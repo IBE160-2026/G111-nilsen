@@ -33,6 +33,19 @@
 - **Ikke verifisert:** at hver av de norske sidene faktisk har fullstendig JSON-LD i dag, og om de blokkerer serverforespørsler. Dette må testes med ekte forespørsler i neste steg (se §6).
 - **Ingrediensparsing:** tekst som «1 ½ dl fløte» må deles i mengde, enhet og navn. Det finnes JS-biblioteker for dette (f.eks. `parse-ingredient`), men de er laget for engelsk. Norske enheter (ss, ts, dl, krm, stk, fedd, pk) og desimalkomma må testes.
 
+### Observasjoner fra fire ekte sider (2026-11-04)
+
+Sidene ble lest som gjengitt tekst via et nettverktøy. HTML-kilden var ikke tilgjengelig, så **om sidene har JSON-LD er fortsatt ikke bekreftet**. Noen av funnene kan skyldes at gjengivelsen mistet tekst. De viser likevel hva importen må tåle.
+
+| Side | Observasjon | Konsekvens for RecipeMate |
+|---|---|---|
+| tine.no (kjøttkaker) | Ingen porsjonsantall på siden. Ingredienser delt i seksjoner («Kålstuing», «Kjøttkaker»). To linjer vises som «2 ss» uten ingrediensnavn. Ingen steg-tekst under «Slik gjør du» | Spør brukeren om porsjonsantall når det mangler. Støtt ingrediensseksjoner. Linjer uten tolkbart navn vises uendret og skaleres ikke |
+| matoppskrift.no (pannekaker) | «Oppskriften har opprinnelig 1 porsjoner», men «1 porsjon gir ca 20 pannekaker». Ingredienser: «0,5 ts salt», «1 dash smør til steking» | Porsjonsantall kan være misvisende. Brukeren må kunne rette opprinnelig antall. Desimalkomma og ukjente enheter («dash») må håndteres |
+| bbcgoodfoodme.com (lasagne) | «Serves 6». «2 olive oil» (enhet mangler), «750g» uten mellomrom, «90g pack prosciutto», «nutmeg» uten mengde | Parser må takle enhet uten mellomrom, ingredienser uten mengde og tekst etter mengden |
+| matprat.no (oppskriftsliste) | Oversiktssiden viser bare tittel, vurdering, vanskelighetsgrad og tid | Brukeren må lime inn lenke til selve oppskriften, ikke en liste. Appen bør gi tydelig feil hvis lenken er en listeside |
+
+**Testdata:** `scripts/fetch-fixtures.sh` henter åtte sider (liste i `test/fixtures/sources.md`) og rapporterer hvilke som har `Recipe` i JSON-LD. Skriptet må kjøres lokalt, siden utviklingsmiljøet her ikke når nettsidene.
+
 ## 4. Stack (valgt)
 
 | Del | Valg | Begrunnelse |
@@ -67,7 +80,7 @@ Prioritet: **P1** må avgjøres før PRD, **P2** kan avgjøres i PRD, **P3** kan
 
 ## 6. Research som gjenstår (til torsdag)
 
-1. **Test ekte sider:** hent 8–10 oppskriftslenker fra norske og engelske sider, lagre HTML som fixtures, og noter hvilke som har JSON-LD, hvilke felt som mangler og hvilke som blokkerer.
+1. **Test ekte sider:** kjør `bash scripts/fetch-fixtures.sh` lokalt (åtte sider er klare, legg til én fra matprat.no og én fra godt.no) og noter hvilke som har JSON-LD, hvilke felt som mangler og hvilke som blokkerer.
 2. Test selv 2–3 av appene (Paprika, AnyList, Samsung Food): hvordan ser import, skalering og feilmeldinger ut? Skjermbilder til designdelen.
 3. Se på hvordan norske sider skriver mengder («2 ss», «½ dl», «1 pk», «krm», «etter smak») og lag en liste over varianter.
 4. Finn en LLM og prøv 3–5 oppskrifter for å se om forslagene er konkrete og trygge (ikke farlige eller meningsløse kombinasjoner).
