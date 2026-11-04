@@ -144,6 +144,8 @@ Pilene viser lovlige avhengigheter. Alt annet er forbudt.
 | cheerio | låses i package-lock.json når import innføres (Epic 2) |
 | Playwright | låses i package-lock.json når ende-til-ende-tester innføres |
 
+Versjonene er de som er låst i `package-lock.json`; `package.json` angir områder.
+
 ## Structural Seed
 
 ```mermaid

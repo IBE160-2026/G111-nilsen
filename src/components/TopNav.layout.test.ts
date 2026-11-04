@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 // Matrise: Smal skjerm. Under 768 px ligger logo og meny på hver sin linje (kolonne);
 // fra 768 px på én linje. Menypunktene bruker minstehøyden for trykkflater.
 const css = readFileSync(join(process.cwd(), "src/components/TopNav.module.css"), "utf8");
-const [base, wide] = css.split("@media (min-width: 768px)");
+const [base, wide] = css.split(/@media\s*\(min-width:\s*768px\)/);
 
 describe("TopNav-oppsett", () => {
   it("er to linjer (kolonne) som standard, altså på smal skjerm", () => {

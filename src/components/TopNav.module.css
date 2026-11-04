@@ -26,7 +26,9 @@
   margin: 0;
   padding: 0;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
+  column-gap: var(--space-2);
 }
 
 .link {

@@ -1,12 +1,15 @@
+import type { Metadata } from "next";
 import styles from "./page.module.css";
+
+export const metadata: Metadata = { title: "Importer" };
 
 export default function ImporterPage() {
   return (
     <section className={styles.intro}>
       <h1>Hent en oppskrift</h1>
       <p className={styles.lead}>
-        Lim inn en lenke til en oppskrift, så henter RecipeMate ingrediensene og stegene og viser
-        dem i et fast og ryddig format. Der kan du velge hvor mange personer du lager mat til.
+        Snart kan du lime inn en lenke til en oppskrift her. RecipeMate henter da ingrediensene og
+        stegene og viser dem i et fast og ryddig format.
       </p>
     </section>
   );

@@ -43,7 +43,9 @@ npm start        # kjør produksjonsbygget
 npm test             # alle tester én gang (Vitest)
 npm run test:watch   # tester i overvåkingsmodus
 npm run lint         # ESLint
+npm run typecheck    # typekontroll med TypeScript (tsc --noEmit)
 npm run format       # formater koden med Prettier
+npm run format:check # sjekk formatering uten å endre filer
 ```
 
 `npm run lint` og `npm test` skal være grønne før hver commit.
@@ -64,6 +66,8 @@ src/
     db/         Databaseskjema og repositorier
   styles/       Designtokens (farger, typografi, avstander)
 test/fixtures/  Lagrede eksempelsider brukt som testdata
+scripts/        Hjelpeskript; fetch-fixtures.sh henter testsidene til test/fixtures/
+issues/         Feil og problemer underveis, og hva som kan endres (én fil per sak)
 ```
 
 ## Planleggingsdokumenter

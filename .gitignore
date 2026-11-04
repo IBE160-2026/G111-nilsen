@@ -61,4 +61,4 @@ Thumbs.db
 *~
 
 # RecipeMate: lokal SQLite-database
-data/
+/data/

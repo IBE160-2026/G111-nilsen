@@ -20,7 +20,7 @@ const [lightBlock, darkBlock] = tokens.split("@media (prefers-color-scheme: dark
 
 describe("designtokens (DESIGN.md)", () => {
   it("leser fargene fra DESIGN.md", () => {
-    expect(Object.keys(designColors).length).toBeGreaterThanOrEqual(18);
+    expect(Object.keys(designColors).length).toBe(18);
   });
 
   it.each(Object.entries(designColors).filter(([name]) => !name.endsWith("-dark")))(

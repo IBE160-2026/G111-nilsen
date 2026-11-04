@@ -59,7 +59,6 @@
 
   /* Oppsett */
   --content-max-width: 1040px;
-  --breakpoint-wide: 768px; /* til referanse; media queries må bruke tallet direkte */
   --tap-target-min: 44px;
   --focus-ring-width: 2px;
 }
