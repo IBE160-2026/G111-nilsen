@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RecipeMate – nøkkelskjermer</title>
+<style>
+/* Styres av DESIGN.md (Colors, Typography, Components) og EXPERIENCE.md
+   (Information Architecture, Component Patterns, State Patterns, Key Flows UJ-1/UJ-2/UJ-3). Spine-dokumentene gjelder ved konflikt. */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#e7e5e1;color:#222;padding:24px 16px}
+h1.page{font-size:22px;margin-bottom:6px}
+p.lead{max-width:800px;color:#444;margin-bottom:24px;line-height:1.5}
+.grid{display:flex;flex-wrap:wrap;gap:28px;justify-content:center}
+.col{width:340px;max-width:100%}
+.col h2{font-size:16px;margin-bottom:4px}
+.col .cap{font-size:13px;color:#555;margin-bottom:10px;min-height:36px}
+.phone{border-radius:34px;padding:12px;background:#111}
+.screen{border-radius:24px;overflow:hidden;height:700px;overflow-y:auto;position:relative}
+/* tokens */
+.light{--bg:#FBF7F0;--raised:#FFFFFF;--tint:#FFF4EC;--ink:#2B2118;--ink2:#6E5E4E;--acc:#B8432F;--onacc:#FFFFFF;--line:#E9DFD1;--strong:#CDBFAE}
+.dark{--bg:#1C1814;--raised:#26211C;--tint:#33251F;--ink:#F2EBE1;--ink2:#BCAE9C;--acc:#E58A6E;--onacc:#1C1814;--line:#3A332B;--strong:#54493E}
+.app{background:var(--bg);color:var(--ink);font-size:17px;line-height:1.5;min-height:100%}
+/* Toppmeny: på smal skjerm (< 768 px) ligger menyen på egen linje under logoen, fordelt over hele bredden */
+.top{padding:10px 16px 0;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:2}
+.logo{display:block;font-family:Georgia,serif;font-weight:600;color:var(--acc);font-size:17px;margin-bottom:6px}
+.nav{display:flex;justify-content:space-between;font-size:14px;color:var(--ink2)}
+.nav span{padding:8px 2px 9px;min-height:44px;display:flex;align-items:center}
+.nav .on{color:var(--ink);font-weight:600;box-shadow:inset 0 -2px 0 var(--acc)}
+.pad{padding:16px 18px}
+.title{font-family:Georgia,"Times New Roman",serif;font-size:28px;font-weight:600;line-height:1.15}
+.meta{font-size:14px;color:var(--ink2);margin-top:6px}
+.meta a{color:var(--acc)}
+.card{background:var(--raised);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:0 18px 12px}
+.card h3{font-family:Georgia,serif;font-size:20px;font-weight:600;margin-bottom:6px}
+.serv{display:flex;align-items:center;justify-content:space-between}
+.serv .l{font-size:14px;color:var(--ink2)}
+.serv .l a{color:var(--acc);text-decoration:underline}
+.step{display:flex;align-items:center;gap:10px}
+.sbtn{width:44px;height:44px;border-radius:999px;border:1.5px solid var(--acc);color:var(--acc);display:grid;place-items:center;font-size:22px;background:var(--raised)}
+.num{font-family:Georgia,serif;font-size:24px;min-width:30px;text-align:center}
+.reset{font-size:13px;color:var(--acc);margin-top:8px;text-align:right}
+.lab{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:10px 0 2px}
+.row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.box{width:22px;height:22px;border:2px solid var(--strong);border-radius:6px;flex:none}
+.row.done .box{background:var(--acc);border-color:var(--acc)}
+.row.done .txt{color:var(--ink2);text-decoration:line-through}
+.q{font-weight:600;font-variant-numeric:tabular-nums;min-width:66px;display:inline-block}
+.ca{font-size:12px;color:var(--acc);margin-left:4px}
+.raw{font-style:italic;color:var(--ink2)}
+.tip{background:var(--tint)}
+.tip .t{font-weight:600}
+.tip .w{font-size:14px;color:var(--ink2);margin-top:3px}
+.badge{display:inline-block;font-size:12px;font-weight:600;color:var(--acc);margin-bottom:4px}
+.acts{display:flex;gap:8px;margin-top:10px}
+.pb{background:var(--acc);color:var(--onacc);border:0;border-radius:10px;padding:10px 14px;font-size:15px;font-family:inherit}
+.sb{background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:15px;font-family:inherit}
+ol.steps{list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+ol.steps li:last-child{border:0}
+ol.steps li::before{content:counter(s);font-family:Georgia,serif;font-weight:600;color:var(--acc);min-width:16px}
+.savebar{position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:12px 18px;display:flex;gap:10px;align-items:center}
+.savebar .folder{flex:1;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--raised);font-size:15px}
+.heart{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);display:grid;place-items:center;color:var(--acc);font-size:20px;background:var(--raised)}
+label.fl{display:block;font-size:14px;font-weight:600;margin-bottom:6px}
+.input{width:100%;padding:12px;border:1px solid var(--strong);border-radius:10px;font-size:16px;background:var(--raised);color:var(--ink);font-family:inherit}
+.full{width:100%;margin-top:10px}
+.msg{background:var(--raised);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:14px;padding:14px;margin-top:12px;font-size:15px}
+.msg b{display:block;margin-bottom:4px;font-size:16px}
+.link{color:var(--acc);text-decoration:underline;font-size:15px}
+.hint{font-size:14px;color:var(--ink2);margin-top:14px}
+.rc{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.rc .rt{font-family:Georgia,serif;font-size:18px;font-weight:600;line-height:1.25}
+.rc .rm{font-size:13px;color:var(--ink2);margin-top:3px}
+.rc .h{color:var(--acc);font-size:20px}
+.filter{display:flex;gap:8px;padding:0 18px 12px;flex-wrap:wrap}
+.filter span{font-size:13px;border:1px solid var(--line);border-radius:999px;padding:5px 11px;background:var(--raised)}
+.empty{text-align:center;padding:28px 22px;border:1px dashed var(--strong);border-radius:14px;margin:0 18px}
+.empty p{color:var(--ink2);font-size:15px;margin:6px 0 14px}
+.toast{position:absolute;left:50%;transform:translateX(-50%);bottom:18px;background:var(--ink);color:var(--bg);font-size:14px;padding:8px 14px;border-radius:999px;white-space:nowrap}
+</style>
+</head>
+<body>
+<h1 class="page">RecipeMate – nøkkelskjermer (retning A · Kjøkkenbok)</h1>
+<p class="lead">Fire skjermer med toppmeny: oppskrift i lys og mørk modus (UJ-1, skalert fra 4 til 5 med avkrysning og et valgt forslag), import med feilmelding (UJ-2) og samlingen med tom mappe (UJ-3).</p>
+<div class="grid">
+
+<!-- 1 Oppskrift lys -->
+<div class="col"><h2>1 · Oppskrift (lys)</h2><p class="cap">Skalert til 5, to ingredienser krysset av, ett forslag tatt i bruk, lagret i Hverdag.</p>
+<div class="phone"><div class="screen light"><div class="app">
+ <div class="top"><span class="logo">RecipeMate</span><nav class="nav"><span>Importer</span><span class="on">Samlingen</span><span>Mapper</span><span>Favoritter</span></nav></div>
+ <div class="pad"><h1 class="title">Fredagstaco med hjemmelaget krydder</h1><p class="meta">Fra <a href="#">matprat.no</a></p></div>
+ <div class="card"><div class="serv"><span class="l">Antall personer<br><a>oppr. 4 · endre</a></span><div class="step"><span class="sbtn">−</span><span class="num">5</span><span class="sbtn">+</span></div></div><p class="reset">Tilbakestill til 4</p></div>
+ <div class="card"><h3>Ingredienser</h3>
+  <p class="lab">Taco</p>
+  <div class="row done"><span class="box"></span><span class="txt"><span class="q">500 g</span>kjøttdeig</span></div>
+  <div class="row done"><span class="box"></span><span class="txt"><span class="q">1 ¼ ss</span>olje</span></div>
+  <div class="row"><span class="box"></span><span class="txt"><span class="q">1</span>løk<span class="ca">ca.</span></span></div>
+  <div class="row"><span class="box"></span><span class="txt"><span class="q">2 ½ dl</span>vann</span></div>
+  <p class="lab">Tilbehør</p>
+  <div class="row"><span class="box"></span><span class="txt"><span class="q">10</span>tortillalefser</span></div>
+  <div class="row"><span class="box"></span><span class="txt"><span class="q">3</span>tomater<span class="ca">ca.</span></span></div>
+  <div class="row"><span class="box"></span><span class="txt raw">salt og pepper etter smak</span></div>
+ </div>
+ <div class="card tip"><span class="badge">Tatt i bruk</span><p class="t">Riv litt limeskall over kjøttet</p><p class="w">Gir friskhet som balanserer krydderet.</p><div class="acts"><button class="sb">Fjern</button></div></div>
+ <div class="card"><h3>Slik gjør du</h3><ol class="steps"><li>Finhakk løken og stek den myk i olje.</li><li>Tilsett kjøttdeigen og brun den godt.</li><li>Rør inn krydder og vann, og la det småkoke i 10 minutter.</li></ol></div>
+ <div class="savebar"><span class="folder">Mappe: Hverdag ▾</span><span class="heart">♥</span></div>
+</div></div></div></div>
+
+<!-- 2 Oppskrift mørk -->
+<div class="col"><h2>2 · Oppskrift (mørk)</h2><p class="cap">Samme skjerm når systemet står på mørk modus. Ikke lagret ennå, nye forslag vises.</p>
+<div class="phone"><div class="screen dark"><div class="app">
+ <div class="top"><span class="logo">RecipeMate</span><nav class="nav"><span class="on">Importer</span><span>Samlingen</span><span>Mapper</span><span>Favoritter</span></nav></div>
+ <div class="pad"><h1 class="title">Fredagstaco med hjemmelaget krydder</h1><p class="meta">Fra <a href="#">matprat.no</a></p></div>
+ <div class="card"><div class="serv"><span class="l">Antall personer<br><a>oppr. 4 · endre</a></span><div class="step"><span class="sbtn">−</span><span class="num">5</span><span class="sbtn">+</span></div></div></div>
+ <div class="card"><h3>Ingredienser</h3>
+  <p class="lab">Taco</p>
+  <div class="row"><span class="box"></span><span class="txt"><span class="q">500 g</span>kjøttdeig</span></div>
+  <div class="row"><span class="box"></span><span class="txt"><span class="q">1 ¼ ss</span>olje</span></div>
+  <div class="row"><span class="box"></span><span class="txt"><span class="q">1</span>løk<span class="ca">ca.</span></span></div>
+ </div>
+ <div class="card tip"><span class="badge">Eksempelforslag</span><p class="t">Riv litt limeskall over kjøttet</p><p class="w">Gir friskhet som balanserer krydderet.</p><div class="acts"><button class="pb">Ta i bruk</button><button class="sb">Hopp over</button></div></div>
+ <div class="card tip"><p class="t">Rist krydderet i tørr panne først</p><p class="w">Frigjør mer smak fra spisskummen og paprikaen.</p><div class="acts"><button class="pb">Ta i bruk</button><button class="sb">Hopp over</button></div></div>
+ <div class="savebar"><button class="pb" style="flex:1">Lagre</button><span class="heart">♡</span></div>
+</div></div></div></div>
+
+<!-- 3 Importer feil -->
+<div class="col"><h2>3 · Importer med feilmelding</h2><p class="cap">Lenken går til en oversiktsside (UJ-2, FR-2). Lenken står igjen, og brukeren kan legge inn selv.</p>
+<div class="phone"><div class="screen light"><div class="app">
+ <div class="top"><span class="logo">RecipeMate</span><nav class="nav"><span class="on">Importer</span><span>Samlingen</span><span>Mapper</span><span>Favoritter</span></nav></div>
+ <div class="pad">
+  <h1 class="title" style="font-size:26px">Hent en oppskrift</h1>
+  <p class="meta" style="margin-bottom:18px">Lim inn lenken til en oppskrift fra nettet.</p>
+  <label class="fl" for="u">Lenke til oppskrift</label>
+  <input id="u" class="input" value="https://www.matprat.no/oppskrifter/">
+  <button class="pb full">Hent oppskrift</button>
+  <div class="msg" role="alert"><b>Fant ingen oppskrift på siden</b>Lenken ser ut til å gå til en oversikt. Åpne selve oppskriften og lim inn den lenken, eller legg den inn selv.<div class="acts"><button class="sb">Legg inn selv</button></div></div>
+  <p class="hint">Fungerer best med oppskriftssider som matprat.no, tine.no og godt.no.</p>
+ </div>
+</div></div></div></div>
+
+<!-- 4 Samlingen / mapper -->
+<div class="col"><h2>4 · Samlingen og tom mappe</h2><p class="cap">Samlingen med sist brukte først (FR-16), og hvordan en tom mappe ser ut. Bekreftelse etter lagring.</p>
+<div class="phone"><div class="screen light"><div class="app">
+ <div class="top"><span class="logo">RecipeMate</span><nav class="nav"><span>Importer</span><span class="on">Samlingen</span><span>Mapper</span><span>Favoritter</span></nav></div>
+ <div class="pad"><h1 class="title" style="font-size:26px">Samlingen</h1><p class="meta">3 oppskrifter</p></div>
+ <div class="card"><div class="rc"><div><p class="rt">Fredagstaco med hjemmelaget krydder</p><p class="rm">matprat.no · Hverdag</p></div><span class="h">♥</span></div></div>
+ <div class="card"><div class="rc"><div><p class="rt">Creamy fish soup</p><p class="rm">northwildkitchen.com · Helg</p></div><span class="h">♡</span></div></div>
+ <div class="card"><div class="rc"><div><p class="rt">Pannekaker grunnoppskrift</p><p class="rm">Lagt inn selv · ingen mappe</p></div><span class="h">♡</span></div></div>
+ <div class="pad" style="padding-top:8px"><p class="lab">Mappe: Bursdag</p></div>
+ <div class="empty"><b>Ingen oppskrifter i mappen ennå</b><p>Legg oppskrifter i mappen fra oppskriftssiden.</p><button class="sb">Gå til samlingen</button></div>
+ <div class="toast" role="status">Lagret i Hverdag.</div>
+</div></div></div></div>
+
+</div>
+</body>
+</html>

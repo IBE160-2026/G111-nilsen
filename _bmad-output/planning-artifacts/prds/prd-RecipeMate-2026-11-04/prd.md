@@ -122,6 +122,14 @@ Ingredienslinjer som ikke er tolkbare vises med originalteksten og skaleres ikke
 - «nutmeg», «salt og pepper» og «en klype salt» vises uendret ved alle porsjonsantall.
 - Linjer med mengde men uten ingrediensnavn (f.eks. «2 ss») vises og skaleres som andre tolkbare linjer, og fjernes ikke.
 
+#### FR-17: Avkrysning under matlaging
+Brukeren kan krysse av ingredienslinjer og steg mens maten lages, for å holde oversikt. Realiserer UJ-1.
+
+**Konsekvenser (testbare):**
+- Et trykk på en ingredienslinje eller et steg markerer den som ferdig, og et nytt trykk fjerner markeringen.
+- Avkrysning påvirker ikke skalering, og endring av porsjonsantall fjerner ikke avkrysningene.
+- Avkrysning lagres ikke når oppskriften lukkes `[ANTAKELSE]`.
+
 ### 4.3 Skalering
 
 **Beskrivelse:** Brukeren velger antall personer, og alle tolkbare mengder regnes om med en gang. Skalering er appens viktigste regel og skal være forutsigbar og fullt testet. Realiserer UJ-1, UJ-2, UJ-3.
@@ -251,7 +259,7 @@ Brukeren kan se samlingen, én mappe om gangen og favoritter, sortert med sist l
 
 ### 7.1 Med i v1
 - Import fra lenke (FR-1–FR-3) og manuell innlegging (FR-4)
-- Visning i fast format (FR-5, FR-6)
+- Visning i fast format med avkrysning (FR-5, FR-6, FR-17)
 - Skalering (FR-7–FR-9)
 - Forbedringsforslag med demomodus (FR-10–FR-12)
 - Lagring, mapper, favoritter og oversikter (FR-13–FR-16)
@@ -297,3 +305,4 @@ Målt i en brukertest med 5 testbrukere og de samme fem lagrede oppskriftslenken
 - §4.5 FR-13 — Import av en lenke som allerede er lagret gir beskjed i stedet for duplikat.
 - §4.5 FR-14 — Oppskrifter i en slettet mappe blir liggende uten mappe.
 - §5 NFR-4 — Adresser til lokal maskin og interne nett avvises ved import.
+- §4.2 FR-17 — Avkrysning lagres ikke når oppskriften lukkes.

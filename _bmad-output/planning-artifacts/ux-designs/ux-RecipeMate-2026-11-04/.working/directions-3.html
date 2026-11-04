@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RecipeMate – designretninger</title>
+<style>
+/* Tre designretninger for oppskriftsvisningen (hero-skjerm), UJ-1: Ida lager taco til 5.
+   A Kjøkkenbok:   bg #FBF7F0, kort #FFFFFF, tekst #2B2118, dempet #6E5E4E, aksent tomat #B8432F, linje #E9DFD1
+   B Frisk og ren: bg #F6F8F7, kort #FFFFFF, tekst #15201B, dempet #55625C, aksent grønn #1E7A4F, linje #DCE3DF
+   C Kjøkkenmodus: bg #121417, kort #1C1F24, tekst #F3F1EC, dempet #A9ADB5, aksent gul #F2B33D, linje #2C3038 */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:#e9e9ec;color:#222;padding:24px 16px}
+h1.page{font-size:22px;margin-bottom:6px}
+p.lead{max-width:760px;color:#444;margin-bottom:24px;line-height:1.5}
+.grid{display:flex;flex-wrap:wrap;gap:28px;justify-content:center}
+.col{width:340px;max-width:100%}
+.col h2{font-size:18px;margin-bottom:4px}
+.col .why{font-size:14px;color:#444;line-height:1.45;min-height:84px;margin-bottom:12px}
+.phone{border-radius:34px;padding:12px;background:#111;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.screen{border-radius:24px;overflow:hidden;height:680px;overflow-y:auto}
+.sec{margin-top:14px}
+.state{margin-top:16px;border-radius:24px;overflow:hidden}
+/* ---------- A Kjøkkenbok ---------- */
+.a{background:#FBF7F0;color:#2B2118;font-size:16px}
+.a .bar{padding:14px 18px;display:flex;justify-content:space-between;font-size:14px;color:#6E5E4E}
+.a .hero{padding:4px 18px 10px}
+.a h3{font-family:Georgia,"Times New Roman",serif;font-size:28px;line-height:1.15;font-weight:600}
+.a .src{font-size:13px;color:#6E5E4E;margin-top:6px}
+.a .src a{color:#B8432F}
+.a .serv{margin:14px 18px;padding:12px 14px;background:#fff;border:1px solid #E9DFD1;border-radius:14px;display:flex;align-items:center;justify-content:space-between}
+.a .serv .l{font-size:14px;color:#6E5E4E}
+.a .step{display:flex;align-items:center;gap:10px}
+.a .btn{width:38px;height:38px;border-radius:50%;border:1.5px solid #B8432F;color:#B8432F;background:#fff;font-size:20px;display:grid;place-items:center}
+.a .num{font-family:Georgia,serif;font-size:24px;min-width:28px;text-align:center}
+.a .card{background:#fff;margin:0 18px 12px;border-radius:14px;border:1px solid #E9DFD1;padding:14px}
+.a .card h4{font-family:Georgia,serif;font-size:19px;margin-bottom:8px}
+.a .sub{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#6E5E4E;margin:10px 0 4px}
+.a ul{list-style:none}
+.a li{padding:7px 0;border-bottom:1px solid #F1E9DD;display:flex;gap:10px}
+.a li b{min-width:72px;font-weight:600}
+.a .ca{font-size:12px;color:#B8432F;margin-left:4px}
+.a .raw{color:#6E5E4E;font-style:italic}
+.a ol{padding-left:22px}
+.a ol li{display:list-item;border:0;padding:5px 0;line-height:1.45}
+.a .tip{background:#FFF4EC;border:1px solid #F0D3C4}
+.a .tip .t{font-weight:600}
+.a .tip .w{font-size:14px;color:#6E5E4E;margin-top:4px}
+.a .acts{display:flex;gap:8px;margin-top:10px}
+.a .pb{background:#B8432F;color:#fff;border:0;border-radius:10px;padding:9px 14px;font-size:15px}
+.a .sb{background:transparent;color:#2B2118;border:1px solid #E9DFD1;border-radius:10px;padding:9px 14px;font-size:15px}
+.a .save{position:sticky;bottom:0;background:#FBF7F0;padding:12px 18px;border-top:1px solid #E9DFD1;display:flex;gap:8px}
+.a .save .pb{flex:1}
+.a.err{padding:18px}
+.a .msg{background:#fff;border:1px solid #E9DFD1;border-left:4px solid #B8432F;border-radius:12px;padding:14px;margin-top:10px}
+.a .msg b{display:block;margin-bottom:4px}
+.a input{width:100%;padding:12px;border:1px solid #CDBFAE;border-radius:10px;font-size:15px;background:#fff}
+/* ---------- B Frisk og ren ---------- */
+.b{background:#F6F8F7;color:#15201B;font-size:15px}
+.b .bar{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;background:#fff;border-bottom:1px solid #DCE3DF;font-size:14px}
+.b .bar .logo{font-weight:700;color:#1E7A4F}
+.b .hero{padding:16px}
+.b h3{font-size:24px;font-weight:700;letter-spacing:-.01em}
+.b .src{font-size:13px;color:#55625C;margin-top:4px}
+.b .src a{color:#1E7A4F}
+.b .chips{display:flex;gap:6px;margin-top:10px}
+.b .chip{font-size:12px;background:#E6F2EC;color:#155C3B;padding:4px 9px;border-radius:999px}
+.b .serv{margin:0 16px 12px;display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid #DCE3DF;border-radius:10px;padding:8px 10px}
+.b .seg{display:flex;align-items:center;border:1px solid #DCE3DF;border-radius:8px;overflow:hidden}
+.b .seg span{padding:7px 12px;font-size:16px}
+.b .seg .n{font-weight:700;border-left:1px solid #DCE3DF;border-right:1px solid #DCE3DF;min-width:44px;text-align:center}
+.b .tabs{display:flex;margin:0 16px;border-bottom:1px solid #DCE3DF}
+.b .tabs span{padding:10px 0;margin-right:20px;font-size:14px;color:#55625C}
+.b .tabs .on{color:#15201B;font-weight:600;border-bottom:2px solid #1E7A4F}
+.b .list{background:#fff;margin:12px 16px;border:1px solid #DCE3DF;border-radius:10px}
+.b .sub{font-size:12px;font-weight:600;color:#55625C;padding:10px 12px 2px}
+.b .row{display:flex;justify-content:space-between;padding:9px 12px;border-top:1px solid #EEF2F0}
+.b .row .q{font-weight:600;font-variant-numeric:tabular-nums}
+.b .ca{font-size:11px;background:#FFF3D6;color:#7A5300;padding:1px 6px;border-radius:6px;margin-left:6px}
+.b .raw{color:#55625C}
+.b .tip{margin:0 16px 12px;background:#fff;border:1px solid #DCE3DF;border-radius:10px;padding:12px}
+.b .tip .k{font-size:12px;color:#1E7A4F;font-weight:600}
+.b .tip .t{margin-top:4px;font-weight:600}
+.b .tip .w{font-size:13px;color:#55625C;margin-top:3px}
+.b .acts{display:flex;gap:8px;margin-top:10px}
+.b .pb{background:#1E7A4F;color:#fff;border:0;border-radius:8px;padding:8px 12px;font-size:14px}
+.b .sb{background:#fff;color:#15201B;border:1px solid #DCE3DF;border-radius:8px;padding:8px 12px;font-size:14px}
+.b .nav{position:sticky;bottom:0;display:flex;justify-content:space-around;background:#fff;border-top:1px solid #DCE3DF;padding:8px 0 10px;font-size:12px;color:#55625C}
+.b .nav .on{color:#1E7A4F;font-weight:600}
+.b.err{padding:16px}
+.b .msg{background:#FDECEA;border:1px solid #F3C2BC;color:#7C1E14;border-radius:10px;padding:12px;margin-top:10px;font-size:14px}
+.b .msg b{display:block;margin-bottom:3px}
+.b input{width:100%;padding:10px;border:1px solid #B9C5BF;border-radius:8px;font-size:15px;background:#fff}
+/* ---------- C Kjøkkenmodus ---------- */
+.c{background:#121417;color:#F3F1EC;font-size:18px}
+.c .bar{padding:14px 18px;display:flex;justify-content:space-between;color:#A9ADB5;font-size:15px}
+.c .hero{padding:4px 18px 8px}
+.c h3{font-size:30px;font-weight:800;line-height:1.1}
+.c .src{font-size:14px;color:#A9ADB5;margin-top:6px}
+.c .src a{color:#F2B33D}
+.c .serv{margin:14px 18px;background:#1C1F24;border-radius:18px;padding:14px;display:flex;align-items:center;justify-content:space-between}
+.c .serv .l{color:#A9ADB5;font-size:15px}
+.c .step{display:flex;align-items:center;gap:12px}
+.c .btn{width:48px;height:48px;border-radius:14px;background:#2C3038;color:#F3F1EC;font-size:26px;display:grid;place-items:center}
+.c .num{font-size:34px;font-weight:800;min-width:40px;text-align:center;color:#F2B33D}
+.c .card{background:#1C1F24;margin:0 18px 12px;border-radius:18px;padding:16px}
+.c .card h4{font-size:20px;margin-bottom:6px}
+.c .sub{font-size:13px;color:#A9ADB5;margin:12px 0 2px;text-transform:uppercase;letter-spacing:.05em}
+.c ul{list-style:none}
+.c li{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #2C3038;align-items:center}
+.c .box{width:24px;height:24px;border:2px solid #555B66;border-radius:7px;flex:none}
+.c .done{opacity:.45;text-decoration:line-through}
+.c .done .box{background:#F2B33D;border-color:#F2B33D}
+.c li b{min-width:84px}
+.c .ca{font-size:13px;color:#F2B33D;margin-left:4px}
+.c .raw{color:#A9ADB5}
+.c .tip{border:1.5px solid #F2B33D}
+.c .tip .t{font-weight:700}
+.c .tip .w{font-size:15px;color:#A9ADB5;margin-top:4px}
+.c .acts{display:flex;gap:10px;margin-top:12px}
+.c .pb{background:#F2B33D;color:#121417;border:0;border-radius:12px;padding:11px 16px;font-size:16px;font-weight:700}
+.c .sb{background:#2C3038;color:#F3F1EC;border:0;border-radius:12px;padding:11px 16px;font-size:16px}
+.c.err{padding:18px}
+.c .msg{background:#1C1F24;border-radius:16px;padding:16px;margin-top:12px;border-left:5px solid #F2B33D}
+.c .msg b{display:block;margin-bottom:6px}
+.c input{width:100%;padding:14px;border:0;border-radius:12px;font-size:17px;background:#2C3038;color:#F3F1EC}
+</style>
+</head>
+<body>
+<h1 class="page">RecipeMate – tre designretninger</h1>
+<p class="lead">Samme skjerm i tre ulike uttrykk: tacooppskriften fra UJ-1, skalert fra 4 til 5 personer, med et forslag. Under hver telefon vises feiltilstanden når lenken går til en oversiktsside (UJ-2). Velg den som føles riktigst, eller si hva du vil blande.</p>
+<div class="grid">
+
+<!-- ================= A ================= -->
+<div class="col">
+<h2>A · Kjøkkenbok</h2>
+<p class="why">Varm og rolig, som en kokebok på benken. Serif-titler, papirfarget bakgrunn og én tomatrød aksent. God luft mellom linjene, lavt tempo.</p>
+<div class="phone"><div class="screen a">
+ <div class="bar"><span>‹ Samlingen</span><span>♡ Favoritt</span></div>
+ <div class="hero"><h3>Fredagstaco med hjemmelaget krydder</h3><p class="src">Fra <a href="#">matprat.no</a> · opprinnelig for 4</p></div>
+ <div class="serv"><span class="l">Antall personer</span><div class="step"><span class="btn">−</span><span class="num">5</span><span class="btn">+</span></div></div>
+ <div class="card"><h4>Ingredienser</h4>
+  <p class="sub">Taco</p>
+  <ul><li><b>500 g</b>kjøttdeig</li><li><b>1 ¼ ss</b>olje</li><li><b>1</b>løk<span class="ca">ca.</span></li><li><b>2 ½ dl</b>vann</li></ul>
+  <p class="sub">Tilbehør</p>
+  <ul><li><b>10</b>tortillalefser</li><li><b>3</b>tomater<span class="ca">ca.</span></li><li class="raw">salt og pepper etter smak</li></ul>
+ </div>
+ <div class="card tip"><p class="t">Forslag: Riv litt limeskall over kjøttet</p><p class="w">Gir friskhet som balanserer krydderet i taco­blandingen.</p><div class="acts"><button class="pb">Ta i bruk</button><button class="sb">Hopp over</button></div></div>
+ <div class="card"><h4>Slik gjør du</h4><ol><li>Finhakk løken og stek den myk i olje.</li><li>Tilsett kjøttdeigen og brun den godt.</li></ol></div>
+ <div class="save"><button class="pb">Lagre i mappe</button></div>
+</div></div>
+<div class="state a err"><input value="https://www.matprat.no/oppskrifter/" aria-label="Lenke til oppskrift"><div class="msg"><b>Fant ingen oppskrift på siden</b>Lenken ser ut til å gå til en oversikt. Åpne selve oppskriften og lim inn den lenken, eller legg den inn selv.</div></div>
+</div>
+
+<!-- ================= B ================= -->
+<div class="col">
+<h2>B · Frisk og ren</h2>
+<p class="why">Lys, nøytral og effektiv, som et godt verktøy. Sans-serif, grønn aksent og tydelige lister. Bunnmeny og faner gjør at mye får plass uten å bli rotete.</p>
+<div class="phone"><div class="screen b">
+ <div class="bar"><span>‹</span><span class="logo">RecipeMate</span><span>♡</span></div>
+ <div class="hero"><h3>Fredagstaco med hjemmelaget krydder</h3><p class="src">Kilde: <a href="#">matprat.no</a></p><div class="chips"><span class="chip">Hverdag</span><span class="chip">Favoritt</span></div></div>
+ <div class="serv"><span>Personer <span style="color:#55625C;font-size:13px">(oppr. 4)</span></span><div class="seg"><span>−</span><span class="n">5</span><span>+</span></div></div>
+ <div class="tabs"><span class="on">Ingredienser</span><span>Fremgangsmåte</span><span>Forslag (1)</span></div>
+ <div class="list"><p class="sub">Taco</p>
+  <div class="row"><span>kjøttdeig</span><span class="q">500 g</span></div>
+  <div class="row"><span>olje</span><span class="q">1 ¼ ss</span></div>
+  <div class="row"><span>løk<span class="ca">ca.</span></span><span class="q">1</span></div>
+  <div class="row"><span>vann</span><span class="q">2 ½ dl</span></div>
+  <p class="sub">Tilbehør</p>
+  <div class="row"><span>tortillalefser</span><span class="q">10</span></div>
+  <div class="row"><span>tomater<span class="ca">ca.</span></span><span class="q">3</span></div>
+  <div class="row raw"><span>salt og pepper etter smak</span><span></span></div>
+ </div>
+ <div class="tip"><p class="k">FORSLAG</p><p class="t">Riv litt limeskall over kjøttet</p><p class="w">Gir friskhet som balanserer krydderet.</p><div class="acts"><button class="pb">Ta i bruk</button><button class="sb">Hopp over</button></div></div>
+ <div class="nav"><span>Importer</span><span class="on">Samlingen</span><span>Mapper</span><span>Favoritter</span></div>
+</div></div>
+<div class="state b err"><input value="https://www.matprat.no/oppskrifter/" aria-label="Lenke til oppskrift"><div class="msg"><b>Fant ingen oppskrift på siden</b>Lenken går trolig til en oversikt. Lim inn lenken til selve oppskriften, eller legg den inn manuelt.</div></div>
+</div>
+
+<!-- ================= C ================= -->
+<div class="col">
+<h2>C · Kjøkkenmodus</h2>
+<p class="why">Mørk, høy kontrast og store tall som leses på armlengdes avstand med mel på fingrene. Store trykkflater, avkrysning av ingredienser og gul aksent.</p>
+<div class="phone"><div class="screen c">
+ <div class="bar"><span>‹ Tilbake</span><span>♥</span></div>
+ <div class="hero"><h3>Fredagstaco med hjemmelaget krydder</h3><p class="src"><a href="#">matprat.no</a> · oppr. 4 personer</p></div>
+ <div class="serv"><span class="l">Personer</span><div class="step"><span class="btn">−</span><span class="num">5</span><span class="btn">+</span></div></div>
+ <div class="card"><h4>Ingredienser</h4>
+  <p class="sub">Taco</p>
+  <ul><li class="done"><span class="box"></span><b>500 g</b>kjøttdeig</li><li><span class="box"></span><b>1 ¼ ss</b>olje</li><li><span class="box"></span><b>1</b>løk<span class="ca">ca.</span></li><li><span class="box"></span><b>2 ½ dl</b>vann</li></ul>
+  <p class="sub">Tilbehør</p>
+  <ul><li><span class="box"></span><b>10</b>tortillalefser</li><li><span class="box"></span><span class="raw">salt og pepper etter smak</span></li></ul>
+ </div>
+ <div class="card tip"><p class="t">Riv litt limeskall over kjøttet</p><p class="w">Gir friskhet som balanserer krydderet.</p><div class="acts"><button class="pb">Ta i bruk</button><button class="sb">Hopp over</button></div></div>
+</div></div>
+<div class="state c err"><input value="https://www.matprat.no/oppskrifter/" aria-label="Lenke til oppskrift"><div class="msg"><b>Fant ingen oppskrift på siden</b>Lenken går trolig til en oversikt. Lim inn lenken til selve oppskriften, eller legg den inn selv.</div></div>
+</div>
+
+</div>
+</body>
+</html>
