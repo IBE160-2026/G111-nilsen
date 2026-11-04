@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Status** | Åpen |
+| **Status** | Løst |
 | **Funnet** | 2026-11-04 |
-| **Løst** | |
+| **Løst** | 2026-11-04 |
 | **Område** | prosess |
 | **Alvorlighet** | høy |
 
@@ -25,3 +25,6 @@ Nettverkstilgangen i KI-miljøet er begrenset til en liste med tillatte domener,
 
 ## Lærdom / prompt
 Sjekk tidlig at utviklingsmiljøet kan installere pakker, før byggingen planlegges.
+
+## Oppfølging 2026-11-04
+Nettverkstilgangen ble endret i Claude-innstillingene. Shellet på maskinen når nå `registry.npmjs.org` (`npm view next version` gir 16.4.5) og `github.com`. Installasjon og tester kjøres der, i en egen arbeidskopi slik at prosjektmappen ikke får Linux-versjoner av `node_modules`.
