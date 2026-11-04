@@ -105,8 +105,40 @@ describe("parseLine – øvrige regler", () => {
     expect(parseLine("2 gulrøtter")).toEqual(line("2 gulrøtter", { min: 2 }, null, "gulrøtter"));
   });
 
-  it("enhet fulgt av komma", () => {
-    expect(parseLine("400 g, finhakket løk").unit).toBe("g");
+  it("skilletegn foran navnet fjernes", () => {
+    expect(parseLine("400 g, finhakket løk")).toEqual(
+      line("400 g, finhakket løk", { min: 400 }, "g", "finhakket løk"),
+    );
+    expect(parseLine("2 stk.egg")).toEqual(line("2 stk.egg", { min: 2 }, "stk", "egg"));
+  });
+
+  it("lange enhetsnavn", () => {
+    expect(parseLine("500 gram mel")).toEqual(line("500 gram mel", { min: 500 }, "g", "mel"));
+    expect(parseLine("2 kryddermål salt")).toEqual(
+      line("2 kryddermål salt", { min: 2 }, "krm", "salt"),
+    );
+  });
+
+  it("tekst i NFD-form tolkes, og originalen bevares uendret", () => {
+    const nfd = "2 kryddermål salt".normalize("NFD");
+    expect(nfd).not.toBe("2 kryddermål salt");
+    expect(parseLine(nfd)).toEqual(line(nfd, { min: 2 }, "krm", "salt"));
+  });
+
+  it("amerikansk blandet tall med bindestrek", () => {
+    expect(parseLine("1-1/2 cups flour")).toEqual(
+      line("1-1/2 cups flour", { min: 1.5 }, "cup", "flour"),
+    );
+  });
+
+  it("«område» med øvre ikke større enn nedre", () => {
+    expect(parseLine("3–2 ss")).toEqual(line("3–2 ss", { min: 3 }, "ss", ""));
+  });
+
+  it("linje med flere tall: bare det første tolkes (låser dagens atferd)", () => {
+    expect(parseLine("1 boks (400 g) tomater")).toEqual(
+      line("1 boks (400 g) tomater", { min: 1 }, "boks", "(400 g) tomater"),
+    );
   });
 
   it("kaster ikke for vilkårlig tekst", () => {

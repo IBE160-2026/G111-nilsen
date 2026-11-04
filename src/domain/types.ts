@@ -16,11 +16,20 @@ export type UnitKey =
   | "pk"
   | "boks"
   | "neve"
+  | "klype"
+  | "kopp"
+  | "pose"
+  | "bunt"
+  | "skive"
+  | "glass"
+  | "beger"
   | "tbsp"
   | "tsp"
   | "cup"
   | "oz"
-  | "lb";
+  | "lb"
+  | "pinch"
+  | "can";
 
 /** Resultatet av å tolke én ingredienslinje. `original` er alltid input, uendret. */
 export type ParsedLine = {

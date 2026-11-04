@@ -18,11 +18,20 @@ export const UNIT_VARIANTS: Readonly<Record<UnitKey, readonly string[]>> = {
   pk: ["pk", "pakke", "pakker"],
   boks: ["boks", "bokser"],
   neve: ["neve", "never"],
+  klype: ["klype", "klyper"],
+  kopp: ["kopp", "kopper"],
+  pose: ["pose", "poser"],
+  bunt: ["bunt", "bunter"],
+  skive: ["skive", "skiver"],
+  glass: ["glass"],
+  beger: ["beger"],
   tbsp: ["tbsp", "tbs", "tablespoon", "tablespoons"],
   tsp: ["tsp", "teaspoon", "teaspoons"],
   cup: ["cup", "cups"],
   oz: ["oz", "ounce", "ounces"],
   lb: ["lb", "lbs", "pound", "pounds"],
+  pinch: ["pinch", "pinches"],
+  can: ["can", "cans"],
 };
 
 const lookup: ReadonlyMap<string, UnitKey> = new Map(
@@ -33,9 +42,10 @@ const lookup: ReadonlyMap<string, UnitKey> = new Map(
 
 /**
  * Gjør et ord om til en fast enhetsnøkkel, uavhengig av store/små bokstaver og
- * av punktum etter forkortelse («SS.», «stk.»). Ukjente ord gir `null`.
+ * av punktum etter forkortelse («SS.», «stk.»), og av Unicode-form (NFC/NFD).
+ * Ukjente ord gir `null`.
  */
 export function normalizeUnit(word: string): UnitKey | null {
-  const cleaned = word.trim().toLowerCase().replace(/\.$/, "");
+  const cleaned = word.normalize("NFC").trim().toLowerCase().replace(/\.$/, "");
   return lookup.get(cleaned) ?? null;
 }
