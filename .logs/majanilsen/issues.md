@@ -12,7 +12,9 @@
 - [ ] 2026-11-04 [oppsett-bmad-og-issues](999-2026-11-04-17-56-52-oppsett-bmad-og-issues.md) — avgjør om product-brief-template.md skal committes
 - [ ] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — bekreft antakelsene i PRD §10 og sett status til final
 - [ ] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — avgjør om mengder under 100 g/ml skal avrundes (PRD §9.4)
-- [ ] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — velg språkmodell og leverandør i arkitekturen
-- [ ] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — kjør bmad-ux (løst 2026-11-04, se [997-2026-11-04-19-06-44-ux.md]); bmad-architecture og bmad-create-epics-and-stories gjenstår
+- [ ] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — velg språkmodell og leverandør (utsatt til forslags-epicen, se [996-2026-11-04-19-27-12-arkitektur.md])
+- [ ] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — kjør bmad-ux (løst 2026-11-04, se [997-2026-11-04-19-06-44-ux.md]); bmad-architecture løst 2026-11-04; bmad-create-epics-and-stories gjenstår
 - [ ] 2026-11-04 [ux](997-2026-11-04-19-06-44-ux.md) — gå gjennom UX-dokumentene og mockupene, bekreft mørk palett og sett status final
 - [ ] 2026-11-04 [ux](997-2026-11-04-19-06-44-ux.md) — bekreft at avkrysning ikke lagres mellom besøk (FR-17)
+- [ ] 2026-11-04 [arkitektur](996-2026-11-04-19-27-12-arkitektur.md) — løs npm-tilgang for KI-miljøet eller kjør npm selv (issues/002)
+- [ ] 2026-11-04 [arkitektur](996-2026-11-04-19-27-12-arkitektur.md) — gå gjennom arkitektur-spine og forklaring, sett status final
