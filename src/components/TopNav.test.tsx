@@ -1,0 +1,77 @@
+// @vitest-environment jsdom
+import { cleanup, render, screen, within } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const pathnameMock = vi.hoisted(() => ({ current: "/" as string | null }));
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => pathnameMock.current,
+}));
+
+import TopNav, { TopNavView, isActive } from "./TopNav";
+
+function navLinks() {
+  const nav = screen.getByRole("navigation", { name: "Hovedmeny" });
+  return within(nav).getAllByRole("link");
+}
+
+describe("TopNav", () => {
+  beforeEach(() => {
+    pathnameMock.current = "/";
+  });
+  afterEach(cleanup);
+
+  it("viser logo og fire menypunkter i riktig rekkefølge", () => {
+    render(<TopNav />);
+    expect(screen.getByRole("link", { name: "RecipeMate" })).toHaveAttribute("href", "/");
+    const links = navLinks();
+    expect(links.map((l) => l.textContent)).toEqual([
+      "Importer",
+      "Samlingen",
+      "Mapper",
+      "Favoritter",
+    ]);
+    expect(links.map((l) => l.getAttribute("href"))).toEqual([
+      "/",
+      "/samlingen",
+      "/mapper",
+      "/favoritter",
+    ]);
+  });
+
+  it.each([
+    ["/", "Importer"],
+    ["/samlingen", "Samlingen"],
+    ["/mapper", "Mapper"],
+    ["/mapper/3", "Mapper"],
+    ["/favoritter", "Favoritter"],
+  ])("markerer riktig punkt på %s", (path, expected) => {
+    pathnameMock.current = path;
+    render(<TopNav />);
+    const current = navLinks().filter((l) => l.getAttribute("aria-current") === "page");
+    expect(current).toHaveLength(1);
+    expect(current[0]).toHaveTextContent(expected);
+  });
+
+  it("markerer ingenting på en ukjent side", () => {
+    pathnameMock.current = "/finnes-ikke";
+    render(<TopNav />);
+    expect(navLinks().some((l) => l.hasAttribute("aria-current"))).toBe(false);
+  });
+
+  it("fallback uten pathname markerer ingenting", () => {
+    render(<TopNavView pathname={null} />);
+    expect(navLinks().some((l) => l.hasAttribute("aria-current"))).toBe(false);
+  });
+});
+
+describe("isActive", () => {
+  it("Importer er bare aktiv på startsiden", () => {
+    expect(isActive("/", "/")).toBe(true);
+    expect(isActive("/", "/samlingen")).toBe(false);
+  });
+
+  it("matcher ikke prefiks uten skråstrek", () => {
+    expect(isActive("/mapper", "/mapperx")).toBe(false);
+  });
+});

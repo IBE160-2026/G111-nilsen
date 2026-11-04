@@ -1,0 +1,10 @@
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 640px;
+}
+
+.lead {
+  color: var(--color-ink-secondary);
+}

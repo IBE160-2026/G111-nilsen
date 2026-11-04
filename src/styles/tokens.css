@@ -1,0 +1,80 @@
+/*
+ * Designtokens for RecipeMate.
+ * Kilde: _bmad-output/planning-artifacts/ux-designs/ux-RecipeMate-2026-11-04/DESIGN.md
+ * Alle farger, typografi og avstander i appen skal hentes herfra.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Farger – lys palett */
+  --color-surface-base: #fbf7f0;
+  --color-surface-raised: #ffffff;
+  --color-surface-tint: #fff4ec;
+  --color-ink-primary: #2b2118;
+  --color-ink-secondary: #6e5e4e;
+  --color-accent: #b8432f;
+  --color-on-accent: #ffffff;
+  --color-border-hairline: #e9dfd1;
+  --color-border-strong: #cdbfae;
+
+  /* Typografi */
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  --type-display-size: 28px;
+  --type-display-weight: 600;
+  --type-display-line-height: 1.15;
+
+  --type-heading-size: 20px;
+  --type-heading-weight: 600;
+  --type-heading-line-height: 1.25;
+
+  --type-body-size: 17px;
+  --type-body-weight: 400;
+  --type-body-line-height: 1.5;
+
+  --type-quantity-size: 17px;
+  --type-quantity-weight: 600;
+
+  --type-label-size: 12px;
+  --type-label-weight: 600;
+  --type-label-letter-spacing: 0.06em;
+
+  --type-meta-size: 14px;
+  --type-meta-weight: 400;
+
+  /* Hjørner */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-full: 999px;
+
+  /* Avstander */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Oppsett */
+  --content-max-width: 1040px;
+  --breakpoint-wide: 768px; /* til referanse; media queries må bruke tallet direkte */
+  --tap-target-min: 44px;
+  --focus-ring-width: 2px;
+}
+
+/* Mørk palett – følger systemets innstilling */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface-base: #1c1814;
+    --color-surface-raised: #26211c;
+    --color-surface-tint: #33251f;
+    --color-ink-primary: #f2ebe1;
+    --color-ink-secondary: #bcae9c;
+    --color-accent: #e58a6e;
+    --color-on-accent: #1c1814;
+    --color-border-hairline: #3a332b;
+    --color-border-strong: #54493e;
+  }
+}

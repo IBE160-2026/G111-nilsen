@@ -59,3 +59,6 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# RecipeMate: lokal SQLite-database
+data/

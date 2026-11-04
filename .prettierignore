@@ -1,0 +1,10 @@
+node_modules/
+.next/
+package-lock.json
+_bmad/
+_bmad-output/
+.claude/
+.logs/
+issues/
+test/fixtures/
+*.md

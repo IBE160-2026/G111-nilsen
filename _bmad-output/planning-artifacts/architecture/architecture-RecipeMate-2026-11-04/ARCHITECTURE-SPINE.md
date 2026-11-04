@@ -132,15 +132,17 @@ Pilene viser lovlige avhengigheter. Alt annet er forbudt.
 | Name | Version |
 | --- | --- |
 | Node.js | 22 LTS eller nyere |
-| Next.js (App Router) | 16.4.x |
-| React | 19.x (følger Next.js) |
-| TypeScript | låses i package-lock.json ved første installasjon |
-| drizzle-orm + drizzle-kit | låses i package-lock.json ved første installasjon |
-| better-sqlite3 | låses i package-lock.json ved første installasjon |
-| zod | låses i package-lock.json ved første installasjon |
-| cheerio | låses i package-lock.json ved første installasjon |
-| Vitest | låses i package-lock.json ved første installasjon |
-| Playwright | låses i package-lock.json ved første installasjon |
+| Next.js (App Router) | 16.4.5 |
+| React / React DOM | 19.3.0 |
+| TypeScript | 5.9.3 |
+| ESLint (+ eslint-config-next) | 9.39.5 (16.4.5) |
+| Prettier | 3.9.10 |
+| Vitest (+ jsdom, Testing Library) | 5.1.0 (jsdom 30.1.3, @testing-library/react 16.3.3) |
+| drizzle-orm + drizzle-kit | låses i package-lock.json når databasen innføres (Story 1.4) |
+| better-sqlite3 | låses i package-lock.json når databasen innføres (Story 1.4) |
+| zod | låses i package-lock.json når Server Actions innføres (Story 1.4) |
+| cheerio | låses i package-lock.json når import innføres (Epic 2) |
+| Playwright | låses i package-lock.json når ende-til-ende-tester innføres |
 
 ## Structural Seed
 
