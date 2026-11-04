@@ -13,10 +13,14 @@
 - [ ] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — bekreft antakelsene i PRD §10 og sett status til final
 - [ ] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — avgjør om mengder under 100 g/ml skal avrundes (PRD §9.4)
 - [ ] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — velg språkmodell og leverandør (utsatt til forslags-epicen, se [996-2026-11-04-19-27-12-arkitektur.md])
-- [ ] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — kjør bmad-ux (løst 2026-11-04, se [997-2026-11-04-19-06-44-ux.md]); bmad-architecture løst 2026-11-04; bmad-create-epics-and-stories løst 2026-11-04 (se [995-2026-11-04-19-39-56-epics-og-stories.md])
+- [x] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — kjør bmad-ux (løst 2026-11-04, se [997-2026-11-04-19-06-44-ux.md]); bmad-architecture løst 2026-11-04; bmad-create-epics-and-stories løst 2026-11-04 (se [995-2026-11-04-19-39-56-epics-og-stories.md])
 - [ ] 2026-11-04 [ux](997-2026-11-04-19-06-44-ux.md) — gå gjennom UX-dokumentene og mockupene, bekreft mørk palett og sett status final
 - [ ] 2026-11-04 [ux](997-2026-11-04-19-06-44-ux.md) — bekreft at avkrysning ikke lagres mellom besøk (FR-17)
 - [x] 2026-11-04 [arkitektur](996-2026-11-04-19-27-12-arkitektur.md) — løs npm-tilgang for KI-miljøet eller kjør npm selv (issues/002) (løst 2026-11-04)
 - [ ] 2026-11-04 [arkitektur](996-2026-11-04-19-27-12-arkitektur.md) — gå gjennom arkitektur-spine og forklaring, sett status final
-- [ ] 2026-11-04 [epics-og-stories](995-2026-11-04-19-39-56-epics-og-stories.md) — start implementasjon med Story 1.1
+- [x] 2026-11-04 [epics-og-stories](995-2026-11-04-19-39-56-epics-og-stories.md) — start implementasjon med Story 1.1 (løst 2026-11-04, se [994-2026-11-04-20-02-04-story-1-1-oppsett.md])
 - [ ] 2026-11-04 [epics-og-stories](995-2026-11-04-19-39-56-epics-og-stories.md) — installer Node.js på Macen for å kjøre appen selv
+- [ ] 2026-11-04 [story-1-1](994-2026-11-04-20-02-04-story-1-1-oppsett.md) — vurder npm audit-funn (8 moderate i ESLint-pakker)
+- [ ] 2026-11-04 [story-1-1](994-2026-11-04-20-02-04-story-1-1-oppsett.md) — legg til CI (GitHub Actions) – utsatt fra gjennomgang av 1.1
+- [ ] 2026-11-04 [story-1-1](994-2026-11-04-20-02-04-story-1-1-oppsett.md) — messageFor med reservemelding og server-only-vakt i Story 1.4
+- [ ] 2026-11-04 [story-1-1](994-2026-11-04-20-02-04-story-1-1-oppsett.md) — avklar rekkefølge på forslag på oppskriftssiden (PRD vs EXPERIENCE) før Epic 4
