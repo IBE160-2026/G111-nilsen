@@ -1,0 +1,118 @@
+import { describe, expect, it } from "vitest";
+import { parseLine } from "./parse-line";
+import type { ParsedLine } from "./types";
+
+function line(
+  original: string,
+  quantity: ParsedLine["quantity"],
+  unit: ParsedLine["unit"],
+  name: string,
+  parseable = true,
+): ParsedLine {
+  return { original, quantity, unit, name, parseable };
+}
+
+describe("parseLine – matrisen i spesifikasjonen", () => {
+  it("heltall + enhet", () => {
+    expect(parseLine("400 g mel")).toEqual(line("400 g mel", { min: 400 }, "g", "mel"));
+  });
+
+  it("desimal med komma", () => {
+    expect(parseLine("0,5 dl olje")).toEqual(line("0,5 dl olje", { min: 0.5 }, "dl", "olje"));
+  });
+
+  it("desimal med punktum", () => {
+    expect(parseLine("0.5 tsp salt")).toEqual(line("0.5 tsp salt", { min: 0.5 }, "tsp", "salt"));
+  });
+
+  it("brøk", () => {
+    expect(parseLine("1/2 ts salt")).toEqual(line("1/2 ts salt", { min: 0.5 }, "ts", "salt"));
+  });
+
+  it("brøktegn", () => {
+    expect(parseLine("½ ts salt")).toEqual(line("½ ts salt", { min: 0.5 }, "ts", "salt"));
+  });
+
+  it.each(["1 ½ dl fløte", "1 1/2 dl fløte", "1½ dl fløte"])("blandet tall: %s", (text) => {
+    expect(parseLine(text)).toEqual(line(text, { min: 1.5 }, "dl", "fløte"));
+  });
+
+  it.each(["2–3 ss sukker", "2-3 ss sukker", "2 til 3 ss sukker"])("område: %s", (text) => {
+    expect(parseLine(text)).toEqual(line(text, { min: 2, max: 3 }, "ss", "sukker"));
+  });
+
+  it("enhet uten mellomrom", () => {
+    expect(parseLine("750g potet")).toEqual(line("750g potet", { min: 750 }, "g", "potet"));
+    expect(parseLine("2dl melk")).toEqual(line("2dl melk", { min: 2 }, "dl", "melk"));
+  });
+
+  it("uten enhet", () => {
+    expect(parseLine("2 egg")).toEqual(line("2 egg", { min: 2 }, null, "egg"));
+  });
+
+  it("mengde uten navn", () => {
+    expect(parseLine("2 ss")).toEqual(line("2 ss", { min: 2 }, "ss", ""));
+  });
+
+  it.each(["nutmeg", "salt og pepper", "en klype salt"])("uten mengde: %s", (text) => {
+    expect(parseLine(text)).toEqual(line(text, null, null, text, false));
+  });
+
+  it("«ca.» foran", () => {
+    expect(parseLine("ca. 400 g kjøttdeig")).toEqual(
+      line("ca. 400 g kjøttdeig", { min: 400 }, "g", "kjøttdeig"),
+    );
+  });
+
+  it("store bokstaver og punktum etter enhet", () => {
+    expect(parseLine("2 SS. sukker")).toEqual(line("2 SS. sukker", { min: 2 }, "ss", "sukker"));
+    expect(parseLine("3 stk. egg")).toEqual(line("3 stk. egg", { min: 3 }, "stk", "egg"));
+  });
+
+  it.each([
+    ["1 tbsp butter", { min: 1 }, "tbsp", "butter"],
+    ["2 cups flour", { min: 2 }, "cup", "flour"],
+    ["8 oz cheese", { min: 8 }, "oz", "cheese"],
+    ["1 lb beef", { min: 1 }, "lb", "beef"],
+  ] as const)("engelske enheter: %s", (text, quantity, unit, name) => {
+    expect(parseLine(text)).toEqual(line(text, quantity, unit, name));
+  });
+
+  it("ukjent ord etter tall blir en del av navnet", () => {
+    expect(parseLine("1 dash smør")).toEqual(line("1 dash smør", { min: 1 }, null, "dash smør"));
+  });
+
+  it.each(["", "   "])("tom eller bare mellomrom: %j", (text) => {
+    expect(() => parseLine(text)).not.toThrow();
+    expect(parseLine(text)).toEqual(line(text, null, null, "", false));
+  });
+});
+
+describe("parseLine – øvrige regler", () => {
+  it("originalteksten bevares uendret, også med mellomrom rundt", () => {
+    expect(parseLine("  400 g mel ").original).toBe("  400 g mel ");
+    expect(parseLine("  400 g mel ").name).toBe("mel");
+  });
+
+  it("«ca» fjernes bare når en mengde følger", () => {
+    expect(parseLine("cayennepepper")).toEqual(
+      line("cayennepepper", null, null, "cayennepepper", false),
+    );
+    expect(parseLine("ca 2 dl melk").quantity).toEqual({ min: 2 });
+  });
+
+  it("enhetsord inne i et lengre ord gjenkjennes ikke som enhet", () => {
+    expect(parseLine("2 gulrøtter")).toEqual(line("2 gulrøtter", { min: 2 }, null, "gulrøtter"));
+  });
+
+  it("enhet fulgt av komma", () => {
+    expect(parseLine("400 g, finhakket løk").unit).toBe("g");
+  });
+
+  it("kaster ikke for vilkårlig tekst", () => {
+    for (const text of ["1/0 ts", "—", "½½", "2 –", "til 3", "\n\t", "ca."]) {
+      expect(() => parseLine(text)).not.toThrow();
+      expect(parseLine(text).original).toBe(text);
+    }
+  });
+});
