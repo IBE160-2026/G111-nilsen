@@ -13,4 +13,6 @@
 - [ ] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — bekreft antakelsene i PRD §10 og sett status til final
 - [ ] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — avgjør om mengder under 100 g/ml skal avrundes (PRD §9.4)
 - [ ] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — velg språkmodell og leverandør i arkitekturen
-- [ ] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — kjør bmad-ux, bmad-architecture og bmad-create-epics-and-stories
+- [ ] 2026-11-04 [prd](998-2026-11-04-18-49-01-prd.md) — kjør bmad-ux (løst 2026-11-04, se [997-2026-11-04-19-06-44-ux.md]); bmad-architecture og bmad-create-epics-and-stories gjenstår
+- [ ] 2026-11-04 [ux](997-2026-11-04-19-06-44-ux.md) — gå gjennom UX-dokumentene og mockupene, bekreft mørk palett og sett status final
+- [ ] 2026-11-04 [ux](997-2026-11-04-19-06-44-ux.md) — bekreft at avkrysning ikke lagres mellom besøk (FR-17)
