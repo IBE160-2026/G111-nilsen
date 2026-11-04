@@ -35,7 +35,7 @@ Brukeren kan legge inn en oppskrift selv, se den i et fast og ryddig format, vel
   | 1 fedd hvitløk | 2 | 1 fedd hvitløk (ca.) |
   | 750 g potet | 3 | 560 g potet |
 
-- **Ikke avgjort:** om g/ml under 100 også skal avrundes (f.eks. 37,5 g). Må bestemmes før skaleringen implementeres; ikke anta et svar.
+- **Avgjort 2026-11-04:** g/ml under 100 avrundes til hele tall (37,5 g → 38 g); over 100 til to gjeldende sifre (PRD FR-8 regel 4).
 - **Porsjonsantall:** heltall 1–50 via −/+ eller inntasting; ugyldig verdi gir melding og forrige verdi beholdes; tilbakestilling med én handling; oppdatering uten innlasting og uten merkbar forsinkelse.
 - **Manuell innlegging:** tittel, porsjonsantall (heltall ≥ 1) og minst én ingredienslinje er påkrevd; ingredienser og steg én per linje. Ved feil lagres ingenting. Oppskriften tolkes, vises og skaleres som en importert.
 - **Fast format:** tittel, kilde (eller «Lagt inn selv»), porsjonsvelger, ingredienser per seksjon, nummererte steg.
