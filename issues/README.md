@@ -15,3 +15,4 @@ Her dokumenterer vi feil og problemer som oppstår underveis i prosjektet, og hv
 | # | Tittel | Status | Funnet | Løst |
 |---|--------|--------|--------|------|
 | 001 | [BMAD lå utenfor repoet](001-bmad-utenfor-repo.md) | Løst | 2026-11-04 | 2026-11-04 |
+| 002 | [npm-registeret er blokkert i KI-miljøet](002-npm-blokkert-i-ki-miljo.md) | Åpen | 2026-11-04 | |
