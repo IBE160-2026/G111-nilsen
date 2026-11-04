@@ -148,7 +148,7 @@ Mengder regnes om med faktoren valgt porsjonsantall delt på opprinnelig porsjon
 1. Enheten beholdes. Det gjøres ingen konvertering mellom enheter.
 2. Resultatet vises som ½, ¼, ¾, ⅓ eller ⅔ (eventuelt med heltall foran) når det ligger innenfor 5 % av en slik verdi. Ellers vises desimaltall med komma og maks én desimal.
 3. Udelelige ingredienser rundes til nærmeste hele tall, minst 1, og merkes «ca.» når avrundingen endret verdien.
-4. Mengder i g og ml over 100 avrundes til to gjeldende sifre.
+4. Mengder i g og ml over 100 avrundes til to gjeldende sifre, og mengder under 100 avrundes til hele tall (37,5 g → 38 g).
 5. Mengdeområder skaleres i begge ender.
 6. Ingredienslinjer uten mengde endres ikke (FR-6).
 
@@ -296,7 +296,7 @@ Målt i en brukertest med 5 testbrukere og de samme fem lagrede oppskriftslenken
 1. Hvilke norske kilder har oppskriftsdata i HTML-en? Avklares ved å kjøre `scripts/fetch-fixtures.sh` (research §6).
 2. Hvilken språkmodell og leverandør brukes, og hva koster den i testing? Avgjøres i arkitekturen.
 3. Er det greit å lagre ingredienser og steg fra andre sider for personlig bruk? Spørres faglærer.
-4. Skal mengder i g og ml under 100 også avrundes (f.eks. 37,5 g)? Avgjøres før skaleringen implementeres.
+4. ~~Skal mengder i g og ml under 100 også avrundes?~~ Avgjort 2026-11-04: ja, til hele tall (37,5 g → 38 g). Se FR-8 regel 4.
 
 ## 10. Antakelser
 

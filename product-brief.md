@@ -103,7 +103,7 @@ Skalering er appens viktigste regel. Mengden multipliseres med nytt antall perso
 - Enheten beholdes. Det gjøres ingen automatisk konvertering mellom enheter i første versjon.
 - Brøker vises som ½, ¼, ¾, ⅓ og ⅔ når verdien ligger innenfor ca. 5 % av en av dem. Ellers vises desimaltall med komma og maks én desimal.
 - Udelelige ingredienser (egg, løk, hvitløksfedd, stk) rundes til nærmeste hele tall, minst 1, og merkes «ca.».
-- Mengder i gram og milliliter over 100 avrundes til to gjeldende sifre.
+- Mengder i gram og milliliter over 100 avrundes til to gjeldende sifre, og under 100 til hele tall (37,5 g → 38 g).
 - Tekst uten tall («en klype», «etter smak») endres ikke.
 - Mengdeområder («2–3 ss») skaleres i begge ender.
 - Norsk desimalkomma og brøktegn (0,5 / ½ / 1/2) forstås ved lesing.
