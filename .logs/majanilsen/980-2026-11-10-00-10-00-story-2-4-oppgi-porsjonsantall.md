@@ -15,8 +15,8 @@ Commit for Story 2.4.
 - `ServingsDialog` åpnes når antall mangler (fokus i feltet, tastatur, Escape, fokusfelle); «Avbryt» lar oppskriften stå uskalert med knappen «Oppgi antall personer». «oppr. N · endre» åpner samme dialog. Lagringen (`changeOriginalServings`) gjelder lagret og ulagret oppskrift, nullstiller valgt antall og røres ikke `updatedAt`.
 - Funn i egen gjennomgang: en dialog som åpner av seg selv kunne bli stående modal når siden skjules av `<Activity>`. `Dialog` lukker nå stille ved skjuling og åpner igjen ved visning (test).
 - Verifisert i Chromium mot dev-server: åpning med fokus, Escape, ny åpning, lagring til «oppr. 6» som består etter omlasting, «endre», ingen konsollfeil.
-- lint, typecheck, format og build grønne; 2162 tester i 73 filer; lock-filene uendret.
+- lint, typecheck, format og build grønne; 2164 tester i 73 filer; lock-filene uendret.
 
 ### Åpne punkter
 - Test i nettleseren på Macen: importer en side uten porsjonsantall (eller sett antall til null), sjekk dialogen på 360 og 1280 px, lys og mørk, 200 % zoom, og «oppr. N · endre».
-- Utsatt: Enter i antallsfeltet i dialogen lagrer ikke; redigeringsskjemaet krever fortsatt antall for importerte uten antall; ingen uavhengige gjennomganger for 2.4.
+- Utsatt: redigeringsskjemaet krever fortsatt antall for importerte uten antall; ingen uavhengige gjennomganger for 2.4.

@@ -22,7 +22,8 @@ Når en oppskrift ikke har tolkbart porsjonsantall, spørres brukeren «Hvor man
 | Siden skjules mens dialogen er åpen | lukkes stille, åpnes igjen | `Dialog.test.tsx` |
 
 ## Verifisering
-lint, typecheck, format:check og build grønne; 74 filer og 2162 tester; lock-filene uendret. Kjørt i Chromium mot dev-server (`IMPORT_SOURCE=fixtures`, strict mode): dialogen åpner med fokus i feltet, Escape lukker, «Oppgi antall personer» åpner igjen, lagring gir «oppr. 6» som består etter omlasting, «endre» åpner med 6, ingen konsollfeil.
+lint, typecheck, format:check og build grønne; 73 filer og 2164 tester; lock-filene uendret. Kjørt i Chromium mot dev-server (`IMPORT_SOURCE=fixtures`, strict mode): dialogen åpner med fokus i feltet, Escape lukker, «Oppgi antall personer» åpner igjen, lagring gir «oppr. 6» som består etter omlasting, «endre» åpner med 6, ingen konsollfeil.
 
 ## Review Triage Log
-Gjort med egen gjennomgang (ingen underagenter, for å spare økta). Funn: dialogen som åpner av seg selv kunne bli stående modal når siden skjules av Activity → rettet i `Dialog` med test. Utsatt: Enter i antallsfeltet i dialogen bekrefter bare tallet (lagrer ikke); redigeringsskjemaet krever fortsatt antall (feltet står tomt for importerte uten antall); ingen uavhengige reviews for 2.4.
+Gjort med egen gjennomgang (ingen underagenter, for å spare økta). Funn: dialogen som åpner av seg selv kunne bli stående modal når siden skjules av Activity → rettet i `Dialog` med test. Utsatt: redigeringsskjemaet krever fortsatt antall (feltet står tomt for importerte uten antall); ingen uavhengige reviews for 2.4.
+- Enter i antallsfeltet i dialogen lagrer valgt antall (ugyldig tekst gir melding og lagrer ikke).

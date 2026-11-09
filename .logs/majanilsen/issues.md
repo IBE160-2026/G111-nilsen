@@ -52,5 +52,5 @@
 - [ ] 2026-11-09 [story-2-2](982-2026-11-09-22-40-00-story-2-2-importer-fra-lenke.md) — kjør npm test på Macen og bekreft 2118 grønne
 - [ ] 2026-11-09 [story-2-2](982-2026-11-09-22-40-00-story-2-2-importer-fra-lenke.md) — utsatt: portbegrensning, prosentkoding, redirect-aliaser, indeks på source_url, DNS-tidsavbrudd, samtidighetsgrense (deferred-work.md)
 - [ ] 2026-11-09 [story-2-3](981-2026-11-09-22-55-00-story-2-3-forsta-hvorfor-import-feilet.md) — se de tre feilmeldingene i nettleseren sammen med testen av Story 2.2
-- [ ] 2026-11-10 [story-2-4](980-2026-11-10-00-10-00-story-2-4-oppgi-porsjonsantall.md) — test porsjonsdialogen og «oppr. N · endre» i nettleseren på Macen (360 og 1280 px, lys og mørk, 200 % zoom); kjør npm test (2162 grønne)
-- [ ] 2026-11-10 [story-2-4](980-2026-11-10-00-10-00-story-2-4-oppgi-porsjonsantall.md) — utsatt: Enter i dialogen lagrer ikke, rediger-skjemaet krever antall, ingen uavhengige reviews (spec-2-4)
+- [ ] 2026-11-10 [story-2-4](980-2026-11-10-00-10-00-story-2-4-oppgi-porsjonsantall.md) — test porsjonsdialogen og «oppr. N · endre» i nettleseren på Macen (360 og 1280 px, lys og mørk, 200 % zoom); kjør npm test (2164 grønne)
+- [ ] 2026-11-10 [story-2-4](980-2026-11-10-00-10-00-story-2-4-oppgi-porsjonsantall.md) — utsatt: rediger-skjemaet krever antall, ingen uavhengige reviews (spec-2-4)

@@ -53,13 +53,13 @@ function ServingsForm({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
-  async function save() {
+  async function save(servings: number = value) {
     if (pending) return;
     setPending(true);
     setError("");
     try {
-      const result = await onSave(value);
-      if (result.ok) onSaved(value);
+      const result = await onSave(servings);
+      if (result.ok) onSaved(servings);
       else setError(result.message);
     } catch (caught) {
       console.error("Kunne ikke lagre antallet", caught);
@@ -71,7 +71,13 @@ function ServingsForm({
 
   return (
     <div ref={bodyRef} className={styles.body}>
-      <ServingStepper bare value={value} onChange={setValue} original={initial} />
+      <ServingStepper
+        bare
+        value={value}
+        onChange={setValue}
+        original={initial}
+        onEnter={(servings) => void save(servings)}
+      />
       {error ? (
         <p role="alert" className={styles.error}>
           {error}
@@ -81,7 +87,11 @@ function ServingsForm({
         <DialogButton variant="secondary" onClick={onCancel}>
           {m.cancel}
         </DialogButton>
-        <DialogButton variant="primary" aria-disabled={pending ? true : undefined} onClick={save}>
+        <DialogButton
+          variant="primary"
+          aria-disabled={pending ? true : undefined}
+          onClick={() => void save()}
+        >
           {m.save}
         </DialogButton>
       </DialogActions>

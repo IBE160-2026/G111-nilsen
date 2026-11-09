@@ -124,4 +124,21 @@ describe("ServingsDialog", () => {
     expect(props.onSave).toHaveBeenCalledTimes(1);
     release();
   });
+
+  it("Enter i feltet lagrer det som står der", async () => {
+    const user = userEvent.setup();
+    const props = setup();
+    await user.clear(field());
+    await user.type(field(), "7{Enter}");
+    expect(props.onSave).toHaveBeenCalledWith(7);
+  });
+
+  it("Enter med ugyldig tekst lagrer ikke", async () => {
+    const user = userEvent.setup();
+    const props = setup();
+    await user.clear(field());
+    await user.type(field(), "x{Enter}");
+    expect(props.onSave).not.toHaveBeenCalled();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
 });

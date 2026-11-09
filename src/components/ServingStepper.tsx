@@ -32,6 +32,8 @@ type Props = {
   onEditOriginal?: () => void;
   /** Bare velgeren (til dialogen): uten «oppr.», «Tilbakestill» og opplesing. */
   bare?: boolean;
+  /** Kalles med gyldig antall når Enter trykkes i feltet (til dialogen: Enter lagrer). */
+  onEnter?: (value: number) => void;
 };
 
 /**
@@ -47,6 +49,7 @@ export default function ServingStepper({
   original,
   onEditOriginal,
   bare = false,
+  onEnter,
 }: Props) {
   const id = useId();
   const inputId = `${id}-antall`;
@@ -61,21 +64,24 @@ export default function ServingStepper({
     if (next !== value) onChange(next);
   }
 
-  function commit() {
-    if (draft === null) return;
+  /** Returnerer det gyldige antallet feltet nå står på, eller `null` ved ugyldig tekst. */
+  function commit(): number | null {
+    if (draft === null) return value;
     const parsed = parseServings(draft);
     if (parsed === null) {
       setDraft(null);
       setError(true);
-      return;
+      return null;
     }
     change(parsed);
+    return parsed;
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Enter") {
       event.preventDefault();
-      commit();
+      const committed = commit();
+      if (committed !== null) onEnter?.(committed);
     }
   }
 
