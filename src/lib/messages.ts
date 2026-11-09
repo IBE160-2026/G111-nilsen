@@ -1,3 +1,4 @@
+import { LIMITS } from "./recipe-input";
 import type { ErrorKind } from "./result";
 
 /**
@@ -80,5 +81,5 @@ export const manualRecipeFieldInvalid = {
 
 /** Feltmelding for porsjonsvelgeren på oppskriftssiden. */
 export const servingStepperMessages = {
-  invalid: "Skriv et helt tall fra 1 til 50. Antallet er ikke endret.",
+  invalid: `Skriv et helt tall fra ${LIMITS.servingsMin} til ${LIMITS.servingsMax}. Antallet er ikke endret.`,
 } as const;

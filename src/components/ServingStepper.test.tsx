@@ -128,4 +128,14 @@ describe("ServingStepper", () => {
     expect(servingsText(1)).toBe("1 person");
     expect(servingsText(2)).toBe("2 personer");
   });
+
+  it("feilmeldingen er en live-region som leses opp etter at fokus har forlatt feltet", async () => {
+    const user = userEvent.setup();
+    render(<Harness start={4} original={4} />);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    await user.clear(field());
+    await user.type(field(), "0");
+    await user.tab();
+    expect(screen.getByRole("alert")).toHaveTextContent(servingStepperMessages.invalid);
+  });
 });

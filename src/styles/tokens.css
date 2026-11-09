@@ -44,6 +44,9 @@
   --type-meta-size: 14px;
   --type-meta-weight: 400;
 
+  /* Tallet i porsjonsvelgeren (DESIGN.md: Georgia 24 px) */
+  --type-stepper-value-size: 24px;
+
   /* Hjørner */
   --radius-sm: 10px;
   --radius-md: 14px;
@@ -61,6 +64,7 @@
   --content-max-width: 1040px;
   --tap-target-min: 44px;
   --focus-ring-width: 2px;
+  --stepper-border-width: 1.5px;
 }
 
 /* Mørk palett – følger systemets innstilling */

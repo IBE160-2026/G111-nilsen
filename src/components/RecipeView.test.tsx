@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it } from "vitest";
 import type { Recipe } from "@/domain";
 import RecipeView, { sourceLabel } from "./RecipeView";
@@ -124,5 +125,16 @@ describe("RecipeView", () => {
     [{ sourceName: null, sourceUrl: null }, "Lagt inn selv"],
   ])("sourceLabel(%j) = %s", (source, expected) => {
     expect(sourceLabel(source)).toBe(expected);
+  });
+
+  it("nullstiller valgt antall når komponenten får en annen oppskrift", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<RecipeView recipe={recipe} />);
+    await user.click(screen.getByRole("button", { name: "Flere personer" }));
+    expect(screen.getByLabelText("Antall personer")).toHaveValue("5");
+
+    rerender(<RecipeView recipe={{ ...recipe, id: 2, title: "Vafler", originalServings: 2 }} />);
+    expect(screen.getByLabelText("Antall personer")).toHaveValue("2");
+    expect(screen.queryByRole("button", { name: /Tilbakestill/ })).not.toBeInTheDocument();
   });
 });

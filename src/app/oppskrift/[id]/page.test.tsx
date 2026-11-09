@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, type Db } from "@/server/db/client";
 import { createManualRecipe } from "@/server/services/recipe-service";
 
-const state = vi.hoisted(() => ({ db: null as Db | null }));
+const state = vi.hoisted(() => ({ db: null as Db | null, forcedErrorKind: null as string | null }));
 
 vi.mock("@/server/db/client", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/server/db/client")>();
@@ -20,6 +20,17 @@ vi.mock("next/navigation", () => ({
   },
 }));
 
+vi.mock("@/server/services/recipe-service", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/server/services/recipe-service")>();
+  return {
+    ...actual,
+    getRecipe: (...args: Parameters<typeof actual.getRecipe>) =>
+      state.forcedErrorKind
+        ? { ok: false, error: { kind: state.forcedErrorKind } }
+        : actual.getRecipe(...args),
+  };
+});
+
 vi.mock("next/server", () => ({ connection: () => Promise.resolve() }));
 
 const { default: RecipePage, generateMetadata } = await import("./page");
@@ -27,6 +38,7 @@ const { default: RecipePage, generateMetadata } = await import("./page");
 afterEach(cleanup);
 beforeEach(() => {
   state.db = createTestDb();
+  state.forcedErrorKind = null;
 });
 
 type AsyncComponent = (props: unknown) => Promise<ReactElement>;
@@ -72,5 +84,12 @@ describe("/oppskrift/[id]", () => {
   it.each(["999999", "abc"])("ukjent id %s gir standardtittel", async (id) => {
     const metadata = await generateMetadata({ params: Promise.resolve({ id }) });
     expect(metadata.title).toBe("Oppskrift");
+  });
+
+  it("andre feil enn not_found kastes videre til error.tsx, ikke notFound()", async () => {
+    state.forcedErrorKind = "validation";
+    const rendering = renderPage("1");
+    await expect(rendering).rejects.toThrow(/validation/);
+    await expect(rendering).rejects.not.toBeInstanceOf(NotFoundError);
   });
 });

@@ -6,6 +6,7 @@ import {
   messageFor,
   servingStepperMessages,
 } from "./messages";
+import { LIMITS } from "./recipe-input";
 import { ERROR_KINDS } from "./result";
 
 describe("messageFor", () => {
@@ -32,5 +33,13 @@ describe("messageFor", () => {
       ...Object.values(servingStepperMessages),
     ];
     for (const text of texts) expect(text).not.toContain("!");
+  });
+});
+
+describe("servingStepperMessages", () => {
+  it("bygger grensene for antall personer fra LIMITS", () => {
+    expect(servingStepperMessages.invalid).toContain(
+      `${LIMITS.servingsMin} til ${LIMITS.servingsMax}`,
+    );
   });
 });

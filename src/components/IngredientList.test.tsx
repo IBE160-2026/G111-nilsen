@@ -182,4 +182,13 @@ describe("IngredientList", () => {
       ["Saus", ["c"]],
     ]);
   });
+
+  it.each([0, 60, -2, 2.5])(
+    "ugyldig opprinnelig antall %s behandles som manglende: ingen velger, uskalerte mengder",
+    (original) => {
+      render(<IngredientList ingredients={basic} originalServings={original} />);
+      expect(screen.queryByLabelText("Antall personer")).not.toBeInTheDocument();
+      expect(shown()).toEqual(["400 g mel", "1 egg", "salt og pepper"]);
+    },
+  );
 });

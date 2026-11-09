@@ -46,7 +46,12 @@ async function RecipeLoader({ params }: { params: Params }) {
   await connection();
 
   const result = loadRecipe(id);
-  if (!result?.ok) notFound();
+  if (result === null) notFound();
+  if (!result.ok) {
+    if (result.error.kind === "not_found") notFound();
+    // Andre feil er uventede og vises av error.tsx.
+    throw new Error(`Kunne ikke hente oppskriften (${result.error.kind})`);
+  }
 
   return <RecipeView recipe={result.value} />;
 }

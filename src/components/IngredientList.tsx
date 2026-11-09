@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { formatQuantity, scaleLine, type RecipeLine, type ScaledLine } from "@/domain";
+import { LIMITS } from "@/lib/recipe-input";
 import ServingStepper from "./ServingStepper";
 import styles from "./IngredientList.module.css";
 
@@ -65,7 +66,19 @@ type Props = {
  * Hver visning skalerer fra originalmengdene i `RecipeLine`, aldri fra forrige
  * skalerte verdi, og ingenting sendes til serveren.
  */
-export default function IngredientList({ ingredients, originalServings }: Props) {
+/** Opprinnelig antall som kan skaleres fra: heltall innenfor 1–50, ellers `null`. */
+function validServings(value: number | null): number | null {
+  return value !== null &&
+    Number.isInteger(value) &&
+    value >= LIMITS.servingsMin &&
+    value <= LIMITS.servingsMax
+    ? value
+    : null;
+}
+
+export default function IngredientList({ ingredients, originalServings: rawOriginal }: Props) {
+  // Ugyldig opprinnelig antall (0, negativt, desimal, over 50) behandles som manglende.
+  const originalServings = validServings(rawOriginal);
   const [selected, setSelected] = useState(originalServings);
   const factor = originalServings !== null && selected !== null ? selected / originalServings : 1;
   const groups = groupBySection(ingredients);

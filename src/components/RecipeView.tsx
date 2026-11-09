@@ -32,6 +32,7 @@ export default function RecipeView({ recipe }: { recipe: Recipe }) {
 
       <div className={styles.columns}>
         <IngredientList
+          key={recipe.id}
           ingredients={recipe.ingredients}
           originalServings={recipe.originalServings}
         />

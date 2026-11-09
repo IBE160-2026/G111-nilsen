@@ -22,7 +22,7 @@
 }
 
 .label {
-  font-weight: 600;
+  font-weight: var(--type-label-weight);
 }
 
 .original {
@@ -42,12 +42,12 @@
   width: var(--tap-target-min);
   height: var(--tap-target-min);
   padding: 0;
-  border: 1.5px solid var(--color-accent);
+  border: var(--stepper-border-width) solid var(--color-accent);
   border-radius: var(--radius-full);
   background: var(--color-surface-raised);
   color: var(--color-accent);
   font: inherit;
-  font-size: 22px;
+  font-size: var(--type-heading-size);
   line-height: 1;
   cursor: pointer;
 }
@@ -67,7 +67,7 @@
   background: var(--color-surface-base);
   color: var(--color-ink-primary);
   font-family: var(--font-serif);
-  font-size: 24px;
+  font-size: var(--type-stepper-value-size);
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
@@ -80,7 +80,7 @@
 .error {
   color: var(--color-accent);
   font-size: var(--type-meta-size);
-  font-weight: 600;
+  font-weight: var(--type-label-weight);
 }
 
 .reset {

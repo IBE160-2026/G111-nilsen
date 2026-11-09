@@ -114,7 +114,7 @@ export default function ServingStepper({ value, onChange, original }: Props) {
       </div>
 
       {error ? (
-        <p id={errorId} className={styles.error}>
+        <p id={errorId} role="alert" className={styles.error}>
           {servingStepperMessages.invalid}
         </p>
       ) : null}
