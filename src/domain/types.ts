@@ -39,3 +39,6 @@ export type ParsedLine = {
   name: string;
   parseable: boolean;
 };
+
+/** En ingredienslinje etter skalering. `approximate` betyr at mengden er avrundet til «ca.». */
+export type ScaledLine = ParsedLine & { approximate: boolean };
