@@ -130,3 +130,20 @@ describe("favoriteMessages (Story 3.4)", () => {
     }
   });
 });
+
+describe("importfeil (Story 2.3): teksten fra EXPERIENCE.md", () => {
+  it("no_recipe: «Fant ingen oppskrift på siden» med forklaring og vei videre", () => {
+    expect(errorMessages.no_recipe.title).toBe("Fant ingen oppskrift på siden.");
+    expect(errorMessages.no_recipe.body).toBe(
+      "Lenken ser ut til å gå til en oversikt. Åpne selve oppskriften og lim inn den lenken, eller legg den inn selv.",
+    );
+  });
+
+  it.each(["invalid_url", "fetch_failed", "no_recipe"] as const)(
+    "%s har tittel som slutter på punktum og en forklaring som sier hva man kan gjøre",
+    (kind) => {
+      expect(errorMessages[kind].title).toMatch(/\.$/);
+      expect(errorMessages[kind].body.length).toBeGreaterThan(20);
+    },
+  );
+});

@@ -26,7 +26,7 @@ export const errorMessages: Record<ErrorKind, ErrorMessage> = {
     body: "Sjekk lenken og internettforbindelsen, og prøv igjen. Du kan også legge inn oppskriften selv.",
   },
   no_recipe: {
-    title: "Vi fant ingen oppskrift på siden.",
+    title: "Fant ingen oppskrift på siden.",
     body: "Lenken ser ut til å gå til en oversikt. Åpne selve oppskriften og lim inn den lenken, eller legg den inn selv.",
   },
   duplicate: {
