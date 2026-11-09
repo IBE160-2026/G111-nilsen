@@ -4,11 +4,9 @@ Sidene under lagres som HTML i `test/fixtures/html/` med `scripts/fetch-fixtures
 
 | Fil | Kilde | Språk | Hvorfor den er med |
 |---|---|---|---|
-| `tine-kjottkaker.html` | https://www.tine.no/oppskrifter/middag-og-hovedretter/kjott/hjemmelagde-kj%C3%B8ttkaker | nb | Store norske aktører. På den gjengitte siden mangler porsjonsantall, og to ingredienslinjer vises uten navn |
 | `tine-kjottboller.html` | https://www.tine.no/oppskrifter/middag-og-hovedretter/kjott/kjottboller-i-tomatsaus | nb | Ny test av samme site med annen oppskrift |
 | `matoppskrift-pannekaker.html` | https://www.matoppskrift.no/oppskrift/pannekaker-grunnoppskrift | nb | Porsjonsantall oppgitt som «1 porsjoner», «1 dash», desimalkomma |
 | `matoppskrift-kjottkaker.html` | https://www.matoppskrift.no/oppskrift/kjoettkaker-3 | nb | Eldre side, annen oppbygging |
-| `visitnorway-farikal.html` | https://www.visitnorway.no/aktiviteter-og-attraksjoner/mat-og-drikke/den-norske-kokeboka/oppskrift-farikal/ | nb | Turistside med oppskrift i fritekst |
 | `klikk-farikal.html` | https://www.klikk.no/mat/spise/oppskrift-pa-farikal-2530170 | nb | Magasinside |
 | `bbcgoodfood-lasagne.html` | https://www.bbcgoodfoodme.com/recipes/classic-lasagne-0/ | en | Engelsk side med enheter som `750g` uten mellomrom og ingredienser uten mengde («nutmeg») |
 | `northwild-kjottkaker.html` | https://northwildkitchen.com/norwegian-brown-cheese-meatballs-kjottkaker-med-brunost/ | en | Matblogg |
@@ -20,4 +18,17 @@ Sidene under lagres som HTML i `test/fixtures/html/` med `scripts/fetch-fixtures
 Etter at skriptet er kjørt, noteres i kolonnen under hvilke filer som har `Recipe` i JSON-LD (se «Resultat av kjøring» nederst).
 
 ## Resultat av kjøring
-Ikke kjørt ennå.
+Kjørt 2026-11-09 (HTTP 404/403 for to sider, som er tatt ut: `tine-kjottkaker.html` og `visitnorway-farikal.html`).
+
+| Fil | `ld+json`-blokker | `Recipe` i JSON-LD | Form |
+|---|---|---|---|
+| `tine-kjottboller.html` | 1 | ja | ett objekt; `recipeYield` «16 servings», steg som `HowToStep` |
+| `matprat-rundstykker.html` | 1 | ja | liste (`Recipe` alene); `recipeYield` «1 PORSJONER (1 porsjon gir ca. 20 rundstykker)» |
+| `matprat-enkel-brodoppskrift.html` | 1 | ja | liste; `recipeYield` «1 PORSJONER (1 porsjon gir 3 brød i 1.5 liters former)» |
+| `godt-amerikanske-pannekaker.html` | 1 | ja | liste med `BreadcrumbList` og `Recipe`; `recipeYield` 4 (tall); `HowToStep` med bilder |
+| `godt-grove-middagspannekaker.html` | 1 | ja | som over; `recipeYield` 6 |
+| `klikk-farikal.html` | 1 | nei | `@graph` med artikkel, ingen `Recipe` |
+| `northwild-kjottkaker.html` | 1 | nei | `@graph` med artikkel, ingen `Recipe` |
+| `matoppskrift-pannekaker.html` | 0 | nei | ingen JSON-LD |
+| `matoppskrift-kjottkaker.html` | 0 | nei | ingen JSON-LD |
+| `bbcgoodfood-lasagne.html` | 0 | nei | ingen JSON-LD i HTML-en vi fikk |

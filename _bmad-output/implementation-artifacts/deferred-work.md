@@ -131,3 +131,37 @@
   summary: Hjertet i lagre-linjen har ingen ramme og ser løsrevet ut ved siden av rammede knapper.
   evidence: Estetikk; vurderes etter Majas skjermbilder.
 
+
+## Story 2.1
+
+- source_spec: `spec-2-1-les-oppskriftsdata.md`
+  summary: Vis `section` for steg i oppskriftssiden og ta vare på den ved lagring/redigering; `normalizeRecipe` leverer allerede seksjonsnavn fra `HowToSection`.
+  evidence: Lagring og visning er utenfor 2.1; se også 1.5 og 3.5 over (seksjoner forsvinner ved redigering).
+- source_spec: `spec-2-1-les-oppskriftsdata.md`
+  summary: Grenser fra `LIMITS` (tittel 200, 100 linjer, 300 tegn per ingrediens, 2000 per steg) håndheves ikke ved lesing; Story 2.2 må avkorte, avvise eller dele før lagring.
+  evidence: Spesifikasjonen sier at lange tekster ikke avkortes i `normalizeRecipe`. En importert side kan ha flere enn 100 steg eller en tekstblokk over 2000 tegn.
+- source_spec: `spec-2-1-les-oppskriftsdata.md`
+  summary: `Recipe` som bare ligger under andre felt (for eksempel `mainEntity` på en `WebPage`, eller via `@id`-referanse) følges ikke, og bare første `Recipe` på siden brukes.
+  evidence: Bevisst etter spesifikasjonen; test låser det. Sjekk om reelle sider (Yoast, WordPress) trenger det når flere kilder prøves i 2.2.
+- source_spec: `spec-2-1-les-oppskriftsdata.md`
+  summary: Mikrodata (`itemprop`) og RDFa uten JSON-LD støttes ikke. De to matoppskrift.no-sidene og BBC Good Food-siden i testdataene har ingen JSON-LD `Recipe`, så de gir `no_recipe`.
+  evidence: Fixtures `matoppskrift-*`, `bbcgoodfood-lasagne`. Kan gi bedre treff på eldre sider, men krever en HTML-tolker eller en mer omfattende skanner.
+- source_spec: `spec-2-1-les-oppskriftsdata.md`
+  summary: Porsjonsantall: tekst som «2 x 4 porsjoner» gir 2, og «Serves 4-6» gir 4. Enheter ved tallet («350 g») vurderes ikke, bare grensene 1–50.
+  evidence: Valgt for å følge «første heltall» i spesifikasjonen; ingen gjetting utover det. Brukeren kan endre antallet ved import (2.3/2.4).
+- source_spec: `spec-2-1-les-oppskriftsdata.md`
+  summary: Tagger med `>` inne i anførselstegn i attributter (`<a title="a>b">`) fjernes ikke helt; resten etter første `>` blir stående som tekst. Kodede URL-er som ren tekst (uten tagg) beholdes.
+  evidence: Tagg-fjerningen er bevisst enkel og lineær (ingen regex med bakoversøk). Teksten vises alltid som tekst (AD-8), så det er ikke et sikkerhetsproblem, bare et kosmetisk.
+- source_spec: `spec-2-1-les-oppskriftsdata.md`
+  summary: `test/fixtures/sources.md` lister ikke de fem nye sidene fra matprat.no og godt.no (bare de seks første).
+  evidence: Filene finnes i `test/fixtures/html/` og brukes i `recipe-import.test.ts`; spesifikasjonen sier at sources.md er oppdatert, men tabellen mangler radene. Ikke endret i denne storyen.
+- source_spec: `spec-2-1-les-oppskriftsdata.md`
+  summary: Første `Recipe` som er et tomt skall skjuler en komplett senere `Recipe` på samme side.
+  evidence: Følger spesifikasjonen («første vinner»). Story 2.2 kan la extract returnere kandidater og normalize velge første brukbare. `servings: null` må også håndteres i 2.2/2.4, siden `createManualRecipe`-stien krever et tall.
+- source_spec: `spec-2-1-les-oppskriftsdata.md`
+  summary: Flytt generiske `Result`/`ok`/`err` til `src/domain/result.ts` og re-eksporter fra `src/lib/result.ts`, så domenet slipper egne feiltyper (`ImportResult`/`ImportError`).
+  evidence: `domain-purity.test.ts` er strengere enn AD-1 og forbyr import utenfor `src/domain`. Dagens løsning er låst av en typetest mot `Result<T, AppError>`.
+- source_spec: `spec-2-1-les-oppskriftsdata.md`
+  summary: Ytelsestestene for import tar ca. 20 s; vurder å skille dem ut i en egen testkjøring.
+  evidence: 2 MB-mønstre med terskel 3 s (kravet er under 1 s på vanlig maskin).
+

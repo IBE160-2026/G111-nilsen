@@ -15,11 +15,11 @@ fetch() { # fil url
   echo "OK    $1  ld+json-blokker=$ld  Recipe=$rc  størrelse=$(wc -c < "$f")"
 }
 
-fetch tine-kjottkaker.html "https://www.tine.no/oppskrifter/middag-og-hovedretter/kjott/hjemmelagde-kj%C3%B8ttkaker"
+# tine-kjottkaker.html: gir HTTP 404 (siden er fjernet), tatt ut 2026-11-09
 fetch tine-kjottboller.html "https://www.tine.no/oppskrifter/middag-og-hovedretter/kjott/kjottboller-i-tomatsaus"
 fetch matoppskrift-pannekaker.html "https://www.matoppskrift.no/oppskrift/pannekaker-grunnoppskrift"
 fetch matoppskrift-kjottkaker.html "https://www.matoppskrift.no/oppskrift/kjoettkaker-3"
-fetch visitnorway-farikal.html "https://www.visitnorway.no/aktiviteter-og-attraksjoner/mat-og-drikke/den-norske-kokeboka/oppskrift-farikal/"
+# visitnorway-farikal.html: gir HTTP 403 (blokkerer skriptet), tatt ut 2026-11-09
 fetch klikk-farikal.html "https://www.klikk.no/mat/spise/oppskrift-pa-farikal-2530170"
 fetch bbcgoodfood-lasagne.html "https://www.bbcgoodfoodme.com/recipes/classic-lasagne-0/"
 fetch northwild-kjottkaker.html "https://northwildkitchen.com/norwegian-brown-cheese-meatballs-kjottkaker-med-brunost/"
