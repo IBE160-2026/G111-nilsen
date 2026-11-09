@@ -31,3 +31,5 @@
 - [x] 2026-11-09 [story-1-4](991-2026-11-09-10-08-43-story-1-4-manuell-innlegging.md) — avgjør om redigering av oppskrifter skal inn i PRD (avdekket ved manuell test, issue 005) (løst 2026-11-09: FR-18, Story 3.5)
 - [ ] 2026-11-09 [story-1-5](990-2026-11-09-15-18-00-story-1-5-oppskriftsvisning.md) — test porsjonsvelgeren i nettleseren på Macen og ta skjermbilder på 360 og 1280 px (lys og mørk), sjekk 768 px og 200 % tekststørrelse
 - [ ] 2026-11-09 [story-1-5](990-2026-11-09-15-18-00-story-1-5-oppskriftsvisning.md) — vurder aria-disabled på −/+ så tastaturfokus ikke forsvinner ved 1/50
+- [ ] 2026-11-09 [story-3-5](989-2026-11-09-16-05-00-story-3-5-rediger.md) — test redigering i nettleseren på Macen (gamle verdier ved ny åpning, Avbryt, fokus ved feil, 360/1280 px, mørk modus)
+- [ ] 2026-11-09 [story-3-5](989-2026-11-09-16-05-00-story-3-5-rediger.md) — redigering mister seksjoner; løs når seksjoner kan redigeres (deferred-work.md)
