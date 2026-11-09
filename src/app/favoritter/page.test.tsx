@@ -127,7 +127,7 @@ describe("/favoritter", () => {
     expect(state.calls).toEqual(["connection", "listFavorites"]);
   });
 
-  it("uten favoritter: tom-tilstand med uendret tittel og tekst og «Gå til samlingen»", async () => {
+  it("uten favoritter: tom-tilstand med uendret tittel og tekst og «Gå til oppskriftene»", async () => {
     // En lagret oppskrift som ikke er favoritt, vises ikke.
     insertRecipe(state.db!, recipe("Ikke favoritt", "2026-11-09T10:00:00.000Z"));
     await show();
@@ -137,7 +137,7 @@ describe("/favoritter", () => {
     expect(
       screen.getByText("Trykk på hjertet på en oppskrift for å gjøre den til favoritt."),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Gå til samlingen" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Gå til oppskriftene" })).toHaveAttribute(
       "href",
       "/samlingen",
     );

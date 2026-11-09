@@ -30,11 +30,11 @@ function setup(list = folders) {
 }
 
 describe("FolderManager", () => {
-  it("uten mapper: skjemaet og tom-tilstanden med «Gå til samlingen»", () => {
+  it("uten mapper: skjemaet og tom-tilstanden med «Gå til oppskriftene»", () => {
     setup([]);
     expect(screen.getByRole("textbox", { name: "Ny mappe" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Du har ingen mapper ennå." })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Gå til samlingen" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Gå til oppskriftene" })).toHaveAttribute(
       "href",
       "/samlingen",
     );

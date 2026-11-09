@@ -26,7 +26,7 @@ type Overrides = Partial<React.ComponentProps<typeof ConfirmDialog>>;
 const props = (overrides: Overrides = {}) => ({
   open: true,
   title: "Slette oppskriften?",
-  description: "«Pannekaker» fjernes fra samlingen. Du kan ikke angre.",
+  description: "«Pannekaker» fjernes fra oppskriftene dine. Du kan ikke angre.",
   confirmLabel: "Slett",
   cancelLabel: "Avbryt",
   onConfirm: vi.fn(),
@@ -52,7 +52,7 @@ describe("ConfirmDialog", () => {
     expect(showModal).toHaveBeenCalledTimes(1);
     const dialog = screen.getByRole("dialog", { name: "Slette oppskriften?" });
     expect(dialog).toHaveAccessibleDescription(
-      "«Pannekaker» fjernes fra samlingen. Du kan ikke angre.",
+      "«Pannekaker» fjernes fra oppskriftene dine. Du kan ikke angre.",
     );
     expect(screen.getByRole("heading", { level: 2, name: "Slette oppskriften?" })).toBeVisible();
   });

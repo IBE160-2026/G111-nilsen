@@ -212,7 +212,7 @@ describe("RecipeActions: lagret", () => {
     await user.click(screen.getByRole("button", { name: "Slett Pannekaker" }));
     const dialog = screen.getByRole("dialog", { name: "Slette oppskriften?" });
     expect(dialog).toHaveAccessibleDescription(
-      "«Pannekaker» fjernes fra samlingen. Du kan ikke angre.",
+      "«Pannekaker» fjernes fra oppskriftene dine. Du kan ikke angre.",
     );
     expect(screen.getByRole("button", { name: "Avbryt" })).toHaveFocus();
     expect(onDelete).not.toHaveBeenCalled();

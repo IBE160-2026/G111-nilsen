@@ -25,7 +25,7 @@ export const errorMessages: Record<ErrorKind, ErrorMessage> = {
   },
   duplicate: {
     title: "Du har allerede denne oppskriften.",
-    body: "Åpne den fra samlingen.",
+    body: "Åpne den fra Oppskrifter.",
   },
   validation: {
     title: "Noe i skjemaet må rettes.",
@@ -101,9 +101,9 @@ export const sourceMessages = {
 
 /** Tekster for Samlingen (Story 3.1). */
 export const collectionMessages = {
-  heading: "Samlingen",
-  loading: "Henter samlingen …",
-  loadFailed: "Kunne ikke hente samlingen",
+  heading: "Oppskrifter",
+  loading: "Henter oppskriftene …",
+  loadFailed: "Kunne ikke hente oppskriftene",
   emptyTitle: "Du har ingen lagrede oppskrifter ennå.",
   emptyDescription:
     "Oppskrifter du legger inn eller lagrer, havner her med den sist lagrede øverst.",
@@ -130,7 +130,7 @@ export const recipeActionMessages = {
 /** Tekster for dialogen «Slette oppskriften?» (Story 3.2). Tittelen settes inn foran `descriptionAfterTitle`. */
 export const deleteDialogMessages = {
   title: "Slette oppskriften?",
-  descriptionAfterTitle: "fjernes fra samlingen. Du kan ikke angre.",
+  descriptionAfterTitle: "fjernes fra oppskriftene dine. Du kan ikke angre.",
   confirm: "Slett",
   cancel: "Avbryt",
 } as const;
@@ -164,7 +164,7 @@ export const folderMessages = {
   allFolders: "Alle mapper",
   emptyTitle: "Du har ingen mapper ennå.",
   emptyDescription: "Legg oppskrifter i en mappe fra oppskriftssiden.",
-  emptyAction: "Gå til samlingen",
+  emptyAction: "Gå til oppskriftene",
   folderEmptyTitle: "Mappen er tom.",
   folderEmptyDescription: "Legg oppskrifter i mappen fra oppskriftssiden.",
   notFoundHeading: "Fant ikke mappen",
@@ -187,7 +187,7 @@ export function recipeCountLabel(count: number): string {
 export const deleteFolderDialogMessages = {
   title: "Slette mappen?",
   descriptionAfterName:
-    "slettes. Oppskriftene i mappen blir liggende i samlingen, uten mappe. Du kan ikke angre.",
+    "slettes. Oppskriftene i mappen blir liggende i Oppskrifter, uten mappe. Du kan ikke angre.",
   confirm: "Slett",
   cancel: "Avbryt",
 } as const;
@@ -210,7 +210,7 @@ export const favoriteMessages = {
   loadFailed: "Kunne ikke hente favorittene",
   emptyTitle: "Du har ingen favoritter ennå.",
   emptyDescription: "Trykk på hjertet på en oppskrift for å gjøre den til favoritt.",
-  emptyAction: "Gå til samlingen",
+  emptyAction: "Gå til oppskriftene",
   /** Foran oppskriftens tittel i hjerteknappens tilgjengelige navn: «Favoritt: Pannekaker». */
   labelPrefix: "Favoritt: ",
   added: "Lagt til i favoritter.",

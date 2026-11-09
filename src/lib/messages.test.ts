@@ -94,7 +94,7 @@ describe("mappetekster (Story 3.3)", () => {
     expect(recipeActionMessages.chooseFolder).toBe("Lagre i mappe");
     expect(recipeActionMessages.folderRemoved).toBe("Fjernet fra mappen.");
     expect(deleteFolderDialogMessages.title).toBe("Slette mappen?");
-    expect(deleteFolderDialogMessages.descriptionAfterName).toContain("liggende i samlingen");
+    expect(deleteFolderDialogMessages.descriptionAfterName).toContain("liggende i Oppskrifter");
     expect(folderDialogMessages.title).toBe("Lagre i mappe");
   });
 
@@ -116,7 +116,7 @@ describe("favoriteMessages (Story 3.4)", () => {
       loadFailed: "Kunne ikke hente favorittene",
       emptyTitle: "Du har ingen favoritter ennå.",
       emptyDescription: "Trykk på hjertet på en oppskrift for å gjøre den til favoritt.",
-      emptyAction: "Gå til samlingen",
+      emptyAction: "Gå til oppskriftene",
       labelPrefix: "Favoritt: ",
       added: "Lagt til i favoritter.",
       removed: "Fjernet fra favoritter.",

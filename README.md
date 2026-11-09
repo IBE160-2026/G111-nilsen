@@ -10,20 +10,20 @@ Repoet inneholder applikasjonen og dokumentasjon av utvikling, testing og kvalit
 
 ## Om appen
 
-**RecipeMate** er en matlagingsassistent for oppskrifter fra nettet. Du limer inn en lenke (eller skriver inn oppskriften selv), og appen viser oppskriften i et fast og ryddig format der du kan velge antall personer, slik at alle mengder regnes om med en gang. Oppskrifter kan lagres i en samling, i mapper og som favoritter.
+**RecipeMate** er en matlagingsassistent for oppskrifter fra nettet. Du limer inn en lenke (eller skriver inn oppskriften selv), og appen viser oppskriften i et fast og ryddig format der du kan velge antall personer, slik at alle mengder regnes om med en gang. Oppskrifter kan lagres i Oppskrifter, i mapper og som favoritter.
 
-Status: Epic 1 («Les og skaler en oppskrift») er ferdig: Story 1.1–1.6, pluss Story 3.5 (redigering), Story 3.1 (Samlingen), Story 3.2 (lagre og slette), Story 3.3 (mapper) og Story 3.4 (favoritter). Du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`), finne den igjen i Samlingen (`/samlingen`), se den på `/oppskrift/{id}`, velge antall personer og krysse av ingredienser og steg mens du lager maten. Oppskriften lagres i en lokal SQLite-database. Import fra lenke og forslag kommer i senere epics.
+Status: Epic 1 («Les og skaler en oppskrift») er ferdig: Story 1.1–1.6, pluss Story 3.5 (redigering), Story 3.1 (Oppskrifter-siden), Story 3.2 (lagre og slette), Story 3.3 (mapper) og Story 3.4 (favoritter). Du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`), finne den igjen under Oppskrifter (`/samlingen`), se den på `/oppskrift/{id}`, velge antall personer og krysse av ingredienser og steg mens du lager maten. Oppskriften lagres i en lokal SQLite-database. Import fra lenke og forslag kommer i senere epics.
 
 ## Hva Epic 1 (og Story 3.5) inneholder
 
-- **Story 1.1, Start appen:** Next.js-prosjektet med toppmeny (Importer, Samlingen, Mapper, Favoritter), visuell profil som designtokens i lys og mørk palett, felles feilmeldinger og testoppsett.
+- **Story 1.1, Start appen:** Next.js-prosjektet med toppmeny (Importer, Oppskrifter, Mapper, Favoritter), visuell profil som designtokens i lys og mørk palett, felles feilmeldinger og testoppsett.
 - **Story 1.2, Tolk ingredienslinjer:** «400 g mel», «1 ½ dl melk» og «2–3 ss sukker» deles i mengde, enhet og navn. Linjer uten mengde («salt og pepper») vises som de står.
 - **Story 1.3, Skaler og formater mengder:** mengder regnes om med fast avrunding, brøktegn (½, ¼, ¾) og «ca.» for udelelige ting som egg og løk.
 - **Story 1.4, Legg inn en oppskrift manuelt:** tittel, antall personer, ingredienser og steg lagres i databasen. Ved feil lagres ingenting.
 - **Story 1.5, Se oppskriften og velg antall personer:** fast format med tittel, kilde, porsjonsvelger (−/+ eller tall, 1–50, «Tilbakestill»), ingredienser per seksjon og nummererte steg.
 - **Story 1.6, Kryss av under matlaging:** hver ingrediens og hvert steg kan krysses av (se under). Porsjonsvelgerens −/+ beholder tastaturfokus ved 1 og 50.
 - **Story 3.5, Rediger en oppskrift:** se «Redigere en oppskrift» under.
-- **Story 3.1, Se samlingen:** se «Samlingen» under.
+- **Story 3.1, Se samlingen:** se «Oppskrifter (samlingen)» under.
 - **Story 3.2, Lagre og slette en oppskrift:** se «Lagre, slette og rydde» under.
 - **Story 3.3, Sorter oppskrifter i mapper:** se «Mapper» under.
 
@@ -61,9 +61,11 @@ npm run build    # produksjonsbygg
 npm start        # kjør produksjonsbygget
 ```
 
-## Samlingen
+## Oppskrifter (samlingen)
 
-«Legg inn selv» lagrer oppskriften rett i samlingen: `savedAt` settes til lagringstidspunktet. Samlingen (`/samlingen`) viser alle oppskrifter med `savedAt` satt som kort med tittel og kilde (kildenavn, ellers vertsnavnet fra lenken, ellers «Lagt inn selv»), sist lagret først. Hele kortet er én lenke til oppskriften. Er samlingen tom, vises en forklaring med knappene «Legg inn selv» og «Importer din første oppskrift».
+Menypunktet og overskriften heter «Oppskrifter». Adressen er fortsatt `/samlingen`, og koden og dokumentene kaller lagrede oppskrifter «samlingen».
+
+«Legg inn selv» lagrer oppskriften rett i samlingen: `savedAt` settes til lagringstidspunktet. Oppskrifter-siden (`/samlingen`) viser alle oppskrifter med `savedAt` satt som kort med tittel og kilde (kildenavn, ellers vertsnavnet fra lenken, ellers «Lagt inn selv»), sist lagret først. Hele kortet er én lenke til oppskriften. Er samlingen tom, vises en forklaring med knappene «Legg inn selv» og «Importer din første oppskrift».
 
 - En datamigrasjon (`drizzle/0001_move_manual_recipes_to_collection.sql`) legger manuelle oppskrifter som ble lagret før denne storyen (uten kilde-lenke) inn i samlingen. Den kjøres automatisk, endrer ikke skjemaet og er trygg å kjøre på nytt.
 - Rekkefølgen er «sist lagret først». Redigering endrer ikke `savedAt`, så plasseringen i listen er den samme. Sporing av «sist åpnet», sidedeling og søk er utsatt.
@@ -81,7 +83,7 @@ Nederst på oppskriftssiden står en lagre-linje som følger med når du ruller.
 
 ## Mapper
 
-På Mapper-siden (`/mapper`) kan du opprette, gi nytt navn til og slette mapper. Hver mappe vises med antall oppskrifter («3 oppskrifter», «1 oppskrift», «Ingen oppskrifter») og lenker til mappesiden (`/mapper/{id}`), som viser oppskriftene i mappen som kort, sist lagret først, eller «Mappen er tom.». En oppskrift ligger i maks én mappe, og bare oppskrifter i samlingen kan legges i en mappe. Oppskriftskortene i Samlingen viser mappenavnet etter kilden («Matprat · Hverdag»).
+På Mapper-siden (`/mapper`) kan du opprette, gi nytt navn til og slette mapper. Hver mappe vises med antall oppskrifter («3 oppskrifter», «1 oppskrift», «Ingen oppskrifter») og lenker til mappesiden (`/mapper/{id}`), som viser oppskriftene i mappen som kort, sist lagret først, eller «Mappen er tom.». En oppskrift ligger i maks én mappe, og bare oppskrifter i samlingen kan legges i en mappe. Oppskriftskortene under Oppskrifter viser mappenavnet etter kilden («Matprat · Hverdag»).
 
 - **Legge en oppskrift i mappe:** i lagre-linjen på en lagret oppskrift står en knapp ved siden av «Slett». Den viser mappenavnet, eller «Lagre i mappe» når oppskriften ikke ligger i noen mappe, og åpner dialogen «Lagre i mappe»: velg «Ingen mappe», en eksisterende mappe eller «Ny mappe» (med navnefelt). Etter lagring sier «Lagret i <navn>.» eller «Fjernet fra mappen.» fra i tre sekunder.
 - **Navn:** 1–40 tegn (telt som Unicode-tegn), blanke tegn i serie slås sammen, og navnet må være unikt uten hensyn til store og små bokstaver, også for æ, ø og å («ÆRLIG» er det samme som «ærlig»). Meldinger vises under feltet.
@@ -93,9 +95,9 @@ På Mapper-siden (`/mapper`) kan du opprette, gi nytt navn til og slette mapper.
 
 ## Favoritter
 
-Hver oppskrift i samlingen har et hjerte. Trykk på hjertet for å markere eller avmarkere oppskriften som favoritt; oppskriften åpnes ikke. Hjertet står øverst til høyre på kortene i Samlingen, i mapper og i Favoritter, og først i lagre-linjen nederst på oppskriftssiden (ved siden av mappeknappen og «Slett»). Lagre-linjen sier «Lagt til i favoritter.» eller «Fjernet fra favoritter.» i tre sekunder. En oppskrift som ikke er lagret i samlingen har ikke hjerte; den må lagres først.
+Hver oppskrift i samlingen har et hjerte. Trykk på hjertet for å markere eller avmarkere oppskriften som favoritt; oppskriften åpnes ikke. Hjertet står øverst til høyre på kortene under Oppskrifter, i mapper og i Favoritter, og først i lagre-linjen nederst på oppskriftssiden (ved siden av mappeknappen og «Slett»). Lagre-linjen sier «Lagt til i favoritter.» eller «Fjernet fra favoritter.» i tre sekunder. En oppskrift som ikke er lagret i samlingen har ikke hjerte; den må lagres først.
 
-- **Favoritter-siden** (`/favoritter`) viser favorittene som kort i samme rutenett som Samlingen, sist lagret først, med mappenavnet i meta. Uten favoritter vises en tom-tilstand med «Gå til samlingen». Avmarkerer du en favoritt her, forsvinner kortet, endringen kunngjøres for skjermleser, og fokus flyttes til overskriften i stedet for å gå tapt.
+- **Favoritter-siden** (`/favoritter`) viser favorittene som kort i samme rutenett som Oppskrifter, sist lagret først, med mappenavnet i meta. Uten favoritter vises en tom-tilstand med «Gå til oppskriftene». Avmarkerer du en favoritt her, forsvinner kortet, endringen kunngjøres for skjermleser, og fokus flyttes til overskriften i stedet for å gå tapt.
 - **Hjerteknappen** er en av/på-knapp (`aria-pressed`) med en fast etikett («Favoritt: Pannekaker»). Fylt hjerte betyr favoritt og omriss betyr ikke, så tilstanden bæres ikke av farge alene. Hjertet skifter med en gang og rulles tilbake med en melding hvis lagringen feiler. Trykker du flere ganger raskt, sendes kallene ett om gangen, og det siste trykket vinner. Handlingen sender alltid en eksplisitt verdi («sett til favoritt»), aldri «bytt», så to faner kan ikke snu feil vei.
 - Favoritt er uavhengig av mappe: å bytte eller slette en mappe, redigere oppskriften eller lagre den på nytt beholder favoritten. Å markere eller avmarkere endrer ikke `updatedAt`, så avkrysning og valgt antall står. Sletter du oppskriften, forsvinner favoritten med den. Egen favorittrekkefølge, søk og filter er ikke med.
 - **Datamodell:** kolonnen `recipes.is_favorite` (heltall, `NOT NULL DEFAULT 0`). Migrasjonen `drizzle/0003_favorites.sql` er en ren `ALTER TABLE ... ADD COLUMN`; eksisterende oppskrifter får 0, og den kan kjøres på nytt.

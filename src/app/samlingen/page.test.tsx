@@ -94,9 +94,9 @@ describe("/samlingen", () => {
   it("har overskriften utenfor Suspense og en reservetekst", async () => {
     const { heading, fallback } = await renderPage();
     render(heading);
-    expect(screen.getByRole("heading", { level: 1, name: "Samlingen" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Oppskrifter" })).toBeInTheDocument();
     render(fallback);
-    expect(screen.getByText("Henter samlingen …")).toBeInTheDocument();
+    expect(screen.getByText("Henter oppskriftene …")).toBeInTheDocument();
   });
 
   it("kaller connection() før databasen leses (ikke ved bygging)", async () => {
@@ -192,6 +192,6 @@ describe("/samlingen", () => {
 
   it("kaster en feil til error.tsx når lesingen feiler, i stedet for å vise tom samling", async () => {
     state.forcedErrorKind = "unknown";
-    await expect(renderPage()).rejects.toThrow(/Kunne ikke hente samlingen \(unknown\)/);
+    await expect(renderPage()).rejects.toThrow(/Kunne ikke hente oppskriftene \(unknown\)/);
   });
 });

@@ -116,7 +116,7 @@ describe("FolderRow", () => {
     await user.click(screen.getByRole("button", { name: "Slett Hverdag" }));
     const dialog = screen.getByRole("dialog", { name: "Slette mappen?" });
     expect(dialog).toHaveAccessibleDescription(
-      /«Hverdag» slettes\. Oppskriftene i mappen blir liggende i samlingen, uten mappe\./,
+      /«Hverdag» slettes\. Oppskriftene i mappen blir liggende i Oppskrifter, uten mappe\./,
     );
     expect(within(dialog).getByRole("button", { name: "Avbryt" })).toHaveFocus();
     expect(onDelete).not.toHaveBeenCalled();

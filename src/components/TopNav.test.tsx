@@ -27,7 +27,7 @@ describe("TopNav", () => {
     const links = navLinks();
     expect(links.map((l) => l.textContent)).toEqual([
       "Importer",
-      "Samlingen",
+      "Oppskrifter",
       "Mapper",
       "Favoritter",
     ]);
@@ -41,7 +41,7 @@ describe("TopNav", () => {
 
   it.each([
     ["/", "Importer"],
-    ["/samlingen", "Samlingen"],
+    ["/samlingen", "Oppskrifter"],
     ["/mapper", "Mapper"],
     ["/mapper/3", "Mapper"],
     ["/favoritter", "Favoritter"],

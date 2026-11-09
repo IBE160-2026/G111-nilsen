@@ -6,7 +6,7 @@ import styles from "./TopNav.module.css";
 
 export const NAV_ITEMS = [
   { href: "/", label: "Importer" },
-  { href: "/samlingen", label: "Samlingen" },
+  { href: "/samlingen", label: "Oppskrifter" },
   { href: "/mapper", label: "Mapper" },
   { href: "/favoritter", label: "Favoritter" },
 ] as const;

@@ -99,7 +99,7 @@ describe("/mapper", () => {
     const empty = screen.getByRole("heading", { level: 2, name: "Du har ingen mapper ennå." });
     expect(form.compareDocumentPosition(empty) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getByRole("button", { name: "Opprett mappe" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Gå til samlingen" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Gå til oppskriftene" })).toHaveAttribute(
       "href",
       "/samlingen",
     );

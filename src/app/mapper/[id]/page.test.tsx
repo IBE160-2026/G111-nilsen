@@ -109,13 +109,13 @@ describe("/mapper/[id]", () => {
     );
   });
 
-  it("tom mappe: «Mappen er tom.» med forklaring og «Gå til samlingen»", async () => {
+  it("tom mappe: «Mappen er tom.» med forklaring og «Gå til oppskriftene»", async () => {
     createFolder("Tom", state.db!);
     render(await renderPage("1"));
     expect(screen.getByRole("heading", { level: 1, name: "Tom" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "Mappen er tom." })).toBeInTheDocument();
     expect(screen.getByText("Legg oppskrifter i mappen fra oppskriftssiden.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Gå til samlingen" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Gå til oppskriftene" })).toHaveAttribute(
       "href",
       "/samlingen",
     );
