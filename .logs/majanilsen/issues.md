@@ -48,3 +48,6 @@
 - [ ] 2026-11-09 [story-3-4](984-2026-11-09-20-55-00-story-3-4-favoritter.md) — avgjør om adressen /samlingen skal bli /oppskrifter (menyen heter nå Oppskrifter)
 - [ ] 2026-11-09 [story-2-1](983-2026-11-09-21-35-00-story-2-1-les-oppskriftsdata.md) — kjør npm test på Macen og bekreft grønn suite (ytelsestestene tar ca. 20 s)
 - [ ] 2026-11-09 [story-2-1](983-2026-11-09-21-35-00-story-2-1-les-oppskriftsdata.md) — utsatt: tomt skall som første Recipe, Result/AppError i domenet, servings null i 2.2/2.4 (deferred-work.md)
+- [ ] 2026-11-09 [story-2-2](982-2026-11-09-22-40-00-story-2-2-importer-fra-lenke.md) — test import i nettleseren på Macen: `IMPORT_SOURCE=fixtures npm run dev` (lenker fra test/fixtures/sources.md), deretter ekte lenker (Matprat, Godt.no); feilmeldinger, 360 og 1280 px, lys og mørk, 200 % zoom
+- [ ] 2026-11-09 [story-2-2](982-2026-11-09-22-40-00-story-2-2-importer-fra-lenke.md) — kjør npm test på Macen og bekreft 2118 grønne
+- [ ] 2026-11-09 [story-2-2](982-2026-11-09-22-40-00-story-2-2-importer-fra-lenke.md) — utsatt: portbegrensning, prosentkoding, redirect-aliaser, indeks på source_url, DNS-tidsavbrudd, samtidighetsgrense (deferred-work.md)
