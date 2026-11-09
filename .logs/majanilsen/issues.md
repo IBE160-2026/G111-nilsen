@@ -45,3 +45,4 @@
 - [ ] 2026-11-09 [story-3-3](985-2026-11-09-18-20-00-story-3-3-mapper.md) — start dev-serveren på nytt og kontroller at /mapper og Samlingen virker etter issue 008
 - [ ] 2026-11-09 [story-3-4](984-2026-11-09-20-55-00-story-3-4-favoritter.md) — test favoritter i nettleseren på Macen (360 og 1280 px, lys og mørk): hjerte på kort og i lagre-linjen, avmarkering i Favoritter (kort forsvinner, fokus, melding), tom-tilstand, tilbake fra oppskrift, 200 % zoom
 - [ ] 2026-11-09 [story-3-4](984-2026-11-09-20-55-00-story-3-4-favoritter.md) — utsatt: feilmelding på kort, ekte-nettleser-test for hjerte, hjerte uten ramme i lagre-linjen, kall i kø (deferred-work.md)
+- [ ] 2026-11-09 [story-3-4](984-2026-11-09-20-55-00-story-3-4-favoritter.md) — avgjør om adressen /samlingen skal bli /oppskrifter (menyen heter nå Oppskrifter)
