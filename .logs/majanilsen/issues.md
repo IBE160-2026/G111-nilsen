@@ -26,3 +26,5 @@
 - [ ] 2026-11-04 [story-1-1](994-2026-11-04-20-02-04-story-1-1-oppsett.md) — avklar rekkefølge på forslag på oppskriftssiden (PRD vs EXPERIENCE) før Epic 4
 - [x] 2026-11-04 [story-1-2](993-2026-11-04-20-17-05-story-1-2-tolking.md) — avgjør avrunding av g/ml under 100 før Story 1.3 (PRD §9.4) (løst 2026-11-04: hele tall)
 - [ ] 2026-11-09 [story-1-3](992-2026-11-09-09-33-25-story-1-3-skalering.md) — Story 1.5: vis enheten slik den står i oppskriften og behold «ca.» fra originalen
+- [ ] 2026-11-09 [story-1-4](991-2026-11-09-10-08-43-story-1-4-manuell-innlegging.md) — test skjemaet på /ny i nettleseren på Macen og ta skjermbilde på 360 px
+- [ ] 2026-11-09 [story-1-4](991-2026-11-09-10-08-43-story-1-4-manuell-innlegging.md) — Story 1.5: sidetittel fra oppskriften og ekte 404-status
