@@ -1,8 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useEffect, useRef } from "react";
 import type { ManualRecipeFormState } from "@/app/ny/actions";
-import { MANUAL_RECIPE_FIELDS, type ManualRecipeField } from "@/app/ny/form-fields";
+import {
+  MANUAL_RECIPE_FIELDS,
+  type ManualRecipeField,
+  type ManualRecipeValues,
+} from "@/app/ny/form-fields";
+import { editRecipeMessages } from "@/lib/messages";
 import styles from "./ManualRecipeForm.module.css";
 
 type FormAction = (
@@ -18,10 +24,26 @@ export const initialManualRecipeState: ManualRecipeFormState = {
 /**
  * Skjemaet «Legg inn selv». Feltene er ukontrollerte med `defaultValue` fra
  * action-tilstanden, så skrevne verdier beholdes når serveren svarer med feil.
- * Ved feil flyttes fokus til første felt med feil (UX-DR16, UX-DR17).
+ * Ved feil flyttes fokus til første felt med feil (UX-DR16, UX-DR17). Redigering
+ * gjenbruker skjemaet med startverdier, egen knappetekst og en «Avbryt»-lenke.
  */
-export default function ManualRecipeForm({ action }: { action: FormAction }) {
-  const [state, formAction, pending] = useActionState(action, initialManualRecipeState);
+export default function ManualRecipeForm({
+  action,
+  initialValues,
+  submitLabel = "Lagre oppskrift",
+  cancelHref,
+}: {
+  action: FormAction;
+  initialValues?: ManualRecipeValues;
+  submitLabel?: string;
+  cancelHref?: string;
+}) {
+  const [state, formAction, pending] = useActionState(
+    action,
+    initialValues
+      ? { ...initialManualRecipeState, values: initialValues }
+      : initialManualRecipeState,
+  );
   const formRef = useRef<HTMLFormElement>(null);
   const formErrorRef = useRef<HTMLDivElement>(null);
 
@@ -118,10 +140,15 @@ export default function ManualRecipeForm({ action }: { action: FormAction }) {
         {state.formError ? <p className={styles.error}>{state.formError}</p> : null}
       </div>
 
-      <div>
+      <div className={styles.actions}>
         <button type="submit" className={styles.submit} disabled={pending}>
-          Lagre oppskrift
+          {submitLabel}
         </button>
+        {cancelHref ? (
+          <Link href={cancelHref} className={styles.cancel}>
+            {editRecipeMessages.cancel}
+          </Link>
+        ) : null}
       </div>
     </form>
   );

@@ -1,9 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { manualRecipeFieldInvalid, messageFor } from "@/lib/messages";
 import { createManualRecipe } from "@/server/services/recipe-service";
 import type { ManualRecipeFieldErrors, ManualRecipeValues } from "./form-fields";
+import { formStateForError, formStateForUnexpectedError } from "./form-errors";
 import { validateManualRecipe, valuesFromFormData } from "./manual-recipe-schema";
 
 export type ManualRecipeFormState = {
@@ -34,24 +34,11 @@ export async function saveManualRecipe(
       ingredients: validated.data.ingredients,
       steps: validated.data.steps,
     });
-    if (!result.ok) {
-      const field = result.error.detail;
-      if (
-        result.error.kind === "validation" &&
-        field &&
-        Object.hasOwn(manualRecipeFieldInvalid, field)
-      ) {
-        const key = field as keyof typeof manualRecipeFieldInvalid;
-        return { fieldErrors: { [key]: manualRecipeFieldInvalid[key] }, values };
-      }
-      const message = messageFor(result.error.kind);
-      return { fieldErrors: {}, values, formError: `${message.title} ${message.body}` };
-    }
+    if (!result.ok) return formStateForError(result.error, values);
     id = result.value.id;
   } catch (error) {
     console.error("Kunne ikke lagre oppskriften", error);
-    const message = messageFor(undefined);
-    return { fieldErrors: {}, values, formError: `${message.title} ${message.body}` };
+    return formStateForUnexpectedError(values);
   }
 
   // redirect() kaster et kontrollflytunntak og må ligge utenfor try/catch.

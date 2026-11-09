@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createTestDb } from "../db/client";
-import { createManualRecipe, getRecipe, type ManualRecipeInput } from "./recipe-service";
+import {
+  createManualRecipe,
+  getRecipe,
+  updateManualRecipe,
+  type ManualRecipeInput,
+} from "./recipe-service";
 
 const input: ManualRecipeInput = {
   title: "Pannekaker",
@@ -135,5 +140,114 @@ describe("recipe-service", () => {
 
   it.each([999999, 0, -1, 1.5, Number.NaN])("Ukjent oppskrift: id %s gir not_found", (id) => {
     expect(getRecipe(id, createTestDb())).toEqual({ ok: false, error: { kind: "not_found" } });
+  });
+});
+
+describe("updateManualRecipe", () => {
+  function created(values: Partial<ManualRecipeInput> = {}) {
+    const db = createTestDb();
+    const result = createManualRecipe(
+      { ...input, ingredients: ["0,5 ts salt", "3 egg"], ...values },
+      db,
+    );
+    if (!result.ok) throw new Error("kunne ikke lagre");
+    return { db, id: result.value.id };
+  }
+
+  function read(db: ReturnType<typeof createTestDb>, id: number) {
+    const result = getRecipe(id, db);
+    if (!result.ok) throw new Error("fant ikke oppskriften");
+    return result.value;
+  }
+
+  it("Lagre endret ingrediens: «0,5 ts salt» → «1 ts salt» tolkes på nytt", () => {
+    const { db, id } = created();
+    expect(updateManualRecipe(id, { ...input, ingredients: ["1 ts salt", "3 egg"] }, db)).toEqual({
+      ok: true,
+      value: { id },
+    });
+    const [salt] = read(db, id).ingredients;
+    expect(salt).toMatchObject({ original: "1 ts salt", quantity: { min: 1 }, unit: "ts" });
+  });
+
+  it("Fjern «Tips» fra steg: oppskriften får ett steg færre", () => {
+    const { db, id } = created({ steps: ["Visp.", "Stek.", "Tips: bruk smør."] });
+    expect(read(db, id).steps).toHaveLength(3);
+    updateManualRecipe(id, { ...input, steps: ["Visp.", "Stek."] }, db);
+    expect(read(db, id).steps.map((s) => s.text)).toEqual(["Visp.", "Stek."]);
+  });
+
+  it("Endre porsjoner: 4 → 6 nullstiller selectedServings", () => {
+    const { db, id } = created();
+    db.$client.prepare("update recipes set selected_servings = 8 where id = ?").run(id);
+    updateManualRecipe(id, { ...input, servings: 6 }, db);
+    expect(read(db, id)).toMatchObject({ originalServings: 6, selectedServings: null });
+  });
+
+  it("Uendret: samme innhold, updatedAt oppdatert, resten uendret", () => {
+    const { db, id } = created();
+    const before = read(db, id);
+    updateManualRecipe(id, { ...input, ingredients: ["0,5 ts salt", "3 egg"] }, db);
+    const after = read(db, id);
+    expect(after.updatedAt >= before.updatedAt).toBe(true);
+    expect({ ...after, updatedAt: "", ingredients: [], steps: [] }).toEqual({
+      ...before,
+      updatedAt: "",
+      ingredients: [],
+      steps: [],
+    });
+    expect(after.ingredients.map((l) => l.original)).toEqual(
+      before.ingredients.map((l) => l.original),
+    );
+    expect(after.steps.map((s) => s.text)).toEqual(before.steps.map((s) => s.text));
+  });
+
+  it("beholder kilde, savedAt og createdAt", () => {
+    const { db, id } = created();
+    db.$client
+      .prepare(
+        "update recipes set source_url = 'https://a.no/x', source_name = 'A', saved_at = 'nå' where id = ?",
+      )
+      .run(id);
+    const before = read(db, id);
+    updateManualRecipe(id, { ...input, title: "Nytt navn" }, db);
+    expect(read(db, id)).toMatchObject({
+      title: "Nytt navn",
+      sourceUrl: "https://a.no/x",
+      sourceName: "A",
+      savedAt: "nå",
+      createdAt: before.createdAt,
+    });
+  });
+
+  it.each<[string, Partial<ManualRecipeInput>, string]>([
+    ["tom tittel", { title: "  " }, "title"],
+    ["ugyldig antall", { servings: 0 }, "servings"],
+    ["tom ingrediensliste", { ingredients: [" "] }, "ingredients"],
+    ["for langt steg", { steps: ["a".repeat(2001)] }, "steps"],
+  ])("%s gir validation og lagrer ingenting", (_, change, field) => {
+    const { db, id } = created();
+    const before = read(db, id);
+    expect(updateManualRecipe(id, { ...input, ...change }, db)).toEqual({
+      ok: false,
+      error: { kind: "validation", detail: field },
+    });
+    expect(read(db, id)).toEqual(before);
+  });
+
+  it.each([999999, 0, -1, 1.5, Number.NaN])("ukjent eller ugyldig id %s gir not_found", (id) => {
+    const db = createTestDb();
+    expect(updateManualRecipe(id, input, db)).toEqual({ ok: false, error: { kind: "not_found" } });
+    expect(count(db, "recipes")).toBe(0);
+  });
+
+  it("databasefeil midt i: oppskriften er uendret og feilen kastes", () => {
+    const { db, id } = created();
+    const before = read(db, id);
+    db.$client.exec(
+      "create trigger fail_steps before insert on steps begin select raise(abort, 'feil'); end",
+    );
+    expect(() => updateManualRecipe(id, { ...input, title: "Annet" }, db)).toThrow();
+    expect(read(db, id)).toEqual(before);
   });
 });

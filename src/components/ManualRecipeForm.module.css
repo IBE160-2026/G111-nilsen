@@ -78,3 +78,20 @@
   opacity: 0.6;
   cursor: progress;
 }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Tekstlenke, ikke primærhandling. */
+.cancel {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-target-min);
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-accent);
+  font-weight: 600;
+}

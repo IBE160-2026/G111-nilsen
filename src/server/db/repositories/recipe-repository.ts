@@ -74,6 +74,78 @@ export function insertRecipe(db: Db, recipe: NewRecipe): number {
   });
 }
 
+/** Feltene en redigering endrer. Kilde, mappe, `savedAt`, `createdAt` og `id` røres ikke. */
+export type RecipeUpdate = {
+  title: string;
+  originalServings: number | null;
+  updatedAt: string;
+  ingredients: NewIngredientLine[];
+  steps: NewStep[];
+};
+
+/**
+ * Erstatter tittel, porsjonsantall, ingredienslinjer og steg i én transaksjon.
+ * Endres `originalServings`, nullstilles `selectedServings`, siden et tidligere valgt
+ * antall hører til den gamle oppskriften. Feiler noe, rulles alt tilbake.
+ * Returnerer `false` når id-en ikke finnes (ingenting er endret).
+ */
+export function updateRecipe(db: Db, id: number, data: RecipeUpdate): boolean {
+  return db.transaction((tx) => {
+    const current = tx
+      .select({ originalServings: recipes.originalServings })
+      .from(recipes)
+      .where(eq(recipes.id, id))
+      .get();
+    if (!current) return false;
+
+    tx.update(recipes)
+      .set({
+        title: data.title,
+        originalServings: data.originalServings,
+        updatedAt: data.updatedAt,
+        ...(current.originalServings !== data.originalServings ? { selectedServings: null } : {}),
+      })
+      .where(eq(recipes.id, id))
+      .run();
+
+    tx.delete(ingredientLines).where(eq(ingredientLines.recipeId, id)).run();
+    tx.delete(steps).where(eq(steps.recipeId, id)).run();
+
+    if (data.ingredients.length > 0) {
+      tx.insert(ingredientLines)
+        .values(
+          data.ingredients.map((line) => ({
+            recipeId: id,
+            position: line.position,
+            section: line.section,
+            originalText: line.original,
+            quantityMin: line.quantity?.min ?? null,
+            quantityMax: line.quantity?.max ?? null,
+            unit: line.unit,
+            name: line.name,
+            parseable: line.parseable,
+          })),
+        )
+        .run();
+    }
+
+    if (data.steps.length > 0) {
+      tx.insert(steps)
+        .values(
+          data.steps.map((step) => ({
+            recipeId: id,
+            position: step.position,
+            section: step.section,
+            text: step.text,
+          })),
+        )
+        .run();
+    }
+
+    return true;
+  });
+}
+
 function toQuantity(min: number | null, max: number | null): Quantity | null {
   if (min === null) return null;
   return max === null ? { min } : { min, max };

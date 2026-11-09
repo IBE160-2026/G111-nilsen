@@ -11,6 +11,24 @@
   gap: var(--space-2);
 }
 
+.titleRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+/* Tekstlenke ved tittelen, ikke primærhandling; minst 44 px høy. */
+.edit {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-target-min);
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
 .meta {
   color: var(--color-ink-secondary);
   font-size: var(--type-meta-size);

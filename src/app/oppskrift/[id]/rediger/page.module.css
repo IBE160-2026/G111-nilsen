@@ -1,0 +1,21 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: 640px;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.lead {
+  color: var(--color-ink-secondary);
+}
+
+.loading {
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}

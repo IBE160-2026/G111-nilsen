@@ -2,7 +2,7 @@
 title: 'Story 3.5: Rediger en oppskrift'
 type: 'feature'
 created: '2026-11-09'
-status: 'in-progress'
+status: 'done'
 baseline_commit: '9ebc0fa'
 route: 'dispatch'
 review_loop_iteration: 0
@@ -70,12 +70,12 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [ ] `updateRecipe` i repository med transaksjon, test mot ekte in-memory SQLite (rollback ved feil, uendret kilde/savedAt/createdAt).
-- [ ] `updateManualRecipe` i service med tester (matrise over).
-- [ ] `ManualRecipeForm` med startverdier, knappetekst og «Avbryt»; eksisterende tester for `/ny` skal fortsatt passere.
-- [ ] Server Action og redigeringsside med forhåndsutfylling, 404 og fanetittel.
-- [ ] «Rediger»-lenke i `RecipeView` (testet).
-- [ ] README og deferred-work.
+- [x] `updateRecipe` i repository med transaksjon, test mot ekte in-memory SQLite (rollback ved feil, uendret kilde/savedAt/createdAt).
+- [x] `updateManualRecipe` i service med tester (matrise over).
+- [x] `ManualRecipeForm` med startverdier, knappetekst og «Avbryt»; eksisterende tester for `/ny` skal fortsatt passere.
+- [x] Server Action og redigeringsside med forhåndsutfylling, 404 og fanetittel.
+- [x] «Rediger»-lenke i `RecipeView` (testet).
+- [x] README og deferred-work.
 
 **Acceptance Criteria:**
 - Given en lagret oppskrift, when jeg trykker «Rediger», then vises samme skjema forhåndsutfylt med tittel, antall personer, ingredienser og steg (FR-18).
@@ -84,6 +84,18 @@ context:
 - Alle eksisterende tester passerer; lint, typecheck, format:check og build er grønne; `package-lock.json` uendret.
 
 ## Implementation Notes
+
+Implementert i commit «Story 3.5: rediger oppskrift» (arbeidskopi, ikke pushet).
+
+- **Repository:** `updateRecipe(db, id, data)` i én transaksjon: leser gjeldende `originalServings`, oppdaterer tittel, antall og `updatedAt`, sletter og setter inn `ingredient_lines` og `steps`. `selectedServings` settes til `null` bare når `originalServings` endres. `id`, kilde, `savedAt` og `createdAt` røres ikke. Returnerer `false` for ukjent id; feil kastes og transaksjonen rulles tilbake.
+- **Service:** `updateManualRecipe(id, input, db)`. Valideringen og byggingen av tolkede linjer og steg er trukket ut i `buildContent`, som både `createManualRecipe` og `updateManualRecipe` bruker. Ugyldig id (ikke positivt heltall) og ukjent id gir `not_found`.
+- **Skjema:** `ManualRecipeForm` har valgfrie `initialValues`, `submitLabel` (standard «Lagre oppskrift») og `cancelHref` («Avbryt» som lenke). `/ny` er uendret i oppførsel.
+- **Handling og side:** `saveRecipeEdits(id, previous, formData)` i `src/app/oppskrift/[id]/rediger/actions.ts`, bundet til id med `bind`. Feilmapping (felt, `messageFor`, reservemelding) er flyttet til `src/app/ny/form-errors.ts` og deles med `saveManualRecipe`. Siden følger Cache Components-mønsteret fra oppskriftssiden (`params` og `connection()` i Suspense, `cache` for oppslaget) med `generateMetadata` («Rediger · <tittel>», ukjent id «Rediger»). Startverdiene bygges i `initial-values.ts` (eget modul fordi sidefiler ikke kan eksportere hjelpefunksjoner).
+- **Visning:** «Rediger» er en tekstlenke (aksentfarge, 44 px høy) ved tittelen i `RecipeView`. Tekstene ligger i `editRecipeMessages` i `src/lib/messages.ts` og er med i testen mot utropstegn.
+- **Dokumenter:** README har et avsnitt om redigering, og `deferred-work.md` noterer at kilde, mappe, favoritt og seksjoner ikke kan redigeres ennå.
+- **Avvik:** ingen fra spesifikasjonen. Merk at ingredienser og steg lagres uten seksjon ved redigering, siden skjemaet bare har én tekstboks per felt (importerte oppskrifter med seksjoner kommer først i Epic 2).
+- **Tester:** repository (7 nye, blant annet tilbakerulling og uendret kilde/`savedAt`/`createdAt`), service (matrisen i spesifikasjonen, inkludert databasefeil midt i), handling, redigeringsside (forhåndsutfylling, tomt antall, 404, fanetittel, andre feil videre til `error.tsx`), skjema og `RecipeView`. Ingen nye pakker; `package-lock.json` er uendret.
+- **Ikke testet i ekte nettleser:** klikk på «Rediger» og «Avbryt», fokusflytt ved feil, utseende og trykkflater (44 px), mørk palett og at redirect etter lagring faktisk skjer i Next. Alt dette er bare dekket i jsdom og med mockede `redirect`/`notFound`.
 
 ## Spec Change Log
 

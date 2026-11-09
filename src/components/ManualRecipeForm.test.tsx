@@ -105,4 +105,51 @@ describe("ManualRecipeForm", () => {
     await waitFor(() => expect(region).toHaveFocus());
     expect(screen.getByLabelText("Tittel")).toHaveValue("A");
   });
+
+  it("uten ekstra props: ingen «Avbryt»-lenke og tomme felt (som i /ny)", () => {
+    render(<ManualRecipeForm action={failingAction({})} />);
+    expect(screen.queryByRole("link", { name: "Avbryt" })).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Tittel")).toHaveValue("");
+  });
+
+  it("med startverdier, knappetekst og cancelHref (redigering)", () => {
+    render(
+      <ManualRecipeForm
+        action={failingAction({})}
+        initialValues={{
+          title: "Vafler",
+          servings: "6",
+          ingredients: "1 egg\n2 dl melk",
+          steps: "Rør.",
+        }}
+        submitLabel="Lagre endringer"
+        cancelHref="/oppskrift/7"
+      />,
+    );
+    expect(screen.getByLabelText("Tittel")).toHaveValue("Vafler");
+    expect(screen.getByLabelText("Antall personer")).toHaveValue("6");
+    expect(screen.getByLabelText("Ingredienser")).toHaveValue("1 egg\n2 dl melk");
+    expect(screen.getByLabelText("Steg (valgfritt)")).toHaveValue("Rør.");
+    expect(screen.getByRole("button", { name: "Lagre endringer" })).toBeEnabled();
+    expect(screen.queryByRole("button", { name: "Lagre oppskrift" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Avbryt" })).toHaveAttribute("href", "/oppskrift/7");
+  });
+
+  it("redigering: ved feil beholdes de skrevne verdiene og fokus flyttes til første feil", async () => {
+    const user = userEvent.setup();
+    render(
+      <ManualRecipeForm
+        action={failingAction({ title: "Skriv en tittel." })}
+        initialValues={{ title: "Vafler", servings: "6", ingredients: "1 egg", steps: "" }}
+        submitLabel="Lagre endringer"
+        cancelHref="/oppskrift/7"
+      />,
+    );
+    await user.clear(screen.getByLabelText("Tittel"));
+    await user.type(screen.getByLabelText("Antall personer"), "0");
+    await user.click(screen.getByRole("button", { name: "Lagre endringer" }));
+    await waitFor(() => expect(screen.getByLabelText("Tittel")).toHaveFocus());
+    expect(screen.getByLabelText("Tittel")).toHaveValue("");
+    expect(screen.getByLabelText("Antall personer")).toHaveValue("60");
+  });
 });

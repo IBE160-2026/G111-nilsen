@@ -6,6 +6,7 @@ import { getDb, type Db } from "../db/client";
 import {
   findRecipeById,
   insertRecipe,
+  updateRecipe,
   type NewIngredientLine,
   type NewStep,
 } from "../db/repositories/recipe-repository";
@@ -50,6 +51,31 @@ function invalidField(
   return null;
 }
 
+type RecipeContent = { title: string; ingredients: NewIngredientLine[]; steps: NewStep[] };
+
+/**
+ * Validerer og bygger innholdet som skal lagres: tittel, tolkede ingredienslinjer og
+ * steg. Brukes både ved ny oppskrift og ved redigering, så reglene er de samme.
+ */
+function buildContent(input: ManualRecipeInput): Result<RecipeContent> {
+  const title = input.title.trim();
+  const ingredients = linesOf(input.ingredients);
+  const stepTexts = linesOf(input.steps);
+
+  const invalid = invalidField(title, input.servings, ingredients, stepTexts);
+  if (invalid) return err(appError("validation", invalid));
+
+  return ok({
+    title,
+    ingredients: ingredients.map((text, position) => ({
+      ...parseLine(text),
+      position,
+      section: null,
+    })),
+    steps: stepTexts.map((text, position) => ({ text, position, section: null })),
+  });
+}
+
 /**
  * Lagrer en oppskrift brukeren har skrevet selv. Hver ingredienslinje tolkes med
  * `parseLine` og lagres med originaltekst (trimmet) og tolkede felt (AD-2).
@@ -59,23 +85,12 @@ export function createManualRecipe(
   input: ManualRecipeInput,
   db: Db = getDb(),
 ): Result<{ id: number }> {
-  const title = input.title.trim();
-  const ingredients = linesOf(input.ingredients);
-  const stepTexts = linesOf(input.steps);
-
-  const invalid = invalidField(title, input.servings, ingredients, stepTexts);
-  if (invalid) return err(appError("validation", invalid));
-
-  const lines: NewIngredientLine[] = ingredients.map((text, position) => ({
-    ...parseLine(text),
-    position,
-    section: null,
-  }));
-  const steps: NewStep[] = stepTexts.map((text, position) => ({ text, position, section: null }));
+  const content = buildContent(input);
+  if (!content.ok) return content;
 
   const now = new Date().toISOString();
   const id = insertRecipe(db, {
-    title,
+    title: content.value.title,
     sourceUrl: null,
     sourceName: null,
     originalServings: input.servings,
@@ -83,10 +98,35 @@ export function createManualRecipe(
     savedAt: null,
     createdAt: now,
     updatedAt: now,
-    ingredients: lines,
-    steps,
+    ingredients: content.value.ingredients,
+    steps: content.value.steps,
   });
   return ok({ id });
+}
+
+/**
+ * Lagrer redigeringer av en oppskrift (Story 3.5). Samme validering og tolking som ved
+ * ny oppskrift; ingredienser og steg erstattes. Kilde og samlingsstatus røres ikke.
+ * Ukjent eller ugyldig id gir `not_found`, og ingenting lagres.
+ */
+export function updateManualRecipe(
+  id: number,
+  input: ManualRecipeInput,
+  db: Db = getDb(),
+): Result<{ id: number }> {
+  if (!Number.isSafeInteger(id) || id < 1) return err(appError("not_found"));
+
+  const content = buildContent(input);
+  if (!content.ok) return content;
+
+  const updated = updateRecipe(db, id, {
+    title: content.value.title,
+    originalServings: input.servings,
+    updatedAt: new Date().toISOString(),
+    ingredients: content.value.ingredients,
+    steps: content.value.steps,
+  });
+  return updated ? ok({ id }) : err(appError("not_found"));
 }
 
 /** Henter en oppskrift, eller `not_found` når id-en ikke finnes. */

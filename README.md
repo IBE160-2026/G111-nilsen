@@ -12,7 +12,7 @@ Repoet inneholder gruppens applikasjon og dokumentasjon av utvikling, testing og
 
 **RecipeMate** er en matlagingsassistent for oppskrifter fra nettet. Du limer inn en lenke (eller skriver inn oppskriften selv), og appen viser oppskriften i et fast og ryddig format der du kan velge antall personer, slik at alle mengder regnes om med en gang. Oppskrifter kan lagres i en samling, i mapper og som favoritter.
 
-Status: grunnmuren er på plass (Story 1.1–1.3), og du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`). Oppskriften lagres i en lokal SQLite-database og vises på `/oppskrift/{id}`. Funksjonene bygges ut story for story.
+Status: grunnmuren er på plass (Story 1.1–1.3), og du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`). Oppskriften lagres i en lokal SQLite-database og vises på `/oppskrift/{id}`. Du kan rette en oppskrift med «Rediger» (se under). Funksjonene bygges ut story for story.
 
 ## Krav
 
@@ -36,6 +36,15 @@ npm run dev      # utviklingsserver på http://localhost:3000
 npm run build    # produksjonsbygg
 npm start        # kjør produksjonsbygget
 ```
+
+## Redigere en oppskrift
+
+På oppskriftssiden (`/oppskrift/{id}`) står «Rediger» ved tittelen. Den åpner `/oppskrift/{id}/rediger` med samme skjema som «Legg inn selv», forhåndsutfylt med tittel, antall personer, ingredienser (én per linje, slik de ble skrevet) og steg. «Lagre endringer» bruker samme validering og tolking som ny oppskrift, erstatter ingredienser og steg i én databasetransaksjon og sender deg tilbake til oppskriften. «Avbryt» går tilbake uten å endre noe.
+
+- Endres antall personer, nullstilles et tidligere valgt antall. Kilde og samlingsstatus røres ikke.
+- Redigering virker på alle oppskrifter. Kilde, mappe, favoritt og seksjonsoverskrifter kan ikke redigeres ennå.
+- Koden ligger i `src/app/oppskrift/[id]/rediger/` (side og Server Action), `updateManualRecipe` i `src/server/services/recipe-service.ts` og `updateRecipe` i `src/server/db/repositories/recipe-repository.ts`.
+- Testes med `npm test`: repository og tjeneste mot en ekte SQLite-database i minnet (blant annet tilbakerulling ved feil midt i oppdateringen), og skjema, side og handling med Testing Library.
 
 ## Database
 

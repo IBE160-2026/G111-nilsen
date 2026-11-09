@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { createTestDb } from "../client";
-import { findRecipeById, insertRecipe, type NewRecipe } from "./recipe-repository";
+import {
+  findRecipeById,
+  insertRecipe,
+  updateRecipe,
+  type NewRecipe,
+  type RecipeUpdate,
+} from "./recipe-repository";
 
 const base: NewRecipe = {
   title: "Pannekaker",
@@ -107,5 +113,101 @@ describe("recipe-repository", () => {
     db.$client.prepare("delete from recipes where id = ?").run(id);
     expect(count(db, "ingredient_lines")).toBe(0);
     expect(count(db, "steps")).toBe(0);
+  });
+
+  describe("updateRecipe", () => {
+    const update: RecipeUpdate = {
+      title: "Vafler",
+      originalServings: 6,
+      updatedAt: "2026-11-10T08:00:00.000Z",
+      ingredients: [
+        {
+          position: 0,
+          section: null,
+          original: "1 ts salt",
+          quantity: { min: 1 },
+          unit: "ts",
+          name: "salt",
+          parseable: true,
+        },
+      ],
+      steps: [{ position: 0, section: null, text: "Stek vaflene." }],
+    };
+
+    function saved() {
+      const db = createTestDb();
+      const id = insertRecipe(db, {
+        ...base,
+        sourceUrl: "https://www.matprat.no/x",
+        sourceName: "Matprat",
+        selectedServings: 8,
+        savedAt: "2026-11-09T11:00:00.000Z",
+      });
+      return { db, id };
+    }
+
+    it("erstatter tittel, antall, linjer og steg og setter updatedAt", () => {
+      const { db, id } = saved();
+      expect(updateRecipe(db, id, update)).toBe(true);
+      const recipe = findRecipeById(db, id);
+      expect(recipe).toMatchObject({ title: "Vafler", originalServings: 6 });
+      expect(recipe?.updatedAt).toBe("2026-11-10T08:00:00.000Z");
+      expect(recipe?.ingredients.map((l) => [l.original, l.quantity, l.unit])).toEqual([
+        ["1 ts salt", { min: 1 }, "ts"],
+      ]);
+      expect(recipe?.steps.map((s) => s.text)).toEqual(["Stek vaflene."]);
+      expect(count(db, "ingredient_lines")).toBe(1);
+      expect(count(db, "steps")).toBe(1);
+    });
+
+    it("lar id, kilde, savedAt og createdAt stå uendret", () => {
+      const { db, id } = saved();
+      updateRecipe(db, id, update);
+      expect(findRecipeById(db, id)).toMatchObject({
+        id,
+        sourceUrl: "https://www.matprat.no/x",
+        sourceName: "Matprat",
+        savedAt: "2026-11-09T11:00:00.000Z",
+        createdAt: "2026-11-09T10:00:00.000Z",
+      });
+    });
+
+    it("nullstiller selectedServings når originalServings endres", () => {
+      const { db, id } = saved();
+      updateRecipe(db, id, update);
+      expect(findRecipeById(db, id)?.selectedServings).toBeNull();
+    });
+
+    it("beholder selectedServings når originalServings er uendret", () => {
+      const { db, id } = saved();
+      updateRecipe(db, id, { ...update, originalServings: 4 });
+      expect(findRecipeById(db, id)?.selectedServings).toBe(8);
+    });
+
+    it("kan fjerne alle steg", () => {
+      const { db, id } = saved();
+      updateRecipe(db, id, { ...update, steps: [] });
+      expect(findRecipeById(db, id)?.steps).toEqual([]);
+    });
+
+    it("returnerer false for ukjent id og endrer ingenting", () => {
+      const { db, id } = saved();
+      expect(updateRecipe(db, 999999, update)).toBe(false);
+      expect(findRecipeById(db, id)?.title).toBe("Pannekaker");
+      expect(count(db, "recipes")).toBe(1);
+    });
+
+    it("ruller tilbake alt når et steg feiler midt i oppdateringen", () => {
+      const { db, id } = saved();
+      const before = findRecipeById(db, id);
+      const broken = {
+        ...update,
+        steps: [{ position: 0, section: null, text: null as unknown as string }],
+      };
+      expect(() => updateRecipe(db, id, broken)).toThrow();
+      expect(findRecipeById(db, id)).toEqual(before);
+      expect(count(db, "ingredient_lines")).toBe(2);
+      expect(count(db, "steps")).toBe(2);
+    });
   });
 });

@@ -83,3 +83,13 @@ export const manualRecipeFieldInvalid = {
 export const servingStepperMessages = {
   invalid: `Skriv et helt tall fra ${LIMITS.servingsMin} til ${LIMITS.servingsMax}. Antallet er ikke endret.`,
 } as const;
+
+/** Tekster for redigering av en oppskrift (Story 3.5). */
+export const editRecipeMessages = {
+  editLink: "Rediger",
+  heading: "Rediger oppskriften",
+  lead: "Rett tittel, antall personer, ingredienser eller steg. Ingrediensene tolkes på nytt når du lagrer.",
+  submit: "Lagre endringer",
+  cancel: "Avbryt",
+  tabTitle: "Rediger",
+} as const;

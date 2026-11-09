@@ -88,6 +88,15 @@ describe("RecipeView", () => {
     ).toEqual(["Visp sammen.", "Stek."]);
   });
 
+  it("har en «Rediger»-lenke ved tittelen som peker til redigeringssiden", () => {
+    render(<RecipeView recipe={{ ...recipe, id: 7 }} />);
+    const link = screen.getByRole("link", { name: "Rediger" });
+    expect(link).toHaveAttribute("href", "/oppskrift/7/rediger");
+    const title = screen.getByRole("heading", { level: 1, name: "Pannekaker" });
+    expect(title.compareDocumentPosition(link) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByRole("article")).toContainElement(link);
+  });
+
   it("skjuler steg-kortet når oppskriften ikke har steg", () => {
     render(<RecipeView recipe={{ ...recipe, steps: [] }} />);
     expect(screen.queryByRole("heading", { name: "Slik gjør du" })).not.toBeInTheDocument();

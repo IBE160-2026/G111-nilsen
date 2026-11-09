@@ -1,4 +1,6 @@
+import Link from "next/link";
 import type { Recipe } from "@/domain";
+import { editRecipeMessages } from "@/lib/messages";
 import IngredientList from "./IngredientList";
 import styles from "./RecipeView.module.css";
 
@@ -26,7 +28,12 @@ export default function RecipeView({ recipe }: { recipe: Recipe }) {
   return (
     <article className={styles.root}>
       <header className={styles.header}>
-        <h1>{recipe.title}</h1>
+        <div className={styles.titleRow}>
+          <h1>{recipe.title}</h1>
+          <Link href={`/oppskrift/${recipe.id}/rediger`} className={styles.edit}>
+            {editRecipeMessages.editLink}
+          </Link>
+        </div>
         <p className={styles.meta}>{sourceLabel(recipe)}</p>
       </header>
 

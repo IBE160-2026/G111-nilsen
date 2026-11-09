@@ -27,3 +27,6 @@
 - source_spec: `spec-1-5-se-oppskrift-og-velg-antall.md`
   summary: Vis seksjonsoverskrifter i stegene (`Step.section`) slik ingrediensseksjoner vises.
   evidence: Story 2.1 beholder seksjonsnavn fra `HowToSection`, men oppskriftssiden viser stegene som én liste. Funn E5.
+- source_spec: `spec-3-5-rediger-oppskrift.md`
+  summary: Redigering av kilde, mappe, favoritt og seksjonsoverskrifter (ingredienser og steg) i redigeringsskjemaet.
+  evidence: Skjemaet i Story 3.5 har bare tittel, antall personer, ingredienser og steg. Ingredienser og steg lagres uten seksjon, så en oppskrift som er importert med seksjoner mister dem når den redigeres. Seksjoner kommer med Story 2.1 og senere, kilde og mapper med Epic 3–4.
