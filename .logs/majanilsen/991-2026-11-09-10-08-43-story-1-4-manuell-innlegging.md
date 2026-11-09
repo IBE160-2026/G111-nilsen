@@ -40,3 +40,19 @@ Manuell test av Story 1.4 i nettleseren: en pannekakeoppskrift kopiert fra tine.
 ### Åpne punkter
 - Pannekakeoppskriften må legges inn på nytt (lagrede data endres ikke).
 - Redigering av oppskrifter finnes ikke i PRD-en; avgjør om det skal inn (avdekket av «Tips»-linjene).
+
+## 2026-11-09 kl. 11:59 — majanilsen
+
+### Oppgave
+Maja fant ikke igjen oppskriften hun la inn, og ønsket redigering inn i Epic 3.
+
+### Plan
+- Avklare med Maja: rekkefølge 1 → 3 → 2 → 4 og at manuelle oppskrifter lagres rett i samlingen (begge valgt).
+- Oppdatere PRD, epics og arkitekturkart, og skrive endringsforslag.
+
+### Resultat
+- Commit `956db85`: PRD (FR-13, ny FR-18), epics.md (ny rekkefølge, Story 3.1 Se samlingen, 3.5 Rediger, duplikatsjekk til 2.2), [endringsforslag](../../_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-09.md), memlog.
+- Oppskriften finnes fortsatt på /oppskrift/1; listen kommer i Story 3.1.
+
+### Åpne punkter
+- Neste: Story 1.5 og 1.6, deretter Epic 3.
