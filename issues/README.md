@@ -18,3 +18,4 @@ Her dokumenterer vi feil og problemer som oppstår underveis i prosjektet, og hv
 | 002 | [npm-registeret er blokkert i KI-miljøet](002-npm-blokkert-i-ki-miljo.md) | Løst | 2026-11-04 | 2026-11-04 |
 | 003 | [iCloud ødela git og node_modules](003-icloud-odela-git-og-node-modules.md) | Løst | 2026-11-04 | 2026-11-09 |
 | 004 | [better-sqlite3 bygges fra kildekode ved `npm ci`](004-better-sqlite3-bygges-fra-kildekode.md) | Løst | 2026-11-09 | 2026-11-09 |
+| 005 | [Enhet klistret på navnet ved innliming](005-enhet-klistret-pa-navn-ved-innliming.md) | Løst | 2026-11-09 | 2026-11-09 |
