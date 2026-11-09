@@ -23,7 +23,8 @@ fetch visitnorway-farikal.html "https://www.visitnorway.no/aktiviteter-og-attrak
 fetch klikk-farikal.html "https://www.klikk.no/mat/spise/oppskrift-pa-farikal-2530170"
 fetch bbcgoodfood-lasagne.html "https://www.bbcgoodfoodme.com/recipes/classic-lasagne-0/"
 fetch northwild-kjottkaker.html "https://northwildkitchen.com/norwegian-brown-cheese-meatballs-kjottkaker-med-brunost/"
-# Legg til matprat.no og godt.no her:
-# fetch matprat-xxx.html "https://www.matprat.no/oppskrifter/..."
-# fetch godt-xxx.html "https://www.godt.no/oppskrifter/..."
+fetch matprat-rundstykker.html "https://www.matprat.no/oppskrifter/familien/rundstykker/"
+fetch matprat-enkel-brodoppskrift.html "https://www.matprat.no/oppskrifter/rask/enkel-brodoppskrift/"
+fetch godt-amerikanske-pannekaker.html "https://www.godt.no/oppskrifter/pannekaker-og-vafler/155/amerikanske-pannekaker"
+fetch godt-grove-middagspannekaker.html "https://www.godt.no/oppskrifter/pannekaker-og-vafler/8749/grove-middagspannekaker"
 echo "Ferdig. Recipe=0 betyr at siden ikke har JSON-LD-oppskrift i HTML-en vi fikk."
