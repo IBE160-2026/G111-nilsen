@@ -9,14 +9,10 @@
 }
 
 .steps {
+  list-style: none;
   margin: 0;
-  padding-left: var(--space-5);
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-}
-
-.steps li::marker {
-  font-weight: var(--type-quantity-weight);
-  color: var(--color-ink-secondary);
 }

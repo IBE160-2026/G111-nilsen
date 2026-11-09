@@ -8,6 +8,11 @@ type Props = {
   children: ReactNode;
   /** Ekstra klasse på `<li>`, for eksempel skillelinje mellom rader. */
   className?: string;
+  /**
+   * Synlig nummer foran boksen (stegnummer). Tegnes som et vanlig element inni labelen, så det
+   * er med på trykkflaten, og er skjult for skjermlesere (listen har allerede rekkefølgen).
+   */
+  marker?: ReactNode;
 };
 
 /**
@@ -16,10 +21,15 @@ type Props = {
  * boksen har fokus. Avkrysset vises med fylt boks, hake og gjennomstreking, ikke med farge alene.
  * Komponenten har ingen egen tilstand; forelderen eier avkrysningen.
  */
-export default function CheckRow({ checked, onToggle, children, className }: Props) {
+export default function CheckRow({ checked, onToggle, children, className, marker }: Props) {
   return (
     <li className={className ? `${styles.row} ${className}` : styles.row}>
       <label className={styles.label}>
+        {marker ? (
+          <span className={styles.marker} aria-hidden="true">
+            {marker}
+          </span>
+        ) : null}
         <input type="checkbox" className={styles.input} checked={checked} onChange={onToggle} />
         <span className={styles.content}>{children}</span>
       </label>

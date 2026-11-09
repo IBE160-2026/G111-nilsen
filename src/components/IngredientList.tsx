@@ -121,7 +121,7 @@ export default function IngredientList({ ingredients, originalServings: rawOrigi
                   {group.section}
                 </h3>
               ) : null}
-              <ul className={styles.lines} aria-labelledby={labelId}>
+              <ul className={styles.lines} aria-labelledby={labelId} role="list">
                 {group.lines.map((line) => (
                   <Line
                     key={line.id}

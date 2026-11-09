@@ -13,6 +13,16 @@
   cursor: pointer;
 }
 
+/* Stegnummer foran boksen: vanlig innhold, ikke ::marker, så det alltid ligger utenfor boksen. */
+.marker {
+  flex: none;
+  min-width: 1.75em;
+  text-align: right;
+  font-weight: var(--type-quantity-weight);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-secondary);
+}
+
 /* Den ekte boksen tegnes selv (appearance: none), så fokus, tastatur og skjermleser er native. */
 .input {
   appearance: none;

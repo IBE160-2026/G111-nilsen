@@ -29,7 +29,7 @@ describe("StepList", () => {
       within(list)
         .getAllByRole("listitem")
         .map((li) => li.textContent),
-    ).toEqual(["Finhakk løken", "Stek i panne.", "Server varmt."]);
+    ).toEqual(["1.Finhakk løken", "2.Stek i panne.", "3.Server varmt."]);
     for (const checkbox of within(card).getAllByRole("checkbox")) {
       expect(checkbox).not.toBeChecked();
     }
@@ -42,11 +42,23 @@ describe("StepList", () => {
     await user.click(screen.getByText("Finhakk løken"));
     expect(box("Finhakk løken")).toBeChecked();
     expect(box("Stek i panne.")).not.toBeChecked();
-    // Fortsatt tre listeelementer i en <ol>: nummeret er listemarkøren og endres ikke.
+    // Nummeret står igjen, også på det avkryssede steget.
+    expect(screen.getByText("1.")).toBeInTheDocument();
     expect(within(screen.getByRole("list")).getAllByRole("listitem")).toHaveLength(3);
     await user.click(screen.getByText("Finhakk løken"));
     expect(box("Finhakk løken")).not.toBeChecked();
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("nummeret er et eget element inni labelen: trykk på nummeret veksler steget, og det er ikke med i navnet", async () => {
+    const user = userEvent.setup();
+    render(<StepList steps={steps} />);
+    const number = screen.getByText("2.");
+    expect(number).toHaveAttribute("aria-hidden", "true");
+    expect(number.closest("label")).toBe(box("Stek i panne.").closest("label"));
+    await user.click(number);
+    expect(box("Stek i panne.")).toBeChecked();
+    expect(box("Finhakk løken")).not.toBeChecked();
   });
 
   it("tastatur: mellomrom veksler steget og fokus blir stående", async () => {

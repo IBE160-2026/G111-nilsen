@@ -86,7 +86,7 @@ describe("RecipeView", () => {
       within(list)
         .getAllByRole("listitem")
         .map((li) => li.textContent),
-    ).toEqual(["Visp sammen.", "Stek."]);
+    ).toEqual(["1.Visp sammen.", "2.Stek."]);
     // Hvert steg og hver ingrediens er en avkrysningsboks.
     expect(within(steps).getAllByRole("checkbox")).toHaveLength(2);
     expect(within(ingredients).getAllByRole("checkbox")).toHaveLength(3);
@@ -113,7 +113,7 @@ describe("RecipeView", () => {
       within(list)
         .getAllByRole("listitem")
         .map((li) => li.textContent),
-    ).toEqual(["Visp sammen.", "Stek."]);
+    ).toEqual(["1.Visp sammen.", "2.Stek."]);
   });
 
   it("viser ingen porsjonsvelger når oppskriften mangler opprinnelig antall", () => {

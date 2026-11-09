@@ -68,6 +68,24 @@ describe("CheckRow", () => {
     expect(box()).toHaveFocus();
   });
 
+  it("marker: nummeret ligger inni labelen, er skjult for skjermlesere og veksler raden", async () => {
+    const user = userEvent.setup();
+    render(
+      <ul>
+        <CheckRow checked={false} onToggle={() => {}} marker="3.">
+          Server varmt.
+        </CheckRow>
+      </ul>,
+    );
+    const number = screen.getByText("3.");
+    expect(number).toHaveAttribute("aria-hidden", "true");
+    expect(number.closest("label")).toContainElement(
+      screen.getByRole("checkbox", { name: "Server varmt." }),
+    );
+    await user.click(number);
+    expect(screen.getByRole("checkbox", { name: "Server varmt." })).not.toBeChecked();
+  });
+
   it("legger ekstra klasse på <li>", () => {
     render(
       <ul>

@@ -20,3 +20,4 @@ Her dokumenterer vi feil og problemer som oppstår underveis i prosjektet, og hv
 | 004 | [better-sqlite3 bygges fra kildekode ved `npm ci`](004-better-sqlite3-bygges-fra-kildekode.md) | Løst | 2026-11-09 | 2026-11-09 |
 | 005 | [Enhet klistret på navnet ved innliming](005-enhet-klistret-pa-navn-ved-innliming.md) | Løst | 2026-11-09 | 2026-11-09 |
 | 006 | [Kantfarge på kontroller var under kontrastkravet](006-kantfarge-pa-kontroller-under-kontrastkrav.md) | Løst | 2026-11-09 | 2026-11-09 |
+| 007 | [Stegnumrene havnet oppå boksene etter Rediger](007-stegnummer-over-boksene-etter-rediger.md) | Løst | 2026-11-09 | 2026-11-09 |

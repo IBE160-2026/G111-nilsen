@@ -8,7 +8,7 @@ import { useCheckedSet } from "./use-checked-set";
 /**
  * «Slik gjør du» (Story 1.6): nummererte steg, sortert på `position`, der hvert steg kan
  * krysses av. Avkrysningen er nøklet på steg-id i et eget sett, uavhengig av ingrediensene,
- * og lagres aldri. Nummeret er listemarkøren og blir stående når steget er avkrysset.
+ * og lagres aldri. Nummeret er et eget element foran boksen (ikke `::marker`) og blir stående når steget er avkrysset.
  */
 export default function StepList({ steps }: { steps: readonly Step[] }) {
   const { isChecked, toggle } = useCheckedSet();
@@ -17,11 +17,17 @@ export default function StepList({ steps }: { steps: readonly Step[] }) {
   return (
     <section className={styles.card} aria-labelledby="fremgangsmate">
       <h2 id="fremgangsmate">Slik gjør du</h2>
-      <ol className={styles.steps}>
+      {/* role="list": nettlesere kan ellers droppe listesemantikken når list-style er none. */}
+      <ol className={styles.steps} role="list">
         {[...steps]
           .sort((a, b) => a.position - b.position)
-          .map((step) => (
-            <CheckRow key={step.id} checked={isChecked(step.id)} onToggle={() => toggle(step.id)}>
+          .map((step, index) => (
+            <CheckRow
+              key={step.id}
+              checked={isChecked(step.id)}
+              onToggle={() => toggle(step.id)}
+              marker={`${index + 1}.`}
+            >
               {step.text}
             </CheckRow>
           ))}

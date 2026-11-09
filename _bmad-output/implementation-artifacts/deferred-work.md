@@ -49,9 +49,3 @@
 - source_spec: `spec-1-6-kryss-av-under-matlaging.md`
   summary: Klikk på −/+ rett etter ugyldig kladd i porsjonsfeltet ved grensen: blur-commit av kladden gjør at klikket likevel virker (verdi 1, kladd «5», klikk − gir 4).
   evidence: Funn E1; følge av `aria-disabled` i stedet for `disabled`. Resultatet er et gyldig tall; kan løses ved å lese grensen ved `pointerdown`.
-- source_spec: `spec-1-6-kryss-av-under-matlaging.md`
-  summary: Stegnummeret (`::marker`) ligger utenfor `<label>`, så trykk på nummeret og i venstre marg veksler ikke steget.
-  evidence: Funn S7. Kan løses med CSS-teller inne i labelen; vurder hvis testing på mobil viser at det er et problem.
-- source_spec: `spec-1-6-kryss-av-under-matlaging.md`
-  summary: `list-style: none` på ingredienslistene kan fjerne listesemantikk i Safari/VoiceOver; vurder `role="list"`.
-  evidence: Spekulasjon fra gjennomgangen; eldre kode fra 1.5, ikke bekreftet.
