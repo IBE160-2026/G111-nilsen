@@ -22,3 +22,21 @@ Bygge Story 1.4 med `bmad-build`: skjema på `/ny`, første database (SQLite via
 - Hvis `npm install <pakke>` kjøres: sjekk at `gypfile: false` står i låsefila (lockfile-testen feiler ellers).
 - Story 1.5: sidetittel fra oppskriften og ekte 404-status (deferred-work.md).
 - Neste: Story 1.5 (se oppskriften i fast format og velg antall personer).
+
+## 2026-11-09 kl. 11:19 — majanilsen
+
+### Oppgave
+Manuell test av Story 1.4 i nettleseren: en pannekakeoppskrift kopiert fra tine.no ga ingredienser som «½ tssalt» og «6 dlTINE® Lettmelk», og «Tips» havnet blant stegene.
+
+### Plan
+- Undersøke lagrede data: enhet og navn manglet mellomrom i innlimt tekst; «Tips» var del av innlimt tekst.
+- Rette tolkeren med `bmad-build` (kort løp): [spec-gh-005](../../_bmad-output/implementation-artifacts/spec-gh-005-enhet-klistret-pa-navn.md), én uavhengig gjennomgang.
+
+### Resultat
+- Commits `3bd7b41` (tolking av klistret enhet) og `1effc17` (issue 005, spesifikasjon, triage).
+- Verifisert: lint, typecheck, format:check, 430/430 tester, bygg.
+- Gjennomgang: 8 funn; 5 rettet, 3 avvist.
+
+### Åpne punkter
+- Pannekakeoppskriften må legges inn på nytt (lagrede data endres ikke).
+- Redigering av oppskrifter finnes ikke i PRD-en; avgjør om det skal inn (avdekket av «Tips»-linjene).
