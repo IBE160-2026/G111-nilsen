@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { formStateForError, formStateForUnexpectedError } from "@/app/_shared/form-errors";
 import type { ManualRecipeFormState } from "@/app/_shared/form-fields";
@@ -34,6 +35,8 @@ export async function saveRecipeEdits(
     return formStateForUnexpectedError(values);
   }
 
+  // Tittelen står på kort i Samlingen og i mapper, og skjulte sider beholdes av Activity.
+  revalidatePath("/", "layout");
   // redirect() kaster et kontrollflytunntak og må ligge utenfor try/catch.
   redirect(`/oppskrift/${id}`);
 }

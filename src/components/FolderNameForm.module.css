@@ -1,0 +1,97 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  font-weight: 600;
+}
+
+.hint {
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: var(--tap-target-min);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-base);
+  color: var(--color-ink-primary);
+  font: inherit;
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--color-accent);
+  border-width: 2px;
+}
+
+.error {
+  color: var(--color-accent);
+  font-size: var(--type-meta-size);
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.submit,
+.cancel {
+  min-height: var(--tap-target-min);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Primærknapp som i EmptyState. */
+.submit {
+  border: var(--button-border-width) solid var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* Sekundærknapp: kantlinje i stedet for fyll. */
+.cancel {
+  border: var(--button-border-width) solid var(--color-control-border);
+  background: transparent;
+  color: var(--color-ink-primary);
+}
+
+.cancel:hover {
+  border-color: var(--color-accent);
+}
+
+.cancel:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.submit:focus-visible,
+.cancel:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-accent);
+  outline-offset: var(--focus-ring-width);
+}
+
+.submit:focus-visible {
+  outline-color: var(--color-ink-primary);
+}

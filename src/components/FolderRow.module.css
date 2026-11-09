@@ -1,0 +1,84 @@
+/* Flatt rad som øvrige kort: ingen skygge, hårfin kant. */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-md);
+}
+
+.row > form {
+  flex: 1 1 100%;
+}
+
+.link {
+  display: flex;
+  flex: 1 1 12rem;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-1);
+  min-width: 0;
+  min-height: var(--tap-target-min);
+  color: var(--color-ink-primary);
+  text-decoration: none;
+}
+
+.link:hover .name {
+  text-decoration: underline;
+}
+
+.link:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-accent);
+  outline-offset: var(--focus-ring-width);
+}
+
+.name {
+  font-family: var(--font-serif);
+  font-size: var(--type-card-title-size);
+  font-weight: var(--type-heading-weight);
+  line-height: var(--type-heading-line-height);
+  overflow-wrap: anywhere;
+}
+
+.count {
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* Sekundærknapp: kantlinje i stedet for fyll (som i EmptyState). */
+.button {
+  min-height: var(--tap-target-min);
+  padding: var(--space-3) var(--space-4);
+  border: var(--button-border-width) solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-ink-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:hover {
+  border-color: var(--color-accent);
+}
+
+.button:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-accent);
+  outline-offset: var(--focus-ring-width);
+}
+
+.error {
+  flex: 1 1 100%;
+  color: var(--color-accent);
+  font-size: var(--type-meta-size);
+  font-weight: 600;
+}

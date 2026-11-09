@@ -2,7 +2,7 @@ import "server-only";
 import { and, asc, desc, eq, isNotNull, isNull, lt } from "drizzle-orm";
 import type { Quantity, Recipe, RecipeLine, RecipeSummary, Step, UnitKey } from "@/domain";
 import type { Db } from "../client";
-import { ingredientLines, recipes, steps } from "../schema";
+import { folders, ingredientLines, recipes, steps } from "../schema";
 
 /** En ingredienslinje klar til lagring (tolket, ikke skalert). */
 export type NewIngredientLine = Omit<RecipeLine, "id">;
@@ -74,7 +74,7 @@ export function insertRecipe(db: Db, recipe: NewRecipe): number {
   });
 }
 
-/** Feltene en redigering endrer. Kilde, mappe, `savedAt`, `createdAt` og `id` røres ikke. */
+/** Feltene en redigering endrer. Kilde, mappe (`folderId`), `savedAt`, `createdAt` og `id` røres ikke. */
 export type RecipeUpdate = {
   title: string;
   originalServings: number | null;
@@ -182,6 +182,7 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
     originalServings: row.originalServings,
     selectedServings: row.selectedServings,
     savedAt: row.savedAt,
+    folderId: row.folderId,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     ingredients: lines.map((line) => ({
@@ -205,9 +206,11 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
 
 /**
  * Oppskriftene i samlingen (`savedAt` satt), sist lagret først og deretter høyest id først.
+ * Med `folderId` bare oppskriftene i den mappen. `folderName` er mappen oppskriften ligger i.
  * Leser bare oppsummeringen; ingredienser og steg hentes ikke.
  */
-export function listSavedRecipes(db: Db): RecipeSummary[] {
+export function listSavedRecipes(db: Db, folderId?: number): RecipeSummary[] {
+  const saved = isNotNull(recipes.savedAt);
   return db
     .select({
       id: recipes.id,
@@ -215,9 +218,11 @@ export function listSavedRecipes(db: Db): RecipeSummary[] {
       sourceName: recipes.sourceName,
       sourceUrl: recipes.sourceUrl,
       savedAt: recipes.savedAt,
+      folderName: folders.name,
     })
     .from(recipes)
-    .where(isNotNull(recipes.savedAt))
+    .leftJoin(folders, eq(recipes.folderId, folders.id))
+    .where(folderId === undefined ? saved : and(saved, eq(recipes.folderId, folderId)))
     .orderBy(desc(recipes.savedAt), desc(recipes.id))
     .all()
     .flatMap((row) => (row.savedAt === null ? [] : [{ ...row, savedAt: row.savedAt }]));

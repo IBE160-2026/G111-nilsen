@@ -15,6 +15,13 @@
       "when": 1794238255049,
       "tag": "0001_move_manual_recipes_to_collection",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1794240651662,
+      "tag": "0002_folders",
+      "breakpoints": true
     }
   ]
 }

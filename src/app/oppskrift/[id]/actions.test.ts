@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { messageFor } from "@/lib/messages";
 import { createTestDb, type Db } from "@/server/db/client";
+import { createFolder, listFolders } from "@/server/services/folder-service";
 import { createManualRecipe, getRecipe } from "@/server/services/recipe-service";
 
 const state = vi.hoisted(() => ({ db: null as Db | null }));
@@ -25,7 +26,8 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("next/cache", () => ({ revalidatePath }));
 
-const { removeRecipe, rememberServings, saveRecipe } = await import("./actions");
+const { moveToFolder, moveToNewFolder, removeRecipe, rememberServings, saveRecipe } =
+  await import("./actions");
 
 const failure = (kind: string | undefined) => {
   const message = messageFor(kind);
@@ -70,7 +72,7 @@ describe("saveRecipe", () => {
     unsave();
     expect(await saveRecipe(id)).toEqual({ ok: true });
     expect(stored().savedAt).not.toBeNull();
-    expect(revalidatePath).toHaveBeenCalledExactlyOnceWith(`/oppskrift/${id}`);
+    expect(revalidatePath).toHaveBeenCalledExactlyOnceWith("/", "layout");
   });
 
   it("allerede lagret: beholder tidspunktet", async () => {
@@ -106,7 +108,7 @@ describe("removeRecipe", () => {
     expect(count("recipes")).toBe(0);
     expect(count("ingredient_lines")).toBe(0);
     expect(count("steps")).toBe(0);
-    expect(revalidatePath).toHaveBeenCalledWith("/samlingen");
+    expect(revalidatePath).toHaveBeenCalledWith("/", "layout");
   });
 
   it("slett to ganger: andre gang gir not_found uten redirect", async () => {
@@ -158,5 +160,107 @@ describe("rememberServings", () => {
   it("databasefeil: reservemelding", async () => {
     breakDatabase();
     expect(await rememberServings(id, 6)).toEqual(failure(undefined));
+  });
+});
+
+describe("moveToFolder (Story 3.3)", () => {
+  beforeEach(() => {
+    createFolder("Hverdag", state.db!);
+    createFolder("Helg", state.db!);
+  });
+
+  it("legger oppskriften i mappen, gir mappenavnet og revaliderer hele appen", async () => {
+    const before = stored().updatedAt;
+    expect(await moveToFolder(id, 1)).toEqual({ ok: true, folderName: "Hverdag" });
+    expect(stored()).toMatchObject({ folderId: 1, updatedAt: before });
+    expect(revalidatePath).toHaveBeenCalledExactlyOnceWith("/", "layout");
+  });
+
+  it("bytter mappe og tar oppskriften ut av mappen med null", async () => {
+    await moveToFolder(id, 1);
+    expect(await moveToFolder(id, 2)).toEqual({ ok: true, folderName: "Helg" });
+    expect(stored().folderId).toBe(2);
+    expect(await moveToFolder(id, null)).toEqual({ ok: true, folderName: null });
+    expect(stored().folderId).toBeNull();
+  });
+
+  it("ulagret oppskrift: not_found, ingenting endres, ingen revalidering", async () => {
+    unsave();
+    expect(await moveToFolder(id, 1)).toEqual(failure("not_found"));
+    expect(stored().folderId).toBeNull();
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["ukjent oppskrift", 999, 1],
+    ["ugyldig oppskrift", 0, 1],
+    ["ugyldig oppskrift", 1.5, 1],
+    ["ukjent mappe", 1, 999],
+    ["ugyldig mappe", 1, 0],
+    ["ugyldig mappe", 1, -1],
+    ["ugyldig mappe", 1, NaN],
+    ["mappe som tekst", 1, "1" as unknown as number],
+  ])("%s: not_found", async (_, recipeId, folderId) => {
+    expect(await moveToFolder(recipeId, folderId)).toEqual(failure("not_found"));
+    expect(stored().folderId).toBeNull();
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("databasefeil: reservemelding", async () => {
+    breakDatabase();
+    expect(await moveToFolder(id, 1)).toEqual(failure(undefined));
+    expect(console.error).toHaveBeenCalled();
+  });
+});
+
+describe("moveToNewFolder (Story 3.3)", () => {
+  const folderNames = () => {
+    const result = listFolders(state.db!);
+    return result.ok ? result.value.map((f) => f.name) : [];
+  };
+
+  it("oppretter mappen og flytter oppskriften, og revaliderer hele appen", async () => {
+    expect(await moveToNewFolder(id, "  Fest  ")).toEqual({ ok: true, folderName: "Fest" });
+    expect(folderNames()).toEqual(["Fest"]);
+    expect(stored().folderId).toBe(1);
+    expect(revalidatePath).toHaveBeenCalledExactlyOnceWith("/", "layout");
+  });
+
+  it.each([
+    ["", "Skriv et navn på mappen."],
+    ["a".repeat(41), "Navnet kan være maks 40 tegn. Gjør det kortere."],
+  ])("%j: melding under feltet, ingen mappe opprettes", async (name, message) => {
+    expect(await moveToNewFolder(id, name)).toEqual({ ok: false, field: "name", message });
+    expect(folderNames()).toEqual([]);
+    expect(stored().folderId).toBeNull();
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("opptatt navn: melding under feltet, oppskriften blir der den var", async () => {
+    createFolder("Fest", state.db!);
+    expect(await moveToNewFolder(id, "FEST")).toEqual({
+      ok: false,
+      field: "name",
+      message: "Du har allerede en mappe med dette navnet.",
+    });
+    expect(folderNames()).toEqual(["Fest"]);
+    expect(stored().folderId).toBeNull();
+  });
+
+  it("ulagret oppskrift: not_found, og ingen mappe opprettes", async () => {
+    unsave();
+    expect(await moveToNewFolder(id, "Fest")).toEqual(failure("not_found"));
+    expect(folderNames()).toEqual([]);
+  });
+
+  it.each([999, 0, -1, 1.5, NaN])("ugyldig eller ukjent oppskrift %s: not_found", async (bad) => {
+    expect(await moveToNewFolder(bad, "Fest")).toEqual(failure("not_found"));
+    expect(folderNames()).toEqual([]);
+  });
+
+  it("databasefeil: reservemelding", async () => {
+    breakDatabase();
+    expect(await moveToNewFolder(id, "Fest")).toEqual(failure(undefined));
+    expect(console.error).toHaveBeenCalled();
   });
 });

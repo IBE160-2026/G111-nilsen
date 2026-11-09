@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { cache, Suspense } from "react";
 import RecipeView from "@/components/RecipeView";
 import { parseRecipeId } from "@/lib/recipe-id";
+import { listFolders } from "@/server/services/folder-service";
 import { getRecipe } from "@/server/services/recipe-service";
 import styles from "./page.module.css";
 
@@ -53,5 +54,8 @@ async function RecipeLoader({ params }: { params: Params }) {
     throw new Error(`Kunne ikke hente oppskriften (${result.error.kind})`);
   }
 
-  return <RecipeView recipe={result.value} />;
+  const folders = listFolders();
+  if (!folders.ok) throw new Error(`Kunne ikke hente mappene (${folders.error.kind})`);
+
+  return <RecipeView recipe={result.value} folders={folders.value} />;
 }

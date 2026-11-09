@@ -5,6 +5,9 @@ import { createTestDb, type Db } from "@/server/db/client";
 import { createManualRecipe, getRecipe } from "@/server/services/recipe-service";
 
 const state = vi.hoisted(() => ({ db: null as Db | null }));
+const revalidatePath = vi.hoisted(() => vi.fn());
+
+vi.mock("next/cache", () => ({ revalidatePath }));
 
 vi.mock("@/server/db/client", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/server/db/client")>();
@@ -61,6 +64,8 @@ beforeEach(() => {
   id = created.value.id;
 });
 
+beforeEach(() => revalidatePath.mockClear());
+
 describe("saveRecipeEdits", () => {
   it("valideringsfeil: skrevne verdier (ikke de lagrede) kommer tilbake, og lagret oppskrift er uendret", async () => {
     const before = stored();
@@ -78,6 +83,8 @@ describe("saveRecipeEdits", () => {
     expect(stored()).toMatchObject({ title: "Vafler", originalServings: 6 });
     expect(stored().ingredients.map((l) => l.original)).toEqual(["1 ts salt", "4 egg"]);
     expect(stored().steps.map((s) => s.text)).toEqual(["Rør."]);
+    // Tittelen står på kort i Samlingen og i mapper; skjulte sider må oppdateres.
+    expect(revalidatePath).toHaveBeenCalledExactlyOnceWith("/", "layout");
   });
 
   it.each([
@@ -90,6 +97,7 @@ describe("saveRecipeEdits", () => {
     const result = await saveRecipeEdits(id, initialManualRecipeState, form(values));
     expect(result).toEqual({ fieldErrors: errors, values });
     expect(stored()).toEqual(before);
+    expect(revalidatePath).not.toHaveBeenCalled();
   });
 
   it("id som er slettet: melding fra messageFor(not_found), ingenting lagres", async () => {

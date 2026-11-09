@@ -3,9 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { actionFailure, type ActionResult } from "@/app/_shared/action-result";
+import {
+  actionFailure,
+  type ActionResult,
+  type FolderActionResult,
+} from "@/app/_shared/action-result";
+import { folderFailure, folderIdSchema, parseFolderName } from "@/app/_shared/folder-action";
 import { parseRecipeId } from "@/lib/recipe-id";
 import { LIMITS } from "@/lib/recipe-input";
+import { moveRecipeToFolder, moveRecipeToNewFolder } from "@/server/services/folder-service";
 import {
   deleteRecipe,
   saveRecipeToCollection,
@@ -27,7 +33,8 @@ export async function saveRecipe(id: number): Promise<ActionResult> {
   try {
     const result = saveRecipeToCollection(id);
     if (!result.ok) return actionFailure(result.error.kind);
-    revalidatePath(`/oppskrift/${id}`);
+    // Mappenavn, kort og telling står på flere sider (og skjulte sider beholdes av Activity).
+    revalidatePath("/", "layout");
     return { ok: true };
   } catch (error) {
     console.error("Kunne ikke lagre oppskriften i samlingen", error);
@@ -46,7 +53,7 @@ export async function removeRecipe(id: number): Promise<ActionResult> {
   try {
     const result = deleteRecipe(id);
     if (!result.ok) return actionFailure(result.error.kind);
-    revalidatePath("/samlingen");
+    revalidatePath("/", "layout");
   } catch (error) {
     console.error("Kunne ikke slette oppskriften", error);
     return actionFailure(undefined);
@@ -70,6 +77,54 @@ export async function rememberServings(id: number, servings: number): Promise<Ac
     return { ok: true };
   } catch (error) {
     console.error("Kunne ikke lagre valgt antall", error);
+    return actionFailure(undefined);
+  }
+}
+
+/**
+ * Legger en lagret oppskrift i en mappe, eller tar den ut av mappen med `null` (Story 3.3).
+ * Svaret har navnet på mappen (`null` når oppskriften ikke lenger ligger i en). Alle sider
+ * revalideres, siden mappenavn står på kort, i lagre-linjen og på mappesider.
+ */
+export async function moveToFolder(
+  recipeId: number,
+  folderId: number | null,
+): Promise<FolderActionResult<{ folderName: string | null }>> {
+  if (!idSchema.safeParse(recipeId).success) return actionFailure("not_found");
+  if (folderId !== null && !folderIdSchema.safeParse(folderId).success) {
+    return actionFailure("not_found");
+  }
+
+  try {
+    const result = moveRecipeToFolder(recipeId, folderId);
+    if (!result.ok) return folderFailure(result.error);
+    revalidatePath("/", "layout");
+    return { ok: true, folderName: result.value.folder?.name ?? null };
+  } catch (error) {
+    console.error("Kunne ikke legge oppskriften i mappen", error);
+    return actionFailure(undefined);
+  }
+}
+
+/**
+ * Oppretter en mappe og legger oppskriften i den, i én transaksjon (Story 3.3). Ugyldig eller
+ * opptatt navn gir en melding under feltet, og ingenting opprettes.
+ */
+export async function moveToNewFolder(
+  recipeId: number,
+  name: string,
+): Promise<FolderActionResult<{ folderName: string }>> {
+  if (!idSchema.safeParse(recipeId).success) return actionFailure("not_found");
+  const parsed = parseFolderName(name);
+  if (!parsed.ok) return parsed.result;
+
+  try {
+    const result = moveRecipeToNewFolder(recipeId, parsed.name);
+    if (!result.ok) return folderFailure(result.error);
+    revalidatePath("/", "layout");
+    return { ok: true, folderName: result.value.folder.name };
+  } catch (error) {
+    console.error("Kunne ikke opprette mappen og legge oppskriften i den", error);
     return actionFailure(undefined);
   }
 }

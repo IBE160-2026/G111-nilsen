@@ -78,3 +78,22 @@
 - source_spec: `spec-3-2-lagre-og-slett.md`
   summary: Et sent `rememberServings`-kall kan skrive et valgt antall rett etter at en redigering har nullstilt det.
   evidence: Bare mulig hvis «Rediger» og lagring skjer innen noen få millisekunder etter å ha endret antallet; ingen versjonssjekk finnes. Ikke tatt hånd om i v1.
+
+- source_spec: `spec-3-3-mapper.md`
+  summary: Mappevalg i redigeringsskjemaet (Story 3.5).
+  evidence: Mappe velges bare fra lagre-linjen på oppskriftssiden; redigering beholder mappen (`updateRecipe` rører ikke `folder_id`). Utsatt som i Story 3.5.
+- source_spec: `spec-3-3-mapper.md`
+  summary: Ingen grense for antall mapper.
+  evidence: Alle mapper listes og vises i dialogen «Lagre i mappe». Greit for en lokal enbrukerapp; vurder en grense eller søk hvis listen blir lang.
+- source_spec: `spec-3-3-mapper.md`
+  summary: Mapper sorteres bare alfabetisk på navn (norsk), uten annen sortering, søk eller sidedeling.
+  evidence: Utenfor Story 3.3 (Never-listen); tas hvis behovet viser seg.
+- source_spec: `spec-3-3-mapper.md`
+  summary: Radiogruppen i «Lagre i mappe» har ingen maksimal høyde; «Lagre» og «Avbryt» havner under bretten med mange mapper.
+  evidence: Funnet i gjennomgangen (12 mapper ved 360 × 700). Dialogen scroller og fokus følger med. Løses sammen med en eventuell grense eller søk i mapper.
+- source_spec: `spec-3-3-mapper.md`
+  summary: `FolderRow`, `FolderNameForm` og `FolderDialog` har ingen egne `forced-colors`-regler.
+  evidence: De bruker kantlinje, outline og innebygde radioer og ventes å fungere i høykontrast, men det er ikke målt. Sjekkes sammen med forced-colors i 1.6.
+- source_spec: `spec-3-3-mapper.md`
+  summary: Gjentatt sletting eller flytting av en mappe som allerede er slettet (annen fane) revaliderer ikke, så raden eller valget står igjen til neste innlasting.
+  evidence: Samme mønster som `removeRecipe` ved `not_found` i 3.2; brukeren får en melding. Tas hvis det oppstår.

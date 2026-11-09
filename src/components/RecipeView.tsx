@@ -1,6 +1,12 @@
 import Link from "next/link";
-import type { Recipe } from "@/domain";
-import { removeRecipe, rememberServings, saveRecipe } from "@/app/oppskrift/[id]/actions";
+import type { Folder, Recipe } from "@/domain";
+import {
+  moveToFolder,
+  moveToNewFolder,
+  removeRecipe,
+  rememberServings,
+  saveRecipe,
+} from "@/app/oppskrift/[id]/actions";
 import { editRecipeMessages } from "@/lib/messages";
 import { sourceLabel } from "@/lib/source-label";
 import IngredientList from "./IngredientList";
@@ -15,8 +21,10 @@ import styles from "./RecipeView.module.css";
  * klientkomponenten `StepList`. Fra 768 px står
  * porsjonsvelger og ingredienser til venstre og stegene til høyre. Nederst står
  * lagre-linjen (`RecipeActions`, Story 3.2); Server Actions bindes til oppskriftens id her.
+ * `folders` er mappene å velge mellom i «Lagre i mappe» (Story 3.3); oppskriftens egen mappe er
+ * `recipe.folderId`.
  */
-export default function RecipeView({ recipe }: { recipe: Recipe }) {
+export default function RecipeView({ recipe, folders }: { recipe: Recipe; folders: Folder[] }) {
   return (
     <article className={styles.root}>
       <header className={styles.header}>
@@ -53,6 +61,10 @@ export default function RecipeView({ recipe }: { recipe: Recipe }) {
         saved={recipe.savedAt !== null}
         onSave={saveRecipe.bind(null, recipe.id)}
         onDelete={removeRecipe.bind(null, recipe.id)}
+        folders={folders}
+        folderId={recipe.folderId}
+        onMoveToFolder={moveToFolder.bind(null, recipe.id)}
+        onMoveToNewFolder={moveToNewFolder.bind(null, recipe.id)}
       />
     </article>
   );

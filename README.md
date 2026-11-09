@@ -12,7 +12,7 @@ Repoet inneholder applikasjonen og dokumentasjon av utvikling, testing og kvalit
 
 **RecipeMate** er en matlagingsassistent for oppskrifter fra nettet. Du limer inn en lenke (eller skriver inn oppskriften selv), og appen viser oppskriften i et fast og ryddig format der du kan velge antall personer, slik at alle mengder regnes om med en gang. Oppskrifter kan lagres i en samling, i mapper og som favoritter.
 
-Status: Epic 1 («Les og skaler en oppskrift») er ferdig: Story 1.1–1.6, pluss Story 3.5 (redigering), Story 3.1 (Samlingen) og Story 3.2 (lagre og slette). Du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`), finne den igjen i Samlingen (`/samlingen`), se den på `/oppskrift/{id}`, velge antall personer og krysse av ingredienser og steg mens du lager maten. Oppskriften lagres i en lokal SQLite-database. Import fra lenke, mapper, favoritter og forslag kommer i senere epics.
+Status: Epic 1 («Les og skaler en oppskrift») er ferdig: Story 1.1–1.6, pluss Story 3.5 (redigering), Story 3.1 (Samlingen), Story 3.2 (lagre og slette) og Story 3.3 (mapper). Du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`), finne den igjen i Samlingen (`/samlingen`), se den på `/oppskrift/{id}`, velge antall personer og krysse av ingredienser og steg mens du lager maten. Oppskriften lagres i en lokal SQLite-database. Import fra lenke, favoritter og forslag kommer i senere epics.
 
 ## Hva Epic 1 (og Story 3.5) inneholder
 
@@ -25,6 +25,7 @@ Status: Epic 1 («Les og skaler en oppskrift») er ferdig: Story 1.1–1.6, plus
 - **Story 3.5, Rediger en oppskrift:** se «Redigere en oppskrift» under.
 - **Story 3.1, Se samlingen:** se «Samlingen» under.
 - **Story 3.2, Lagre og slette en oppskrift:** se «Lagre, slette og rydde» under.
+- **Story 3.3, Sorter oppskrifter i mapper:** se «Mapper» under.
 
 ## Kryss av under matlaging
 
@@ -78,12 +79,24 @@ Nederst på oppskriftssiden står en lagre-linje som følger med når du ruller.
 - Koden ligger i `src/app/oppskrift/[id]/actions.ts` (Server Actions), `RecipeActions.tsx` og `ConfirmDialog.tsx`, tjenestene `saveRecipeToCollection`, `deleteRecipe`, `setSelectedServings` og `purgeStaleUnsavedRecipes` i `src/server/services/recipe-service.ts` og tilsvarende funksjoner i `recipe-repository.ts`.
 - Testes med `npm test`: repository og tjenester mot en ekte SQLite-database i minnet (blant annet at sletting kaskaderer og at `updatedAt` er uendret), handlinger, dialog og lagre-linje (falske tidtakere for tresekundersregelen) og opprydding med falske tidtakere.
 
+## Mapper
+
+På Mapper-siden (`/mapper`) kan du opprette, gi nytt navn til og slette mapper. Hver mappe vises med antall oppskrifter («3 oppskrifter», «1 oppskrift», «Ingen oppskrifter») og lenker til mappesiden (`/mapper/{id}`), som viser oppskriftene i mappen som kort, sist lagret først, eller «Mappen er tom.». En oppskrift ligger i maks én mappe, og bare oppskrifter i samlingen kan legges i en mappe. Oppskriftskortene i Samlingen viser mappenavnet etter kilden («Matprat · Hverdag»).
+
+- **Legge en oppskrift i mappe:** i lagre-linjen på en lagret oppskrift står en knapp ved siden av «Slett». Den viser mappenavnet, eller «Lagre i mappe» når oppskriften ikke ligger i noen mappe, og åpner dialogen «Lagre i mappe»: velg «Ingen mappe», en eksisterende mappe eller «Ny mappe» (med navnefelt). Etter lagring sier «Lagret i <navn>.» eller «Fjernet fra mappen.» fra i tre sekunder.
+- **Navn:** 1–40 tegn (telt som Unicode-tegn), blanke tegn i serie slås sammen, og navnet må være unikt uten hensyn til store og små bokstaver, også for æ, ø og å («ÆRLIG» er det samme som «ærlig»). Meldinger vises under feltet.
+- **Slette en mappe:** dialogen «Slette mappen?» sier at oppskriftene blir liggende i samlingen uten mappe. Mapper og oppskrifter slettes uavhengig av hverandre.
+- Mappehandlinger endrer ikke `updatedAt` på oppskriften, så avkrysning og valgt antall står. Redigering av en oppskrift beholder mappen. Mapper i mapper, flytting av flere oppskrifter om gangen, sortering og søk i mapper er ikke med.
+- **Datamodell:** tabellen `folders` (`id`, `name`, `name_key` med unik indeks, `created_at`) og kolonnen `recipes.folder_id` (valgfri fremmednøkkel med `ON DELETE SET NULL`). Migrasjonen `drizzle/0002_folders.sql` bevarer alle eksisterende data (`folder_id` blir `NULL`) og kan kjøres på nytt.
+- Koden ligger i `src/app/mapper/` (sider og Server Actions), `moveToFolder` og `moveToNewFolder` i `src/app/oppskrift/[id]/actions.ts`, `FolderManager`, `FolderRow`, `FolderNameForm`, `FolderDialog` og den felles `Dialog` i `src/components/`, `folder-service.ts`, `folder-repository.ts` og `src/lib/folder-name.ts`.
+- Testes med `npm test`: migrasjonen fra 0000 og 0001 med data, fremmednøkkelen (`SET NULL`), unik `name_key`, tilbakerulling når «Ny mappe» feiler midt i transaksjonen, navneregler, handlinger, dialoger, mapperaden og sidene.
+
 ## Redigere en oppskrift
 
 På oppskriftssiden (`/oppskrift/{id}`) står «Rediger» ved tittelen. Den åpner `/oppskrift/{id}/rediger` med samme skjema som «Legg inn selv», forhåndsutfylt med tittel, antall personer, ingredienser (én per linje, slik de ble skrevet) og steg. «Lagre endringer» bruker samme validering og tolking som ny oppskrift, erstatter ingredienser og steg i én databasetransaksjon og sender deg tilbake til oppskriften. «Avbryt» går tilbake uten å endre noe.
 
 - Endres antall personer, nullstilles et tidligere valgt antall. Kilde og samlingsstatus røres ikke.
-- Redigering virker på alle oppskrifter. Kilde, mappe, favoritt og seksjonsoverskrifter kan ikke redigeres ennå.
+- Redigering virker på alle oppskrifter og beholder mappen. Kilde, favoritt og seksjonsoverskrifter kan ikke redigeres ennå, og mappe velges fra lagre-linjen.
 - Koden ligger i `src/app/oppskrift/[id]/rediger/` (side og Server Action), `updateManualRecipe` i `src/server/services/recipe-service.ts` og `updateRecipe` i `src/server/db/repositories/recipe-repository.ts`.
 - Testes med `npm test`: repository og tjeneste mot en ekte SQLite-database i minnet (blant annet tilbakerulling ved feil midt i oppdateringen), og skjema, side og handling med Testing Library.
 
@@ -124,7 +137,7 @@ npm run format:check # sjekk formatering uten å endre filer
 
 ### Hva testene dekker
 
-`npm test` kjører Vitest én gang og gir i dag 43 testfiler og 745 tester. Ingen test bruker nettverket eller en ekte API-nøkkel.
+`npm test` kjører Vitest én gang og gir i dag 54 testfiler og 999 tester. Ingen test bruker nettverket eller en ekte API-nøkkel.
 
 - **Domenet** (`src/domain/`): tolking av mengder og ingredienslinjer og skalering og formatering, med fasittabellen fra Epic 1 (400 g mel for 6 gir 600 g, «1 egg (ca.)», og så videre) som egne tester.
 - **Server** (`src/server/`): repositorier og tjenester mot en ekte SQLite-database i minnet, blant annet tilbakerulling ved feil, redigering, samlingen, lagring, sletting og opprydding, og datamigrasjonen (en database med bare den første migrasjonen oppgraderes).

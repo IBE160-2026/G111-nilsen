@@ -26,6 +26,8 @@
 
 .description {
   color: var(--color-ink-secondary);
+  /* Lange navn uten mellomrom brytes i stedet for å klippes ved 360 px. */
+  overflow-wrap: anywhere;
 }
 
 .actions {
@@ -36,8 +38,7 @@
   margin-top: var(--space-2);
 }
 
-.cancel,
-.confirm {
+.button {
   min-height: var(--tap-target-min);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-sm);
@@ -47,35 +48,34 @@
 }
 
 /* Sekundærknapp: kantlinje i stedet for fyll (som i EmptyState). */
-.cancel {
+.secondary {
   border: var(--button-border-width) solid var(--color-control-border);
   background: transparent;
   color: var(--color-ink-primary);
 }
 
-.cancel:hover {
+.secondary:hover {
   border-color: var(--color-accent);
 }
 
 /* Primærknapp i aksentfarge; designet bruker ikke rødt for tilstander. */
-.confirm {
+.primary {
   border: var(--button-border-width) solid var(--color-accent);
   background: var(--color-accent);
   color: var(--color-on-accent);
 }
 
-.confirm:disabled {
+.primary:disabled {
   opacity: 0.6;
   cursor: default;
 }
 
-.cancel:focus-visible,
-.confirm:focus-visible {
+.button:focus-visible {
   outline: var(--focus-ring-width) solid var(--color-accent);
   outline-offset: var(--focus-ring-width);
 }
 
 /* Aksentfylt knapp mot aksentfarget ring: ring med tekstfarge i kontrast. */
-.confirm:focus-visible {
+.primary:focus-visible {
   outline-color: var(--color-ink-primary);
 }

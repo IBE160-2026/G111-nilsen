@@ -13,6 +13,7 @@ const recipe: RecipeSummary = {
   sourceName: "Matprat",
   sourceUrl: "https://www.matprat.no/x",
   savedAt: "2026-11-09T10:00:00.000Z",
+  folderName: null,
 };
 
 describe("RecipeCard", () => {
@@ -23,6 +24,27 @@ describe("RecipeCard", () => {
     expect(links[0]).toHaveAttribute("href", "/oppskrift/7");
     expect(links[0]).toHaveTextContent("Pannekaker");
     expect(links[0]).toHaveTextContent("Matprat");
+  });
+
+  it("viser kilde og mappenavn i metaraden, mappenavnet som egen <span>", () => {
+    render(<RecipeCard recipe={{ ...recipe, folderName: "Hverdag" }} />);
+    const link = screen.getByRole("link");
+    expect(link).toHaveAccessibleName("Pannekaker Matprat · Hverdag");
+    expect(screen.getByText("Hverdag").tagName).toBe("SPAN");
+    expect(screen.getByText("Matprat").tagName).toBe("SPAN");
+    expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent("Pannekaker");
+  });
+
+  it("uten mappe vises bare kilden", () => {
+    render(<RecipeCard recipe={recipe} />);
+    expect(screen.getByRole("link")).toHaveAccessibleName("Pannekaker Matprat");
+    expect(screen.getByRole("link")).not.toHaveTextContent("·");
+  });
+
+  it("utelater mappenavnet med showFolder={false}", () => {
+    render(<RecipeCard recipe={{ ...recipe, folderName: "Hverdag" }} showFolder={false} />);
+    expect(screen.queryByText("Hverdag")).not.toBeInTheDocument();
+    expect(screen.getByRole("link")).toHaveTextContent("Matprat");
   });
 
   it("har tittelen som <h2>", () => {

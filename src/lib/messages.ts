@@ -117,6 +117,14 @@ export const recipeActionMessages = {
   saving: "Lagrer …",
   saved: "Lagret.",
   delete: "Slett",
+  /** Knappen for mappe når oppskriften ikke ligger i en mappe. */
+  chooseFolder: "Lagre i mappe",
+  /** Etter «<navn>» i knappens tilgjengelige navn: «Hverdag, bytt mappe». */
+  changeFolderSuffix: "bytt mappe",
+  /** Meldingen etter at oppskriften er lagt i en mappe; `folderSavedPrefix` + navn + `folderSavedSuffix`. */
+  folderSavedPrefix: "Lagret i ",
+  folderSavedSuffix: ".",
+  folderRemoved: "Fjernet fra mappen.",
 } as const;
 
 /** Tekster for dialogen «Slette oppskriften?» (Story 3.2). Tittelen settes inn foran `descriptionAfterTitle`. */
@@ -124,5 +132,73 @@ export const deleteDialogMessages = {
   title: "Slette oppskriften?",
   descriptionAfterTitle: "fjernes fra samlingen. Du kan ikke angre.",
   confirm: "Slett",
+  cancel: "Avbryt",
+} as const;
+
+/** Tekster for Mapper-siden og mappesidene (Story 3.3). */
+export const folderMessages = {
+  heading: "Mapper",
+  loading: "Henter mappene …",
+  loadFailed: "Kunne ikke hente mappene",
+  folderLoading: "Henter mappen …",
+  folderLoadFailed: "Kunne ikke hente mappen",
+  /** Fanetittel når mappen ikke finnes. */
+  folderDefaultTitle: "Mappe",
+  newFolderLabel: "Ny mappe",
+  newFolderHint: "Gi mappen et navn på 1–40 tegn.",
+  createButton: "Opprett mappe",
+  creating: "Oppretter …",
+  rename: "Gi nytt navn",
+  /** Foran mappenavnet i knappens tilgjengelige navn: «Gi nytt navn til Hverdag». */
+  renameFor: "Gi nytt navn til",
+  renameField: "Nytt navn",
+  save: "Lagre",
+  saveFor: "Lagre nytt navn for",
+  saving: "Lagrer …",
+  cancel: "Avbryt",
+  cancelFor: "Avbryt nytt navn for",
+  delete: "Slett",
+  recipeCountNone: "Ingen oppskrifter",
+  recipeCountOne: "1 oppskrift",
+  recipeCountMany: "oppskrifter",
+  allFolders: "Alle mapper",
+  emptyTitle: "Du har ingen mapper ennå.",
+  emptyDescription: "Legg oppskrifter i en mappe fra oppskriftssiden.",
+  emptyAction: "Gå til samlingen",
+  folderEmptyTitle: "Mappen er tom.",
+  folderEmptyDescription: "Legg oppskrifter i mappen fra oppskriftssiden.",
+  notFoundHeading: "Fant ikke mappen",
+  notFoundTitle: "Vi fant ikke mappen.",
+  notFoundBody: "Den kan være slettet, eller lenken kan være feil.",
+  notFoundAction: "Se alle mapper",
+  nameRequired: "Skriv et navn på mappen.",
+  nameTooLong: "Navnet kan være maks 40 tegn. Gjør det kortere.",
+  nameTaken: "Du har allerede en mappe med dette navnet.",
+} as const;
+
+/** Antall oppskrifter i en mappe: «Ingen oppskrifter», «1 oppskrift» eller «3 oppskrifter». */
+export function recipeCountLabel(count: number): string {
+  if (count === 0) return folderMessages.recipeCountNone;
+  if (count === 1) return folderMessages.recipeCountOne;
+  return `${count} ${folderMessages.recipeCountMany}`;
+}
+
+/** Tekster for dialogen «Slette mappen?» (Story 3.3). Mappenavnet settes inn i `descriptionAfterName`. */
+export const deleteFolderDialogMessages = {
+  title: "Slette mappen?",
+  descriptionAfterName:
+    "slettes. Oppskriftene i mappen blir liggende i samlingen, uten mappe. Du kan ikke angre.",
+  confirm: "Slett",
+  cancel: "Avbryt",
+} as const;
+
+/** Tekster for dialogen «Lagre i mappe» (Story 3.3). */
+export const folderDialogMessages = {
+  title: "Lagre i mappe",
+  legend: "Velg mappe",
+  noFolder: "Ingen mappe",
+  newFolder: "Ny mappe",
+  newFolderLabel: "Navn på ny mappe",
+  save: "Lagre",
   cancel: "Avbryt",
 } as const;

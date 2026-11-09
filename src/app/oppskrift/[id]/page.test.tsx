@@ -3,6 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, type Db } from "@/server/db/client";
+import { createFolder, moveRecipeToFolder } from "@/server/services/folder-service";
 import { createManualRecipe } from "@/server/services/recipe-service";
 
 const state = vi.hoisted(() => ({ db: null as Db | null, forcedErrorKind: null as string | null }));
@@ -91,5 +92,19 @@ describe("/oppskrift/[id]", () => {
     const rendering = renderPage("1");
     await expect(rendering).rejects.toThrow(/validation/);
     await expect(rendering).rejects.not.toBeInstanceOf(NotFoundError);
+  });
+
+  it("sender mappene og oppskriftens mappe til lagre-linjen", async () => {
+    const created = createManualRecipe(
+      { title: "Pannekaker", servings: 4, ingredients: ["3 egg"], steps: [] },
+      state.db!,
+    );
+    if (!created.ok) throw new Error("kunne ikke lagre");
+    createFolder("Hverdag", state.db!);
+    createFolder("Helg", state.db!);
+    moveRecipeToFolder(created.value.id, 2, state.db!);
+
+    render(await renderPage(String(created.value.id)));
+    expect(screen.getByRole("button", { name: "Helg, bytt mappe" })).toBeInTheDocument();
   });
 });

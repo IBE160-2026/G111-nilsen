@@ -73,13 +73,25 @@ export type Recipe = {
   originalServings: number | null;
   selectedServings: number | null;
   savedAt: string | null;
+  /** Mappen oppskriften ligger i (bare lagrede oppskrifter kan ligge i en mappe), ellers `null`. */
+  folderId: number | null;
   createdAt: string;
   updatedAt: string;
   ingredients: RecipeLine[];
   steps: Step[];
 };
 
-/** En oppskrift slik den vises som kort i samlingen. `savedAt` er alltid satt. */
+/**
+ * En oppskrift slik den vises som kort i samlingen. `savedAt` er alltid satt. `folderName` er
+ * navnet på mappen oppskriften ligger i, ellers `null`.
+ */
 export type RecipeSummary = Pick<Recipe, "id" | "title" | "sourceUrl" | "sourceName"> & {
   savedAt: string;
+  folderName: string | null;
 };
+
+/** En mappe for oppskrifter (Story 3.3). `name` er navnet slik brukeren skrev det. */
+export type Folder = { id: number; name: string };
+
+/** En mappe med antall oppskrifter i den. */
+export type FolderSummary = Folder & { recipeCount: number };

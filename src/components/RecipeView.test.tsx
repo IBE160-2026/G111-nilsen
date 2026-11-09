@@ -9,6 +9,8 @@ const actions = vi.hoisted(() => ({
   saveRecipe: vi.fn(),
   removeRecipe: vi.fn(),
   rememberServings: vi.fn(),
+  moveToFolder: vi.fn(),
+  moveToNewFolder: vi.fn(),
 }));
 vi.mock("@/app/oppskrift/[id]/actions", () => actions);
 
@@ -18,6 +20,8 @@ beforeEach(() => {
   actions.saveRecipe.mockReset().mockResolvedValue({ ok: true });
   actions.removeRecipe.mockReset().mockResolvedValue(undefined);
   actions.rememberServings.mockReset().mockResolvedValue({ ok: true });
+  actions.moveToFolder.mockReset().mockResolvedValue({ ok: true, folderName: null });
+  actions.moveToNewFolder.mockReset().mockResolvedValue({ ok: true, folderName: "Ny" });
   HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
     this.setAttribute("open", "");
   };
@@ -28,6 +32,11 @@ beforeEach(() => {
 
 afterEach(cleanup);
 
+const folders = [
+  { id: 1, name: "Hverdag" },
+  { id: 2, name: "Helg" },
+];
+
 const recipe: Recipe = {
   id: 1,
   title: "Pannekaker",
@@ -36,6 +45,7 @@ const recipe: Recipe = {
   originalServings: 4,
   selectedServings: null,
   savedAt: null,
+  folderId: null,
   createdAt: "2026-11-09T10:00:00.000Z",
   updatedAt: "2026-11-09T10:00:00.000Z",
   ingredients: [
@@ -78,7 +88,7 @@ const recipe: Recipe = {
 
 describe("RecipeView", () => {
   it("viser fast format: tittel, kilde, porsjonsvelger, ingredienser og nummererte steg", () => {
-    render(<RecipeView recipe={recipe} />);
+    render(<RecipeView recipe={recipe} folders={folders} />);
     const title = screen.getByRole("heading", { level: 1, name: "Pannekaker" });
     const source = screen.getByText("Lagt inn selv");
     const stepper = screen.getByLabelText("Antall personer");
@@ -113,7 +123,7 @@ describe("RecipeView", () => {
   });
 
   it("har en «Rediger»-lenke ved tittelen som peker til redigeringssiden", () => {
-    render(<RecipeView recipe={{ ...recipe, id: 7 }} />);
+    render(<RecipeView recipe={{ ...recipe, id: 7 }} folders={folders} />);
     const link = screen.getByRole("link", { name: "Rediger Pannekaker" });
     expect(link).toHaveAttribute("href", "/oppskrift/7/rediger");
     const title = screen.getByRole("heading", { level: 1, name: "Pannekaker" });
@@ -122,12 +132,14 @@ describe("RecipeView", () => {
   });
 
   it("skjuler steg-kortet når oppskriften ikke har steg", () => {
-    render(<RecipeView recipe={{ ...recipe, steps: [] }} />);
+    render(<RecipeView recipe={{ ...recipe, steps: [] }} folders={folders} />);
     expect(screen.queryByRole("heading", { name: "Slik gjør du" })).not.toBeInTheDocument();
   });
 
   it("viser stegene i lagret rekkefølge", () => {
-    render(<RecipeView recipe={{ ...recipe, steps: [...recipe.steps].reverse() }} />);
+    render(
+      <RecipeView recipe={{ ...recipe, steps: [...recipe.steps].reverse() }} folders={folders} />,
+    );
     const list = within(screen.getByRole("region", { name: "Slik gjør du" })).getByRole("list");
     expect(
       within(list)
@@ -137,14 +149,17 @@ describe("RecipeView", () => {
   });
 
   it("viser ingen porsjonsvelger når oppskriften mangler opprinnelig antall", () => {
-    render(<RecipeView recipe={{ ...recipe, originalServings: null }} />);
+    render(<RecipeView recipe={{ ...recipe, originalServings: null }} folders={folders} />);
     expect(screen.queryByLabelText("Antall personer")).not.toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Ingredienser" })).toBeInTheDocument();
   });
 
   it("viser kilden når oppskriften har sourceUrl eller sourceName", () => {
     render(
-      <RecipeView recipe={{ ...recipe, sourceUrl: "https://www.matprat.no/oppskrifter/x/" }} />,
+      <RecipeView
+        recipe={{ ...recipe, sourceUrl: "https://www.matprat.no/oppskrifter/x/" }}
+        folders={folders}
+      />,
     );
     expect(screen.getByText("matprat.no")).toBeInTheDocument();
     expect(screen.queryByText(/Lagt inn selv/)).not.toBeInTheDocument();
@@ -152,18 +167,23 @@ describe("RecipeView", () => {
 
   it("nullstiller valgt antall når komponenten får en annen oppskrift", async () => {
     const user = userEvent.setup();
-    const { rerender } = render(<RecipeView recipe={recipe} />);
+    const { rerender } = render(<RecipeView recipe={recipe} folders={folders} />);
     await user.click(screen.getByRole("button", { name: "Flere personer" }));
     expect(screen.getByLabelText("Antall personer")).toHaveValue("5");
 
-    rerender(<RecipeView recipe={{ ...recipe, id: 2, title: "Vafler", originalServings: 2 }} />);
+    rerender(
+      <RecipeView
+        recipe={{ ...recipe, id: 2, title: "Vafler", originalServings: 2 }}
+        folders={folders}
+      />,
+    );
     expect(screen.getByLabelText("Antall personer")).toHaveValue("2");
     expect(screen.queryByRole("button", { name: /Tilbakestill/ })).not.toBeInTheDocument();
   });
 
   it("nullstiller valgt antall og avkrysning når samme oppskrift er lagret på nytt (updatedAt endret)", async () => {
     const user = userEvent.setup();
-    const { rerender } = render(<RecipeView recipe={recipe} />);
+    const { rerender } = render(<RecipeView recipe={recipe} folders={folders} />);
     await user.click(screen.getByRole("button", { name: "Flere personer" }));
     await user.click(screen.getByText("Stek."));
     await user.click(screen.getByText("melk"));
@@ -171,6 +191,7 @@ describe("RecipeView", () => {
     rerender(
       <RecipeView
         recipe={{ ...recipe, originalServings: 2, updatedAt: "2026-11-09T11:00:00.000Z" }}
+        folders={folders}
       />,
     );
     expect(screen.getByLabelText("Antall personer")).toHaveValue("2");
@@ -179,7 +200,7 @@ describe("RecipeView", () => {
 
   it("Lik id: ingrediens og steg med id 1 krysses av uavhengig av hverandre", async () => {
     const user = userEvent.setup();
-    render(<RecipeView recipe={recipe} />);
+    render(<RecipeView recipe={recipe} folders={folders} />);
     const ingredients = screen.getByRole("region", { name: "Ingredienser" });
     const steps = screen.getByRole("region", { name: "Slik gjør du" });
 
@@ -198,7 +219,7 @@ describe("RecipeView", () => {
     const user = userEvent.setup();
     const view = (mode: "visible" | "hidden") => (
       <Activity mode={mode}>
-        <RecipeView recipe={recipe} />
+        <RecipeView recipe={recipe} folders={folders} />
       </Activity>
     );
     const { rerender } = render(view("visible"));
@@ -211,9 +232,9 @@ describe("RecipeView", () => {
 
   it("nullstiller avkrysning når komponenten får en annen oppskrift", async () => {
     const user = userEvent.setup();
-    const { rerender } = render(<RecipeView recipe={recipe} />);
+    const { rerender } = render(<RecipeView recipe={recipe} folders={folders} />);
     await user.click(screen.getByText("Stek."));
-    rerender(<RecipeView recipe={{ ...recipe, id: 2, title: "Vafler" }} />);
+    rerender(<RecipeView recipe={{ ...recipe, id: 2, title: "Vafler" }} folders={folders} />);
     for (const checkbox of screen.getAllByRole("checkbox")) expect(checkbox).not.toBeChecked();
   });
 
@@ -222,7 +243,7 @@ describe("RecipeView", () => {
 
     it("ulagret oppskrift: «Lagre» nederst i artikkelen, og «Lagre» kaller saveRecipe med id", async () => {
       const user = userEvent.setup();
-      render(<RecipeView recipe={{ ...recipe, id: 7 }} />);
+      render(<RecipeView recipe={{ ...recipe, id: 7 }} folders={folders} />);
       const save = screen.getByRole("button", { name: "Lagre" });
       const steps = screen.getByRole("region", { name: "Slik gjør du" });
       expect(steps.compareDocumentPosition(save) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -234,7 +255,7 @@ describe("RecipeView", () => {
 
     it("lagret oppskrift: «Slett» i stedet for «Lagre», og bekreftelse kaller removeRecipe med id", async () => {
       const user = userEvent.setup();
-      render(<RecipeView recipe={saved} />);
+      render(<RecipeView recipe={saved} folders={folders} />);
       expect(screen.queryByRole("button", { name: "Lagre" })).not.toBeInTheDocument();
       await user.click(screen.getByRole("button", { name: "Slett Pannekaker" }));
       await user.click(screen.getByRole("button", { name: "Slett", description: "" }));
@@ -243,21 +264,43 @@ describe("RecipeView", () => {
 
     it("lagret oppskrift: endret antall sendes til rememberServings med id og antall", async () => {
       const user = userEvent.setup();
-      render(<RecipeView recipe={saved} />);
+      render(<RecipeView recipe={saved} folders={folders} />);
       await user.click(screen.getByRole("button", { name: "Flere personer" }));
       expect(actions.rememberServings).toHaveBeenCalledExactlyOnceWith(7, 5);
     });
 
     it("ulagret oppskrift: endret antall gir ingen lagring", async () => {
       const user = userEvent.setup();
-      render(<RecipeView recipe={{ ...recipe, id: 7 }} />);
+      render(<RecipeView recipe={{ ...recipe, id: 7 }} folders={folders} />);
       await user.click(screen.getByRole("button", { name: "Flere personer" }));
       expect(screen.getByLabelText("Antall personer")).toHaveValue("5");
       expect(actions.rememberServings).not.toHaveBeenCalled();
     });
 
+    it("mappeknappen viser mappen oppskriften ligger i, og valget kaller moveToFolder med id", async () => {
+      const user = userEvent.setup();
+      render(<RecipeView recipe={{ ...saved, folderId: 1 }} folders={folders} />);
+      await user.click(screen.getByRole("button", { name: "Hverdag, bytt mappe" }));
+      const dialog = screen.getByRole("dialog", { name: "Lagre i mappe" });
+      expect(within(dialog).getByRole("radio", { name: "Hverdag" })).toBeChecked();
+      await user.click(within(dialog).getByRole("radio", { name: "Helg" }));
+      await user.click(within(dialog).getByRole("button", { name: "Lagre" }));
+      expect(actions.moveToFolder).toHaveBeenCalledExactlyOnceWith(7, 2);
+    });
+
+    it("«Ny mappe» kaller moveToNewFolder med id og navn", async () => {
+      const user = userEvent.setup();
+      render(<RecipeView recipe={saved} folders={folders} />);
+      await user.click(screen.getByRole("button", { name: "Lagre i mappe" }));
+      const dialog = screen.getByRole("dialog", { name: "Lagre i mappe" });
+      await user.click(within(dialog).getByRole("radio", { name: "Ny mappe" }));
+      await user.type(within(dialog).getByRole("textbox"), "Ny");
+      await user.click(within(dialog).getByRole("button", { name: "Lagre" }));
+      expect(actions.moveToNewFolder).toHaveBeenCalledExactlyOnceWith(7, "Ny");
+    });
+
     it("åpner på sist valgte antall, med mengdene skalert", () => {
-      render(<RecipeView recipe={{ ...saved, selectedServings: 6 }} />);
+      render(<RecipeView recipe={{ ...saved, selectedServings: 6 }} folders={folders} />);
       expect(screen.getByLabelText("Antall personer")).toHaveValue("6");
       const ingredients = screen.getByRole("region", { name: "Ingredienser" });
       expect(within(ingredients).getAllByRole("listitem")[0]).toHaveTextContent("2 ¼ dl melk");

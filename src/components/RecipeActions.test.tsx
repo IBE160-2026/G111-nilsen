@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import RecipeActions from "./RecipeActions";
@@ -20,6 +20,13 @@ afterEach(() => {
 
 const status = () => screen.getByRole("status");
 
+const folderProps = {
+  folders: [],
+  folderId: null,
+  onMoveToFolder: vi.fn(),
+  onMoveToNewFolder: vi.fn(),
+};
+
 function setup(overrides: Partial<React.ComponentProps<typeof RecipeActions>> = {}) {
   const onSave = vi.fn().mockResolvedValue({ ok: true });
   const onDelete = vi.fn().mockResolvedValue(undefined);
@@ -29,6 +36,7 @@ function setup(overrides: Partial<React.ComponentProps<typeof RecipeActions>> = 
       saved={false}
       onSave={onSave}
       onDelete={onDelete}
+      {...folderProps}
       {...overrides}
     />,
   );
@@ -63,7 +71,15 @@ describe("RecipeActions: ikke lagret", () => {
     const { rerender, onSave, onDelete } = setup();
     await user.click(screen.getByRole("button", { name: "Lagre" }));
     await waitFor(() => expect(onSave).toHaveBeenCalled());
-    rerender(<RecipeActions title="Pannekaker" saved onSave={onSave} onDelete={onDelete} />);
+    rerender(
+      <RecipeActions
+        title="Pannekaker"
+        saved
+        onSave={onSave}
+        onDelete={onDelete}
+        {...folderProps}
+      />,
+    );
     expect(screen.getByRole("button", { name: "Slett Pannekaker" })).toHaveFocus();
   });
 
@@ -104,7 +120,13 @@ describe("RecipeActions: ikke lagret", () => {
     act(() => vi.advanceTimersByTime(1100));
     expect(status()).toBeEmptyDOMElement();
     rerender(
-      <RecipeActions title="Pannekaker" saved={false} onSave={onSave} onDelete={onDelete} />,
+      <RecipeActions
+        title="Pannekaker"
+        saved={false}
+        onSave={onSave}
+        onDelete={onDelete}
+        {...folderProps}
+      />,
     );
   });
 
@@ -113,7 +135,15 @@ describe("RecipeActions: ikke lagret", () => {
     const { rerender, onSave, onDelete } = setup();
     await user.click(screen.getByRole("button", { name: "Lagre" }));
     await waitFor(() => expect(status()).toHaveTextContent("Lagret."));
-    rerender(<RecipeActions title="Pannekaker" saved onSave={onSave} onDelete={onDelete} />);
+    rerender(
+      <RecipeActions
+        title="Pannekaker"
+        saved
+        onSave={onSave}
+        onDelete={onDelete}
+        {...folderProps}
+      />,
+    );
     expect(screen.getByRole("button", { name: "Slett Pannekaker" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Lagre" })).not.toBeInTheDocument();
     expect(status()).toHaveTextContent("Lagret.");
@@ -159,6 +189,13 @@ describe("RecipeActions: ikke lagret", () => {
 });
 
 describe("RecipeActions: lagret", () => {
+  it("viser «Lagre i mappe» (uten mappe) ved siden av «Slett»", () => {
+    setup({ saved: true });
+    const button = screen.getByRole("button", { name: "Lagre i mappe" });
+    expect(button).toHaveTextContent("Lagre i mappe");
+    expect(button).toHaveAttribute("aria-haspopup", "dialog");
+  });
+
   it("viser «Slett» med aria-label som nevner tittelen, og ingen «Lagre»", () => {
     setup({ saved: true });
     const button = screen.getByRole("button", { name: "Slett Pannekaker" });
@@ -223,5 +260,202 @@ describe("RecipeActions: lagret", () => {
     await user.click(screen.getByRole("button", { name: "Slett Pannekaker" }));
     await user.click(screen.getByRole("button", { name: "Slett", description: "" }));
     await waitFor(() => expect(status()).toHaveTextContent("Noe gikk galt."));
+  });
+});
+
+describe("RecipeActions: mappe (Story 3.3)", () => {
+  const folders = [
+    { id: 1, name: "Hverdag" },
+    { id: 2, name: "Helg" },
+  ];
+
+  const openDialog = async (user: ReturnType<typeof userEvent.setup>, name: RegExp | string) => {
+    await user.click(screen.getByRole("button", { name }));
+    return screen.getByRole("dialog", { name: "Lagre i mappe" });
+  };
+
+  it("knappen viser mappenavnet, med aria-label «<navn>, bytt mappe»", () => {
+    setup({ saved: true, folders, folderId: 1 });
+    const button = screen.getByRole("button", { name: "Hverdag, bytt mappe" });
+    expect(button).toHaveTextContent("Hverdag");
+    expect(screen.queryByRole("button", { name: "Lagre i mappe" })).not.toBeInTheDocument();
+  });
+
+  it("vises ikke for en oppskrift som ikke er lagret", () => {
+    setup({ saved: false, folders, folderId: null });
+    expect(screen.queryByRole("button", { name: /mappe/ })).not.toBeInTheDocument();
+  });
+
+  it("åpner dialogen med forhåndsvalgt mappe og startfokus på det valgte alternativet", async () => {
+    const user = userEvent.setup();
+    setup({ saved: true, folders, folderId: 2 });
+    const dialog = await openDialog(user, "Helg, bytt mappe");
+    expect(within(dialog).getByRole("radio", { name: "Helg" })).toBeChecked();
+    expect(within(dialog).getByRole("radio", { name: "Helg" })).toHaveFocus();
+  });
+
+  it("legger oppskriften i en mappe: lukker dialogen, fokus til mappeknappen og «Lagret i <navn>.» i 3 s", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const onMoveToFolder = vi.fn().mockResolvedValue({ ok: true, folderName: "Hverdag" });
+    const { rerender, onSave, onDelete } = setup({ saved: true, folders, onMoveToFolder });
+    const dialog = await openDialog(user, "Lagre i mappe");
+    await user.click(within(dialog).getByRole("radio", { name: "Hverdag" }));
+    await user.click(within(dialog).getByRole("button", { name: "Lagre" }));
+
+    expect(onMoveToFolder).toHaveBeenCalledExactlyOnceWith(1);
+    await waitFor(() => expect(status()).toHaveTextContent("Lagret i Hverdag."));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    // Siden revalideres: knappen viser det nye navnet og har fokus.
+    rerender(
+      <RecipeActions
+        title="Pannekaker"
+        saved
+        onSave={onSave}
+        onDelete={onDelete}
+        {...folderProps}
+        folders={folders}
+        folderId={1}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Hverdag, bytt mappe" })).toHaveFocus();
+
+    act(() => vi.advanceTimersByTime(2900));
+    expect(status()).toHaveTextContent("Lagret i Hverdag.");
+    act(() => vi.advanceTimersByTime(200));
+    expect(status()).toBeEmptyDOMElement();
+  });
+
+  it("«Ingen mappe» tar oppskriften ut av mappen: «Fjernet fra mappen.»", async () => {
+    const user = userEvent.setup();
+    const onMoveToFolder = vi.fn().mockResolvedValue({ ok: true, folderName: null });
+    setup({ saved: true, folders, folderId: 1, onMoveToFolder });
+    const dialog = await openDialog(user, "Hverdag, bytt mappe");
+    await user.click(within(dialog).getByRole("radio", { name: "Ingen mappe" }));
+    await user.click(within(dialog).getByRole("button", { name: "Lagre" }));
+    expect(onMoveToFolder).toHaveBeenCalledExactlyOnceWith(null);
+    await waitFor(() => expect(status()).toHaveTextContent("Fjernet fra mappen."));
+    expect(screen.getByRole("button", { name: "Hverdag, bytt mappe" })).toHaveFocus();
+  });
+
+  it("å velge mappen oppskriften allerede ligger i endrer ingenting og lukker dialogen", async () => {
+    const user = userEvent.setup();
+    const onMoveToFolder = vi.fn();
+    setup({ saved: true, folders, folderId: 1, onMoveToFolder });
+    const dialog = await openDialog(user, "Hverdag, bytt mappe");
+    await user.click(within(dialog).getByRole("button", { name: "Lagre" }));
+    expect(onMoveToFolder).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(status()).toBeEmptyDOMElement();
+    expect(screen.getByRole("button", { name: "Hverdag, bytt mappe" })).toHaveFocus();
+  });
+
+  it("«Ny mappe»: feltet vises med fokus, og navnet sendes til onMoveToNewFolder", async () => {
+    const user = userEvent.setup();
+    const onMoveToNewFolder = vi.fn().mockResolvedValue({ ok: true, folderName: "Fest" });
+    setup({ saved: true, folders, onMoveToNewFolder });
+    const dialog = await openDialog(user, "Lagre i mappe");
+    await user.click(within(dialog).getByRole("radio", { name: "Ny mappe" }));
+    const field = within(dialog).getByRole("textbox", { name: "Navn på ny mappe" });
+    expect(field).toHaveFocus();
+    await user.type(field, "Fest");
+    await user.click(within(dialog).getByRole("button", { name: "Lagre" }));
+    expect(onMoveToNewFolder).toHaveBeenCalledExactlyOnceWith("Fest");
+    await waitFor(() => expect(status()).toHaveTextContent("Lagret i Fest."));
+  });
+
+  it("ugyldig navn: melding under feltet, dialogen blir åpen og fokus går til feltet", async () => {
+    const user = userEvent.setup();
+    const onMoveToNewFolder = vi.fn().mockResolvedValue({
+      ok: false,
+      field: "name",
+      message: "Du har allerede en mappe med dette navnet.",
+    });
+    setup({ saved: true, folders, onMoveToNewFolder });
+    const dialog = await openDialog(user, "Lagre i mappe");
+    await user.click(within(dialog).getByRole("radio", { name: "Ny mappe" }));
+    const field = within(dialog).getByRole("textbox", { name: "Navn på ny mappe" });
+    await user.type(field, "hverdag");
+    await user.click(within(dialog).getByRole("button", { name: "Lagre" }));
+
+    await waitFor(() =>
+      expect(field).toHaveAccessibleDescription("Du har allerede en mappe med dette navnet."),
+    );
+    expect(field).toHaveAttribute("aria-invalid", "true");
+    expect(field).toHaveFocus();
+    expect(screen.getByRole("dialog", { name: "Lagre i mappe" })).toBeVisible();
+    expect(status()).toBeEmptyDOMElement();
+
+    // Feilen forsvinner når brukeren skriver videre.
+    await user.type(field, "x");
+    expect(field).not.toHaveAttribute("aria-invalid");
+  });
+
+  it("annen feil: dialogen lukkes og meldingen vises i statusområdet", async () => {
+    const user = userEvent.setup();
+    const onMoveToFolder = vi
+      .fn()
+      .mockResolvedValue({ ok: false, message: "Vi fant ikke oppskriften." });
+    setup({ saved: true, folders, onMoveToFolder });
+    const dialog = await openDialog(user, "Lagre i mappe");
+    await user.click(within(dialog).getByRole("radio", { name: "Helg" }));
+    await user.click(within(dialog).getByRole("button", { name: "Lagre" }));
+    await waitFor(() => expect(status()).toHaveTextContent("Vi fant ikke oppskriften."));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("kastet feil gir reservemelding", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const user = userEvent.setup();
+    setup({ saved: true, folders, onMoveToFolder: vi.fn().mockRejectedValue(new Error("nett")) });
+    const dialog = await openDialog(user, "Lagre i mappe");
+    await user.click(within(dialog).getByRole("radio", { name: "Helg" }));
+    await user.click(within(dialog).getByRole("button", { name: "Lagre" }));
+    await waitFor(() => expect(status()).toHaveTextContent("Noe gikk galt."));
+  });
+
+  it("«Avbryt» og Escape lukker uten å lagre, og fokus går tilbake til mappeknappen", async () => {
+    const user = userEvent.setup();
+    const onMoveToFolder = vi.fn();
+    setup({ saved: true, folders, onMoveToFolder });
+    const trigger = screen.getByRole("button", { name: "Lagre i mappe" });
+    const dialog = await openDialog(user, "Lagre i mappe");
+    await user.click(within(dialog).getByRole("button", { name: "Avbryt" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+
+    await user.click(trigger);
+    fireEvent(screen.getByRole("dialog"), new Event("cancel", { cancelable: true }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+    expect(onMoveToFolder).not.toHaveBeenCalled();
+  });
+
+  it("dialogen starter på nytt ved hver åpning (valg og navn nullstilles)", async () => {
+    const user = userEvent.setup();
+    setup({ saved: true, folders });
+    let dialog = await openDialog(user, "Lagre i mappe");
+    await user.click(within(dialog).getByRole("radio", { name: "Ny mappe" }));
+    await user.type(within(dialog).getByRole("textbox"), "Utkast");
+    await user.click(within(dialog).getByRole("button", { name: "Avbryt" }));
+
+    dialog = await openDialog(user, "Lagre i mappe");
+    expect(within(dialog).getByRole("radio", { name: "Ingen mappe" })).toBeChecked();
+    expect(within(dialog).queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
+  it("«Lagret.» erstattes av mappemeldingen med ny tidtaker", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const onMoveToFolder = vi.fn().mockResolvedValue({ ok: true, folderName: "Helg" });
+    setup({ saved: true, folders, onMoveToFolder });
+    const dialog = await openDialog(user, "Lagre i mappe");
+    await user.click(within(dialog).getByRole("radio", { name: "Helg" }));
+    await user.click(within(dialog).getByRole("button", { name: "Lagre" }));
+    await waitFor(() => expect(status()).toHaveTextContent("Lagret i Helg."));
+    act(() => vi.advanceTimersByTime(3100));
+    expect(status()).toBeEmptyDOMElement();
+    expect(vi.getTimerCount()).toBe(0);
   });
 });

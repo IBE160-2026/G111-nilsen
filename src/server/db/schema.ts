@@ -1,4 +1,4 @@
-import { index, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 /**
  * Eneste databaseskjema i appen (AD-6). Endringer gjøres her, og migrasjonen
@@ -9,6 +9,21 @@ import { index, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core
  * Kolonner som kan mangle (f.eks. porsjonsantall ved import) er valgfrie.
  */
 
+/**
+ * Mapper (Story 3.3). `name` er navnet slik brukeren skrev det (trimmet); `nameKey` er det
+ * normaliserte navnet som sammenlignes (NFC + små bokstaver), og er unikt.
+ */
+export const folders = sqliteTable(
+  "folders",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    name: text("name").notNull(),
+    nameKey: text("name_key").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [uniqueIndex("folders_name_key_unique").on(table.nameKey)],
+);
+
 export const recipes = sqliteTable("recipes", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
@@ -18,6 +33,8 @@ export const recipes = sqliteTable("recipes", {
   selectedServings: integer("selected_servings"),
   /** `null` = ikke i samlingen. */
   savedAt: text("saved_at"),
+  /** `null` = ikke i noen mappe. Sletter man mappen, settes den til `null`. */
+  folderId: integer("folder_id").references(() => folders.id, { onDelete: "set null" }),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });

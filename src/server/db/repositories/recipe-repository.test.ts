@@ -285,6 +285,7 @@ describe("listSavedRecipes", () => {
         sourceName: "Matprat",
         sourceUrl: "https://www.matprat.no/x",
         savedAt: "2026-11-09T10:00:00.000Z",
+        folderName: null,
       },
     ]);
   });

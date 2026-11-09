@@ -23,6 +23,10 @@
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+  /* Mappeknappen kan ha et langt navn uten mellomrom; den skal brytes, ikke gi sidescroll. */
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: left;
 }
 
 /* Primærknapp som i EmptyState. */

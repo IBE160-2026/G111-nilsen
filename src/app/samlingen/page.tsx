@@ -6,7 +6,6 @@ import RecipeCard from "@/components/RecipeCard";
 import { collectionMessages } from "@/lib/messages";
 import { listCollection } from "@/server/services/recipe-service";
 import listStyles from "../list-page.module.css";
-import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: collectionMessages.heading };
 
@@ -18,7 +17,7 @@ export default function SamlingenPage() {
   return (
     <div className={listStyles.root}>
       <h1>{collectionMessages.heading}</h1>
-      <Suspense fallback={<p className={styles.loading}>{collectionMessages.loading}</p>}>
+      <Suspense fallback={<p className={listStyles.loading}>{collectionMessages.loading}</p>}>
         <CollectionLoader />
       </Suspense>
     </div>
@@ -44,7 +43,7 @@ async function CollectionLoader() {
   }
 
   return (
-    <ul className={styles.list} role="list">
+    <ul className={listStyles.list} role="list">
       {result.value.map((recipe) => (
         <li key={recipe.id}>
           <RecipeCard recipe={recipe} />

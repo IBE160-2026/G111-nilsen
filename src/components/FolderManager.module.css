@@ -1,0 +1,24 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: var(--content-max-width);
+}
+
+/* Skjemaet står i et kort som skjemaet «Legg inn selv». */
+.create {
+  padding: var(--space-5) var(--space-4);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-md);
+}
+
+/* role="list" i markupen: list-style: none fjerner ellers listesemantikken i Safari. */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

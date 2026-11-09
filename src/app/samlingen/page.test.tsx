@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, type Db } from "@/server/db/client";
 import { insertRecipe, type NewRecipe } from "@/server/db/repositories/recipe-repository";
+import { createFolder, moveRecipeToFolder } from "@/server/services/folder-service";
 
 const state = vi.hoisted(() => ({
   db: null as Db | null,
@@ -137,6 +138,25 @@ describe("/samlingen", () => {
     expect(
       screen.queryByRole("heading", { name: "Du har ingen lagrede oppskrifter ennå." }),
     ).not.toBeInTheDocument();
+  });
+
+  it("viser mappenavnet på kortet: «Matprat · Hverdag», og bare kilden uten mappe", async () => {
+    createFolder("Hverdag", state.db!);
+    const inFolder = insertRecipe(
+      state.db!,
+      recipe("I mappe", "2026-11-09T11:00:00.000Z", { sourceName: "Matprat" }),
+    );
+    insertRecipe(
+      state.db!,
+      recipe("Uten mappe", "2026-11-09T10:00:00.000Z", { sourceName: "Matprat" }),
+    );
+    moveRecipeToFolder(inFolder, 1, state.db!);
+    await show();
+    const links = screen.getAllByRole("link");
+    expect(links.map((a) => a.textContent)).toEqual([
+      "I mappeMatprat · Hverdag",
+      "Uten mappeMatprat",
+    ]);
   });
 
   it("utelater oppskrifter som ikke er i samlingen", async () => {
