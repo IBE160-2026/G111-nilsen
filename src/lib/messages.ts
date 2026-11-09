@@ -87,8 +87,8 @@ export const servingStepperMessages = {
 /** Tekster for redigering av en oppskrift (Story 3.5). */
 export const editRecipeMessages = {
   editLink: "Rediger",
-  heading: "Rediger oppskriften",
-  lead: "Rett tittel, antall personer, ingredienser eller steg. Ingrediensene tolkes på nytt når du lagrer.",
+  heading: "Rediger",
+  lead: "Endre tittel, antall personer, ingredienser eller steg. Ingrediensene tolkes på nytt når du lagrer.",
   submit: "Lagre endringer",
   cancel: "Avbryt",
   tabTitle: "Rediger",

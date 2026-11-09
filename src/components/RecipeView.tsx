@@ -30,7 +30,11 @@ export default function RecipeView({ recipe }: { recipe: Recipe }) {
       <header className={styles.header}>
         <div className={styles.titleRow}>
           <h1>{recipe.title}</h1>
-          <Link href={`/oppskrift/${recipe.id}/rediger`} className={styles.edit}>
+          <Link
+            href={`/oppskrift/${recipe.id}/rediger`}
+            className={styles.edit}
+            aria-label={`${editRecipeMessages.editLink} ${recipe.title}`}
+          >
             {editRecipeMessages.editLink}
           </Link>
         </div>

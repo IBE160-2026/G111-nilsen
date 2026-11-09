@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useActionState, useEffect, useRef } from "react";
-import type { ManualRecipeFormState } from "@/app/ny/actions";
 import {
   MANUAL_RECIPE_FIELDS,
   type ManualRecipeField,
+  type ManualRecipeFormState,
   type ManualRecipeValues,
-} from "@/app/ny/form-fields";
+} from "@/app/_shared/form-fields";
 import { editRecipeMessages } from "@/lib/messages";
 import styles from "./ManualRecipeForm.module.css";
 
@@ -145,7 +145,16 @@ export default function ManualRecipeForm({
           {submitLabel}
         </button>
         {cancelHref ? (
-          <Link href={cancelHref} className={styles.cancel}>
+          <Link
+            href={cancelHref}
+            className={styles.cancel}
+            aria-disabled={pending ? "true" : undefined}
+            tabIndex={pending ? -1 : undefined}
+            onClick={(event) => {
+              // Under lagring skal «Avbryt» ikke kunne navigere bort fra en pågående lagring.
+              if (pending) event.preventDefault();
+            }}
+          >
             {editRecipeMessages.cancel}
           </Link>
         ) : null}

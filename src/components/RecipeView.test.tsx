@@ -90,7 +90,7 @@ describe("RecipeView", () => {
 
   it("har en «Rediger»-lenke ved tittelen som peker til redigeringssiden", () => {
     render(<RecipeView recipe={{ ...recipe, id: 7 }} />);
-    const link = screen.getByRole("link", { name: "Rediger" });
+    const link = screen.getByRole("link", { name: "Rediger Pannekaker" });
     expect(link).toHaveAttribute("href", "/oppskrift/7/rediger");
     const title = screen.getByRole("heading", { level: 1, name: "Pannekaker" });
     expect(title.compareDocumentPosition(link) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();

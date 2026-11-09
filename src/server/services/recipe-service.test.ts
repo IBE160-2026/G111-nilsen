@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { parseLine } from "@/domain";
 import { createTestDb } from "../db/client";
+import { insertRecipe } from "../db/repositories/recipe-repository";
 import {
   createManualRecipe,
   getRecipe,
@@ -184,22 +186,84 @@ describe("updateManualRecipe", () => {
     expect(read(db, id)).toMatchObject({ originalServings: 6, selectedServings: null });
   });
 
-  it("Uendret: samme innhold, updatedAt oppdatert, resten uendret", () => {
+  it("Uendret: samme innhold, strengt nyere updatedAt, resten uendret", () => {
     const { db, id } = created();
+    db.$client
+      .prepare("update recipes set updated_at = '2020-01-01T00:00:00.000Z' where id = ?")
+      .run(id);
     const before = read(db, id);
     updateManualRecipe(id, { ...input, ingredients: ["0,5 ts salt", "3 egg"] }, db);
     const after = read(db, id);
-    expect(after.updatedAt >= before.updatedAt).toBe(true);
+    expect(after.updatedAt > before.updatedAt).toBe(true);
     expect({ ...after, updatedAt: "", ingredients: [], steps: [] }).toEqual({
       ...before,
       updatedAt: "",
       ingredients: [],
       steps: [],
     });
-    expect(after.ingredients.map((l) => l.original)).toEqual(
-      before.ingredients.map((l) => l.original),
+    const withoutId = <T extends { id: number }>(items: T[]) =>
+      items.map((item) => ({ ...item, id: undefined }));
+    expect(withoutId(after.ingredients)).toEqual(withoutId(before.ingredients));
+    expect(withoutId(after.steps)).toEqual(withoutId(before.steps));
+  });
+
+  it("seksjoner forsvinner ved redigering (akseptert til seksjoner kan redigeres)", () => {
+    const db = createTestDb();
+    const id = insertRecipe(db, {
+      title: "Pannekaker",
+      sourceUrl: null,
+      sourceName: null,
+      originalServings: 4,
+      selectedServings: null,
+      savedAt: null,
+      createdAt: "2026-11-09T10:00:00.000Z",
+      updatedAt: "2026-11-09T10:00:00.000Z",
+      ingredients: [{ ...parseLine("1 dl melk"), position: 0, section: "Saus" }],
+      steps: [{ position: 0, section: "Saus", text: "Kok." }],
+    });
+    expect(read(db, id).ingredients[0].section).toBe("Saus");
+    updateManualRecipe(id, { ...input, ingredients: ["1 dl melk"], steps: ["Kok."] }, db);
+    expect(read(db, id).ingredients[0].section).toBeNull();
+    expect(read(db, id).steps[0].section).toBeNull();
+  });
+
+  it("grenser: akkurat på grensene godtas, over gir validation", () => {
+    const { db, id } = created();
+    const atLimits = {
+      title: "a".repeat(200),
+      servings: 50,
+      ingredients: Array(100).fill("a".repeat(300)),
+      steps: Array(100).fill("a".repeat(2000)),
+    };
+    expect(updateManualRecipe(id, atLimits, db).ok).toBe(true);
+    expect(read(db, id).ingredients).toHaveLength(100);
+    for (const [change, field] of [
+      [{ title: "a".repeat(201) }, "title"],
+      [{ ingredients: Array(101).fill("1 egg") }, "ingredients"],
+      [{ ingredients: ["a".repeat(301)] }, "ingredients"],
+    ] as [Partial<ManualRecipeInput>, string][]) {
+      expect(updateManualRecipe(id, { ...atLimits, ...change }, db)).toEqual({
+        ok: false,
+        error: { kind: "validation", detail: field },
+      });
+    }
+    expect(read(db, id).title).toBe("a".repeat(200));
+  });
+
+  it("deler linjer som skjemaet: CRLF og linjer med bare mellomrom", () => {
+    const { db, id } = created();
+    updateManualRecipe(
+      id,
+      {
+        ...input,
+        ingredients: ["2 egg\r\n   \r\n1 dl melk\r\n"],
+        steps: ["  \r\nRør\r\n \t \r\nStek"],
+      },
+      db,
     );
-    expect(after.steps.map((s) => s.text)).toEqual(before.steps.map((s) => s.text));
+    const recipe = read(db, id);
+    expect(recipe.ingredients.map((l) => l.original)).toEqual(["2 egg", "1 dl melk"]);
+    expect(recipe.steps.map((st) => st.text)).toEqual(["Rør", "Stek"]);
   });
 
   it("beholder kilde, savedAt og createdAt", () => {
@@ -235,11 +299,17 @@ describe("updateManualRecipe", () => {
     expect(read(db, id)).toEqual(before);
   });
 
-  it.each([999999, 0, -1, 1.5, Number.NaN])("ukjent eller ugyldig id %s gir not_found", (id) => {
-    const db = createTestDb();
-    expect(updateManualRecipe(id, input, db)).toEqual({ ok: false, error: { kind: "not_found" } });
-    expect(count(db, "recipes")).toBe(0);
-  });
+  it.each([999999, 0, -1, 1.5, Number.NaN, Infinity, 2 ** 53])(
+    "ukjent eller ugyldig id %s gir not_found",
+    (id) => {
+      const db = createTestDb();
+      expect(updateManualRecipe(id, input, db)).toEqual({
+        ok: false,
+        error: { kind: "not_found" },
+      });
+      expect(count(db, "recipes")).toBe(0);
+    },
+  );
 
   it("databasefeil midt i: oppskriften er uendret og feilen kastes", () => {
     const { db, id } = created();

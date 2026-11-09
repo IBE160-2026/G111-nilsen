@@ -184,6 +184,26 @@ describe("recipe-repository", () => {
       expect(findRecipeById(db, id)?.selectedServings).toBe(8);
     });
 
+    it("nullstiller selectedServings når originalServings går fra null til et tall", () => {
+      const db = createTestDb();
+      const id = insertRecipe(db, { ...base, originalServings: null, selectedServings: 3 });
+      updateRecipe(db, id, update);
+      expect(findRecipeById(db, id)).toMatchObject({ originalServings: 6, selectedServings: null });
+    });
+
+    it.each([
+      ["selve oppdateringen av recipes", "before update on recipes"],
+      ["innsettingen av ingredienser", "before insert on ingredient_lines"],
+    ])("ruller tilbake alt ved feil i %s", (_, trigger) => {
+      const { db, id } = saved();
+      const before = findRecipeById(db, id);
+      db.$client.exec(`create trigger fail ${trigger} begin select raise(abort, 'feil'); end`);
+      expect(() => updateRecipe(db, id, update)).toThrow();
+      expect(findRecipeById(db, id)).toEqual(before);
+      expect(count(db, "ingredient_lines")).toBe(2);
+      expect(count(db, "steps")).toBe(2);
+    });
+
     it("kan fjerne alle steg", () => {
       const { db, id } = saved();
       updateRecipe(db, id, { ...update, steps: [] });

@@ -73,7 +73,7 @@ describe("/oppskrift/[id]/rediger", () => {
     const id = create();
     render(await renderPage(String(id)));
 
-    expect(screen.getByRole("heading", { level: 1, name: "Rediger oppskriften" })).toBeVisible();
+    expect(screen.getByRole("heading", { level: 1, name: "Rediger «Pannekaker»" })).toBeVisible();
     expect(screen.getByLabelText("Tittel")).toHaveValue("Pannekaker");
     expect(screen.getByLabelText("Antall personer")).toHaveValue("4");
     expect(screen.getByLabelText("Ingredienser")).toHaveValue(
@@ -99,13 +99,24 @@ describe("/oppskrift/[id]/rediger", () => {
     state
       .db!.$client.prepare("update steps set position = 5 - position where recipe_id = ?")
       .run(id);
+    state
+      .db!.$client.prepare(
+        "update ingredient_lines set position = 5 - position where recipe_id = ?",
+      )
+      .run(id);
     render(await renderPage(String(id)));
     expect(screen.getByLabelText("Steg (valgfritt)")).toHaveValue("Tips: bruk smør.\nStek.\nVisp.");
+    expect(screen.getByLabelText("Ingredienser")).toHaveValue(
+      "salt og pepper\n0,5 ts salt\n3 dl hvetemel",
+    );
   });
 
-  it.each(["999999", "abc", "0"])("ukjent eller ugyldig id %s gir notFound()", async (id) => {
-    await expect(renderPage(id)).rejects.toBeInstanceOf(NotFoundError);
-  });
+  it.each(["999999", "abc", "0", "1abc", "01", "-1", "1.5", "Infinity", String(2 ** 53)])(
+    "ukjent eller ugyldig id %s gir notFound()",
+    async (id) => {
+      await expect(renderPage(id)).rejects.toBeInstanceOf(NotFoundError);
+    },
+  );
 
   it("andre feil enn not_found kastes videre til error.tsx", async () => {
     state.forcedErrorKind = "validation";

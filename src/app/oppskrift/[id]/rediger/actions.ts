@@ -1,9 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import type { ManualRecipeFormState } from "@/app/ny/actions";
-import { formStateForError, formStateForUnexpectedError } from "@/app/ny/form-errors";
-import { validateManualRecipe, valuesFromFormData } from "@/app/ny/manual-recipe-schema";
+import { formStateForError, formStateForUnexpectedError } from "@/app/_shared/form-errors";
+import type { ManualRecipeFormState } from "@/app/_shared/form-fields";
+import { validateManualRecipe, valuesFromFormData } from "@/app/_shared/manual-recipe-schema";
 import { updateManualRecipe } from "@/server/services/recipe-service";
 
 /**

@@ -2,7 +2,7 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { ManualRecipeFormState } from "@/app/ny/actions";
+import type { ManualRecipeFormState } from "@/app/_shared/form-fields";
 import ManualRecipeForm from "./ManualRecipeForm";
 
 afterEach(cleanup);
@@ -151,5 +151,42 @@ describe("ManualRecipeForm", () => {
     await waitFor(() => expect(screen.getByLabelText("Tittel")).toHaveFocus());
     expect(screen.getByLabelText("Tittel")).toHaveValue("");
     expect(screen.getByLabelText("Antall personer")).toHaveValue("60");
+  });
+
+  it("«Avbryt» er deaktivert mens lagringen pågår og navigerer ikke bort", async () => {
+    const user = userEvent.setup();
+    let finish: (state: ManualRecipeFormState) => void = () => {};
+    const action = vi.fn(() => new Promise<ManualRecipeFormState>((resolve) => (finish = resolve)));
+    render(
+      <ManualRecipeForm action={action} cancelHref="/oppskrift/7" submitLabel="Lagre endringer" />,
+    );
+    const cancel = screen.getByRole("link", { name: "Avbryt" });
+    expect(cancel).not.toHaveAttribute("aria-disabled");
+    await user.click(screen.getByRole("button", { name: "Lagre endringer" }));
+    await waitFor(() => expect(cancel).toHaveAttribute("aria-disabled", "true"));
+    expect(cancel).toHaveAttribute("tabindex", "-1");
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+    cancel.dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(true);
+    finish({
+      fieldErrors: { title: "Skriv en tittel." },
+      values: { title: "", servings: "", ingredients: "", steps: "" },
+    });
+    await waitFor(() => expect(cancel).not.toHaveAttribute("aria-disabled"));
+    const after = new MouseEvent("click", { bubbles: true, cancelable: true });
+    cancel.dispatchEvent(after);
+    expect(after.defaultPrevented).toBe(false);
+  });
+
+  it("viser nye startverdier når skjemaet får ny key (ikke gamle verdier)", () => {
+    const values = (title: string) => ({ title, servings: "4", ingredients: "1 egg", steps: "" });
+    const { rerender } = render(
+      <ManualRecipeForm key="1-a" action={failingAction({})} initialValues={values("Gammel")} />,
+    );
+    expect(screen.getByLabelText("Tittel")).toHaveValue("Gammel");
+    rerender(
+      <ManualRecipeForm key="1-b" action={failingAction({})} initialValues={values("Ny")} />,
+    );
+    expect(screen.getByLabelText("Tittel")).toHaveValue("Ny");
   });
 });

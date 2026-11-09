@@ -2,16 +2,9 @@
 
 import { redirect } from "next/navigation";
 import { createManualRecipe } from "@/server/services/recipe-service";
-import type { ManualRecipeFieldErrors, ManualRecipeValues } from "./form-fields";
-import { formStateForError, formStateForUnexpectedError } from "./form-errors";
-import { validateManualRecipe, valuesFromFormData } from "./manual-recipe-schema";
-
-export type ManualRecipeFormState = {
-  fieldErrors: ManualRecipeFieldErrors;
-  values: ManualRecipeValues;
-  /** Melding når lagringen feilet av en annen grunn enn feil i feltene. */
-  formError?: string;
-};
+import { formStateForError, formStateForUnexpectedError } from "@/app/_shared/form-errors";
+import type { ManualRecipeFormState } from "@/app/_shared/form-fields";
+import { validateManualRecipe, valuesFromFormData } from "@/app/_shared/manual-recipe-schema";
 
 /**
  * Server Action for «Legg inn selv» (AD-3). Validerer med zod, lagrer via

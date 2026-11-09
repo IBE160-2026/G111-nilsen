@@ -28,5 +28,20 @@
   summary: Vis seksjonsoverskrifter i stegene (`Step.section`) slik ingrediensseksjoner vises.
   evidence: Story 2.1 beholder seksjonsnavn fra `HowToSection`, men oppskriftssiden viser stegene som én liste. Funn E5.
 - source_spec: `spec-3-5-rediger-oppskrift.md`
-  summary: Redigering av kilde, mappe, favoritt og seksjonsoverskrifter (ingredienser og steg) i redigeringsskjemaet.
-  evidence: Skjemaet i Story 3.5 har bare tittel, antall personer, ingredienser og steg. Ingredienser og steg lagres uten seksjon, så en oppskrift som er importert med seksjoner mister dem når den redigeres. Seksjoner kommer med Story 2.1 og senere, kilde og mapper med Epic 3–4.
+  summary: Redigering av kilde, mappe, favoritt og seksjoner (ingredienser og steg) i redigeringsskjemaet.
+  evidence: Skjemaet har bare tittel, antall personer, ingredienser og steg. Ingredienser og steg lagres uten seksjon, så seksjoner fra import forsvinner når oppskriften redigeres. Tas når seksjoner, kilde og mapper kan redigeres.
+- source_spec: `spec-3-5-rediger-oppskrift.md`
+  summary: Rad-id for ingredienser og steg er ikke stabil mellom redigeringer.
+  evidence: Redigering sletter og setter inn linjer og steg på nytt. Ingen funksjon bruker rad-id ennå (avkrysning er klienttilstand); vurder oppdatering på plass hvis noe begynner å lagre mot rad-id.
+- source_spec: `spec-3-5-rediger-oppskrift.md`
+  summary: Oppskrift med verdier utenfor `LIMITS` (mulig etter import) kan ikke lagres uendret i redigeringsskjemaet.
+  evidence: Redigering bruker samme grenser som «Legg inn selv». Håndteres når import kan gi lengre tekster.
+- source_spec: `spec-3-5-rediger-oppskrift.md`
+  summary: Tegn med nullbredde (U+200B m.fl.) passerer `trim()` i tittel og linjer.
+  evidence: Gjelder også «Legg inn selv» og er ikke en regresjon.
+- source_spec: `spec-3-5-rediger-oppskrift.md`
+  summary: Ved `not_found` under lagring peker «Avbryt» til en side som gir 404.
+  evidence: Sjeldent i en enbrukerapp; tas hvis det oppstår.
+- source_spec: `spec-3-5-rediger-oppskrift.md`
+  summary: Fokusflytt til første feil kan gjentas når en side gjenopprettes av Cache Components.
+  evidence: Sjekkes i nettleseren sammen med at skjemaet ikke viser gamle verdier ved ny åpning.

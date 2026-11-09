@@ -62,6 +62,15 @@ beforeEach(() => {
 });
 
 describe("saveRecipeEdits", () => {
+  it("valideringsfeil: skrevne verdier (ikke de lagrede) kommer tilbake, og lagret oppskrift er uendret", async () => {
+    const before = stored();
+    const values = { ...valid, title: "Halvskrevet", servings: "x" };
+    const result = await saveRecipeEdits(id, initialManualRecipeState, form(values));
+    expect(result.values).toEqual(values);
+    expect(result.fieldErrors).toEqual({ servings: m.servingsInvalid });
+    expect(stored()).toEqual(before);
+  });
+
   it("lagrer endringene og sender brukeren tilbake til /oppskrift/{id}", async () => {
     const error = await saveRecipeEdits(id, initialManualRecipeState, form(valid)).catch((e) => e);
     expect(error).toBeInstanceOf(RedirectError);

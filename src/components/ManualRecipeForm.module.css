@@ -95,3 +95,8 @@
   color: var(--color-accent);
   font-weight: 600;
 }
+
+.cancel[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: progress;
+}

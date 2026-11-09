@@ -90,60 +90,64 @@ export type RecipeUpdate = {
  * Returnerer `false` når id-en ikke finnes (ingenting er endret).
  */
 export function updateRecipe(db: Db, id: number, data: RecipeUpdate): boolean {
-  return db.transaction((tx) => {
-    const current = tx
-      .select({ originalServings: recipes.originalServings })
-      .from(recipes)
-      .where(eq(recipes.id, id))
-      .get();
-    if (!current) return false;
+  return db.transaction(
+    (tx) => {
+      const current = tx
+        .select({ originalServings: recipes.originalServings })
+        .from(recipes)
+        .where(eq(recipes.id, id))
+        .get();
+      if (!current) return false;
 
-    tx.update(recipes)
-      .set({
-        title: data.title,
-        originalServings: data.originalServings,
-        updatedAt: data.updatedAt,
-        ...(current.originalServings !== data.originalServings ? { selectedServings: null } : {}),
-      })
-      .where(eq(recipes.id, id))
-      .run();
-
-    tx.delete(ingredientLines).where(eq(ingredientLines.recipeId, id)).run();
-    tx.delete(steps).where(eq(steps.recipeId, id)).run();
-
-    if (data.ingredients.length > 0) {
-      tx.insert(ingredientLines)
-        .values(
-          data.ingredients.map((line) => ({
-            recipeId: id,
-            position: line.position,
-            section: line.section,
-            originalText: line.original,
-            quantityMin: line.quantity?.min ?? null,
-            quantityMax: line.quantity?.max ?? null,
-            unit: line.unit,
-            name: line.name,
-            parseable: line.parseable,
-          })),
-        )
+      tx.update(recipes)
+        .set({
+          title: data.title,
+          originalServings: data.originalServings,
+          updatedAt: data.updatedAt,
+          ...(current.originalServings !== data.originalServings ? { selectedServings: null } : {}),
+        })
+        .where(eq(recipes.id, id))
         .run();
-    }
 
-    if (data.steps.length > 0) {
-      tx.insert(steps)
-        .values(
-          data.steps.map((step) => ({
-            recipeId: id,
-            position: step.position,
-            section: step.section,
-            text: step.text,
-          })),
-        )
-        .run();
-    }
+      tx.delete(ingredientLines).where(eq(ingredientLines.recipeId, id)).run();
+      tx.delete(steps).where(eq(steps.recipeId, id)).run();
 
-    return true;
-  });
+      if (data.ingredients.length > 0) {
+        tx.insert(ingredientLines)
+          .values(
+            data.ingredients.map((line) => ({
+              recipeId: id,
+              position: line.position,
+              section: line.section,
+              originalText: line.original,
+              quantityMin: line.quantity?.min ?? null,
+              quantityMax: line.quantity?.max ?? null,
+              unit: line.unit,
+              name: line.name,
+              parseable: line.parseable,
+            })),
+          )
+          .run();
+      }
+
+      if (data.steps.length > 0) {
+        tx.insert(steps)
+          .values(
+            data.steps.map((step) => ({
+              recipeId: id,
+              position: step.position,
+              section: step.section,
+              text: step.text,
+            })),
+          )
+          .run();
+      }
+
+      return true;
+      // BEGIN IMMEDIATE tar skrivelåsen med en gang, så lesingen først ikke gir SQLITE_BUSY ved oppgradering.
+    },
+    { behavior: "immediate" },
+  );
 }
 
 function toQuantity(min: number | null, max: number | null): Quantity | null {

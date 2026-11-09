@@ -1,4 +1,4 @@
-import type { ManualRecipeValues } from "@/app/ny/form-fields";
+import type { ManualRecipeValues } from "@/app/_shared/form-fields";
 import type { Recipe } from "@/domain";
 
 /** Skjemaverdiene slik oppskriften står nå: én ingrediens og ett steg per linje. */

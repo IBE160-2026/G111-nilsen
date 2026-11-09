@@ -12,7 +12,7 @@ Repoet inneholder gruppens applikasjon og dokumentasjon av utvikling, testing og
 
 **RecipeMate** er en matlagingsassistent for oppskrifter fra nettet. Du limer inn en lenke (eller skriver inn oppskriften selv), og appen viser oppskriften i et fast og ryddig format der du kan velge antall personer, slik at alle mengder regnes om med en gang. Oppskrifter kan lagres i en samling, i mapper og som favoritter.
 
-Status: grunnmuren er på plass (Story 1.1–1.3), og du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`). Oppskriften lagres i en lokal SQLite-database og vises på `/oppskrift/{id}`. Du kan rette en oppskrift med «Rediger» (se under). Funksjonene bygges ut story for story.
+Status: grunnmuren er på plass (Story 1.1–1.5 og 3.5), og du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`). Oppskriften lagres i en lokal SQLite-database og vises på `/oppskrift/{id}`. Du kan rette en oppskrift med «Rediger» (se under). Funksjonene bygges ut story for story.
 
 ## Krav
 

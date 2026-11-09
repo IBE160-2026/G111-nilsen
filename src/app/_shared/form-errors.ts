@@ -1,7 +1,6 @@
 import { manualRecipeFieldInvalid, messageFor } from "@/lib/messages";
 import type { AppError } from "@/lib/result";
-import type { ManualRecipeFormState } from "./actions";
-import type { ManualRecipeValues } from "./form-fields";
+import type { ManualRecipeFormState, ManualRecipeValues } from "./form-fields";
 
 /**
  * Gjør en feil fra tjenesten om til skjematilstand: `validation` med kjent feltnavn

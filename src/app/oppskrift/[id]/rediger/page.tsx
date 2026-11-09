@@ -58,11 +58,11 @@ async function EditRecipeLoader({ params }: { params: Params }) {
   return (
     <div className={styles.root}>
       <header className={styles.intro}>
-        <h1>{editRecipeMessages.heading}</h1>
+        <h1>{`${editRecipeMessages.heading} «${recipe.title}»`}</h1>
         <p className={styles.lead}>{editRecipeMessages.lead}</p>
       </header>
       <ManualRecipeForm
-        key={recipe.id}
+        key={`${recipe.id}-${recipe.updatedAt}`}
         action={saveRecipeEdits.bind(null, recipe.id)}
         initialValues={initialValuesOf(recipe)}
         submitLabel={editRecipeMessages.submit}
