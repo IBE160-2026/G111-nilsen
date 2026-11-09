@@ -9,3 +9,4 @@
 [core]
 project_name = "RecipeMate"
 document_output_language = "Norwegian"
+communication_language = "Norwegian"
