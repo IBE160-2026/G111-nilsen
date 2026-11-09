@@ -1,0 +1,64 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  max-width: 640px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.meta {
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-md);
+  padding: var(--space-5) var(--space-4);
+}
+
+.lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.line {
+  display: grid;
+  grid-template-columns: minmax(5.5em, auto) 1fr;
+  column-gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border-hairline);
+}
+
+.line:last-child {
+  border-bottom: none;
+}
+
+.amount {
+  font-weight: var(--type-quantity-weight);
+  font-variant-numeric: tabular-nums;
+}
+
+.unparsed {
+  grid-column: 1 / -1;
+  font-style: italic;
+  color: var(--color-ink-secondary);
+}
+
+.steps {
+  margin: 0;
+  padding-left: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}

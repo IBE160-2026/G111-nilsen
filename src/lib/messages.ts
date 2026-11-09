@@ -2,11 +2,67 @@ import type { ErrorKind } from "./result";
 
 /**
  * Alle norske feilmeldinger samles her (AD-7); ingen andre steder skriver feiltekst.
- * Tabellen fylles ut i senere stories etter hvert som feiltypene tas i bruk.
+ * Du-form, korte setninger, ingen utropstegn: hva skjedde, og hva brukeren kan gjøre.
  */
 export type ErrorMessage = {
   title: string;
   body: string;
 };
 
-export const errorMessages: Partial<Record<ErrorKind, ErrorMessage>> = {};
+export const errorMessages: Record<ErrorKind, ErrorMessage> = {
+  invalid_url: {
+    title: "Lenken ser ikke riktig ut.",
+    body: "Sjekk at hele lenken er med, og prøv igjen.",
+  },
+  fetch_failed: {
+    title: "Vi fikk ikke hentet siden.",
+    body: "Sjekk lenken og internettforbindelsen, og prøv igjen.",
+  },
+  no_recipe: {
+    title: "Vi fant ingen oppskrift på siden.",
+    body: "Prøv en annen lenke, eller legg inn oppskriften selv.",
+  },
+  duplicate: {
+    title: "Du har allerede denne oppskriften.",
+    body: "Åpne den fra samlingen.",
+  },
+  validation: {
+    title: "Noe i skjemaet må rettes.",
+    body: "Se meldingene under feltene.",
+  },
+  not_found: {
+    title: "Vi fant ikke oppskriften.",
+    body: "Den kan være slettet, eller lenken kan være feil. Gå til Importer for å hente en oppskrift.",
+  },
+  suggestion_failed: {
+    title: "Vi fikk ikke laget forslag nå.",
+    body: "Prøv igjen om litt.",
+  },
+};
+
+/** Reservemelding når feiltypen er ukjent eller feilen var uventet. */
+export const fallbackMessage: ErrorMessage = {
+  title: "Noe gikk galt.",
+  body: "Prøv igjen. Skjer det igjen, kan du starte appen på nytt.",
+};
+
+/** Norsk melding for en feiltype, med reservemelding for ukjente typer. */
+export function messageFor(kind: ErrorKind | string | null | undefined): ErrorMessage {
+  if (kind && Object.hasOwn(errorMessages, kind)) {
+    return errorMessages[kind as ErrorKind];
+  }
+  return fallbackMessage;
+}
+
+/** Feltmeldinger for skjemaet «Legg inn selv» (/ny). */
+export const manualRecipeFieldMessages = {
+  titleRequired: "Skriv en tittel.",
+  titleTooLong: "Tittelen kan være maks 200 tegn. Gjør den kortere.",
+  servingsInvalid: "Skriv et helt tall fra 1 til 50.",
+  ingredientsRequired: "Skriv minst én ingrediens, én per linje.",
+  ingredientsTooMany: "Du kan ha maks 100 ingredienslinjer.",
+  ingredientLineTooLong:
+    "En ingredienslinje kan være maks 300 tegn. Del den opp eller gjør den kortere.",
+  stepsTooMany: "Du kan ha maks 100 steg.",
+  stepTooLong: "Et steg kan være maks 2000 tegn. Del det opp i flere steg.",
+} as const;

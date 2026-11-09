@@ -1,0 +1,4 @@
+.loading {
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}

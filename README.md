@@ -12,11 +12,11 @@ Repoet inneholder gruppens applikasjon og dokumentasjon av utvikling, testing og
 
 **RecipeMate** er en matlagingsassistent for oppskrifter fra nettet. Du limer inn en lenke (eller skriver inn oppskriften selv), og appen viser oppskriften i et fast og ryddig format der du kan velge antall personer, slik at alle mengder regnes om med en gang. Oppskrifter kan lagres i en samling, i mapper og som favoritter.
 
-Status: grunnmuren er på plass (Story 1.1) – prosjektoppsett, toppmeny, visuell profil og tomme sider for Importer, Samlingen, Mapper og Favoritter. Funksjonene bygges ut story for story.
+Status: grunnmuren er på plass (Story 1.1–1.3), og du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`). Oppskriften lagres i en lokal SQLite-database og vises på `/oppskrift/{id}`. Funksjonene bygges ut story for story.
 
 ## Krav
 
-- [Node.js](https://nodejs.org/) 22 eller nyere (npm følger med)
+- [Node.js](https://nodejs.org/) 22 eller nyere (npm følger med). Testet med Node.js 22.23 og npm 10.9.
 - Ingen database-server, konto eller API-nøkkel trengs
 
 ## Installasjon
@@ -36,6 +36,28 @@ npm run dev      # utviklingsserver på http://localhost:3000
 npm run build    # produksjonsbygg
 npm start        # kjør produksjonsbygget
 ```
+
+## Database
+
+Appen bruker én SQLite-fil, som standard `data/recipemate.db` i prosjektmappen (mappen `data/` er ikke med i git). Du trenger ikke gjøre noe for å komme i gang: mappen, fila og tabellene opprettes automatisk første gang appen trenger databasen, for eksempel når du lagrer en oppskrift. `npm run build` lager ingen database.
+
+```bash
+npm run db:migrate   # opprett databasen og kjør migrasjonene manuelt (valgfritt)
+npm run db:generate  # lag en ny migrasjon etter endring i src/server/db/schema.ts
+```
+
+- Vil du ha fila et annet sted, sett `DATABASE_PATH` i `.env.local` (se `.env.example`).
+- Vil du starte med tom database, stopp appen og slett mappen `data/`.
+- Skjemaet ligger i `src/server/db/schema.ts`, og migrasjonene i `drizzle/` (de er med i git).
+
+### Hvis better-sqlite3 ikke installerer
+
+`better-sqlite3` er en native modul. `npm install` henter vanligvis en ferdigbygd versjon for din plattform og Node-versjon. Hvis installasjonen feiler (ofte med feil fra `node-gyp` eller `prebuild-install`):
+
+1. Sjekk at du bruker Node.js 22 eller nyere (`node -v`), helst en LTS-versjon.
+2. Slett `node_modules/` og kjør `npm install` på nytt.
+3. Mangler det ferdigbygd versjon, må modulen bygges lokalt. Det krever byggverktøy: på macOS `xcode-select --install`, på Windows «Desktop development with C++» fra Visual Studio Build Tools, på Linux `build-essential` og `python3`. Kjør deretter `npm rebuild better-sqlite3`.
+4. Har du byttet Node-versjon etter installasjonen, kjør `npm rebuild better-sqlite3`.
 
 ## Testing og kodekvalitet
 
@@ -63,10 +85,11 @@ src/
     services/   Tjenester som brukes av sider og Server Actions
     ports/      Grensesnitt mot omverdenen
     adapters/   Implementasjoner av portene
-    db/         Databaseskjema og repositorier
+    db/         Databaseskjema, tilkobling, migrering og repositorier
   styles/       Designtokens (farger, typografi, avstander)
+drizzle/        Databasemigrasjoner (genereres med npm run db:generate)
 test/fixtures/  Lagrede eksempelsider brukt som testdata
-scripts/        Hjelpeskript; fetch-fixtures.sh henter testsidene til test/fixtures/
+scripts/        Hjelpeskript; db-migrate.ts kjører migrasjonene, fetch-fixtures.sh henter testsidene
 issues/         Feil og problemer underveis, og hva som kan endres (én fil per sak)
 ```
 

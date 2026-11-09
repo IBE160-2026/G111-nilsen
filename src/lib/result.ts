@@ -3,14 +3,18 @@
  * Norske brukermeldinger hentes fra src/lib/messages.ts basert på `kind`.
  */
 
-export type ErrorKind =
-  | "invalid_url"
-  | "fetch_failed"
-  | "no_recipe"
-  | "duplicate"
-  | "validation"
-  | "not_found"
-  | "suggestion_failed";
+/** Alle faste feiltyper. Hver har en norsk melding i `src/lib/messages.ts`. */
+export const ERROR_KINDS = [
+  "invalid_url",
+  "fetch_failed",
+  "no_recipe",
+  "duplicate",
+  "validation",
+  "not_found",
+  "suggestion_failed",
+] as const;
+
+export type ErrorKind = (typeof ERROR_KINDS)[number];
 
 export type AppError = {
   kind: ErrorKind;

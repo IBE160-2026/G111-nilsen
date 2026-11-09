@@ -17,6 +17,11 @@ describe("sider (spec 1.1, matrise: Start og Ukjent side)", () => {
     ).toBeInTheDocument();
   });
 
+  it("Importer-siden lenker til «Legg inn selv» (/ny)", () => {
+    render(<ImporterPage />);
+    expect(screen.getByRole("link", { name: "Legg inn selv" })).toHaveAttribute("href", "/ny");
+  });
+
   it.each([
     [
       "Samlingen",

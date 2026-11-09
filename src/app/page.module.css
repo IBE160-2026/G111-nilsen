@@ -8,3 +8,17 @@
 .lead {
   color: var(--color-ink-secondary);
 }
+
+.manual {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-2);
+}
+
+.manualLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-target-min);
+  font-weight: 600;
+}

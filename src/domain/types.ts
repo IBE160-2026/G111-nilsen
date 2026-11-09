@@ -42,3 +42,39 @@ export type ParsedLine = {
 
 /** En ingredienslinje etter skalering. `approximate` betyr at mengden er avrundet til «ca.». */
 export type ScaledLine = ParsedLine & { approximate: boolean };
+
+/**
+ * En lagret ingredienslinje: tolkningen pluss plassering i oppskriften.
+ * `original` er linjen slik brukeren skrev den (trimmet); skalerte verdier lagres aldri.
+ */
+export type RecipeLine = ParsedLine & {
+  id: number;
+  position: number;
+  section: string | null;
+};
+
+/** Et steg i fremgangsmåten. */
+export type Step = {
+  id: number;
+  position: number;
+  section: string | null;
+  text: string;
+};
+
+/**
+ * En lagret oppskrift. Tidspunkt er ISO 8601-tekst i UTC.
+ * `savedAt === null` betyr at oppskriften ikke er i samlingen ennå.
+ */
+export type Recipe = {
+  id: number;
+  title: string;
+  sourceUrl: string | null;
+  sourceName: string | null;
+  originalServings: number | null;
+  selectedServings: number | null;
+  savedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  ingredients: RecipeLine[];
+  steps: Step[];
+};
