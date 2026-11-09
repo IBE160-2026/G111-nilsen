@@ -78,3 +78,8 @@ export type Recipe = {
   ingredients: RecipeLine[];
   steps: Step[];
 };
+
+/** En oppskrift slik den vises som kort i samlingen. `savedAt` er alltid satt. */
+export type RecipeSummary = Pick<Recipe, "id" | "title" | "sourceUrl" | "sourceName"> & {
+  savedAt: string;
+};

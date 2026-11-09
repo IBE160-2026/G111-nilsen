@@ -93,3 +93,20 @@ export const editRecipeMessages = {
   cancel: "Avbryt",
   tabTitle: "Rediger",
 } as const;
+
+/** Tekster for Samlingen (Story 3.1). */
+/** Kilden som vises på oppskrifter uten navn og lenke (oppskriftssiden og kort). */
+export const sourceMessages = {
+  manual: "Lagt inn selv",
+} as const;
+
+export const collectionMessages = {
+  heading: "Samlingen",
+  loading: "Henter samlingen …",
+  loadFailed: "Kunne ikke hente samlingen",
+  emptyTitle: "Du har ingen lagrede oppskrifter ennå.",
+  emptyDescription:
+    "Oppskrifter du legger inn eller lagrer, havner her med den sist lagrede øverst.",
+  emptyManualAction: "Legg inn selv",
+  emptyImportAction: "Importer din første oppskrift",
+} as const;

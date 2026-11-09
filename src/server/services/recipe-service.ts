@@ -1,11 +1,12 @@
 import "server-only";
-import { parseLine, type Recipe } from "@/domain";
+import { parseLine, type Recipe, type RecipeSummary } from "@/domain";
 import { LIMITS, splitLines } from "@/lib/recipe-input";
 import { appError, err, ok, type Result } from "@/lib/result";
 import { getDb, type Db } from "../db/client";
 import {
   findRecipeById,
   insertRecipe,
+  listSavedRecipes,
   updateRecipe,
   type NewIngredientLine,
   type NewStep,
@@ -79,7 +80,7 @@ function buildContent(input: ManualRecipeInput): Result<RecipeContent> {
 /**
  * Lagrer en oppskrift brukeren har skrevet selv. Hver ingredienslinje tolkes med
  * `parseLine` og lagres med originaltekst (trimmet) og tolkede felt (AD-2).
- * Oppskriften legges ikke i samlingen (`savedAt = null`).
+ * Oppskriften legges rett i samlingen: `savedAt` settes til lagringstidspunktet.
  */
 export function createManualRecipe(
   input: ManualRecipeInput,
@@ -95,7 +96,7 @@ export function createManualRecipe(
     sourceName: null,
     originalServings: input.servings,
     selectedServings: null,
-    savedAt: null,
+    savedAt: now,
     createdAt: now,
     updatedAt: now,
     ingredients: content.value.ingredients,
@@ -134,4 +135,9 @@ export function getRecipe(id: number, db: Db = getDb()): Result<Recipe> {
   if (!Number.isSafeInteger(id) || id < 1) return err(appError("not_found"));
   const recipe = findRecipeById(db, id);
   return recipe ? ok(recipe) : err(appError("not_found"));
+}
+
+/** Oppskriftene i samlingen, sist lagret først. */
+export function listCollection(db: Db = getDb()): Result<RecipeSummary[]> {
+  return ok(listSavedRecipes(db));
 }

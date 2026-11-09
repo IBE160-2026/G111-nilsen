@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  collectionMessages,
   editRecipeMessages,
   errorMessages,
   fallbackMessage,
@@ -33,6 +34,7 @@ describe("messageFor", () => {
       ...Object.values(manualRecipeFieldMessages),
       ...Object.values(servingStepperMessages),
       ...Object.values(editRecipeMessages),
+      ...Object.values(collectionMessages),
     ];
     for (const text of texts) expect(text).not.toContain("!");
   });

@@ -49,3 +49,16 @@
 - source_spec: `spec-1-6-kryss-av-under-matlaging.md`
   summary: Klikk på −/+ rett etter ugyldig kladd i porsjonsfeltet ved grensen: blur-commit av kladden gjør at klikket likevel virker (verdi 1, kladd «5», klikk − gir 4).
   evidence: Funn E1; følge av `aria-disabled` i stedet for `disabled`. Resultatet er et gyldig tall; kan løses ved å lese grensen ved `pointerdown`.
+
+- source_spec: `spec-3-1-se-samlingen.md`
+  summary: Sporing av «sist åpnet» i Samlingen (FR-16).
+  evidence: Samlingen sorteres på «sist lagret først» og dekker FR-16 med «sist lagret». Å spore åpninger krever en ny kolonne og skriving ved visning av oppskriften; tas hvis rekkefølgen etter bruk viser seg å savne det.
+- source_spec: `spec-3-1-se-samlingen.md`
+  summary: Sidedeling og søk i Samlingen.
+  evidence: Alle oppskrifter listes i én liste. Greit for en lokal enbrukerapp med få oppskrifter; vurderes når samlingen blir stor.
+- source_spec: `spec-3-1-se-samlingen.md`
+  summary: Antall oppskrifter under overskriften i Samlingen (UX-mockupen) og «sist brukt» som rekkefølge (EXPERIENCE.md).
+  evidence: Ikke krevd av Story 3.1; sorteringen er «sist lagret først». Tas sammen med sporing av «sist åpnet».
+- source_spec: `spec-3-1-se-samlingen.md`
+  summary: Import (Epic 2) må lagre tom kilde-lenke som `null`, ikke som tom streng.
+  evidence: Migrasjonen 0001 og regelen «uten kilde-lenke» bruker `source_url IS NULL`; en tom streng ville ikke blitt flyttet inn i samlingen.

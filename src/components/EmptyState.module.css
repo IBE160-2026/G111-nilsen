@@ -31,3 +31,32 @@
   font-weight: 600;
   text-decoration: none;
 }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* Sekundærknapp: samme størrelse som hovedknappen, men med kantlinje i stedet for fyll. */
+.secondaryAction {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-target-min);
+  padding: var(--space-3) var(--space-4);
+  border: var(--button-border-width) solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-ink-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.secondaryAction:hover {
+  border-color: var(--color-accent);
+}
+
+.secondaryAction:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-accent);
+  outline-offset: var(--focus-ring-width);
+}

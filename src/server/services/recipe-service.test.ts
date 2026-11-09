@@ -5,6 +5,7 @@ import { insertRecipe } from "../db/repositories/recipe-repository";
 import {
   createManualRecipe,
   getRecipe,
+  listCollection,
   updateManualRecipe,
   type ManualRecipeInput,
 } from "./recipe-service";
@@ -47,9 +48,9 @@ describe("recipe-service", () => {
     expect(recipe.steps.map((s) => s.text)).toEqual(["Visp sammen.", "Stek tynne pannekaker."]);
   });
 
-  it("lagres med savedAt = null (ikke i samlingen) og ISO-tidspunkt i UTC", () => {
+  it("lagres rett i samlingen: savedAt = createdAt = updatedAt (ISO i UTC)", () => {
     const recipe = saveAndRead({});
-    expect(recipe.savedAt).toBeNull();
+    expect(recipe.savedAt).toBe(recipe.createdAt);
     expect(recipe.createdAt).toMatch(/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/);
     expect(recipe.updatedAt).toBe(recipe.createdAt);
   });
@@ -319,5 +320,40 @@ describe("updateManualRecipe", () => {
     );
     expect(() => updateManualRecipe(id, { ...input, title: "Annet" }, db)).toThrow();
     expect(read(db, id)).toEqual(before);
+  });
+});
+
+describe("listCollection", () => {
+  it("er tom for en tom database", () => {
+    expect(listCollection(createTestDb())).toEqual({ ok: true, value: [] });
+  });
+
+  it("viser nye manuelle oppskrifter, sist lagret først", () => {
+    const db = createTestDb();
+    const first = createManualRecipe({ ...input, title: "Først" }, db);
+    const second = createManualRecipe({ ...input, title: "Sist" }, db);
+    if (!first.ok || !second.ok) throw new Error("kunne ikke lagre");
+
+    const result = listCollection(db);
+    if (!result.ok) throw new Error("forventet ok");
+    expect(result.value.map((r) => r.id)).toEqual([second.value.id, first.value.id]);
+    expect(result.value[0]).toMatchObject({ title: "Sist", sourceName: null, sourceUrl: null });
+  });
+
+  it("endrer ikke savedAt eller plassering når en oppskrift redigeres", () => {
+    const db = createTestDb();
+    const first = createManualRecipe({ ...input, title: "Først" }, db);
+    const second = createManualRecipe({ ...input, title: "Sist" }, db);
+    if (!first.ok || !second.ok) throw new Error("kunne ikke lagre");
+    const before = listCollection(db);
+
+    updateManualRecipe(first.value.id, { ...input, title: "Endret" }, db);
+
+    const after = listCollection(db);
+    if (!before.ok || !after.ok) throw new Error("forventet ok");
+    expect(after.value.map((r) => [r.id, r.savedAt])).toEqual(
+      before.value.map((r) => [r.id, r.savedAt]),
+    );
+    expect(after.value[1].title).toBe("Endret");
   });
 });

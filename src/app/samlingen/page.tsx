@@ -1,18 +1,55 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
+import { Suspense } from "react";
 import EmptyState from "@/components/EmptyState";
-import styles from "../list-page.module.css";
+import RecipeCard from "@/components/RecipeCard";
+import { collectionMessages } from "@/lib/messages";
+import { listCollection } from "@/server/services/recipe-service";
+import listStyles from "../list-page.module.css";
+import styles from "./page.module.css";
 
-export const metadata: Metadata = { title: "Samlingen" };
+export const metadata: Metadata = { title: collectionMessages.heading };
 
+/**
+ * Samlingen (Story 3.1). Overskriften står utenfor Suspense; oppskriftene leses inne i
+ * grensen, etter `connection()`, slik at databasen bare leses ved en faktisk forespørsel.
+ */
 export default function SamlingenPage() {
   return (
-    <div className={styles.root}>
-      <h1>Samlingen</h1>
-      <EmptyState
-        title="Du har ingen lagrede oppskrifter ennå."
-        description="Oppskrifter du lagrer, havner her med den sist brukte øverst."
-        action={{ href: "/", label: "Importer din første oppskrift" }}
-      />
+    <div className={listStyles.root}>
+      <h1>{collectionMessages.heading}</h1>
+      <Suspense fallback={<p className={styles.loading}>{collectionMessages.loading}</p>}>
+        <CollectionLoader />
+      </Suspense>
     </div>
+  );
+}
+
+async function CollectionLoader() {
+  await connection();
+
+  const result = listCollection();
+  // Feil vises av error.tsx; en tom samling skal aldri skjule en databasefeil.
+  if (!result.ok) throw new Error(`${collectionMessages.loadFailed} (${result.error.kind})`);
+
+  if (result.value.length === 0) {
+    return (
+      <EmptyState
+        title={collectionMessages.emptyTitle}
+        description={collectionMessages.emptyDescription}
+        action={{ href: "/ny", label: collectionMessages.emptyManualAction }}
+        secondaryAction={{ href: "/", label: collectionMessages.emptyImportAction }}
+      />
+    );
+  }
+
+  return (
+    <ul className={styles.list} role="list">
+      {result.value.map((recipe) => (
+        <li key={recipe.id}>
+          <RecipeCard recipe={recipe} />
+        </li>
+      ))}
+    </ul>
   );
 }

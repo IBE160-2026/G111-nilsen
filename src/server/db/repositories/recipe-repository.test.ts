@@ -3,6 +3,7 @@ import { createTestDb } from "../client";
 import {
   findRecipeById,
   insertRecipe,
+  listSavedRecipes,
   updateRecipe,
   type NewRecipe,
   type RecipeUpdate,
@@ -229,5 +230,58 @@ describe("recipe-repository", () => {
       expect(count(db, "ingredient_lines")).toBe(2);
       expect(count(db, "steps")).toBe(2);
     });
+  });
+});
+
+describe("listSavedRecipes", () => {
+  const at = (
+    savedAt: string | null,
+    title: string,
+    extra: Partial<NewRecipe> = {},
+  ): NewRecipe => ({
+    ...base,
+    title,
+    savedAt,
+    ...extra,
+  });
+
+  it("er tom når ingen oppskrifter finnes", () => {
+    expect(listSavedRecipes(createTestDb())).toEqual([]);
+  });
+
+  it("utelater oppskrifter uten savedAt", () => {
+    const db = createTestDb();
+    insertRecipe(db, at(null, "Ikke i samlingen", { sourceUrl: "https://a.no/x" }));
+    const saved = insertRecipe(db, at("2026-11-09T10:00:00.000Z", "I samlingen"));
+    expect(listSavedRecipes(db).map((r) => r.id)).toEqual([saved]);
+  });
+
+  it("sorterer på savedAt synkende, og på id synkende ved likt tidspunkt", () => {
+    const db = createTestDb();
+    const oldest = insertRecipe(db, at("2026-11-09T09:00:00.000Z", "Eldst"));
+    const tieA = insertRecipe(db, at("2026-11-09T11:00:00.000Z", "Lik A"));
+    const newest = insertRecipe(db, at("2026-11-09T12:00:00.000Z", "Nyest"));
+    const tieB = insertRecipe(db, at("2026-11-09T11:00:00.000Z", "Lik B"));
+    expect(listSavedRecipes(db).map((r) => r.id)).toEqual([newest, tieB, tieA, oldest]);
+  });
+
+  it("returnerer bare oppsummeringen, uten ingredienser og steg", () => {
+    const db = createTestDb();
+    const id = insertRecipe(
+      db,
+      at("2026-11-09T10:00:00.000Z", "Pannekaker", {
+        sourceName: "Matprat",
+        sourceUrl: "https://www.matprat.no/x",
+      }),
+    );
+    expect(listSavedRecipes(db)).toEqual([
+      {
+        id,
+        title: "Pannekaker",
+        sourceName: "Matprat",
+        sourceUrl: "https://www.matprat.no/x",
+        savedAt: "2026-11-09T10:00:00.000Z",
+      },
+    ]);
   });
 });

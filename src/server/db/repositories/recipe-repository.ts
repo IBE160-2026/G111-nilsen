@@ -1,6 +1,6 @@
 import "server-only";
-import { asc, eq } from "drizzle-orm";
-import type { Quantity, Recipe, RecipeLine, Step, UnitKey } from "@/domain";
+import { asc, desc, eq, isNotNull } from "drizzle-orm";
+import type { Quantity, Recipe, RecipeLine, RecipeSummary, Step, UnitKey } from "@/domain";
 import type { Db } from "../client";
 import { ingredientLines, recipes, steps } from "../schema";
 
@@ -201,4 +201,24 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
       text: step.text,
     })),
   };
+}
+
+/**
+ * Oppskriftene i samlingen (`savedAt` satt), sist lagret først og deretter høyest id først.
+ * Leser bare oppsummeringen; ingredienser og steg hentes ikke.
+ */
+export function listSavedRecipes(db: Db): RecipeSummary[] {
+  return db
+    .select({
+      id: recipes.id,
+      title: recipes.title,
+      sourceName: recipes.sourceName,
+      sourceUrl: recipes.sourceUrl,
+      savedAt: recipes.savedAt,
+    })
+    .from(recipes)
+    .where(isNotNull(recipes.savedAt))
+    .orderBy(desc(recipes.savedAt), desc(recipes.id))
+    .all()
+    .flatMap((row) => (row.savedAt === null ? [] : [{ ...row, savedAt: row.savedAt }]));
 }

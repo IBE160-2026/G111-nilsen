@@ -1,23 +1,10 @@
 import Link from "next/link";
 import type { Recipe } from "@/domain";
 import { editRecipeMessages } from "@/lib/messages";
+import { sourceLabel } from "@/lib/source-label";
 import IngredientList from "./IngredientList";
 import StepList from "./StepList";
 import styles from "./RecipeView.module.css";
-
-/** Kilden som vises: navnet, ellers vertsnavnet fra lenken, ellers «Lagt inn selv». */
-export function sourceLabel(recipe: Pick<Recipe, "sourceName" | "sourceUrl">): string {
-  const name = recipe.sourceName?.trim();
-  if (name) return name;
-  if (recipe.sourceUrl) {
-    try {
-      return new URL(recipe.sourceUrl).hostname.replace(/^www\./, "");
-    } catch {
-      // Ugyldig lenke: vis reserveteksten.
-    }
-  }
-  return "Lagt inn selv";
-}
 
 /**
  * Oppskriften i fast format (FR-5, UX-DR15): tittel, kilde, porsjonsvelger,

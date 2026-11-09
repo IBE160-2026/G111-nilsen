@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { Activity } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { Recipe } from "@/domain";
-import RecipeView, { sourceLabel } from "./RecipeView";
+import RecipeView from "./RecipeView";
 
 afterEach(cleanup);
 
@@ -128,16 +128,6 @@ describe("RecipeView", () => {
     );
     expect(screen.getByText("matprat.no")).toBeInTheDocument();
     expect(screen.queryByText(/Lagt inn selv/)).not.toBeInTheDocument();
-  });
-
-  it.each([
-    [{ sourceName: "Matprat", sourceUrl: "https://www.matprat.no/x" }, "Matprat"],
-    [{ sourceName: null, sourceUrl: "https://www.matprat.no/x" }, "matprat.no"],
-    [{ sourceName: "  ", sourceUrl: "https://example.com/a" }, "example.com"],
-    [{ sourceName: null, sourceUrl: "ikke en lenke" }, "Lagt inn selv"],
-    [{ sourceName: null, sourceUrl: null }, "Lagt inn selv"],
-  ])("sourceLabel(%j) = %s", (source, expected) => {
-    expect(sourceLabel(source)).toBe(expected);
   });
 
   it("nullstiller valgt antall når komponenten får en annen oppskrift", async () => {

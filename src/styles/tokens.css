@@ -45,6 +45,9 @@
   --type-meta-size: 14px;
   --type-meta-weight: 400;
 
+  /* Tittel på oppskriftskort i lister (DESIGN.md: Georgia 18 px) */
+  --type-card-title-size: 18px;
+
   /* Tallet i porsjonsvelgeren (DESIGN.md: Georgia 24 px) */
   --type-stepper-value-size: 24px;
 
@@ -66,6 +69,7 @@
   --tap-target-min: 44px;
   --focus-ring-width: 2px;
   --stepper-border-width: 1.5px;
+  --button-border-width: 1.5px;
 
   /* Avkrysningsboks (DESIGN.md: «Avkrysset linje») */
   --checkbox-size: 24px;

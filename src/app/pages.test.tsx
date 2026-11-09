@@ -3,13 +3,12 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import ImporterPage from "./page";
 import NotFound from "./not-found";
-import SamlingenPage from "./samlingen/page";
 import MapperPage from "./mapper/page";
 import FavoritterPage from "./favoritter/page";
 
 afterEach(cleanup);
 
-describe("sider (spec 1.1, matrise: Start og Ukjent side)", () => {
+describe("sider (spec 1.1, matrise: Start og Ukjent side; Samlingen testes i samlingen/page.test.tsx)", () => {
   it("Importer-siden viser overskriften «Hent en oppskrift»", () => {
     render(<ImporterPage />);
     expect(
@@ -23,13 +22,6 @@ describe("sider (spec 1.1, matrise: Start og Ukjent side)", () => {
   });
 
   it.each([
-    [
-      "Samlingen",
-      SamlingenPage,
-      "Du har ingen lagrede oppskrifter ennå.",
-      "Importer din første oppskrift",
-      "/",
-    ],
     ["Mapper", MapperPage, "Du har ingen mapper ennå.", "Gå til samlingen", "/samlingen"],
     [
       "Favoritter",
