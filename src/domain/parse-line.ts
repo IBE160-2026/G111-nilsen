@@ -1,6 +1,6 @@
 import { FRACTION_CLASS, parseQuantity } from "./parse-quantity";
 import type { ParsedLine, UnitKey } from "./types";
-import { normalizeUnit } from "./units";
+import { GLUE_SAFE_UNITS, normalizeUnit } from "./units";
 
 // «ca.» fjernes bare når en mengde følger, slik at ord som «cayenne» ikke berøres.
 const APPROX_PREFIX = new RegExp(`^ca\\.?\\s*(?=\\d|[.,]\\d|${FRACTION_CLASS})`, "i");
@@ -8,6 +8,13 @@ const APPROX_PREFIX = new RegExp(`^ca\\.?\\s*(?=\\d|[.,]\\d|${FRACTION_CLASS})`,
 // Første ord etter mengden (eventuelt rett etter tallet, «750g»), med valgfritt
 // punktum etter forkortelse. Ordet må slutte der (ikke følges av bokstav eller tall).
 const LEADING_WORD = /^\s*(\p{L}+\.?)(?![\p{L}\d])/u;
+
+// Enhet klistret rett på navnet («½ tssalt»); se GLUE_SAFE_UNITS. Lengste først,
+// små bokstaver, og minst to bokstaver må følge.
+const GLUED_UNIT = new RegExp(
+  `^\\s*(${[...GLUE_SAFE_UNITS].sort((a, b) => b.length - a.length).join("|")})(?=\\p{L}{2})`,
+  "u",
+);
 
 // Skilletegn og mellomrom som ikke hører til navnet («400 g, finhakket løk»).
 const LEADING_SEPARATORS = /^[\s,;:.]+/;
@@ -32,6 +39,13 @@ export function parseLine(text: string): ParsedLine {
   if (word) {
     unit = normalizeUnit(word[1]);
     if (unit) rest = rest.slice(word[0].length);
+  }
+  if (!unit) {
+    const glued = rest.match(GLUED_UNIT);
+    if (glued) {
+      unit = normalizeUnit(glued[1]);
+      rest = rest.slice(glued[0].length);
+    }
   }
 
   const name = rest.replace(LEADING_SEPARATORS, "").trim();

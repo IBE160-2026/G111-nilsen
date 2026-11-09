@@ -49,3 +49,26 @@ export function normalizeUnit(word: string): UnitKey | null {
   const cleaned = word.normalize("NFC").trim().toLowerCase().replace(/\.$/, "");
   return lookup.get(cleaned) ?? null;
 }
+
+/**
+ * Enhetsforkortelser som kan skilles ut når de er klistret rett på navnet uten
+ * mellomrom («½ tssalt», «6 dlTINE®»), slik tekst kopiert fra enkelte oppskriftssider
+ * blir. Bare forkortelser som sjelden eller aldri starter vanlige ord i ingredienslister.
+ * Utelatt med vilje: g og l («gulrøtter», «løk»), cup («cupcake»), boks/pose («boksen»,
+ * «posen»), oz/lb og store bokstaver (merkenavn). Kjent grense: ord som «tsatsiki» etter
+ * et tall får enheten ts.
+ */
+export const GLUE_SAFE_UNITS: readonly string[] = [
+  "tbsp",
+  "tbs",
+  "tsp",
+  "krm",
+  "stk",
+  "fedd",
+  "ss",
+  "ts",
+  "dl",
+  "ml",
+  "kg",
+  "pk",
+];

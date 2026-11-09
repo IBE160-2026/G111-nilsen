@@ -148,3 +148,41 @@ describe("parseLine – øvrige regler", () => {
     }
   });
 });
+
+describe("parseLine – enhet klistret på navnet (kopiert fra oppskriftssider, issue 005)", () => {
+  it.each([
+    ["½ tssalt (kan sløyfes)", { min: 0.5 }, "ts", "salt (kan sløyfes)"],
+    ["6 dlTINE® Lettmelk 1,0 % fett.", { min: 6 }, "dl", "TINE® Lettmelk 1,0 % fett."],
+    ["3 stkegg, helst romtemperert", { min: 3 }, "stk", "egg, helst romtemperert"],
+    ["3 ssTINE® Meierismør til steking.", { min: 3 }, "ss", "TINE® Meierismør til steking."],
+    ["2 krmpepper", { min: 2 }, "krm", "pepper"],
+    ["1 tbspbutter", { min: 1 }, "tbsp", "butter"],
+    ["500 mlmelk", { min: 500 }, "ml", "melk"],
+    ["½tssalt", { min: 0.5 }, "ts", "salt"],
+    ["2 feddhvitløk", { min: 2 }, "fedd", "hvitløk"],
+    ["1 tbsbutter", { min: 1 }, "tbsp", "butter"],
+    ["2–3 ssmel", { min: 2, max: 3 }, "ss", "mel"],
+    ["ca. 2 dlfløte", { min: 2 }, "dl", "fløte"],
+  ] as const)("%s", (text, quantity, unit, name) => {
+    expect(parseLine(text)).toEqual(line(text, quantity, unit, name));
+  });
+
+  it.each(["2 gulrøtter", "1 løk", "2 grønne epler", "3 egg", "1 dash smør"])(
+    "skiller ikke ut g, l eller andre ord: %s",
+    (text) => {
+      expect(parseLine(text).unit).toBeNull();
+    },
+  );
+
+  it("krever minst to bokstaver etter enheten", () => {
+    expect(parseLine("2 dle").unit).toBeNull();
+  });
+
+  it("kjent grense: ord som starter med en forkortelse får enheten (tsatsiki)", () => {
+    expect(parseLine("1 tsatsiki").unit).toBe("ts");
+  });
+
+  it("store bokstaver i enheten skilles ikke ut (kan være merkenavn)", () => {
+    expect(parseLine("2 SSsukker").unit).toBeNull();
+  });
+});

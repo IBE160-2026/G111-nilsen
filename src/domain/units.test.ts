@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeUnit, UNIT_VARIANTS } from "./units";
+import { GLUE_SAFE_UNITS, normalizeUnit, UNIT_VARIANTS } from "./units";
 
 describe("normalizeUnit", () => {
   it.each([
@@ -93,5 +93,17 @@ describe("normalizeUnit", () => {
   it("hver variant hører til nøyaktig én nøkkel", () => {
     const all = Object.values(UNIT_VARIANTS).flat();
     expect(new Set(all).size).toBe(all.length);
+  });
+});
+
+describe("GLUE_SAFE_UNITS", () => {
+  it.each(GLUE_SAFE_UNITS)("%s er en kjent enhet", (word) => {
+    expect(normalizeUnit(word)).not.toBeNull();
+  });
+
+  it("inneholder ikke g, l eller cup", () => {
+    expect(GLUE_SAFE_UNITS).not.toContain("g");
+    expect(GLUE_SAFE_UNITS).not.toContain("l");
+    expect(GLUE_SAFE_UNITS).not.toContain("cup");
   });
 });
