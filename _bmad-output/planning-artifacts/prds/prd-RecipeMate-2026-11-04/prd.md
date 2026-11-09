@@ -146,7 +146,7 @@ Brukeren kan velge valgt porsjonsantall som et heltall fra 1 til 50 `[ANTAKELSE:
 Mengder regnes om med faktoren valgt porsjonsantall delt på opprinnelig porsjonsantall, etter disse reglene:
 
 1. Enheten beholdes. Det gjøres ingen konvertering mellom enheter.
-2. Resultatet vises som ½, ¼, ¾, ⅓ eller ⅔ (eventuelt med heltall foran) når det ligger innenfor 5 % av en slik verdi. Ellers vises desimaltall med komma og maks én desimal.
+2. Resultatet vises som ½, ¼, ¾, ⅓ eller ⅔ (eventuelt med heltall foran) når brøkdelen ligger innenfor 5 % av selve brøken (f.eks. 1,24 → 1 ¼, men 5,4 → 5,4). Ellers vises desimaltall med komma og maks én desimal.
 3. Udelelige ingredienser rundes til nærmeste hele tall, minst 1, og merkes «ca.» når avrundingen endret verdien.
 4. Mengder i g og ml over 100 avrundes til to gjeldende sifre, og mengder under 100 avrundes til hele tall (37,5 g → 38 g).
 5. Mengdeområder skaleres i begge ender.
