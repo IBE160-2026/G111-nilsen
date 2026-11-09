@@ -52,7 +52,7 @@ npm run db:generate  # lag en ny migrasjon etter endring i src/server/db/schema.
 
 ### Hvis better-sqlite3 ikke installerer
 
-`better-sqlite3` er en native modul. `npm install` henter vanligvis en ferdigbygd versjon for din plattform og Node-versjon. Hvis installasjonen feiler (ofte med feil fra `node-gyp` eller `prebuild-install`):
+`better-sqlite3` er en native modul. Pakken har med ferdigbygde versjoner for macOS, Linux og Windows (x64 og arm64), så `npm install` trenger normalt verken kompilator eller nett utover npm. `package-lock.json` har `"gypfile": false` for pakken, slik at npm ikke prøver å bygge den selv (se [issue 004](issues/004-better-sqlite3-bygges-fra-kildekode.md)). Hvis installasjonen feiler (ofte med feil fra `node-gyp` eller `prebuild-install`):
 
 1. Sjekk at du bruker Node.js 22 eller nyere (`node -v`), helst en LTS-versjon.
 2. Slett `node_modules/` og kjør `npm install` på nytt.
