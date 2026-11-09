@@ -25,7 +25,9 @@
 - [ ] 2026-11-04 [story-1-1](994-2026-11-04-20-02-04-story-1-1-oppsett.md) — messageFor med reservemelding og server-only-vakt i Story 1.4
 - [ ] 2026-11-04 [story-1-1](994-2026-11-04-20-02-04-story-1-1-oppsett.md) — avklar rekkefølge på forslag på oppskriftssiden (PRD vs EXPERIENCE) før Epic 4
 - [x] 2026-11-04 [story-1-2](993-2026-11-04-20-17-05-story-1-2-tolking.md) — avgjør avrunding av g/ml under 100 før Story 1.3 (PRD §9.4) (løst 2026-11-04: hele tall)
-- [ ] 2026-11-09 [story-1-3](992-2026-11-09-09-33-25-story-1-3-skalering.md) — Story 1.5: vis enheten slik den står i oppskriften og behold «ca.» fra originalen
+- [ ] 2026-11-09 [story-1-3](992-2026-11-09-09-33-25-story-1-3-skalering.md) — vis enheten slik den står i oppskriften og behold «ca.» fra originalen
 - [ ] 2026-11-09 [story-1-4](991-2026-11-09-10-08-43-story-1-4-manuell-innlegging.md) — test skjemaet på /ny i nettleseren på Macen og ta skjermbilde på 360 px
-- [ ] 2026-11-09 [story-1-4](991-2026-11-09-10-08-43-story-1-4-manuell-innlegging.md) — Story 1.5: sidetittel fra oppskriften og ekte 404-status
+- [x] 2026-11-09 [story-1-4](991-2026-11-09-10-08-43-story-1-4-manuell-innlegging.md) — Story 1.5: sidetittel fra oppskriften og ekte 404-status (sidetittel løst i Story 1.5; ekte 404-status utsatt, se deferred-work.md)
 - [x] 2026-11-09 [story-1-4](991-2026-11-09-10-08-43-story-1-4-manuell-innlegging.md) — avgjør om redigering av oppskrifter skal inn i PRD (avdekket ved manuell test, issue 005) (løst 2026-11-09: FR-18, Story 3.5)
+- [ ] 2026-11-09 [story-1-5](990-2026-11-09-15-18-00-story-1-5-oppskriftsvisning.md) — test porsjonsvelgeren i nettleseren på Macen og ta skjermbilder på 360 og 1280 px (lys og mørk), sjekk 768 px og 200 % tekststørrelse
+- [ ] 2026-11-09 [story-1-5](990-2026-11-09-15-18-00-story-1-5-oppskriftsvisning.md) — vurder aria-disabled på −/+ så tastaturfokus ikke forsvinner ved 1/50

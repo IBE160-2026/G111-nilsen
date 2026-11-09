@@ -19,7 +19,7 @@ Brukeren kan legge inn en oppskrift selv, se den i et fast og ryddig format, vel
 
 - **Tolking:** heltall, desimal med komma eller punktum, brøk (1/2), brøktegn (½), blandet tall (1 ½, 1 1/2) og områder (2–3, 2-3). Enhet rett etter tallet (750g, 2dl) gjenkjennes. Minst g, kg, ml, dl, l, ss, ts, krm, stk, fedd, pk, boks, never og engelsk tbsp, tsp, cup, oz, lb; listen kan utvides.
 - **Utolkbare linjer** (uten mengde: «nutmeg», «salt og pepper», «en klype salt») vises med originaltekst og skaleres aldri. «2 ss» (mengde uten navn) er tolkbar og skaleres.
-- **Skalering** med faktor valgt/opprinnelig: enheten beholdes (ingen konvertering); innen 5 % av ½, ¼, ¾, ⅓, ⅔ (evt. med heltall foran) vises brøktegn, ellers komma og maks én desimal; udelelige ingredienser (egg, løk, fedd, stk) rundes til nærmeste hele tall, minst 1, og merkes «ca.» når verdien endret seg; g og ml over 100 rundes til to gjeldende sifre; områder skaleres i begge ender.
+- **Skalering** med faktor valgt/opprinnelig: enheten beholdes (ingen konvertering); brøktegn ½ ¼ ¾ ⅓ ⅔ (evt. med heltall foran) vises når brøkdelen avviker ≤ 5 % av selve brøken (avgjort 2026-11-09: 5,4 → «5,4», 1,24 → «1 ¼»), ellers komma og maks én desimal; udelelige ingredienser (egg, løk, fedd, stk) rundes til nærmeste hele tall, minst 1, og merkes «ca.» når verdien endret seg; g og ml over 100 rundes til to gjeldende sifre; områder skaleres i begge ender.
 - **Fasit** (opprinnelig 4), hvert tilfelle er en egen automatisk test:
 
   | Linje | Valgt | Forventet |
@@ -73,4 +73,4 @@ Brukeren kan legge inn en oppskrift selv, se den i et fast og ryddig format, vel
 - 1.1 er grunnmuren (prosjekt, struktur, tokens, meny, `Result`, `config.ts`, Vitest/ESLint, README) for alle andre stories.
 - 1.3 bygger på tolkingen i 1.2; 1.5 bruker begge til visning og skalering.
 - 1.4 innfører databaseskjema, migrasjon, Server Action og `recipe-service`; 1.5 leser oppskriften derfra; 1.6 bygger på oppskriftssiden fra 1.5 og oppdaterer README for epicen.
-- Mot senere epics: Epic 2 gjenbruker tolking, visning og «ikke i samlingen»-lagring, og legger til «oppr. N · endre», dialogen for manglende porsjonsantall og feilmelding-komponenten. Epic 3 bruker sist valgt porsjonsantall og flytter oppskrifter inn i samlingen.
+- Mot senere epics: Epic 2 gjenbruker tolking, visning og «ikke i samlingen»-lagring, og legger til «oppr. N · endre», dialogen for manglende porsjonsantall og feilmelding-komponenten. Epic 3 bruker sist valgt porsjonsantall og flytter oppskrifter inn i samlingen. Endret 2026-11-09 (sprint-change-proposal-2026-11-09.md): epicene bygges 1 → 3 → 2 → 4, manuelt innlagte oppskrifter lagres rett i samlingen (Story 3.1), og redigering kommer i Story 3.5.

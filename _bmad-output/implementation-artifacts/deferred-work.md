@@ -18,3 +18,12 @@
 - source_spec: `spec-1-4-legg-inn-oppskrift-manuelt.md`
   summary: Oppskriftssiden: sidetittel fra oppskriftens tittel (`generateMetadata`) og ekte HTTP 404 for ukjent oppskrift.
   evidence: Sidetittelen er alltid «Oppskrift», og `/oppskrift/999999` svarer 200 fordi `notFound()` kalles inne i Suspense etter at strømmingen har startet. Funn B7 og implementasjonsnotat; hører til Story 1.5.
+- source_spec: `spec-1-5-se-oppskrift-og-velg-antall.md`
+  summary: Vis enheten slik den står i oppskriften («bokser», «SS.») og behold «ca.» fra originalteksten; krever nye felt i `ParsedLine` og i `ingredient_lines`.
+  evidence: Utsatt fra 1.3 til 1.5, men holdt utenfor 1.5 fordi det endrer tolkekontrakten og alle tolketester. Hører til «hvis tid» eller en egen liten story etter Epic 3.
+- source_spec: `spec-1-5-se-oppskrift-og-velg-antall.md`
+  summary: Ekte HTTP 404 for ukjent oppskrift (i dag 200 med norsk 404-innhold).
+  evidence: Med Cache Components må `params` leses inne i Suspense, så strømmen starter før `notFound()`. Krever annen sidestruktur; lav brukerverdi i en lokal app.
+- source_spec: `spec-1-5-se-oppskrift-og-velg-antall.md`
+  summary: Vis seksjonsoverskrifter i stegene (`Step.section`) slik ingrediensseksjoner vises.
+  evidence: Story 2.1 beholder seksjonsnavn fra `HowToSection`, men oppskriftssiden viser stegene som én liste. Funn E5.
