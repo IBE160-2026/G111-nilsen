@@ -34,4 +34,5 @@
 - [ ] 2026-11-09 [story-3-5](989-2026-11-09-16-05-00-story-3-5-rediger.md) — test redigering i nettleseren på Macen (gamle verdier ved ny åpning, Avbryt, fokus ved feil, 360/1280 px, mørk modus)
 - [ ] 2026-11-09 [story-3-5](989-2026-11-09-16-05-00-story-3-5-rediger.md) — redigering mister seksjoner; løs når seksjoner kan redigeres (deferred-work.md)
 - [ ] 2026-11-09 [story-1-6](988-2026-11-09-16-20-00-story-1-6-kryss-av.md) — test avkrysning i nettleseren på Macen og ta skjermbilder på 360 og 1280 px (lys og mørk): stegnummer på linje, hake midt i boksen, 44 px, 200 % tekststørrelse, høykontrast, «Rediger» og tilbake gir ingen avkrysning
-- [ ] 2026-11-09 [story-1-6](988-2026-11-09-16-20-00-story-1-6-kryss-av.md) — utsatt: blur-commit før klikk på −/+ ved grensen, stegnummer utenfor labelen og `role="list"` for Safari (deferred-work.md)
+- [ ] 2026-11-09 [story-1-6](988-2026-11-09-16-20-00-story-1-6-kryss-av.md) — utsatt: blur-commit før klikk på −/+ ved grensen (deferred-work.md); stegnummer og `role="list"` løst i issue 007
+- [ ] 2026-11-09 [story-1-6](988-2026-11-09-16-20-00-story-1-6-kryss-av.md) — kontroller på Macen at stegnumrene står riktig etter Rediger og tilbake (issue 007; feilen lot seg ikke gjenskape i Chrome på Linux)
