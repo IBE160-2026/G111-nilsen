@@ -35,6 +35,7 @@ Dette dokumentet deler kravene fra PRD, UX (DESIGN.md og EXPERIENCE.md) og arkit
 - FR-15: Favoritter: markere/avmarkere uavhengig av mappe; egen visning; synlig i oppskrift og lister.
 - FR-16: Finne igjen: samlingen, én mappe og favoritter, sist lagret/åpnet først, med tittel, kilde og favorittmerke; tomme visninger forklarer og gir vei videre.
 - FR-17: Avkrysning av ingredienslinjer og steg under matlaging; påvirker ikke skalering; lagres ikke.
+- FR-18: Redigere tittel, opprinnelig porsjonsantall, ingredienser og steg i en lagret oppskrift med samme skjema og tolking som FR-4 (lagt til 2026-11-09).
 
 ### Ikke-funksjonelle krav
 
@@ -102,6 +103,7 @@ Dette dokumentet deler kravene fra PRD, UX (DESIGN.md og EXPERIENCE.md) og arkit
 - FR-15: Epic 3 – favoritter
 - FR-16: Epic 3 – finne igjen
 - FR-17: Epic 1 – avkrysning under matlaging
+- FR-18: Epic 3 – redigere en oppskrift
 
 ## Epic-liste
 
@@ -115,13 +117,15 @@ Brukeren kan lime inn en lenke og få oppskriften inn i appen, med tydelige feil
 
 ### Epic 3: Ta vare på og finn igjen
 Brukeren kan lagre og slette oppskrifter, sortere dem i mapper, markere favoritter og finne dem igjen.
-**Krav:** FR-13, FR-14, FR-15, FR-16
+**Krav:** FR-13, FR-14, FR-15, FR-16, FR-18
 
 ### Epic 4: Forbedringsforslag
 Brukeren kan få 1–3 konkrete forslag til oppskriften og ta dem i bruk, også uten nøkkel til språkmodell (eksempelforslag).
 **Krav:** FR-10, FR-11, FR-12
 
-NFR og UX-DR dekkes i storiene som trenger dem. README oppdateres i siste story i hver epic. En oppskrift lagres i databasen fra Epic 1 som «ikke lagret i samlingen»; Lagre i Epic 3 flytter den inn i samlingen.
+NFR og UX-DR dekkes i storiene som trenger dem. README oppdateres i siste story i hver epic.
+
+**Rekkefølge (endret 2026-11-09, se `sprint-change-proposal-2026-11-09.md`):** epicene bygges i rekkefølgen 1 → 3 → 2 → 4, slik at brukeren kan finne igjen oppskrifter før importen kommer. Numrene beholdes for sporbarhet. Manuelt innlagte oppskrifter lagres rett i samlingen; importerte oppskrifter lagres som «ikke i samlingen» til brukeren trykker Lagre.
 
 ## Epic 1: Les og skaler en oppskrift
 
@@ -340,6 +344,10 @@ slik at jeg slipper å skrive den inn selv.
 **Så** viser knappen «Henter oppskriften …» og er deaktivert, og deretter vises oppskriften på oppskriftssiden med kilden som lenke (FR-1, FR-5)
 **Og** oppskriften er lagret som «ikke i samlingen»
 
+**Gitt** en lenke som allerede finnes i samlingen (også med annet fragment eller sporingsparametere)
+**Når** jeg importerer den
+**Så** vises «Du har allerede lagret denne oppskriften» med lenke til den, uten ny henting (FR-13, AD-4; flyttet fra Story 3.2 ved endringen 2026-11-09)
+
 **Gitt** HTTP-adapteren
 **Når** den henter en side
 **Så** godtar den bare http og https, avviser adresser som peker til maskinen selv, private eller lenkelokale nett (også etter omdirigering), avbryter etter 10 sekunder og leser maks 2 MB (AD-8, NFR-3, NFR-4)
@@ -394,7 +402,28 @@ slik at skaleringen blir riktig.
 
 Brukeren kan lagre og slette oppskrifter, sortere dem i mapper, markere favoritter og finne dem igjen.
 
-### Story 3.1: Lagre og slette en oppskrift
+### Story 3.1: Se samlingen
+
+Som Ida,
+vil jeg se alle oppskriftene jeg har lagt inn,
+slik at jeg finner dem igjen uten bokmerker.
+
+**Akseptansekriterier:**
+
+**Gitt** skjemaet «Legg inn selv»
+**Når** jeg trykker «Lagre oppskrift»
+**Så** lagres oppskriften rett i samlingen (FR-13)
+**Og** oppskrifter som allerede er lagt inn manuelt (uten kilde-lenke) flyttes inn i samlingen ved migrering
+
+**Gitt** lagrede oppskrifter
+**Når** jeg åpner Samlingen
+**Så** vises de som oppskriftskort med tittel og kilde, sist lagret eller åpnet først, og hele kortet åpner oppskriften (FR-16, UX-DR10)
+
+**Gitt** en tom samling
+**Når** jeg åpner Samlingen
+**Så** vises «Du har ingen lagrede oppskrifter ennå.» og knappene «Legg inn selv» og «Importer din første oppskrift» (UX-DR11)
+
+### Story 3.2: Lagre og slette en oppskrift
 
 Som Ida,
 vil jeg lagre oppskrifter jeg liker og slette dem jeg ikke trenger,
@@ -402,7 +431,7 @@ slik at samlingen min bare inneholder det jeg vil ha.
 
 **Akseptansekriterier:**
 
-**Gitt** en oppskrift som ikke er i samlingen
+**Gitt** en oppskrift som ikke er i samlingen (gjelder importerte oppskrifter fra Epic 2)
 **Når** jeg trykker «Lagre» i lagre-linjen nederst
 **Så** legges den i samlingen, og «Lagret.» vises i 3 sekunder og leses opp av skjermleser (FR-13, UX-DR9, UX-DR12)
 
@@ -414,25 +443,7 @@ slik at samlingen min bare inneholder det jeg vil ha.
 **Når** jeg velger «Slett» og bekrefter i dialogen «Slette oppskriften?»
 **Så** fjernes den fra samlingen; avbryter jeg, skjer ingenting (UX-DR13)
 
-### Story 3.2: Se samlingen og unngå duplikater
-
-Som Ida,
-vil jeg se alle oppskriftene mine samlet,
-slik at jeg finner dem igjen uten bokmerker.
-
-**Akseptansekriterier:**
-
-**Gitt** lagrede oppskrifter
-**Når** jeg åpner Samlingen
-**Så** vises de som oppskriftskort med tittel og kilde, sist lagret eller åpnet først (FR-16, UX-DR10)
-
-**Gitt** en tom samling
-**Når** jeg åpner Samlingen
-**Så** vises «Du har ingen lagrede oppskrifter ennå.» og knappen «Importer din første oppskrift» (UX-DR11)
-
-**Gitt** en lenke som allerede finnes i samlingen (også med annet fragment eller sporingsparametere)
-**Når** jeg importerer den
-**Så** vises «Du har allerede lagret denne oppskriften» med lenke til den, uten ny henting (FR-13, AD-4)
+**Og** oppskrifter som aldri ble lagret i samlingen ryddes bort etter et døgn (deferred-work fra Story 1.4)
 
 ### Story 3.3: Sorter oppskrifter i mapper
 
@@ -478,7 +489,28 @@ slik at jeg finner dem med ett trykk.
 **Når** jeg åpner Favoritter
 **Så** vises de sist brukt først; uten favoritter vises en tom-tilstand med forklaring (FR-15, FR-16, UX-DR11)
 
-**Og** README er oppdatert med samling, mapper og favoritter
+### Story 3.5: Rediger en oppskrift
+
+Som Ida,
+vil jeg rette en oppskrift jeg har lagt inn,
+slik at jeg slipper å legge den inn på nytt når noe ble feil.
+
+**Akseptansekriterier:**
+
+**Gitt** en lagret oppskrift
+**Når** jeg trykker «Rediger» på oppskriftssiden
+**Så** åpnes samme skjema som «Legg inn selv», forhåndsutfylt med tittel, porsjonsantall, ingredienser og steg (FR-18)
+
+**Gitt** skjemaet med endringer
+**Når** jeg trykker «Lagre endringer»
+**Så** lagres endringene med samme validering og tolking som FR-4, og jeg sendes tilbake til oppskriften (FR-18, AD-2, AD-3)
+**Og** kilde, mappe, favoritt og valgte forslag beholdes
+
+**Gitt** skjemaet
+**Når** jeg trykker «Avbryt» eller får en valideringsfeil
+**Så** endres ingenting i den lagrede oppskriften, og skrevne verdier beholdes ved feil
+
+**Og** README er oppdatert med samling, lagring, mapper, favoritter og redigering
 
 ## Epic 4: Forbedringsforslag
 

@@ -208,13 +208,22 @@ Uten nøkkel til språkmodell gir appen forhåndslagrede eksempelforslag og vise
 **Beskrivelse:** Brukeren lagrer oppskrifter i samlingen, sorterer dem i mapper og markerer favoritter. Alt lagres lokalt uten konto. Realiserer UJ-1, UJ-3.
 
 #### FR-13: Lagre og slette oppskrifter
-Brukeren kan lagre en oppskrift i samlingen og slette den igjen.
+Brukeren kan lagre en oppskrift i samlingen og slette den igjen. En manuelt innlagt oppskrift lagres i samlingen med en gang («Lagre oppskrift»); en importert oppskrift lagres med en egen Lagre-knapp.
 
 **Konsekvenser (testbare):**
+- En oppskrift lagt inn via «Legg inn selv» vises i samlingen uten flere steg.
 - En lagret oppskrift finnes i samlingen etter at appen er startet på nytt.
 - Sist valgte porsjonsantall og valgte forslag lagres med oppskriften.
 - Sletting krever bekreftelse.
 - Import av en lenke som allerede finnes i samlingen gir beskjed om det og lenke til den lagrede oppskriften `[ANTAKELSE]`.
+
+#### FR-18: Redigere en oppskrift
+Brukeren kan endre tittel, opprinnelig porsjonsantall, ingredienser og steg i en lagret oppskrift. Lagt til 2026-11-09 etter manuell test (issue 005): uten redigering måtte en oppskrift med feil legges inn på nytt.
+
+**Konsekvenser (testbare):**
+- Redigering bruker samme skjema, validering og tolking som manuell innlegging (FR-4), forhåndsutfylt med oppskriften.
+- Endrede ingredienslinjer tolkes på nytt og lagres med originaltekst (AD-2); kilde, mappe, favoritt og valgte forslag beholdes.
+- Avbryt gir ingen endring.
 
 #### FR-14: Mapper
 Brukeren kan opprette, gi nytt navn til og slette mapper, og legge en oppskrift i én mappe eller ingen.
@@ -262,7 +271,7 @@ Brukeren kan se samlingen, én mappe om gangen og favoritter, sortert med sist l
 - Visning i fast format med avkrysning (FR-5, FR-6, FR-17)
 - Skalering (FR-7–FR-9)
 - Forbedringsforslag med demomodus (FR-10–FR-12)
-- Lagring, mapper, favoritter og oversikter (FR-13–FR-16)
+- Lagring, redigering, mapper, favoritter og oversikter (FR-13–FR-16, FR-18)
 
 ### 7.2 Ikke med i v1
 - Ingredienssubstitusjoner, automatisk handleliste, egne notater, søk og filtrering, kostholdspreferanser og allergier, tidsplan, import fra bilder, ukemenyer (fra briefen).

@@ -8,7 +8,7 @@ scope: 'RecipeMate v1: import, visning, skalering, forslag, lagring og organiser
 status: draft
 created: '2026-11-04'
 updated: '2026-11-04'
-binds: [FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-16, FR-17, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7]
+binds: [FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-16, FR-17, FR-18, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7]
 sources:
   - ../../prds/prd-RecipeMate-2026-11-04/prd.md
   - ../../prds/prd-RecipeMate-2026-11-04/addendum.md
@@ -198,7 +198,7 @@ Kjøring: kun lokalt (`npm install`, `npm run db:migrate`, `npm run dev`). Ingen
 | Visning og avkrysning (FR-5, FR-6, FR-17) | `app/oppskrift/[id]`, `components/` | AD-1, AD-10 |
 | Skalering og tolking (FR-7–FR-9) | `domain/` | AD-1, AD-2, AD-11 |
 | Forslag (FR-10–FR-12) | `services/suggestion-service`, `ports/`, `adapters/*-suggestions` | AD-5, AD-7, AD-9 |
-| Lagring, mapper, favoritter (FR-13–FR-16) | `services/recipe-service`, `services/folder-service`, `db/repositories` | AD-3, AD-6 |
+| Lagring, redigering, mapper, favoritter (FR-13–FR-16, FR-18) | `services/recipe-service`, `services/folder-service`, `db/repositories` | AD-3, AD-6 |
 | Kjørbarhet og hemmeligheter (NFR-1, NFR-4) | `server/config.ts`, `.env.example`, README | AD-9 |
 
 ## Deferred
