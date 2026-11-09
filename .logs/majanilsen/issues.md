@@ -40,3 +40,5 @@
 - [ ] 2026-11-09 [story-3-1](987-2026-11-09-16-40-00-story-3-1-se-samlingen.md) — utsatt: «sist åpnet», antall oppskrifter, sidedeling og søk i Samlingen (deferred-work.md)
 - [ ] 2026-11-09 [story-3-2](986-2026-11-09-17-05-00-story-3-2-lagre-og-slett.md) — test lagre-linjen og slettedialogen i nettleseren på Macen (360 og 1280 px, lys og mørk): Slett og dialogen, Escape og Tab, oppskriften borte fra Samlingen, sist valgte antall etter omstart, 200 % zoom
 - [ ] 2026-11-09 [story-3-2](986-2026-11-09-17-05-00-story-3-2-lagre-og-slett.md) — utsatt: valgt antall før «Lagre» (Epic 2), safe-area og dimming i mørk palett, sent rememberServings-kall (deferred-work.md)
+- [ ] 2026-11-09 [story-3-3](985-2026-11-09-18-20-00-story-3-3-mapper.md) — test mapper i nettleseren på Macen (360 og 1280 px, lys og mørk): opprette, gi nytt navn, slette, duplikatmelding, «Lagre i mappe»-dialogen, mappenavn på kort, mappeside og tom mappe, 200 % zoom
+- [ ] 2026-11-09 [story-3-3](985-2026-11-09-18-20-00-story-3-3-mapper.md) — utsatt: maksimal høyde i mappedialogen, forced-colors for mappekomponentene, grense for antall mapper (deferred-work.md)
