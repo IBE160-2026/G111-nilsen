@@ -51,3 +51,4 @@
 - [ ] 2026-11-09 [story-2-2](982-2026-11-09-22-40-00-story-2-2-importer-fra-lenke.md) — test import i nettleseren på Macen: `IMPORT_SOURCE=fixtures npm run dev` (lenker fra test/fixtures/sources.md), deretter ekte lenker (Matprat, Godt.no); feilmeldinger, 360 og 1280 px, lys og mørk, 200 % zoom
 - [ ] 2026-11-09 [story-2-2](982-2026-11-09-22-40-00-story-2-2-importer-fra-lenke.md) — kjør npm test på Macen og bekreft 2118 grønne
 - [ ] 2026-11-09 [story-2-2](982-2026-11-09-22-40-00-story-2-2-importer-fra-lenke.md) — utsatt: portbegrensning, prosentkoding, redirect-aliaser, indeks på source_url, DNS-tidsavbrudd, samtidighetsgrense (deferred-work.md)
+- [ ] 2026-11-09 [story-2-3](981-2026-11-09-22-55-00-story-2-3-forsta-hvorfor-import-feilet.md) — se de tre feilmeldingene i nettleseren sammen med testen av Story 2.2
