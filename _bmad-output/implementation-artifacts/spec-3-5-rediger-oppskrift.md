@@ -101,6 +101,39 @@ Implementert i commit «Story 3.5: rediger oppskrift» (arbeidskopi, ikke pushet
 
 ## Review Triage Log
 
+Tre uavhengige gjennomganger (randtilfeller og dataintegritet, spesifikasjon og arkitektur, UI/tilgjengelighet/testkvalitet) ga 28 funn. Triage: 15 rettes (patch), 5 utsettes (defer), 8 avvises (reject).
+
+**Patch (rettes i denne storyen):**
+1. Skjemaet kan vise gamle verdier når redigeringssiden åpnes på nytt for samme oppskrift (Cache Components bevarer komponenttilstand). `key` på skjemaet får `updatedAt` i tillegg til id.
+2. «Avbryt»-lenken er aktiv mens lagring pågår, så en lagring kan fullføres etter «Avbryt». Lenken deaktiveres under `pending`.
+3. Testen «Uendret» bruker `>=` på `updatedAt` og er delvis alltid grønn. Bruk eldre startverdi og kreve strengt nyere; sammenlign hele ingredienslisten (uten `id`) med `toEqual`.
+4. Ingen test fanger gamle verdier ved gjenbruk av skjemaet. Legg til `rerender`-test med nye startverdier og ny `key`, og en test med ekte action mot test-database der verdiene beholdes ved valideringsfeil.
+5. Sorteringen av ingredienser på `position` i forhåndsutfyllingen er ikke testet. Snu `position` også for ingredienser.
+6. «Rediger»-lenken får `aria-label` «Rediger <tittel>».
+7. `<h1>` på redigeringssiden nevner oppskriftens tittel.
+8. Meldingstekst «Rett tittel …» byttes til «Endre tittel …».
+9. Seksjoner forsvinner ved redigering uten å være testet. Legg til test som dokumenterer oppførselen, og en linje i spesifikasjonen om at tapet er akseptert til seksjoner kan redigeres.
+10. `updateRecipe` bruker `BEGIN IMMEDIATE` (`behavior: "immediate"`) for å unngå `SQLITE_BUSY` ved oppgradering til skrivelås.
+11. Testhull: `originalServings` fra `null` til tall nullstiller `selectedServings`; rollback ved feil i selve oppdateringen av `recipes` og ved feil i ingrediens-innsettingen; grenseverdier for `LIMITS` og CRLF/blanke linjer i `updateManualRecipe`; id-ene `Infinity`, `2**53`, `1abc`, `-1`, `1.5`, `01` i service og rute.
+12. Type-syklus og avhengighet mellom ruter: `ManualRecipeFormState` og felles hjelpere flyttes til nøytral modul, slik at `rediger/` ikke importerer fra `ny/actions`.
+13. `deferred-work.md` har inkonsistente henvisninger til epics og stories for seksjoner/kilde. Bruk én formulering uten story-numre.
+14. Implementation Notes inneholder tilstandsmeta («ikke pushet»). Fjernes; manuell nettlesersjekk føres som åpent punkt.
+15. README-status er utdatert («Story 1.1–1.3»). Oppdateres.
+
+**Defer:**
+- Rad-id for ingredienser og steg er ikke stabil mellom redigeringer (slettes og settes inn på nytt). Ingen funksjon bruker rad-id ennå (avkrysning er bare klienttilstand, AD-10); notert i `deferred-work.md`.
+- Oppskrift med verdier utenfor `LIMITS` (mulig ved import, Epic 2) kan ikke lagres uendret. Håndteres ved import.
+- Tegn med nullbredde (U+200B m.fl.) passerer `trim()` i tittel og linjer. Gjelder også «Legg inn selv», ikke en regresjon.
+- Ved `not_found` under lagring peker «Avbryt» til en side som nå gir 404. Sjeldent i enbrukerapp; tas hvis det oppstår.
+- Fokusflytt til første feil kan gjentas når en side gjenopprettes av Cache Components. Sjekkes i nettleseren sammen med punkt 1.
+
+**Reject:**
+- Lost update uten versjonssjekk mellom to faner: enbrukerapp, akseptert risiko.
+- Lengdegrenser teller UTF-16-enheter, ikke tegn: grensene er generøse, og «Legg inn selv» fungerer likt.
+- Duplisert `loadRecipe`/id-sjekk mellom visnings- og redigeringsside: tre linjer, bevisst ikke abstrahert ennå.
+- Ingen test som kobler skjema og ekte action utover punkt 4: dekket av punkt 4.
+- Tre funn som gjentok andre funn (seksjoner, `updatedAt`-test, `key`) er slått sammen med punkt 9, 3 og 1.
+
 ## Verification
 
 `npm run lint`, `npm run typecheck`, `npm run format:check`, `npm test`, `npm run build`; `git diff -- package-lock.json` tomt.
