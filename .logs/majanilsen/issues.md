@@ -42,3 +42,4 @@
 - [ ] 2026-11-09 [story-3-2](986-2026-11-09-17-05-00-story-3-2-lagre-og-slett.md) — utsatt: valgt antall før «Lagre» (Epic 2), safe-area og dimming i mørk palett, sent rememberServings-kall (deferred-work.md)
 - [ ] 2026-11-09 [story-3-3](985-2026-11-09-18-20-00-story-3-3-mapper.md) — test mapper i nettleseren på Macen (360 og 1280 px, lys og mørk): opprette, gi nytt navn, slette, duplikatmelding, «Lagre i mappe»-dialogen, mappenavn på kort, mappeside og tom mappe, 200 % zoom
 - [ ] 2026-11-09 [story-3-3](985-2026-11-09-18-20-00-story-3-3-mapper.md) — utsatt: maksimal høyde i mappedialogen, forced-colors for mappekomponentene, grense for antall mapper (deferred-work.md)
+- [ ] 2026-11-09 [story-3-3](985-2026-11-09-18-20-00-story-3-3-mapper.md) — start dev-serveren på nytt og kontroller at /mapper og Samlingen virker etter issue 008
