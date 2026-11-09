@@ -55,38 +55,64 @@ const recipe: Recipe = {
 };
 
 describe("RecipeView", () => {
-  it("viser tittel, «Lagt inn selv», antall personer, ingredienser og nummererte steg", () => {
+  it("viser fast format: tittel, kilde, porsjonsvelger, ingredienser og nummererte steg", () => {
     render(<RecipeView recipe={recipe} />);
-    expect(screen.getByRole("heading", { level: 1, name: "Pannekaker" })).toBeInTheDocument();
-    expect(screen.getByText(/Lagt inn selv/)).toHaveTextContent("Lagt inn selv · 4 personer");
+    const title = screen.getByRole("heading", { level: 1, name: "Pannekaker" });
+    const source = screen.getByText("Lagt inn selv");
+    const stepper = screen.getByLabelText("Antall personer");
+    const ingredients = screen.getByRole("region", { name: "Ingredienser" });
+    const steps = screen.getByRole("region", { name: "Slik gjør du" });
 
-    const items = within(screen.getAllByRole("list")[0]).getAllByRole("listitem");
-    expect(items.map((item) => item.textContent)).toEqual([
-      "1 ½ dl melk",
-      "2 ss",
-      "salt og pepper",
-    ]);
+    // Rekkefølgen i dokumentet er også rekkefølgen på mobil (én kolonne).
+    const order = [title, source, stepper, ingredients, steps];
+    for (let i = 1; i < order.length; i++) {
+      expect(
+        order[i - 1].compareDocumentPosition(order[i]) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    }
 
-    const steps = screen.getAllByRole("list")[1];
-    expect(steps.tagName).toBe("OL");
+    expect(stepper).toHaveValue("4");
     expect(
-      within(steps)
+      within(ingredients)
+        .getAllByRole("listitem")
+        .map((item) => item.textContent),
+    ).toEqual(["1 ½ dl melk", "2 ss", "salt og pepper"]);
+
+    const list = within(steps).getByRole("list");
+    expect(list.tagName).toBe("OL");
+    expect(
+      within(list)
         .getAllByRole("listitem")
         .map((li) => li.textContent),
     ).toEqual(["Visp sammen.", "Stek."]);
   });
 
-  it("skjuler steg-kortet når oppskriften ikke har steg, og bruker entall for 1 person", () => {
-    render(<RecipeView recipe={{ ...recipe, originalServings: 1, steps: [] }} />);
+  it("skjuler steg-kortet når oppskriften ikke har steg", () => {
+    render(<RecipeView recipe={{ ...recipe, steps: [] }} />);
     expect(screen.queryByRole("heading", { name: "Slik gjør du" })).not.toBeInTheDocument();
-    expect(screen.getByText(/Lagt inn selv/)).toHaveTextContent("Lagt inn selv · 1 person");
+  });
+
+  it("viser stegene i lagret rekkefølge", () => {
+    render(<RecipeView recipe={{ ...recipe, steps: [...recipe.steps].reverse() }} />);
+    const list = within(screen.getByRole("region", { name: "Slik gjør du" })).getByRole("list");
+    expect(
+      within(list)
+        .getAllByRole("listitem")
+        .map((li) => li.textContent),
+    ).toEqual(["Visp sammen.", "Stek."]);
+  });
+
+  it("viser ingen porsjonsvelger når oppskriften mangler opprinnelig antall", () => {
+    render(<RecipeView recipe={{ ...recipe, originalServings: null }} />);
+    expect(screen.queryByLabelText("Antall personer")).not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Ingredienser" })).toBeInTheDocument();
   });
 
   it("viser kilden når oppskriften har sourceUrl eller sourceName", () => {
     render(
       <RecipeView recipe={{ ...recipe, sourceUrl: "https://www.matprat.no/oppskrifter/x/" }} />,
     );
-    expect(screen.getByText(/matprat\.no/)).toHaveTextContent("matprat.no · 4 personer");
+    expect(screen.getByText("matprat.no")).toBeInTheDocument();
     expect(screen.queryByText(/Lagt inn selv/)).not.toBeInTheDocument();
   });
 

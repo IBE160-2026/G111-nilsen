@@ -1,22 +1,6 @@
-import { formatQuantity, type Recipe, type RecipeLine } from "@/domain";
+import type { Recipe } from "@/domain";
+import IngredientList from "./IngredientList";
 import styles from "./RecipeView.module.css";
-
-function servingsText(servings: number): string {
-  return servings === 1 ? "1 person" : `${servings} personer`;
-}
-
-function LineText({ line }: { line: RecipeLine }) {
-  if (!line.parseable || line.quantity === null) {
-    return <span className={styles.unparsed}>{line.original}</span>;
-  }
-  const amount = [formatQuantity(line.quantity), line.unit ?? ""].filter(Boolean).join(" ");
-  if (line.name === "") return <span className={styles.amount}>{amount}</span>;
-  return (
-    <>
-      <span className={styles.amount}>{amount}</span> <span>{line.name}</span>
-    </>
-  );
-}
 
 /** Kilden som vises: navnet, ellers vertsnavnet fra lenken, ellers «Lagt inn selv». */
 export function sourceLabel(recipe: Pick<Recipe, "sourceName" | "sourceUrl">): string {
@@ -32,40 +16,39 @@ export function sourceLabel(recipe: Pick<Recipe, "sourceName" | "sourceUrl">): s
   return "Lagt inn selv";
 }
 
+/**
+ * Oppskriften i fast format (FR-5, UX-DR15): tittel, kilde, porsjonsvelger,
+ * ingredienser per seksjon og nummererte steg. Serverkomponent; porsjonsvelger og
+ * skalering ligger i klientkomponenten `IngredientList`. Fra 768 px står
+ * porsjonsvelger og ingredienser til venstre og stegene til høyre.
+ */
 export default function RecipeView({ recipe }: { recipe: Recipe }) {
   return (
     <article className={styles.root}>
       <header className={styles.header}>
         <h1>{recipe.title}</h1>
-        <p className={styles.meta}>
-          {sourceLabel(recipe)}
-          {recipe.originalServings !== null ? (
-            <> · {servingsText(recipe.originalServings)}</>
-          ) : null}
-        </p>
+        <p className={styles.meta}>{sourceLabel(recipe)}</p>
       </header>
 
-      <section className={styles.card} aria-labelledby="ingredienser">
-        <h2 id="ingredienser">Ingredienser</h2>
-        <ul className={styles.lines}>
-          {recipe.ingredients.map((line) => (
-            <li key={line.id} className={styles.line}>
-              <LineText line={line} />
-            </li>
-          ))}
-        </ul>
-      </section>
+      <div className={styles.columns}>
+        <IngredientList
+          ingredients={recipe.ingredients}
+          originalServings={recipe.originalServings}
+        />
 
-      {recipe.steps.length > 0 ? (
-        <section className={styles.card} aria-labelledby="fremgangsmate">
-          <h2 id="fremgangsmate">Slik gjør du</h2>
-          <ol className={styles.steps}>
-            {recipe.steps.map((step) => (
-              <li key={step.id}>{step.text}</li>
-            ))}
-          </ol>
-        </section>
-      ) : null}
+        {recipe.steps.length > 0 ? (
+          <section className={styles.card} aria-labelledby="fremgangsmate">
+            <h2 id="fremgangsmate">Slik gjør du</h2>
+            <ol className={styles.steps}>
+              {[...recipe.steps]
+                .sort((a, b) => a.position - b.position)
+                .map((step) => (
+                  <li key={step.id}>{step.text}</li>
+                ))}
+            </ol>
+          </section>
+        ) : null}
+      </div>
     </article>
   );
 }

@@ -1,19 +1,36 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { Suspense } from "react";
+import { cache, Suspense } from "react";
 import RecipeView from "@/components/RecipeView";
 import { parseRecipeId } from "@/lib/recipe-id";
 import { getRecipe } from "@/server/services/recipe-service";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = { title: "Oppskrift" };
-
 type Params = Promise<{ id: string }>;
 
+/** Standardtittel når oppskriften ikke finnes. */
+const DEFAULT_TITLE = "Oppskrift";
+
+/** Leser oppskriften én gang per forespørsel, selv om både metadata og side trenger den. */
+const loadRecipe = cache((rawId: string) => {
+  const id = parseRecipeId(rawId);
+  return id === null ? null : getRecipe(id);
+});
+
 /**
- * Enkel visning av en oppskrift (Story 1.4). Fast format, porsjonsvelger og
- * avkrysning kommer i Story 1.5–1.6. Data hentes inne i Suspense-grensen, etter
+ * Fanetittel «<tittel> · RecipeMate» (malen ligger i rotlayouten). Siden er uansett
+ * dynamisk (Suspense + `connection()`), så metadata kan lese databasen ved forespørsel.
+ */
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { id } = await params;
+  await connection();
+  const result = loadRecipe(id);
+  return { title: result?.ok ? result.value.title : DEFAULT_TITLE };
+}
+
+/**
+ * Oppskriftssiden (Story 1.4–1.5). Data hentes inne i Suspense-grensen, etter
  * `connection()`, slik at databasen bare leses ved en faktisk forespørsel.
  */
 export default function RecipePage({ params }: { params: Params }) {
@@ -25,14 +42,11 @@ export default function RecipePage({ params }: { params: Params }) {
 }
 
 async function RecipeLoader({ params }: { params: Params }) {
-  const { id: rawId } = await params;
+  const { id } = await params;
   await connection();
 
-  const id = parseRecipeId(rawId);
-  if (id === null) notFound();
-
-  const result = getRecipe(id);
-  if (!result.ok) notFound();
+  const result = loadRecipe(id);
+  if (!result?.ok) notFound();
 
   return <RecipeView recipe={result.value} />;
 }

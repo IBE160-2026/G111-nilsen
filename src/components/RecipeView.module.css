@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  max-width: 640px;
+  max-width: var(--content-max-width);
 }
 
 .header {
@@ -16,6 +16,22 @@
   font-size: var(--type-meta-size);
 }
 
+/* Én kolonne på mobil: porsjonsvelger, ingredienser, steg. */
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+/* Fra 768 px: porsjonsvelger og ingredienser til venstre, steg til høyre (UX-DR15). */
+@media (min-width: 768px) {
+  .columns {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: var(--space-5);
+  }
+}
+
 .card {
   display: flex;
   flex-direction: column;
@@ -26,39 +42,15 @@
   padding: var(--space-5) var(--space-4);
 }
 
-.lines {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.line {
-  display: grid;
-  grid-template-columns: minmax(5.5em, auto) 1fr;
-  column-gap: var(--space-3);
-  padding: var(--space-2) 0;
-  border-bottom: 1px solid var(--color-border-hairline);
-}
-
-.line:last-child {
-  border-bottom: none;
-}
-
-.amount {
-  font-weight: var(--type-quantity-weight);
-  font-variant-numeric: tabular-nums;
-}
-
-.unparsed {
-  grid-column: 1 / -1;
-  font-style: italic;
-  color: var(--color-ink-secondary);
-}
-
 .steps {
   margin: 0;
   padding-left: var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.steps li::marker {
+  font-weight: var(--type-quantity-weight);
+  color: var(--color-ink-secondary);
 }

@@ -22,7 +22,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("next/server", () => ({ connection: () => Promise.resolve() }));
 
-const { default: RecipePage } = await import("./page");
+const { default: RecipePage, generateMetadata } = await import("./page");
 
 afterEach(cleanup);
 beforeEach(() => {
@@ -54,5 +54,23 @@ describe("/oppskrift/[id]", () => {
 
   it.each(["999999", "abc"])("%s fører til notFound()", async (id) => {
     await expect(renderPage(id)).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it("setter oppskriftens tittel som fanetittel", async () => {
+    const created = createManualRecipe(
+      { title: "Pannekaker", servings: 4, ingredients: ["3 egg"], steps: [] },
+      state.db!,
+    );
+    if (!created.ok) throw new Error("kunne ikke lagre");
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ id: String(created.value.id) }),
+    });
+    expect(metadata.title).toBe("Pannekaker");
+  });
+
+  it.each(["999999", "abc"])("ukjent id %s gir standardtittel", async (id) => {
+    const metadata = await generateMetadata({ params: Promise.resolve({ id }) });
+    expect(metadata.title).toBe("Oppskrift");
   });
 });

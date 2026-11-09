@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { errorMessages, fallbackMessage, manualRecipeFieldMessages, messageFor } from "./messages";
+import {
+  errorMessages,
+  fallbackMessage,
+  manualRecipeFieldMessages,
+  messageFor,
+  servingStepperMessages,
+} from "./messages";
 import { ERROR_KINDS } from "./result";
 
 describe("messageFor", () => {
@@ -23,6 +29,7 @@ describe("messageFor", () => {
       fallbackMessage.title,
       fallbackMessage.body,
       ...Object.values(manualRecipeFieldMessages),
+      ...Object.values(servingStepperMessages),
     ];
     for (const text of texts) expect(text).not.toContain("!");
   });

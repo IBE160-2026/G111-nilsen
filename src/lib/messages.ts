@@ -77,3 +77,8 @@ export const manualRecipeFieldInvalid = {
   ingredients: "Skriv 1–100 ingredienser, én per linje, hver på maks 300 tegn.",
   steps: "Du kan ha maks 100 steg, hvert på maks 2000 tegn.",
 } as const;
+
+/** Feltmelding for porsjonsvelgeren på oppskriftssiden. */
+export const servingStepperMessages = {
+  invalid: "Skriv et helt tall fra 1 til 50. Antallet er ikke endret.",
+} as const;
