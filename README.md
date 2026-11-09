@@ -12,7 +12,7 @@ Repoet inneholder applikasjonen og dokumentasjon av utvikling, testing og kvalit
 
 **RecipeMate** er en matlagingsassistent for oppskrifter fra nettet. Du limer inn en lenke (eller skriver inn oppskriften selv), og appen viser oppskriften i et fast og ryddig format der du kan velge antall personer, slik at alle mengder regnes om med en gang. Oppskrifter kan lagres i en samling, i mapper og som favoritter.
 
-Status: Epic 1 («Les og skaler en oppskrift») er ferdig: Story 1.1–1.6, pluss Story 3.5 (redigering) og Story 3.1 (Samlingen). Du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`), finne den igjen i Samlingen (`/samlingen`), se den på `/oppskrift/{id}`, velge antall personer og krysse av ingredienser og steg mens du lager maten. Oppskriften lagres i en lokal SQLite-database. Import fra lenke, mapper, favoritter og forslag kommer i senere epics.
+Status: Epic 1 («Les og skaler en oppskrift») er ferdig: Story 1.1–1.6, pluss Story 3.5 (redigering), Story 3.1 (Samlingen) og Story 3.2 (lagre og slette). Du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`), finne den igjen i Samlingen (`/samlingen`), se den på `/oppskrift/{id}`, velge antall personer og krysse av ingredienser og steg mens du lager maten. Oppskriften lagres i en lokal SQLite-database. Import fra lenke, mapper, favoritter og forslag kommer i senere epics.
 
 ## Hva Epic 1 (og Story 3.5) inneholder
 
@@ -24,6 +24,7 @@ Status: Epic 1 («Les og skaler en oppskrift») er ferdig: Story 1.1–1.6, plus
 - **Story 1.6, Kryss av under matlaging:** hver ingrediens og hvert steg kan krysses av (se under). Porsjonsvelgerens −/+ beholder tastaturfokus ved 1 og 50.
 - **Story 3.5, Rediger en oppskrift:** se «Redigere en oppskrift» under.
 - **Story 3.1, Se samlingen:** se «Samlingen» under.
+- **Story 3.2, Lagre og slette en oppskrift:** se «Lagre, slette og rydde» under.
 
 ## Kryss av under matlaging
 
@@ -67,6 +68,15 @@ npm start        # kjør produksjonsbygget
 - Rekkefølgen er «sist lagret først». Redigering endrer ikke `savedAt`, så plasseringen i listen er den samme. Sporing av «sist åpnet», sidedeling og søk er utsatt.
 - Siden leser databasen inne i `Suspense` etter `connection()`, og en databasefeil vises av `error.tsx` i stedet for en tom samling.
 - Koden ligger i `src/app/samlingen/`, `RecipeCard.tsx`, `listCollection` i `src/server/services/recipe-service.ts` og `listSavedRecipes` i `src/server/db/repositories/recipe-repository.ts`.
+
+## Lagre, slette og rydde
+
+Nederst på oppskriftssiden står en lagre-linje som følger med når du ruller. Er oppskriften ikke i samlingen (`savedAt` er `null`), står det «Lagre». Etter lagring sier «Lagret.» fra i tre sekunder (skjermleseren leser det opp), og linjen viser «Slett». «Slett» åpner dialogen «Slette oppskriften?» med «Avbryt» som startfokus; bekrefter du, slettes oppskriften med ingredienser og steg, og du sendes til Samlingen. «Avbryt» eller Escape lukker dialogen uten å endre noe, og fokus går tilbake til «Slett».
+
+- **Sist valgte antall:** for en lagret oppskrift huskes antall personer ved hver endring (også «Tilbakestill»), og siden åpnes med sist valgte antall, også etter omstart. Skaleringen regner fortsatt fra originalmengdene. Valgt antall og lagring i samlingen endrer ikke `updatedAt`, så avkrysningen står. Avkrysning lagres fortsatt aldri.
+- **Opprydding:** oppskrifter som aldri ble lagret i samlingen og er eldre enn et døgn slettes (med ingredienser og steg) når appen starter og deretter hver time mens den kjører (`src/instrumentation.ts`). Lagrede oppskrifter slettes aldri av dette, og rydding skjer ikke når en side vises.
+- Koden ligger i `src/app/oppskrift/[id]/actions.ts` (Server Actions), `RecipeActions.tsx` og `ConfirmDialog.tsx`, tjenestene `saveRecipeToCollection`, `deleteRecipe`, `setSelectedServings` og `purgeStaleUnsavedRecipes` i `src/server/services/recipe-service.ts` og tilsvarende funksjoner i `recipe-repository.ts`.
+- Testes med `npm test`: repository og tjenester mot en ekte SQLite-database i minnet (blant annet at sletting kaskaderer og at `updatedAt` er uendret), handlinger, dialog og lagre-linje (falske tidtakere for tresekundersregelen) og opprydding med falske tidtakere.
 
 ## Redigere en oppskrift
 
@@ -114,10 +124,10 @@ npm run format:check # sjekk formatering uten å endre filer
 
 ### Hva testene dekker
 
-`npm test` kjører Vitest én gang og gir i dag 39 testfiler og 608 tester. Ingen test bruker nettverket eller en ekte API-nøkkel.
+`npm test` kjører Vitest én gang og gir i dag 43 testfiler og 745 tester. Ingen test bruker nettverket eller en ekte API-nøkkel.
 
 - **Domenet** (`src/domain/`): tolking av mengder og ingredienslinjer og skalering og formatering, med fasittabellen fra Epic 1 (400 g mel for 6 gir 600 g, «1 egg (ca.)», og så videre) som egne tester.
-- **Server** (`src/server/`): repositorier og tjenester mot en ekte SQLite-database i minnet, blant annet tilbakerulling ved feil, redigering, samlingen og datamigrasjonen (en database med bare den første migrasjonen oppgraderes).
+- **Server** (`src/server/`): repositorier og tjenester mot en ekte SQLite-database i minnet, blant annet tilbakerulling ved feil, redigering, samlingen, lagring, sletting og opprydding, og datamigrasjonen (en database med bare den første migrasjonen oppgraderes).
 - **Komponenter og sider** (Testing Library og user-event i jsdom): toppmeny, skjema for ny og redigert oppskrift, porsjonsvelger (grenser, ugyldig inntasting, `aria-disabled` og fokus), ingredienser (skalering fra originalen, seksjoner, utolkbare linjer), steg og avkrysning (klikk på teksten, mellomrom med tastatur, skalering og «Tilbakestill» beholder avkrysningen, ingen serverkall, nullstilling når `<Activity>` skjuler siden og ved avmontering, også i Strict Mode).
 - **Designtokens**: fargene i `tokens.css` er de samme som i `DESIGN.md`, og avkrysningsboksen bruker tokens uten hardkodede farger.
 

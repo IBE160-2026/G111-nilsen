@@ -13,9 +13,6 @@
   summary: Vis enheten slik den står i oppskriften (bøyning og skrivemåte), behold «ca.» fra originalteksten og vis originallinjen uendret ved faktor 1.
   evidence: `formatLine` skriver enhetsnøkkelen («bokser» → «boks», «kilo» → «kg») og mister «ca.»-prefikset; krever at `ParsedLine` bevarer originalt enhetsord. Funn B6/E5/E6/E7, hører hjemme i Story 1.5 (visning).
 - source_spec: `spec-1-4-legg-inn-oppskrift-manuelt.md`
-  summary: Rydd bort oppskrifter med `savedAt = null` (importert eller lagt inn, men aldri lagret i samlingen), f.eks. eldre enn et døgn.
-  evidence: Uten opprydding samler ulagrede oppskrifter seg i databasen. Funn 9 i gjennomgangen av spesifikasjonen; hører til Epic 3 (lagring).
-- source_spec: `spec-1-4-legg-inn-oppskrift-manuelt.md`
   summary: Oppskriftssiden: sidetittel fra oppskriftens tittel (`generateMetadata`) og ekte HTTP 404 for ukjent oppskrift.
   evidence: Sidetittelen er alltid «Oppskrift», og `/oppskrift/999999` svarer 200 fordi `notFound()` kalles inne i Suspense etter at strømmingen har startet. Funn B7 og implementasjonsnotat; hører til Story 1.5.
 - source_spec: `spec-1-5-se-oppskrift-og-velg-antall.md`
@@ -62,3 +59,22 @@
 - source_spec: `spec-3-1-se-samlingen.md`
   summary: Import (Epic 2) må lagre tom kilde-lenke som `null`, ikke som tom streng.
   evidence: Migrasjonen 0001 og regelen «uten kilde-lenke» bruker `source_url IS NULL`; en tom streng ville ikke blitt flyttet inn i samlingen.
+
+- source_spec: `spec-3-2-lagre-og-slett.md`
+  summary: Rydding av ulagrede oppskrifter gjentas bare mens appen kjører.
+  evidence: `instrumentation.ts` rydder ved oppstart og deretter hver time med `setInterval`; en app som står lenge uten omstart rydder hver time, men ingenting rydder mens den er stoppet. Greit for en lokal app; vurder en annen planlegger hvis appen skal kjøre på en server.
+- source_spec: `spec-3-2-lagre-og-slett.md`
+  summary: Kanten øverst på lagre-linjen vises alltid, ikke bare når innholdet ruller under.
+  evidence: DESIGN.md sier «når innholdet ruller under»; `position: sticky` gir ingen enkel måte å vite det på uten skrollobservasjon. Akseptert i Story 3.2.
+- source_spec: `spec-3-2-lagre-og-slett.md`
+  summary: Ny import (Epic 2) skal bruke samme `savedAt = null`-regel.
+  evidence: Importerte oppskrifter lagres først uten `savedAt` og legges i samlingen med «Lagre»; uten det ryddes de bort etter et døgn. Import må også skrive `createdAt` med `new Date().toISOString()`; opprydding sammenligner ISO-tekst, og et annet format (for eksempel mellomrom i stedet for «T») kan gi feil sletting.
+- source_spec: `spec-3-2-lagre-og-slett.md`
+  summary: Valgt antall personer huskes ikke når det velges før oppskriften er lagret; etter «Lagre» åpnes den på opprinnelig antall ved neste besøk.
+  evidence: Spesifikasjonen lagrer bare antall for oppskrifter i samlingen. Gjelder først importerte oppskrifter (Epic 2); løses der, for eksempel ved at «Lagre» tar med valgt antall.
+- source_spec: `spec-3-2-lagre-og-slett.md`
+  summary: `env(safe-area-inset-bottom)` på lagre-linjen har ingen effekt fordi viewport mangler `viewportFit: "cover"`; dimmingen bak dialogen lysner siden i mørk palett.
+  evidence: Funnet i gjennomgangen. Nettleseren holder selv innholdet unna hjemmeindikatoren, og dialogen skilles tydelig også i mørk palett; vurderes ved designgjennomgang av hele appen.
+- source_spec: `spec-3-2-lagre-og-slett.md`
+  summary: Et sent `rememberServings`-kall kan skrive et valgt antall rett etter at en redigering har nullstilt det.
+  evidence: Bare mulig hvis «Rediger» og lagring skjer innen noen få millisekunder etter å ha endret antallet; ingen versjonssjekk finnes. Ikke tatt hånd om i v1.

@@ -1,5 +1,5 @@
 import "server-only";
-import { asc, desc, eq, isNotNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, isNull, lt } from "drizzle-orm";
 import type { Quantity, Recipe, RecipeLine, RecipeSummary, Step, UnitKey } from "@/domain";
 import type { Db } from "../client";
 import { ingredientLines, recipes, steps } from "../schema";
@@ -221,4 +221,53 @@ export function listSavedRecipes(db: Db): RecipeSummary[] {
     .orderBy(desc(recipes.savedAt), desc(recipes.id))
     .all()
     .flatMap((row) => (row.savedAt === null ? [] : [{ ...row, savedAt: row.savedAt }]));
+}
+
+/**
+ * Legger en oppskrift i samlingen: setter `savedAt` bare når den er `null`, så en allerede
+ * lagret oppskrift beholder tidspunktet (og plassen i Samlingen). `updatedAt` røres ikke.
+ * Returnerer `false` når id-en ikke finnes.
+ */
+export function markRecipeSaved(db: Db, id: number, savedAt: string): boolean {
+  const { changes } = db
+    .update(recipes)
+    .set({ savedAt })
+    .where(and(eq(recipes.id, id), isNull(recipes.savedAt)))
+    .run();
+  if (changes > 0) return true;
+  return db.select({ id: recipes.id }).from(recipes).where(eq(recipes.id, id)).get() !== undefined;
+}
+
+/**
+ * Sletter oppskriften. `ingredient_lines` og `steps` følger med via `ON DELETE CASCADE`
+ * (fremmednøkler er slått på i `openDatabase`). Returnerer `false` når id-en ikke finnes.
+ */
+export function deleteRecipeById(db: Db, id: number): boolean {
+  return db.delete(recipes).where(eq(recipes.id, id)).run().changes > 0;
+}
+
+/**
+ * Lagrer valgt antall personer, bare for en lagret oppskrift (`savedAt` satt). `updatedAt`
+ * røres ikke: avkrysning på siden er nøklet på `updatedAt`, og en endring ville nullstilt
+ * den. Returnerer `false` når id-en ikke finnes eller oppskriften ikke er lagret.
+ */
+export function updateSelectedServings(db: Db, id: number, servings: number): boolean {
+  return (
+    db
+      .update(recipes)
+      .set({ selectedServings: servings })
+      .where(and(eq(recipes.id, id), isNotNull(recipes.savedAt)))
+      .run().changes > 0
+  );
+}
+
+/**
+ * Sletter oppskrifter som aldri ble lagret i samlingen (`savedAt` er `null`) og ble laget
+ * før `cutoff` (ISO-tekst). Linjer og steg følger med. Returnerer antall slettede oppskrifter.
+ */
+export function deleteStaleUnsavedRecipes(db: Db, cutoff: string): number {
+  return db
+    .delete(recipes)
+    .where(and(isNull(recipes.savedAt), lt(recipes.createdAt, cutoff)))
+    .run().changes;
 }

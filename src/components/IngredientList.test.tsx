@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { Activity } from "react";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { parseLine, type RecipeLine } from "@/domain";
@@ -359,6 +359,96 @@ describe("IngredientList", () => {
       await user.click(screen.getByText("mel"));
       await user.click(screen.getByText("egg"));
       expect(fetchSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("sist valgte antall og lagring (Story 3.2)", () => {
+    it("starter på lagret antall og skalerer fra originalen", () => {
+      render(<IngredientList ingredients={basic} originalServings={4} selectedServings={6} />);
+      expect(field()).toHaveValue("6");
+      expect(shown()).toEqual(["600 g mel", "2 egg ca.", "salt og pepper"]);
+      expect(screen.getByRole("button", { name: "Tilbakestill til 4" })).toBeInTheDocument();
+    });
+
+    it.each([99, 0, 2.5, -1, null])("ugyldig lagret antall %s gir opprinnelig antall", (value) => {
+      render(<IngredientList ingredients={basic} originalServings={4} selectedServings={value} />);
+      expect(field()).toHaveValue("4");
+      expect(shown()[0]).toBe("400 g mel");
+    });
+
+    it("kaller onServingsChange ved hver endring, også «Tilbakestill», og skriving i feltet", async () => {
+      const onServingsChange = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <IngredientList
+          ingredients={basic}
+          originalServings={4}
+          selectedServings={6}
+          onServingsChange={onServingsChange}
+        />,
+      );
+      expect(onServingsChange).not.toHaveBeenCalled();
+
+      await user.click(plus());
+      await user.click(minus());
+      await user.click(screen.getByRole("button", { name: "Tilbakestill til 4" }));
+      await user.clear(field());
+      await user.type(field(), "9{Enter}");
+      expect(onServingsChange.mock.calls).toEqual([[7], [6], [4], [9]]);
+    });
+
+    it("uten onServingsChange fungerer velgeren som før, uten kall", async () => {
+      const fetchSpy = vi.spyOn(globalThis, "fetch");
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={basic} originalServings={4} selectedServings={6} />);
+      await user.click(plus());
+      expect(field()).toHaveValue("7");
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it("endringen vises med en gang, uten å vente på svaret", async () => {
+      const user = userEvent.setup();
+      render(
+        <IngredientList
+          ingredients={basic}
+          originalServings={4}
+          onServingsChange={() => new Promise(() => {})}
+        />,
+      );
+      await user.click(plus());
+      expect(field()).toHaveValue("5");
+      expect(shown()[0]).toBe("500 g mel");
+    });
+
+    it.each([
+      ["avvist løfte", () => Promise.reject(new Error("nett"))],
+      [
+        "kastet feil",
+        () => {
+          throw new Error("rar");
+        },
+      ],
+      ["feilsvar", () => Promise.resolve({ ok: false, message: "Noe gikk galt." })],
+    ])("%s logges i konsollen og forstyrrer ikke siden", async (_, handler) => {
+      const error = vi.spyOn(console, "error").mockImplementation(() => {});
+      const user = userEvent.setup();
+      render(
+        <IngredientList ingredients={basic} originalServings={4} onServingsChange={handler} />,
+      );
+      await user.click(plus());
+      await waitFor(() => expect(error).toHaveBeenCalledTimes(1));
+      expect(field()).toHaveValue("5");
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
+    it("avkrysning står når antallet endres og lagres", async () => {
+      const user = userEvent.setup();
+      render(
+        <IngredientList ingredients={basic} originalServings={4} onServingsChange={() => {}} />,
+      );
+      await user.click(screen.getByRole("checkbox", { name: "400 g mel" }));
+      await user.click(plus());
+      expect(screen.getByRole("checkbox", { name: "500 g mel" })).toBeChecked();
     });
   });
 });

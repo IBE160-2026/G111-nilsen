@@ -100,7 +100,7 @@ Pilene viser lovlige avhengigheter. Alt annet er forbudt.
 
 - **Binds:** NFR-1, NFR-4
 - **Prevents:** Nøkler i koden og ulike steder som leser miljøvariabler.
-- **Rule:** Miljøvariabler leses bare i `src/server/config.ts`. `.env.example` lister alle variabler uten ekte verdier. Appen starter uten `.env`.
+- **Rule:** Miljøvariabler leses bare i `src/server/config.ts`, med ett smalt unntak: `src/instrumentation.ts` leser Nexts egen `process.env.NEXT_RUNTIME` for å starte opprydding bare i Node-kjøretiden (Story 3.2; `env-access.test.ts` låser unntaket til akkurat den variabelen). `.env.example` lister alle variabler uten ekte verdier. Appen starter uten `.env`.
 
 ### AD-10 — Avkrysning er klienttilstand
 

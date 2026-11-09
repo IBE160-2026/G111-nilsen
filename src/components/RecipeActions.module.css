@@ -1,0 +1,64 @@
+/* Lagre-linjen følger med nederst (sticky, ikke fixed), så den ikke dekker innhold. */
+.root {
+  position: sticky;
+  bottom: 0;
+  padding: var(--space-3) 0;
+  padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+  background: var(--color-surface-base);
+  border-top: 1px solid var(--color-border-hairline);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.primary,
+.secondary {
+  min-height: var(--tap-target-min);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Primærknapp som i EmptyState. */
+.primary {
+  border: var(--button-border-width) solid var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* Sekundærknapp: kantlinje i stedet for fyll, ikke rød. */
+.secondary {
+  border: var(--button-border-width) solid var(--color-control-border);
+  background: transparent;
+  color: var(--color-ink-primary);
+}
+
+.secondary:hover {
+  border-color: var(--color-accent);
+}
+
+.primary:focus-visible,
+.secondary:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-accent);
+  outline-offset: var(--focus-ring-width);
+}
+
+.primary:focus-visible {
+  outline-color: var(--color-ink-primary);
+}
+
+.message {
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}

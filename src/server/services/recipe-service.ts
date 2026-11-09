@@ -4,10 +4,14 @@ import { LIMITS, splitLines } from "@/lib/recipe-input";
 import { appError, err, ok, type Result } from "@/lib/result";
 import { getDb, type Db } from "../db/client";
 import {
+  deleteRecipeById,
+  deleteStaleUnsavedRecipes,
   findRecipeById,
   insertRecipe,
   listSavedRecipes,
+  markRecipeSaved,
   updateRecipe,
+  updateSelectedServings,
   type NewIngredientLine,
   type NewStep,
 } from "../db/repositories/recipe-repository";
@@ -128,6 +132,62 @@ export function updateManualRecipe(
     steps: content.value.steps,
   });
   return updated ? ok({ id }) : err(appError("not_found"));
+}
+
+function isRecipeId(id: number): boolean {
+  return Number.isSafeInteger(id) && id >= 1;
+}
+
+/**
+ * Legger en oppskrift i samlingen (Story 3.2). En allerede lagret oppskrift beholder sitt
+ * tidspunkt. Ugyldig eller ukjent id gir `not_found`.
+ */
+export function saveRecipeToCollection(id: number, db: Db = getDb()): Result<{ id: number }> {
+  if (!isRecipeId(id)) return err(appError("not_found"));
+  return markRecipeSaved(db, id, new Date().toISOString())
+    ? ok({ id })
+    : err(appError("not_found"));
+}
+
+/** Sletter oppskriften med ingredienser og steg. Ugyldig eller ukjent id gir `not_found`. */
+export function deleteRecipe(id: number, db: Db = getDb()): Result<{ id: number }> {
+  if (!isRecipeId(id)) return err(appError("not_found"));
+  return deleteRecipeById(db, id) ? ok({ id }) : err(appError("not_found"));
+}
+
+/**
+ * Husker valgt antall personer for en lagret oppskrift. Antall utenfor 1–50 eller ikke
+ * heltall gir `validation` (felt `servings`). Ukjent id og ikke-lagret oppskrift gir `not_found`.
+ */
+export function setSelectedServings(
+  id: number,
+  servings: number,
+  db: Db = getDb(),
+): Result<{ id: number }> {
+  if (!isRecipeId(id)) return err(appError("not_found"));
+  if (
+    !Number.isInteger(servings) ||
+    servings < LIMITS.servingsMin ||
+    servings > LIMITS.servingsMax
+  ) {
+    return err(appError("validation", "servings"));
+  }
+  return updateSelectedServings(db, id, servings) ? ok({ id }) : err(appError("not_found"));
+}
+
+/** Oppskrifter som aldri ble lagret ryddes bort etter så lang tid. */
+export const UNSAVED_RECIPE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Sletter oppskrifter som ikke er i samlingen og er eldre enn et døgn (regnet fra `now`).
+ * Lagrede oppskrifter røres aldri. Returnerer antall slettede.
+ */
+export function purgeStaleUnsavedRecipes(
+  now: Date = new Date(),
+  db: Db = getDb(),
+): Result<{ deleted: number }> {
+  const cutoff = new Date(now.getTime() - UNSAVED_RECIPE_MAX_AGE_MS).toISOString();
+  return ok({ deleted: deleteStaleUnsavedRecipes(db, cutoff) });
 }
 
 /** Henter en oppskrift, eller `not_found` når id-en ikke finnes. */

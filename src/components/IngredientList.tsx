@@ -78,12 +78,20 @@ type Props = {
   ingredients: readonly RecipeLine[];
   /** Antallet oppskriften er skrevet for; `null` gir uskalerte linjer og ingen porsjonsvelger. */
   originalServings: number | null;
+  /** Sist valgte antall (lagret). Brukes som startverdi bare når det er et heltall 1–50. */
+  selectedServings?: number | null;
+  /**
+   * Kalles med nytt antall ved hver endring (også «Tilbakestill»). Settes bare for en
+   * lagret oppskrift; uten den lagres ingenting. Svaret ventes ikke på, og feil logges.
+   */
+  onServingsChange?: (servings: number) => unknown;
 };
 
 /**
- * Porsjonsvelger og ingredienser (Story 1.5, 1.6). Valgt antall og avkrysning er bare
- * React-tilstand. Hver visning skalerer fra originalmengdene i `RecipeLine`, aldri fra
- * forrige skalerte verdi, og ingenting sendes til serveren. Avkrysningen er nøklet på
+ * Porsjonsvelger og ingredienser (Story 1.5, 1.6, 3.2). Avkrysning er bare React-tilstand.
+ * Hver visning skalerer fra originalmengdene i `RecipeLine`, aldri fra forrige skalerte
+ * verdi. Valgt antall starter på det lagrede antallet (`selectedServings`) og sendes bare
+ * til serveren via `onServingsChange` (lagret oppskrift). Avkrysningen er nøklet på
  * linje-id, så den består når antallet endres.
  */
 /** Opprinnelig antall som kan skaleres fra: heltall innenfor 1–50, ellers `null`. */
@@ -96,10 +104,39 @@ function validServings(value: number | null): number | null {
     : null;
 }
 
-export default function IngredientList({ ingredients, originalServings: rawOriginal }: Props) {
+/** Sender antallet til serveren uten å vente; feil logges og forstyrrer ikke siden. */
+function remember(save: (servings: number) => unknown, servings: number) {
+  const report = (error: unknown) => console.error("Kunne ikke lagre valgt antall", error);
+  try {
+    Promise.resolve(save(servings))
+      .then((result) => {
+        if (typeof result === "object" && result !== null && "ok" in result && !result.ok) {
+          report(result);
+        }
+      })
+      .catch(report);
+  } catch (error) {
+    report(error);
+  }
+}
+
+export default function IngredientList({
+  ingredients,
+  originalServings: rawOriginal,
+  selectedServings = null,
+  onServingsChange,
+}: Props) {
   // Ugyldig opprinnelig antall (0, negativt, desimal, over 50) behandles som manglende.
   const originalServings = validServings(rawOriginal);
-  const [selected, setSelected] = useState(originalServings);
+  // Ugyldig lagret antall (0, 99, desimal) gir opprinnelig antall.
+  const [selected, setSelected] = useState(
+    originalServings === null ? null : (validServings(selectedServings) ?? originalServings),
+  );
+
+  function change(servings: number) {
+    setSelected(servings);
+    if (onServingsChange) remember(onServingsChange, servings);
+  }
   const factor = originalServings !== null && selected !== null ? selected / originalServings : 1;
   const { isChecked, toggle } = useCheckedSet();
   const groups = groupBySection(ingredients);
@@ -107,7 +144,7 @@ export default function IngredientList({ ingredients, originalServings: rawOrigi
   return (
     <div className={styles.root}>
       {originalServings !== null && selected !== null ? (
-        <ServingStepper value={selected} onChange={setSelected} original={originalServings} />
+        <ServingStepper value={selected} onChange={change} original={originalServings} />
       ) : null}
 
       <section className={styles.card} aria-labelledby="ingredienser">

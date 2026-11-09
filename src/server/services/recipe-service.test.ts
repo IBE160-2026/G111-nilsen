@@ -4,8 +4,12 @@ import { createTestDb } from "../db/client";
 import { insertRecipe } from "../db/repositories/recipe-repository";
 import {
   createManualRecipe,
+  deleteRecipe,
   getRecipe,
   listCollection,
+  purgeStaleUnsavedRecipes,
+  saveRecipeToCollection,
+  setSelectedServings,
   updateManualRecipe,
   type ManualRecipeInput,
 } from "./recipe-service";
@@ -355,5 +359,145 @@ describe("listCollection", () => {
       before.value.map((r) => [r.id, r.savedAt]),
     );
     expect(after.value[1].title).toBe("Endret");
+  });
+});
+
+describe("lagre, slette og rydde (Story 3.2)", () => {
+  const stored = (
+    db: ReturnType<typeof createTestDb>,
+    savedAt: string | null,
+    createdAt?: string,
+  ) =>
+    insertRecipe(db, {
+      title: "Vafler",
+      sourceUrl: null,
+      sourceName: null,
+      originalServings: 4,
+      selectedServings: null,
+      savedAt,
+      createdAt: createdAt ?? "2026-11-09T10:00:00.000Z",
+      updatedAt: "2026-11-09T10:00:00.000Z",
+      ingredients: [{ position: 0, section: null, ...parseLine("2 egg") }],
+      steps: [{ position: 0, section: null, text: "Rør." }],
+    });
+  const read = (db: ReturnType<typeof createTestDb>, id: number) => {
+    const result = getRecipe(id, db);
+    if (!result.ok) throw new Error("fant ikke oppskriften");
+    return result.value;
+  };
+  const BAD_IDS = [0, -1, 1.5, NaN, Infinity, 2 ** 53];
+
+  describe("saveRecipeToCollection", () => {
+    it("legger en ulagret oppskrift i samlingen, så den vises der", () => {
+      const db = createTestDb();
+      const id = stored(db, null);
+      const before = read(db, id);
+      expect(saveRecipeToCollection(id, db)).toEqual({ ok: true, value: { id } });
+      const after = read(db, id);
+      expect(after.savedAt).not.toBeNull();
+      expect(after.updatedAt).toBe(before.updatedAt);
+      const list = listCollection(db);
+      expect(list.ok && list.value.map((r) => r.id)).toEqual([id]);
+    });
+
+    it("beholder tidspunktet når oppskriften allerede er lagret", () => {
+      const db = createTestDb();
+      const id = stored(db, "2026-11-09T11:00:00.000Z");
+      expect(saveRecipeToCollection(id, db).ok).toBe(true);
+      expect(read(db, id).savedAt).toBe("2026-11-09T11:00:00.000Z");
+    });
+
+    it.each([999, ...BAD_IDS])("id %s gir not_found", (id) => {
+      expect(saveRecipeToCollection(id, createTestDb())).toEqual({
+        ok: false,
+        error: { kind: "not_found" },
+      });
+    });
+  });
+
+  describe("deleteRecipe", () => {
+    it("sletter oppskriften med ingredienser og steg", () => {
+      const db = createTestDb();
+      const id = stored(db, "2026-11-09T11:00:00.000Z");
+      expect(deleteRecipe(id, db)).toEqual({ ok: true, value: { id } });
+      expect(getRecipe(id, db).ok).toBe(false);
+      expect(count(db, "recipes")).toBe(0);
+      expect(count(db, "ingredient_lines")).toBe(0);
+      expect(count(db, "steps")).toBe(0);
+    });
+
+    it.each([999, ...BAD_IDS])("id %s gir not_found", (id) => {
+      expect(deleteRecipe(id, createTestDb())).toEqual({
+        ok: false,
+        error: { kind: "not_found" },
+      });
+    });
+
+    it("sletting to ganger gir not_found andre gang", () => {
+      const db = createTestDb();
+      const id = stored(db, "2026-11-09T11:00:00.000Z");
+      deleteRecipe(id, db);
+      expect(deleteRecipe(id, db)).toEqual({ ok: false, error: { kind: "not_found" } });
+    });
+  });
+
+  describe("setSelectedServings", () => {
+    it.each([1, 6, 50])("lagrer %s for en lagret oppskrift uten å endre updatedAt", (n) => {
+      const db = createTestDb();
+      const id = stored(db, "2026-11-09T11:00:00.000Z");
+      expect(setSelectedServings(id, n, db)).toEqual({ ok: true, value: { id } });
+      expect(read(db, id)).toMatchObject({
+        selectedServings: n,
+        updatedAt: "2026-11-09T10:00:00.000Z",
+      });
+    });
+
+    it.each([0, 51, 2.5, -3, NaN, Infinity])("antall %s gir validation (servings)", (n) => {
+      const db = createTestDb();
+      const id = stored(db, "2026-11-09T11:00:00.000Z");
+      expect(setSelectedServings(id, n, db)).toEqual({
+        ok: false,
+        error: { kind: "validation", detail: "servings" },
+      });
+      expect(read(db, id).selectedServings).toBeNull();
+    });
+
+    it("ikke-lagret oppskrift gir not_found og lagrer ingenting", () => {
+      const db = createTestDb();
+      const id = stored(db, null);
+      expect(setSelectedServings(id, 6, db)).toEqual({ ok: false, error: { kind: "not_found" } });
+      expect(read(db, id).selectedServings).toBeNull();
+    });
+
+    it.each([999, ...BAD_IDS])("id %s gir not_found", (id) => {
+      expect(setSelectedServings(id, 6, createTestDb())).toEqual({
+        ok: false,
+        error: { kind: "not_found" },
+      });
+    });
+  });
+
+  describe("purgeStaleUnsavedRecipes", () => {
+    const now = new Date("2026-11-10T12:00:00.000Z");
+
+    it("sletter ulagrede eldre enn 24 timer og beholder resten", () => {
+      const db = createTestDb();
+      const old = stored(db, null, "2026-11-09T11:59:59.000Z");
+      const recent = stored(db, null, "2026-11-09T12:00:01.000Z");
+      const savedOld = stored(db, "2026-11-01T00:00:00.000Z", "2026-11-01T00:00:00.000Z");
+
+      expect(purgeStaleUnsavedRecipes(now, db)).toEqual({ ok: true, value: { deleted: 1 } });
+      expect(getRecipe(old, db).ok).toBe(false);
+      expect(getRecipe(recent, db).ok).toBe(true);
+      expect(getRecipe(savedOld, db).ok).toBe(true);
+      expect(count(db, "ingredient_lines")).toBe(2);
+      expect(count(db, "steps")).toBe(2);
+    });
+
+    it("bruker nåtid når now utelates", () => {
+      const db = createTestDb();
+      stored(db, null, "2000-01-01T00:00:00.000Z");
+      expect(purgeStaleUnsavedRecipes(undefined, db)).toEqual({ ok: true, value: { deleted: 1 } });
+    });
   });
 });

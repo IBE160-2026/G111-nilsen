@@ -94,12 +94,12 @@ export const editRecipeMessages = {
   tabTitle: "Rediger",
 } as const;
 
-/** Tekster for Samlingen (Story 3.1). */
 /** Kilden som vises på oppskrifter uten navn og lenke (oppskriftssiden og kort). */
 export const sourceMessages = {
   manual: "Lagt inn selv",
 } as const;
 
+/** Tekster for Samlingen (Story 3.1). */
 export const collectionMessages = {
   heading: "Samlingen",
   loading: "Henter samlingen …",
@@ -109,4 +109,20 @@ export const collectionMessages = {
     "Oppskrifter du legger inn eller lagrer, havner her med den sist lagrede øverst.",
   emptyManualAction: "Legg inn selv",
   emptyImportAction: "Importer din første oppskrift",
+} as const;
+
+/** Tekster for lagre-linjen nederst på oppskriftssiden (Story 3.2). */
+export const recipeActionMessages = {
+  save: "Lagre",
+  saving: "Lagrer …",
+  saved: "Lagret.",
+  delete: "Slett",
+} as const;
+
+/** Tekster for dialogen «Slette oppskriften?» (Story 3.2). Tittelen settes inn foran `descriptionAfterTitle`. */
+export const deleteDialogMessages = {
+  title: "Slette oppskriften?",
+  descriptionAfterTitle: "fjernes fra samlingen. Du kan ikke angre.",
+  confirm: "Slett",
+  cancel: "Avbryt",
 } as const;

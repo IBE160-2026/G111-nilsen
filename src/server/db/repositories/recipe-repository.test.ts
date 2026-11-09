@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { createTestDb } from "../client";
 import {
+  deleteRecipeById,
+  deleteStaleUnsavedRecipes,
   findRecipeById,
   insertRecipe,
   listSavedRecipes,
+  markRecipeSaved,
   updateRecipe,
+  updateSelectedServings,
   type NewRecipe,
   type RecipeUpdate,
 } from "./recipe-repository";
@@ -283,5 +287,122 @@ describe("listSavedRecipes", () => {
         savedAt: "2026-11-09T10:00:00.000Z",
       },
     ]);
+  });
+});
+
+describe("lagre, slette og rydde (Story 3.2)", () => {
+  const SAVED = "2026-11-10T08:00:00.000Z";
+
+  describe("markRecipeSaved", () => {
+    it("setter savedAt på en ulagret oppskrift uten å røre updatedAt", () => {
+      const db = createTestDb();
+      const id = insertRecipe(db, base);
+      expect(markRecipeSaved(db, id, SAVED)).toBe(true);
+      expect(findRecipeById(db, id)).toMatchObject({
+        savedAt: SAVED,
+        updatedAt: base.updatedAt,
+        createdAt: base.createdAt,
+      });
+    });
+
+    it("beholder savedAt når oppskriften allerede er lagret", () => {
+      const db = createTestDb();
+      const id = insertRecipe(db, { ...base, savedAt: "2026-11-09T11:00:00.000Z" });
+      expect(markRecipeSaved(db, id, SAVED)).toBe(true);
+      expect(findRecipeById(db, id)?.savedAt).toBe("2026-11-09T11:00:00.000Z");
+    });
+
+    it("returnerer false for ukjent id", () => {
+      expect(markRecipeSaved(createTestDb(), 999, SAVED)).toBe(false);
+    });
+  });
+
+  describe("deleteRecipeById", () => {
+    it("fjerner oppskriften og bare den", () => {
+      const db = createTestDb();
+      const keep = insertRecipe(db, base);
+      const id = insertRecipe(db, base);
+      expect(deleteRecipeById(db, id)).toBe(true);
+      expect(findRecipeById(db, id)).toBeNull();
+      expect(findRecipeById(db, keep)).not.toBeNull();
+    });
+
+    it("kaskaderer til ingredient_lines og steps (fremmednøkler er på)", () => {
+      const db = createTestDb();
+      expect(db.$client.pragma("foreign_keys", { simple: true })).toBe(1);
+      const keep = insertRecipe(db, base);
+      const id = insertRecipe(db, base);
+      expect(count(db, "ingredient_lines")).toBe(4);
+      expect(count(db, "steps")).toBe(4);
+
+      expect(deleteRecipeById(db, id)).toBe(true);
+      expect(count(db, "recipes")).toBe(1);
+      expect(count(db, "ingredient_lines")).toBe(2);
+      expect(count(db, "steps")).toBe(2);
+      expect(findRecipeById(db, keep)?.ingredients).toHaveLength(2);
+    });
+
+    it("returnerer false for ukjent id", () => {
+      expect(deleteRecipeById(createTestDb(), 999)).toBe(false);
+    });
+  });
+
+  describe("updateSelectedServings", () => {
+    it("lagrer antallet for en lagret oppskrift uten å røre updatedAt eller savedAt", () => {
+      const db = createTestDb();
+      const id = insertRecipe(db, { ...base, savedAt: SAVED });
+      expect(updateSelectedServings(db, id, 6)).toBe(true);
+      expect(findRecipeById(db, id)).toMatchObject({
+        selectedServings: 6,
+        updatedAt: base.updatedAt,
+        savedAt: SAVED,
+      });
+      expect(updateSelectedServings(db, id, 4)).toBe(true);
+      expect(findRecipeById(db, id)?.selectedServings).toBe(4);
+    });
+
+    it("lagrer ingenting for en oppskrift som ikke er lagret", () => {
+      const db = createTestDb();
+      const id = insertRecipe(db, base);
+      expect(updateSelectedServings(db, id, 6)).toBe(false);
+      expect(findRecipeById(db, id)?.selectedServings).toBeNull();
+    });
+
+    it("returnerer false for ukjent id", () => {
+      expect(updateSelectedServings(createTestDb(), 999, 6)).toBe(false);
+    });
+  });
+
+  describe("deleteStaleUnsavedRecipes", () => {
+    const cutoff = "2026-11-09T12:00:00.000Z";
+    const created = (createdAt: string, savedAt: string | null = null) =>
+      ({ ...base, createdAt, savedAt }) satisfies NewRecipe;
+
+    it("sletter ulagrede oppskrifter eldre enn grensen, med linjer og steg", () => {
+      const db = createTestDb();
+      const old = insertRecipe(db, created("2026-11-08T11:59:59.000Z"));
+      expect(deleteStaleUnsavedRecipes(db, cutoff)).toBe(1);
+      expect(findRecipeById(db, old)).toBeNull();
+      expect(count(db, "ingredient_lines")).toBe(0);
+      expect(count(db, "steps")).toBe(0);
+    });
+
+    it("beholder yngre ulagrede, grensen selv og lagrede uansett alder", () => {
+      const db = createTestDb();
+      const young = insertRecipe(db, created("2026-11-09T12:00:01.000Z"));
+      const boundary = insertRecipe(db, created(cutoff));
+      const saved = insertRecipe(db, created("2020-01-01T00:00:00.000Z", SAVED));
+      expect(deleteStaleUnsavedRecipes(db, cutoff)).toBe(0);
+      for (const id of [young, boundary, saved]) expect(findRecipeById(db, id)).not.toBeNull();
+    });
+
+    it("returnerer antall slettede", () => {
+      const db = createTestDb();
+      insertRecipe(db, created("2026-11-01T00:00:00.000Z"));
+      insertRecipe(db, created("2026-11-02T00:00:00.000Z"));
+      insertRecipe(db, created("2026-11-03T00:00:00.000Z", SAVED));
+      expect(deleteStaleUnsavedRecipes(db, cutoff)).toBe(2);
+      expect(count(db, "recipes")).toBe(1);
+    });
   });
 });

@@ -2,9 +2,29 @@
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Activity } from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Recipe } from "@/domain";
-import RecipeView from "./RecipeView";
+
+const actions = vi.hoisted(() => ({
+  saveRecipe: vi.fn(),
+  removeRecipe: vi.fn(),
+  rememberServings: vi.fn(),
+}));
+vi.mock("@/app/oppskrift/[id]/actions", () => actions);
+
+const { default: RecipeView } = await import("./RecipeView");
+
+beforeEach(() => {
+  actions.saveRecipe.mockReset().mockResolvedValue({ ok: true });
+  actions.removeRecipe.mockReset().mockResolvedValue(undefined);
+  actions.rememberServings.mockReset().mockResolvedValue({ ok: true });
+  HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function (this: HTMLDialogElement) {
+    this.removeAttribute("open");
+  };
+});
 
 afterEach(cleanup);
 
@@ -195,5 +215,52 @@ describe("RecipeView", () => {
     await user.click(screen.getByText("Stek."));
     rerender(<RecipeView recipe={{ ...recipe, id: 2, title: "Vafler" }} />);
     for (const checkbox of screen.getAllByRole("checkbox")) expect(checkbox).not.toBeChecked();
+  });
+
+  describe("lagre-linje og sist valgte antall (Story 3.2)", () => {
+    const saved = { ...recipe, id: 7, savedAt: "2026-11-09T11:00:00.000Z" };
+
+    it("ulagret oppskrift: «Lagre» nederst i artikkelen, og «Lagre» kaller saveRecipe med id", async () => {
+      const user = userEvent.setup();
+      render(<RecipeView recipe={{ ...recipe, id: 7 }} />);
+      const save = screen.getByRole("button", { name: "Lagre" });
+      const steps = screen.getByRole("region", { name: "Slik gjør du" });
+      expect(steps.compareDocumentPosition(save) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(screen.getByRole("article")).toContainElement(save);
+
+      await user.click(save);
+      expect(actions.saveRecipe).toHaveBeenCalledExactlyOnceWith(7);
+    });
+
+    it("lagret oppskrift: «Slett» i stedet for «Lagre», og bekreftelse kaller removeRecipe med id", async () => {
+      const user = userEvent.setup();
+      render(<RecipeView recipe={saved} />);
+      expect(screen.queryByRole("button", { name: "Lagre" })).not.toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: "Slett Pannekaker" }));
+      await user.click(screen.getByRole("button", { name: "Slett", description: "" }));
+      expect(actions.removeRecipe).toHaveBeenCalledExactlyOnceWith(7);
+    });
+
+    it("lagret oppskrift: endret antall sendes til rememberServings med id og antall", async () => {
+      const user = userEvent.setup();
+      render(<RecipeView recipe={saved} />);
+      await user.click(screen.getByRole("button", { name: "Flere personer" }));
+      expect(actions.rememberServings).toHaveBeenCalledExactlyOnceWith(7, 5);
+    });
+
+    it("ulagret oppskrift: endret antall gir ingen lagring", async () => {
+      const user = userEvent.setup();
+      render(<RecipeView recipe={{ ...recipe, id: 7 }} />);
+      await user.click(screen.getByRole("button", { name: "Flere personer" }));
+      expect(screen.getByLabelText("Antall personer")).toHaveValue("5");
+      expect(actions.rememberServings).not.toHaveBeenCalled();
+    });
+
+    it("åpner på sist valgte antall, med mengdene skalert", () => {
+      render(<RecipeView recipe={{ ...saved, selectedServings: 6 }} />);
+      expect(screen.getByLabelText("Antall personer")).toHaveValue("6");
+      const ingredients = screen.getByRole("region", { name: "Ingredienser" });
+      expect(within(ingredients).getAllByRole("listitem")[0]).toHaveTextContent("2 ¼ dl melk");
+    });
   });
 });

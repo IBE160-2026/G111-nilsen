@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   collectionMessages,
+  deleteDialogMessages,
   editRecipeMessages,
   errorMessages,
   fallbackMessage,
   manualRecipeFieldMessages,
   messageFor,
+  recipeActionMessages,
   servingStepperMessages,
 } from "./messages";
 import { LIMITS } from "./recipe-input";
@@ -35,6 +37,8 @@ describe("messageFor", () => {
       ...Object.values(servingStepperMessages),
       ...Object.values(editRecipeMessages),
       ...Object.values(collectionMessages),
+      ...Object.values(recipeActionMessages),
+      ...Object.values(deleteDialogMessages),
     ];
     for (const text of texts) expect(text).not.toContain("!");
   });
@@ -45,5 +49,19 @@ describe("servingStepperMessages", () => {
     expect(servingStepperMessages.invalid).toContain(
       `${LIMITS.servingsMin} til ${LIMITS.servingsMax}`,
     );
+  });
+});
+
+describe("recipeActionMessages og deleteDialogMessages", () => {
+  it("har teksten fra spesifikasjonen (Story 3.2)", () => {
+    expect(recipeActionMessages).toEqual({
+      save: "Lagre",
+      saving: "Lagrer …",
+      saved: "Lagret.",
+      delete: "Slett",
+    });
+    expect(deleteDialogMessages.title).toBe("Slette oppskriften?");
+    expect(deleteDialogMessages.confirm).toBe("Slett");
+    expect(deleteDialogMessages.cancel).toBe("Avbryt");
   });
 });
