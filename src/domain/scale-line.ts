@@ -3,7 +3,7 @@ import type { ParsedLine, Quantity, ScaledLine, UnitKey } from "./types";
 // Toleranse for flyttallsfeil (f.eks. 0,9 × 1,25), slik at halvdeler alltid rundes opp.
 const EPSILON = 1e-9;
 
-/** Enheter (og linjer uten enhet) som ikke kan deles: egg, løk, fedd, bokser osv. */
+/** Enheter (og linjer uten enhet) som ikke kan deles: egg, løk, fedd, bokser, never, klyper osv. */
 const INDIVISIBLE_UNITS: ReadonlySet<UnitKey> = new Set<UnitKey>([
   "stk",
   "fedd",
@@ -15,6 +15,9 @@ const INDIVISIBLE_UNITS: ReadonlySet<UnitKey> = new Set<UnitKey>([
   "glass",
   "beger",
   "can",
+  "neve",
+  "klype",
+  "pinch",
 ]);
 
 /** Enheter der store mengder rundes til to gjeldende sifre og små til hele tall. */

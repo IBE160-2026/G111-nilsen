@@ -2,51 +2,48 @@ import { FRACTION_CHARS } from "./parse-quantity";
 import type { Quantity, ScaledLine } from "./types";
 
 // Brøkdelene som kan vises med brøktegn (FR-8), med tegnet fra tolkingens tabell.
-const DISPLAY_FRACTIONS: readonly (readonly [number, string])[] = ["¼", "⅓", "½", "⅔", "¾"].map(
-  (char) => [FRACTION_CHARS[char], char] as const,
-);
+export const DISPLAY_FRACTIONS: readonly (readonly [number, string])[] = [
+  "¼",
+  "⅓",
+  "½",
+  "⅔",
+  "¾",
+].map((char) => [FRACTION_CHARS[char], char] as const);
 
-// Største tillatte avvik fra kandidaten, som andel av kandidatens verdi.
+// Største tillatte avvik fra brøken, som andel av selve brøken (beslutning 2026-11-09).
 const TOLERANCE = 0.05;
 const EPSILON = 1e-9;
 
-type Candidate = { value: number; whole: number; char: string | null };
-
-function candidatesFor(value: number): Candidate[] {
-  const n = Math.floor(value);
-  return [
-    { value: n, whole: n, char: null },
-    ...DISPLAY_FRACTIONS.map(([fraction, char]) => ({ value: n + fraction, whole: n, char })),
-    { value: n + 1, whole: n + 1, char: null },
-  ];
-}
-
 function formatNumber(value: number): string {
-  let best: Candidate | null = null;
-  for (const candidate of candidatesFor(value)) {
-    if (best === null || Math.abs(value - candidate.value) < Math.abs(value - best.value)) {
-      best = candidate;
+  const whole = Math.floor(value);
+  const part = value - whole;
+
+  for (const [fraction, char] of DISPLAY_FRACTIONS) {
+    if (Math.abs(part - fraction) <= TOLERANCE * fraction + EPSILON) {
+      return whole === 0 ? char : `${whole} ${char}`;
     }
   }
 
-  if (best !== null && Math.abs(value - best.value) <= TOLERANCE * best.value + EPSILON) {
-    if (best.char === null) return String(best.whole);
-    return best.whole === 0 ? best.char : `${best.whole} ${best.char}`;
-  }
-
   // Én desimal med komma; «,0» utelates fordi tallet da skrives som heltall.
-  const rounded = Math.round(value * 10 + EPSILON) / 10;
-  return String(rounded).replace(".", ",");
+  const oneDecimal = Math.round(value * 10 + EPSILON) / 10;
+  if (oneDecimal !== 0 || value <= 0) return String(oneDecimal).replace(".", ",");
+
+  // Små positive mengder vises aldri som «0»: to desimaler, minst 0,01.
+  const twoDecimals = Math.max(0.01, Math.round(value * 100 + EPSILON) / 100);
+  return String(twoDecimals).replace(".", ",");
 }
 
 /**
  * Formaterer en mengde for visning: brøktegn (¼ ⅓ ½ ⅔ ¾, eventuelt med heltall
- * foran) når verdien ligger innen 5 % av brøken, ellers maks én desimal med komma.
- * Områder vises som «a–b».
+ * foran) når brøkdelen ligger innen 5 % av selve brøken, ellers maks én desimal med
+ * komma (to desimaler for små mengder som ellers ville blitt «0»). Områder vises som
+ * «a–b», eller som én verdi når endene formateres likt.
  */
 export function formatQuantity(quantity: Quantity): string {
   const min = formatNumber(quantity.min);
-  return quantity.max === undefined ? min : `${min}–${formatNumber(quantity.max)}`;
+  if (quantity.max === undefined) return min;
+  const max = formatNumber(quantity.max);
+  return max === min ? min : `${min}–${max}`;
 }
 
 /**

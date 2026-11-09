@@ -74,6 +74,10 @@ describe("scaleLine – øvrige rader i matrisen", () => {
     expect(show("1 ss olje", 5)).toBe("1 ¼ ss olje");
   });
 
+  it("små mengder vises ikke som «0»: ¼ ts salt fra 8 til 1 gir 0,03 ts salt", () => {
+    expect(show("¼ ts salt", 1, 8)).toBe("0,03 ts salt");
+  });
+
   it.each([0, Number.NaN, -1, Number.POSITIVE_INFINITY])(
     "ugyldig faktor %s gir linjen uendret og kaster ikke",
     (factor) => {
@@ -84,6 +88,25 @@ describe("scaleLine – øvrige rader i matrisen", () => {
       expect(formatLine(scaled)).toBe("400 g mel");
     },
   );
+});
+
+describe("scaleLine – udelelige enheter", () => {
+  it.each(["stk", "boks", "pk", "pose", "bunt", "skive", "glass", "beger", "can"])(
+    "1 %s × 0,75 rundes til 1 og merkes «ca.»",
+    (unit) => {
+      expect(formatLine(scaleLine(parseLine(`1 ${unit} tomater`), 0.75))).toBe(
+        `1 ${unit} tomater (ca.)`,
+      );
+    },
+  );
+
+  it("1 neve persille × 1,5 gir 2 neve persille (ca.)", () => {
+    expect(formatLine(scaleLine(parseLine("1 neve persille"), 1.5))).toBe("2 neve persille (ca.)");
+  });
+
+  it.each(["klype", "pinch"])("1 %s salt × 1,5 gir 2 og «ca.»", (unit) => {
+    expect(formatLine(scaleLine(parseLine(`1 ${unit} salt`), 1.5))).toBe(`2 ${unit} salt (ca.)`);
+  });
 });
 
 describe("scaleLine – regel (c) for g og ml", () => {
@@ -99,6 +122,25 @@ describe("scaleLine – regel (c) for g og ml", () => {
     expect(scaleLine(parseLine("0,3 g safran"), 2).quantity).toEqual({ min: 1 });
   });
 
+  it("nøyaktig 100 g: faktor 1 er uendret, faktor 1,5 gir 150 g", () => {
+    expect(formatLine(scaleLine(parseLine("100 g mel"), 1))).toBe("100 g mel");
+    expect(formatLine(scaleLine(parseLine("100 g mel"), 1.5))).toBe("150 g mel");
+  });
+
+  it("over 1000: 750 g × 2 gir 1500 g", () => {
+    expect(formatLine(scaleLine(parseLine("750 g potet"), 2))).toBe("1500 g potet");
+  });
+
+  it.each([
+    ["1,5 kg poteter", 0.75, "1,1 kg poteter"],
+    ["0,75 l melk", 1.5, "1,1 l melk"],
+  ] as const)("%s × %s avrundes ikke som g/ml", (input, factor, shown) => {
+    const scaled = scaleLine(parseLine(input), factor);
+    expect(scaled.quantity).toEqual({ min: 1.125 });
+    expect(scaled.approximate).toBe(false);
+    expect(formatLine(scaled)).toBe(shown);
+  });
+
   it("ml følger samme regel: 250 ml melk med faktor 1,5 gir 380 ml", () => {
     expect(scaleLine(parseLine("250 ml melk"), 1.5).quantity).toEqual({ min: 380 });
   });
@@ -107,6 +149,14 @@ describe("scaleLine – regel (c) for g og ml", () => {
 describe("scaleLine – område", () => {
   it("skalerer hver ende for seg", () => {
     expect(scaleLine(parseLine("2–3 ss sukker"), 0.5).quantity).toEqual({ min: 1, max: 1.5 });
+  });
+
+  it("2–3 egg × 1,5 gir 3–5 egg (ca.) når bare øvre ende avrundes", () => {
+    expect(formatLine(scaleLine(parseLine("2–3 egg"), 1.5))).toBe("3–5 egg (ca.)");
+  });
+
+  it("200–300 g mel × 1,25 gir 250–380 g mel", () => {
+    expect(formatLine(scaleLine(parseLine("200–300 g mel"), 1.25))).toBe("250–380 g mel");
   });
 
   it("fjerner max når den blir lik min etter avrunding", () => {
@@ -118,16 +168,24 @@ describe("scaleLine – område", () => {
 });
 
 describe("scaleLine – originalen er fasit (AD-2)", () => {
-  it("skalering med 0,75 og deretter 1,25 gir samme resultat som fra originalen", () => {
-    const line = parseLine("750 g potet");
-    const first = scaleLine(line, 0.75);
-    const second = scaleLine(line, 1.25);
-    expect(first.quantity).toEqual({ min: 560 });
-    expect(second).toEqual(scaleLine(parseLine("750 g potet"), 1.25));
-    expect(second.quantity).toEqual({ min: 940 });
+  it("resultatet avhenger bare av originalen og faktoren, ikke av tidligere kall", () => {
+    const input = "750 g potet";
+    const fresh = scaleLine(parseLine(input), 1.25);
+
+    const line = parseLine(input);
+    const snapshot = structuredClone(line);
+    scaleLine(line, 0.75);
+    expect(scaleLine(line, 1.25)).toEqual(fresh);
+
+    scaleLine(line, 2);
+    scaleLine(line, 0.5);
+    scaleLine(line, 0.75);
+    expect(scaleLine(line, 1.25)).toEqual(fresh);
+
+    expect(line).toEqual(snapshot);
   });
 
-  it("endrer ikke originalobjektet", () => {
+  it("endrer ikke originalobjektet for områder", () => {
     const line = parseLine("2–3 ss sukker");
     const snapshot = structuredClone(line);
     scaleLine(line, 2);

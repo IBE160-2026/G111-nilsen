@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatLine, formatQuantity } from "./format-quantity";
+import { DISPLAY_FRACTIONS, formatLine, formatQuantity } from "./format-quantity";
 import { parseLine } from "./parse-line";
 
 describe("formatQuantity", () => {
@@ -26,8 +26,30 @@ describe("formatQuantity", () => {
     expect(formatQuantity({ min: 1.125 })).toBe("1,1");
     expect(formatQuantity({ min: 0.6 })).toBe("0,6");
     expect(formatQuantity({ min: 0.4 })).toBe("0,4");
-    // 2,8 ligger innen 5 % av 2 ¾ (kandidatens verdi teller, også heltallet).
-    expect(formatQuantity({ min: 2.8 })).toBe("2 ¾");
+    expect(formatQuantity({ min: 2.8 })).toBe("2,8");
+  });
+
+  it.each([
+    [5.4, "5,4"],
+    [3.1, "3,1"],
+    [1.24, "1 ¼"],
+    [0.65, "⅔"],
+    [0.3, "0,3"],
+  ])("5 %%-grensen måles mot selve brøken: %s vises som %s", (value, expected) => {
+    expect(formatQuantity({ min: value })).toBe(expected);
+  });
+
+  it("alle brøktegnene for visning har en tallverdi", () => {
+    expect(DISPLAY_FRACTIONS).toHaveLength(5);
+    for (const [fraction] of DISPLAY_FRACTIONS) {
+      expect(Number.isFinite(fraction)).toBe(true);
+      expect(formatQuantity({ min: fraction })).not.toContain("NaN");
+    }
+  });
+
+  it("viser små positive mengder med to desimaler i stedet for «0»", () => {
+    expect(formatQuantity({ min: 0.03125 })).toBe("0,03");
+    expect(formatQuantity({ min: 0.001 })).toBe("0,01");
   });
 
   it("viser aldri «,0»", () => {
@@ -38,6 +60,11 @@ describe("formatQuantity", () => {
   it("viser område med tankestrek uten mellomrom", () => {
     expect(formatQuantity({ min: 4, max: 6 })).toBe("4–6");
     expect(formatQuantity({ min: 1, max: 1.5 })).toBe("1–1 ½");
+  });
+
+  it("viser én verdi når endene i et område formateres likt", () => {
+    expect(formatQuantity({ min: 1, max: 1.02 })).toBe("1");
+    expect(formatQuantity({ min: 0.49, max: 0.51 })).toBe("½");
   });
 });
 
