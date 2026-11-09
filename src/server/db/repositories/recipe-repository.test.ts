@@ -5,6 +5,8 @@ import {
   deleteRecipeById,
   deleteStaleUnsavedRecipes,
   findRecipeById,
+  findRecipeBySourceUrl,
+  insertImportedRecipe,
   insertRecipe,
   listFavoriteRecipes,
   listSavedRecipes,
@@ -542,5 +544,71 @@ describe("favoritter (Story 3.4)", () => {
     setRecipeFavorite(db, id, true);
     deleteRecipeById(db, id);
     expect(listFavoriteRecipes(db)).toEqual([]);
+  });
+});
+
+describe("findRecipeBySourceUrl og insertImportedRecipe (Story 2.2)", () => {
+  const url = "https://www.matprat.no/oppskrifter/x/";
+  const imported = { ...base, sourceUrl: url };
+
+  it("finner ingenting for ukjent adresse, og sammenligner nøyaktig", () => {
+    const db = createTestDb();
+    insertRecipe(db, imported);
+    expect(findRecipeBySourceUrl(db, "https://www.matprat.no/oppskrifter/y/")).toBeNull();
+    expect(findRecipeBySourceUrl(db, url.toUpperCase())).toBeNull();
+    expect(findRecipeBySourceUrl(db, url.slice(0, -1))).toBeNull();
+    expect(findRecipeBySourceUrl(db, url)).toEqual({ id: 1, saved: false });
+  });
+
+  it("en lagret oppskrift går foran en ulagret, uansett id", () => {
+    const db = createTestDb();
+    const saved = insertRecipe(db, { ...imported, savedAt: "2026-11-09T11:00:00.000Z" });
+    insertRecipe(db, imported);
+    expect(findRecipeBySourceUrl(db, url)).toEqual({ id: saved, saved: true });
+    const db2 = createTestDb();
+    insertRecipe(db2, imported);
+    const later = insertRecipe(db2, { ...imported, savedAt: "2026-11-09T11:00:00.000Z" });
+    expect(findRecipeBySourceUrl(db2, url)).toEqual({ id: later, saved: true });
+  });
+
+  it("insertImportedRecipe setter inn når adressen er ny", () => {
+    const db = createTestDb();
+    const result = insertImportedRecipe(db, imported);
+    expect(result).toEqual({ kind: "inserted", id: 1 });
+    expect(findRecipeById(db, 1)?.sourceUrl).toBe(url);
+    expect(count(db, "ingredient_lines")).toBe(2);
+  });
+
+  it("gjenbruker en ulagret rad uten å skrive en ny", () => {
+    const db = createTestDb();
+    insertImportedRecipe(db, imported);
+    expect(insertImportedRecipe(db, imported)).toEqual({ kind: "existing", id: 1 });
+    expect(count(db, "recipes")).toBe(1);
+    expect(count(db, "ingredient_lines")).toBe(2);
+  });
+
+  it("gir duplicate uten å skrive når en lagret oppskrift finnes", () => {
+    const db = createTestDb();
+    const id = insertRecipe(db, { ...imported, savedAt: "2026-11-09T11:00:00.000Z" });
+    expect(insertImportedRecipe(db, imported)).toEqual({ kind: "duplicate", id });
+    expect(count(db, "recipes")).toBe(1);
+  });
+
+  it("sjekk og skriv er én transaksjon: den andre av to importer får den første raden", () => {
+    const db = createTestDb();
+    const results = [insertImportedRecipe(db, imported), insertImportedRecipe(db, imported)];
+    expect(results.map((r) => r.kind)).toEqual(["inserted", "existing"]);
+    expect(count(db, "recipes")).toBe(1);
+  });
+
+  it("ruller tilbake alt når skrivingen feiler", () => {
+    const db = createTestDb();
+    const broken = {
+      ...imported,
+      steps: [{ position: 0, section: null, text: null as unknown as string }],
+    };
+    expect(() => insertImportedRecipe(db, broken)).toThrow();
+    expect(count(db, "recipes")).toBe(0);
+    expect(count(db, "ingredient_lines")).toBe(0);
   });
 });

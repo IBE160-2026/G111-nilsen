@@ -1,21 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ImportForm from "@/components/ImportForm";
+import { importMessages } from "@/lib/messages";
+import { submitImport } from "./actions";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = { title: "Importer" };
+export const metadata: Metadata = { title: importMessages.tabTitle };
 
 export default function ImporterPage() {
   return (
     <section className={styles.intro}>
-      <h1>Hent en oppskrift</h1>
-      <p className={styles.lead}>
-        Snart kan du lime inn en lenke til en oppskrift her. RecipeMate henter da ingrediensene og
-        stegene og viser dem i et fast og ryddig format.
-      </p>
+      <h1>{importMessages.heading}</h1>
+      <p className={styles.lead}>{importMessages.lead}</p>
+      <ImportForm action={submitImport} />
       <p className={styles.manual}>
-        Har du oppskriften selv?{" "}
+        {importMessages.manualPrompt}{" "}
         <Link href="/ny" className={styles.manualLink}>
-          Legg inn selv
+          {importMessages.enterManually}
         </Link>
       </p>
     </section>

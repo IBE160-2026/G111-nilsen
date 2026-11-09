@@ -34,6 +34,19 @@
   font-size: var(--type-meta-size);
 }
 
+/* Kilden som lenke: understreket og i aksentfarge, så den er tydelig en lenke; 44 px høy trykkflate. */
+.source {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-target-min);
+  color: var(--color-accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  /* Lange kildenavn uten mellomrom skal brytes, ikke gi sidescroll. */
+  overflow-wrap: anywhere;
+}
+
 /* Én kolonne på mobil: porsjonsvelger, ingredienser, steg. */
 .columns {
   display: grid;

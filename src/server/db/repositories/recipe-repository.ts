@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, isNotNull, isNull, lt, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, isNull, lt, sql, type SQL } from "drizzle-orm";
 import type { Quantity, Recipe, RecipeLine, RecipeSummary, Step, UnitKey } from "@/domain";
 import type { Db } from "../client";
 import { folders, ingredientLines, recipes, steps } from "../schema";
@@ -21,57 +21,117 @@ export type NewRecipe = {
   steps: NewStep[];
 };
 
+type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
+
+/** Skriver oppskrift, linjer og steg med en åpen transaksjon (eller tilkobling) og returnerer id. */
+function insertRecipeRows(tx: Tx, recipe: NewRecipe): number {
+  const { id } = tx
+    .insert(recipes)
+    .values({
+      title: recipe.title,
+      sourceUrl: recipe.sourceUrl,
+      sourceName: recipe.sourceName,
+      originalServings: recipe.originalServings,
+      selectedServings: recipe.selectedServings,
+      savedAt: recipe.savedAt,
+      createdAt: recipe.createdAt,
+      updatedAt: recipe.updatedAt,
+    })
+    .returning({ id: recipes.id })
+    .get();
+
+  if (recipe.ingredients.length > 0) {
+    tx.insert(ingredientLines)
+      .values(
+        recipe.ingredients.map((line) => ({
+          recipeId: id,
+          position: line.position,
+          section: line.section,
+          originalText: line.original,
+          quantityMin: line.quantity?.min ?? null,
+          quantityMax: line.quantity?.max ?? null,
+          unit: line.unit,
+          name: line.name,
+          parseable: line.parseable,
+        })),
+      )
+      .run();
+  }
+
+  if (recipe.steps.length > 0) {
+    tx.insert(steps)
+      .values(
+        recipe.steps.map((step) => ({
+          recipeId: id,
+          position: step.position,
+          section: step.section,
+          text: step.text,
+        })),
+      )
+      .run();
+  }
+
+  return id;
+}
+
 /** Lagrer oppskrift, ingredienslinjer og steg i én transaksjon og returnerer ny id. */
 export function insertRecipe(db: Db, recipe: NewRecipe): number {
-  return db.transaction((tx) => {
-    const { id } = tx
-      .insert(recipes)
-      .values({
-        title: recipe.title,
-        sourceUrl: recipe.sourceUrl,
-        sourceName: recipe.sourceName,
-        originalServings: recipe.originalServings,
-        selectedServings: recipe.selectedServings,
-        savedAt: recipe.savedAt,
-        createdAt: recipe.createdAt,
-        updatedAt: recipe.updatedAt,
-      })
-      .returning({ id: recipes.id })
-      .get();
+  return db.transaction((tx) => insertRecipeRows(tx, recipe));
+}
 
-    if (recipe.ingredients.length > 0) {
-      tx.insert(ingredientLines)
-        .values(
-          recipe.ingredients.map((line) => ({
-            recipeId: id,
-            position: line.position,
-            section: line.section,
-            originalText: line.original,
-            quantityMin: line.quantity?.min ?? null,
-            quantityMax: line.quantity?.max ?? null,
-            unit: line.unit,
-            name: line.name,
-            parseable: line.parseable,
-          })),
-        )
-        .run();
-    }
+/** En eksisterende oppskrift med en gitt kilde-adresse: id og om den er i samlingen. */
+export type ExistingSource = { id: number; saved: boolean };
 
-    if (recipe.steps.length > 0) {
-      tx.insert(steps)
-        .values(
-          recipe.steps.map((step) => ({
-            recipeId: id,
-            position: step.position,
-            section: step.section,
-            text: step.text,
-          })),
-        )
-        .run();
-    }
+/**
+ * Finner oppskriften med nøyaktig denne `source_url` (allerede normalisert). En lagret oppskrift
+ * (`savedAt` satt) går foran en ulagret; blant like går den eldste (lavest id) først.
+ */
+export function findRecipeBySourceUrl(db: Db | Tx, sourceUrl: string): ExistingSource | null {
+  const row = db
+    .select({ id: recipes.id, savedAt: recipes.savedAt })
+    .from(recipes)
+    .where(eq(recipes.sourceUrl, sourceUrl))
+    .orderBy(sql`${recipes.savedAt} IS NULL`, asc(recipes.id))
+    .limit(1)
+    .get();
+  return row ? { id: row.id, saved: row.savedAt !== null } : null;
+}
 
-    return id;
-  });
+/**
+ * Setter `createdAt` til `now` for en ulagret import som brukeren åpner på nytt, så den ikke
+ * ryddes bort av døgnrenholdet rett etterpå. Lagrede oppskrifter røres ikke.
+ */
+export function refreshUnsavedRecipe(db: Db | Tx, id: number, now: string): void {
+  db.update(recipes)
+    .set({ createdAt: now })
+    .where(and(eq(recipes.id, id), isNull(recipes.savedAt)))
+    .run();
+}
+
+/** Utfallet av `insertImportedRecipe`. */
+export type ImportedInsert =
+  | { kind: "inserted"; id: number }
+  | { kind: "existing"; id: number }
+  | { kind: "duplicate"; id: number };
+
+/**
+ * Sjekker og skriver i én transaksjon (`BEGIN IMMEDIATE`), så to samtidige importer av samme
+ * adresse ikke gir to rader: finnes det allerede en lagret oppskrift med `sourceUrl`, skrives
+ * ingenting (`duplicate`); finnes en ulagret, gjenbrukes den (`existing`); ellers settes den inn.
+ * Feiler noe, rulles alt tilbake og feilen kastes videre.
+ */
+export function insertImportedRecipe(
+  db: Db,
+  recipe: NewRecipe & { sourceUrl: string },
+): ImportedInsert {
+  return db.transaction(
+    (tx) => {
+      const found = findRecipeBySourceUrl(tx, recipe.sourceUrl);
+      if (found) return { kind: found.saved ? "duplicate" : "existing", id: found.id } as const;
+      return { kind: "inserted", id: insertRecipeRows(tx, recipe) } as const;
+    },
+    { behavior: "immediate" },
+  );
 }
 
 /** Feltene en redigering endrer. Kilde, mappe (`folderId`), `savedAt`, `createdAt` og `id` røres ikke. */

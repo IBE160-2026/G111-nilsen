@@ -1,0 +1,33 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-hairline);
+  border-left: 4px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  overflow-wrap: anywhere;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.body {
+  color: var(--color-ink-secondary);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* Høykontrast: kanten må fortsatt synes som en kant, ikke bakgrunn. */
+@media (forced-colors: active) {
+  .root {
+    border: 1px solid CanvasText;
+    border-left: 4px solid Highlight;
+  }
+}

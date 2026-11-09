@@ -10,6 +10,12 @@ export type ErrorMessage = {
   body: string;
 };
 
+/** Reservemelding når feiltypen er ukjent eller feilen var uventet. */
+export const fallbackMessage: ErrorMessage = {
+  title: "Noe gikk galt.",
+  body: "Prøv igjen. Skjer det igjen, kan du starte appen på nytt.",
+};
+
 export const errorMessages: Record<ErrorKind, ErrorMessage> = {
   invalid_url: {
     title: "Lenken ser ikke riktig ut.",
@@ -17,15 +23,15 @@ export const errorMessages: Record<ErrorKind, ErrorMessage> = {
   },
   fetch_failed: {
     title: "Vi fikk ikke hentet siden.",
-    body: "Sjekk lenken og internettforbindelsen, og prøv igjen.",
+    body: "Sjekk lenken og internettforbindelsen, og prøv igjen. Du kan også legge inn oppskriften selv.",
   },
   no_recipe: {
     title: "Vi fant ingen oppskrift på siden.",
-    body: "Prøv en annen lenke, eller legg inn oppskriften selv.",
+    body: "Lenken ser ut til å gå til en oversikt. Åpne selve oppskriften og lim inn den lenken, eller legg den inn selv.",
   },
   duplicate: {
-    title: "Du har allerede denne oppskriften.",
-    body: "Åpne den fra Oppskrifter.",
+    title: "Du har allerede lagret denne oppskriften.",
+    body: "Du finner den under Oppskrifter.",
   },
   validation: {
     title: "Noe i skjemaet må rettes.",
@@ -39,12 +45,7 @@ export const errorMessages: Record<ErrorKind, ErrorMessage> = {
     title: "Vi fikk ikke laget forslag nå.",
     body: "Prøv igjen om litt.",
   },
-};
-
-/** Reservemelding når feiltypen er ukjent eller feilen var uventet. */
-export const fallbackMessage: ErrorMessage = {
-  title: "Noe gikk galt.",
-  body: "Prøv igjen. Skjer det igjen, kan du starte appen på nytt.",
+  unknown: fallbackMessage,
 };
 
 /** Norsk melding for en feiltype, med reservemelding for ukjente typer. */
@@ -54,6 +55,28 @@ export function messageFor(kind: ErrorKind | string | null | undefined): ErrorMe
   }
   return fallbackMessage;
 }
+
+/** Tekster for Importer-siden (Story 2.2). Feilmeldingene hentes fra `errorMessages` via `messageFor`. */
+export const importMessages = {
+  heading: "Hent en oppskrift",
+  lead: "Lim inn lenken til en oppskrift. RecipeMate henter ingrediensene og stegene og viser dem i et fast og ryddig format.",
+  label: "Lenke til oppskriften",
+  hint: "For eksempel https://www.matprat.no/oppskrifter/…",
+  submit: "Hent oppskrift",
+  pending: "Henter oppskriften …",
+  /** Lenken i feilmeldingen til den manuelle skjermen. */
+  enterManually: "Legg inn selv",
+  /** Lenken i feilmeldingen om at oppskriften allerede er lagret. */
+  openRecipe: "Åpne oppskriften",
+  manualPrompt: "Har du oppskriften selv?",
+  tabTitle: "Importer",
+} as const;
+
+/** Kilden på oppskriftssiden når den har en lenke (Story 2.2). */
+export const sourceLinkMessages = {
+  /** Etter kildenavnet i lenkens tilgjengelige navn: «Matprat, åpner kilden i ny fane». */
+  opensSuffix: "åpner kilden i ny fane",
+} as const;
 
 /** Feltmeldinger for skjemaet «Legg inn selv» (/ny). */
 export const manualRecipeFieldMessages = {

@@ -12,7 +12,7 @@ Repoet inneholder applikasjonen og dokumentasjon av utvikling, testing og kvalit
 
 **RecipeMate** er en matlagingsassistent for oppskrifter fra nettet. Du limer inn en lenke (eller skriver inn oppskriften selv), og appen viser oppskriften i et fast og ryddig format der du kan velge antall personer, slik at alle mengder regnes om med en gang. Oppskrifter kan lagres i Oppskrifter, i mapper og som favoritter.
 
-Status: Epic 1 («Les og skaler en oppskrift») er ferdig: Story 1.1–1.6, pluss Story 3.5 (redigering), Story 3.1 (Oppskrifter-siden), Story 3.2 (lagre og slette), Story 3.3 (mapper) og Story 3.4 (favoritter). Du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`), finne den igjen under Oppskrifter (`/samlingen`), se den på `/oppskrift/{id}`, velge antall personer og krysse av ingredienser og steg mens du lager maten. Oppskriften lagres i en lokal SQLite-database. Import fra lenke og forslag kommer i senere epics.
+Status: Story 2.2 (import fra lenke) er ferdig, se «Importere fra lenke» under. Epic 1 («Les og skaler en oppskrift») er ferdig: Story 1.1–1.6, pluss Story 3.5 (redigering), Story 3.1 (Oppskrifter-siden), Story 3.2 (lagre og slette), Story 3.3 (mapper) og Story 3.4 (favoritter). Du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`), finne den igjen under Oppskrifter (`/samlingen`), se den på `/oppskrift/{id}`, velge antall personer og krysse av ingredienser og steg mens du lager maten. Oppskriften lagres i en lokal SQLite-database. Import fra lenke (Story 2.2) er på plass; forslag og porsjonsdialogen for oppskrifter uten antall kommer i senere stories.
 
 ## Hva Epic 1 (og Story 3.5) inneholder
 
@@ -115,13 +115,32 @@ På oppskriftssiden (`/oppskrift/{id}`) står «Rediger» ved tittelen. Den åpn
 
 ## Lese oppskriftsdata (import, del 1)
 
-Story 2.1 legger grunnen for import fra lenke: to rene funksjoner i `src/domain/` som leser oppskriftsdata (schema.org `Recipe` i JSON-LD) fra HTML. Det finnes ingen henting fra nettet, lagring eller skjermbilde ennå; det kommer i Story 2.2 og senere.
+Story 2.1 legger grunnen for import fra lenke: to rene funksjoner i `src/domain/` som leser oppskriftsdata (schema.org `Recipe` i JSON-LD) fra HTML. Henting, lagring og skjermbilde kom i Story 2.2, se «Importere fra lenke».
 
 - **`extractRecipeJsonLd(html)`** (`src/domain/extract-recipe-jsonld.ts`) finner alle `<script type="application/ld+json">`-blokker og returnerer første `Recipe`, i dokumentrekkefølge. Den finner `Recipe` i et enkelt objekt, en liste, `@graph` (også nestet) og når `@type` er en liste eller en full type (`https://schema.org/Recipe`, `schema:Recipe`). En blokk med ugyldig JSON hoppes over; vanlige feil i praksis (rå linjeskift i strenger, BOM, `<!--`- og CDATA-innpakning) tåles. Ingen blokker eller ingen `Recipe` gir `{ ok: false, error: { kind: "no_recipe" } }`. Funksjonen kaster aldri.
 - **`normalizeRecipe(node)`** (`src/domain/normalize-recipe.ts`) gjør `Recipe`-objektet om til `ImportedRecipe`: `title`, `sourceName` (utgiver, ellers forfatter, ellers `null`), `servings` (første tydelige heltall i `recipeYield` mellom 1 og 50, ellers `null`; tall med måleenhet («3 dl», «20 cm», «180 °C»), mål og antall ganger («2 x 6», «20x20 cm») og brøker eller blandede tall («1/2», «1 1/2», «4 ½») hoppes over og letingen fortsetter, så «1 liter, 4 porsjoner» gir 4, mens «3 dl» og «1 1/2» gir `null`; desimaltall, negative tall og «1e3» gir `null`, og i «4-6» brukes 4), `ingredients` (`{ text }`, rå originaltekst) og `steps` (`{ text, section }`, nummerert i rekkefølge, med seksjonsnavn fra `HowToSection`). Mengder tolkes ikke her; det gjør `parseLine` senere. En oppskrift uten tittel, eller uten både ingredienser og steg, gir `no_recipe`.
 - **Bare tekst slipper gjennom** (AD-8): HTML-tagger fjernes (innholdet i `script` og `style` forsvinner), entiteter dekodes, usynlige tegn fjernes og blanke tegn slås sammen. Bilder, URL-er og HTML fra kilden tas ikke med i `ImportedRecipe`.
 - **Testdata:** testene leser de lagrede sidene i `test/fixtures/html/` (kilder i `test/fixtures/sources.md`) og små, egenskrevne JSON-LD-eksempler. Nettsider endrer seg, så testene bruker aldri nettet. Vil du fornye sidene, kjør `bash scripts/fetch-fixtures.sh` fra prosjektroten og oppdater de forventede verdiene i `src/domain/recipe-import.test.ts` etter å ha lest de nye filene.
 - Testes med `npm test`: I/O-matrisen fra spesifikasjonen, kantfall for alle regler (porsjonsantall, nummerering, seksjoner, feil felttyper, skadelig tekst), de ti lagrede sidene (fem med oppskrift, fem uten), at 2 MB HTML tas på under ett sekund, og at ingen av funksjonene kaster for tilfeldig eller ugyldig input.
+
+## Importere fra lenke
+
+Story 2.2 binder import sammen. På Importer-siden (`/`) limer du inn en lenke og trykker «Hent oppskrift». Appen går gjennom disse stegene (AD-4): `validateUrl` → duplikatsjekk → henting → `extractRecipeJsonLd` → `normalizeRecipe` → `parseLine` → lagring som «ikke i samlingen». Du havner på `/oppskrift/{id}`, der kilden vises som lenke (åpnes i ny fane), og kan lagre oppskriften i Oppskrifter derfra. Uten JavaScript virker skjemaet også, så langt som mulig.
+
+- **Lenken:** `validateUrl` (`src/lib/source-url.ts`) trimmer blanke og usynlige tegn og omsluttende anførselstegn, setter `https://` foran når skjemaet mangler («www.matprat.no/…»), og godtar bare `http` og `https` uten brukernavn og passord. `normalizeSourceUrl` fjerner fragment og sporingsparametere (`utm_*`, `fbclid`, `gclid` …) og lagres som `sourceUrl`. To ulike stier, og `http` mot `https`, regnes som ulike oppskrifter.
+- **Duplikat:** er adressen allerede lagret i Oppskrifter, får du «Du har allerede lagret denne oppskriften» med lenke til den, og ingenting hentes. En import som ikke ble lagret, åpnes på nytt uten ny henting. Sjekken ligger bare i `import-service`.
+- **Feil:** tre varianter vises under feltet med 4 px venstrekant i aksentfarge og `role="alert"`: ugyldig lenke, siden kunne ikke hentes, og ingen oppskrift funnet (da er «Legg inn selv» ett trykk unna). Lenken står igjen i feltet. Alle tekster ligger i `src/lib/messages.ts`.
+- **Sikkerhet i HTTP-adapteren** (`src/server/adapters/http-fetcher.ts`, AD-8), uten ny pakke:
+  - Bare `http` og `https`. Adresser som peker til maskinen selv, private, lenkelokale og andre ikke-offentlige nett avvises (alle IPv4- og IPv6-områdene i spesifikasjonen, IPv4-mappet IPv6, og vertsnavn som `localhost`, `*.local`, `*.internal`, `*.lan`, `*.home.arpa`). Regelverket er rene funksjoner i `address-policy.ts`.
+  - Sjekken skjer på selve tilkoblingen: en egen `lookup` slår opp alle adresser, avviser hvis noen er ikke-offentlig og kobler til den sjekkede adressen uten nytt oppslag (ingen DNS-rebinding). IP-adresser skrevet direkte sjekkes uten oppslag.
+  - Omdirigeringer (maks 5) følges manuelt, og hver ny adresse får samme sjekk. Ingen cookies og ingen innloggingshoder.
+  - Én samlet frist på 10 sekunder for hele kjeden, med timer som alltid ryddes, og maks 2 MB leses. `Accept-Encoding: identity`, så ingenting dekomprimeres. Tegnsett fra `Content-Type`, ellers `<meta charset>`, ellers UTF-8.
+  - HTML fra kilden vises og lagres aldri; bare tekstfeltene fra oppskriftsdata brukes.
+- **Hva som avkortes:** tittel til 200 tegn, hver ingrediens til 300, hvert steg til 2000 (avkortet tekst ender på «…»), og bare de første 100 ingrediensene og 100 stegene lagres. Grensene er `LIMITS` i `src/lib/recipe-input.ts`.
+- **`IMPORT_SOURCE`:** miljøvariabelen velger hvor sidene hentes fra. `http` (standard) henter fra nettet; `fixtures` bruker de lagrede sidene i `test/fixtures/html/` slik de er listet i `test/fixtures/sources.md`, uten nett. Bruk den til demo og ende-til-ende-tester, for eksempel `IMPORT_SOURCE=fixtures npm run dev` og lim inn `https://www.matprat.no/oppskrifter/familien/rundstykker/`. Ingen variabel kan skru av adressebeskyttelsen.
+- **Oppskrift uten porsjonsantall:** finner ikke siden et tydelig antall, lagres `originalServings = null`. Oppskriftssiden viser da ingen porsjonsvelger og mengdene som i originalen (uskalert). Dialogen for å velge antall kommer i Story 2.4.
+- **Testdata:** `scripts/fetch-fixtures.sh` henter sidene i `test/fixtures/sources.md` på nytt. Fixture-adapteren leser samme tabell; legg til en rad der når du lagrer en ny side.
+- Testes med `npm test`: adresseregler (tabeller for alle områdene, IPv6, IPv4-mappet og vertsnavn), HTTP-adapteren mot lokale 127.0.0.1-tjenere og falske oppslag (omdirigeringer, tidsfrist med falske timere, 2 MB-grense, tegnsett, statuskoder, ikke-HTML, selvsignert HTTPS-sertifikat avvises, ingen hengende sockets eller timere), fixture-adapteren, `importRecipe` mot en database i minnet (Tine, Matprat og Godt, duplikat uten henting, gjenbruk, avkorting, tilbakerulling), Server Action, skjema og side.
 
 ## Database
 
@@ -161,7 +180,7 @@ npm run format:check # sjekk formatering uten å endre filer
 
 ### Hva testene dekker
 
-`npm test` kjører Vitest én gang og gir i dag 60 testfiler og 1612 tester. Ingen test bruker nettverket eller en ekte API-nøkkel.
+`npm test` kjører Vitest én gang og gir i dag 71 testfiler og 2118 tester. Ingen test bruker nettverket (bare lokale 127.0.0.1-tjenere) eller en ekte API-nøkkel.
 
 - **Domenet** (`src/domain/`): tolking av mengder og ingredienslinjer og skalering og formatering, med fasittabellen fra Epic 1 (400 g mel for 6 gir 600 g, «1 egg (ca.)», og så videre) som egne tester, og lesing av oppskriftsdata fra lagrede HTML-sider (JSON-LD, normalisering, tekstrensing, ytelse for 2 MB og aldri-kaster-egenskap).
 - **Server** (`src/server/`): repositorier og tjenester mot en ekte SQLite-database i minnet, blant annet tilbakerulling ved feil, redigering, samlingen, lagring, sletting og opprydding, og datamigrasjonen (en database med bare den første migrasjonen oppgraderes).
@@ -181,8 +200,8 @@ src/
   server/
     config.ts   Eneste sted som leser miljøvariabler
     services/   Tjenester som brukes av sider og Server Actions
-    ports/      Grensesnitt mot omverdenen
-    adapters/   Implementasjoner av portene
+    ports/      Grensesnitt mot omverdenen (RecipeSourceFetcher)
+    adapters/   Implementasjoner av portene (http-fetcher, fixture-fetcher, address-policy)
     db/         Databaseskjema, tilkobling, migrering og repositorier
   styles/       Designtokens (farger, typografi, avstander)
 drizzle/        Databasemigrasjoner (genereres med npm run db:generate)

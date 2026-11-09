@@ -12,6 +12,8 @@ export const ERROR_KINDS = [
   "validation",
   "not_found",
   "suggestion_failed",
+  /** Uventet feil (for eksempel databasen). Brukeren får reservemeldingen. */
+  "unknown",
 ] as const;
 
 export type ErrorKind = (typeof ERROR_KINDS)[number];

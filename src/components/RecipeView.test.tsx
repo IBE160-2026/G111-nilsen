@@ -168,6 +168,64 @@ describe("RecipeView", () => {
     expect(screen.queryByText(/Lagt inn selv/)).not.toBeInTheDocument();
   });
 
+  describe("kilde som lenke (Story 2.2)", () => {
+    const withUrl = (sourceUrl: string | null, sourceName: string | null = "Matprat") => (
+      <RecipeView recipe={{ ...recipe, sourceUrl, sourceName }} folders={folders} />
+    );
+
+    it("viser kilden som lenke til sourceUrl som åpner i ny fane", () => {
+      render(withUrl("https://www.matprat.no/oppskrifter/x/"));
+      const link = screen.getByRole("link", { name: "Matprat, åpner kilden i ny fane" });
+      expect(link).toHaveAttribute("href", "https://www.matprat.no/oppskrifter/x/");
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+      expect(link).toHaveTextContent("Matprat");
+    });
+
+    it("bruker vertsnavnet som tekst når kilden mangler navn", () => {
+      render(withUrl("https://www.godt.no/x", null));
+      expect(
+        screen.getByRole("link", { name: "godt.no, åpner kilden i ny fane" }),
+      ).toHaveTextContent("godt.no");
+    });
+
+    it("http er også en lenke", () => {
+      render(withUrl("http://gammel.no/x"));
+      expect(screen.getByRole("link", { name: /åpner kilden/ })).toHaveAttribute(
+        "href",
+        "http://gammel.no/x",
+      );
+    });
+
+    it.each(["javascript:alert(1)", "data:text/html,x", "file:///etc/passwd", "ikke en url"])(
+      "sourceUrl %j (manipulert rad) vises ikke som lenke",
+      (sourceUrl) => {
+        render(withUrl(sourceUrl));
+        expect(screen.queryByRole("link", { name: /åpner kilden/ })).not.toBeInTheDocument();
+        expect(document.querySelector(`a[href="${sourceUrl}"]`)).toBeNull();
+        expect(screen.getByText("Matprat")).toBeInTheDocument();
+      },
+    );
+
+    it("uten sourceUrl står bare teksten, uten lenke", () => {
+      render(withUrl(null, null));
+      expect(screen.getByText("Lagt inn selv")).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: /åpner kilden/ })).not.toBeInTheDocument();
+    });
+
+    it("oppskrift uten porsjonsantall (null) krasjer ikke og viser uskalerte mengder", () => {
+      render(
+        <RecipeView
+          recipe={{ ...recipe, originalServings: null, sourceUrl: "https://a.no/x" }}
+          folders={folders}
+        />,
+      );
+      expect(screen.queryByLabelText("Antall personer")).not.toBeInTheDocument();
+      expect(screen.getByText("1 ½ dl")).toBeInTheDocument();
+      expect(document.body.textContent).not.toMatch(/NaN|undefined/);
+    });
+  });
+
   it("nullstiller valgt antall når komponenten får en annen oppskrift", async () => {
     const user = userEvent.setup();
     const { rerender } = render(<RecipeView recipe={recipe} folders={folders} />);

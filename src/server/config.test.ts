@@ -20,6 +20,7 @@ describe("loadConfig", () => {
       llmApiKey: "test-key",
       llmModel: "test-model",
       databasePath: "/tmp/test.db",
+      importSource: "http",
       isProduction: false,
     });
   });
@@ -35,5 +36,14 @@ describe("loadConfig", () => {
     expect(config.llmApiKey).toBeUndefined();
     expect(config.llmModel).toBeUndefined();
     expect(config.databasePath).toBe(DEFAULT_DATABASE_PATH);
+  });
+
+  it("IMPORT_SOURCE: http er standard, fixtures velger lagrede sider, alt annet er http", () => {
+    expect(loadConfig({}).importSource).toBe("http");
+    expect(loadConfig({ IMPORT_SOURCE: "" }).importSource).toBe("http");
+    expect(loadConfig({ IMPORT_SOURCE: "fixtures" }).importSource).toBe("fixtures");
+    expect(loadConfig({ IMPORT_SOURCE: " Fixtures " }).importSource).toBe("fixtures");
+    expect(loadConfig({ IMPORT_SOURCE: "http" }).importSource).toBe("http");
+    expect(loadConfig({ IMPORT_SOURCE: "ukjent" }).importSource).toBe("http");
   });
 });

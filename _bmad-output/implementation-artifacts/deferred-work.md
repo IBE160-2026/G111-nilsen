@@ -165,3 +165,33 @@
   summary: Ytelsestestene for import tar ca. 20 s; vurder å skille dem ut i en egen testkjøring.
   evidence: 2 MB-mønstre med terskel 3 s (kravet er under 1 s på vanlig maskin).
 
+## Story 2.2
+
+- source_spec: `spec-2-2-importer-fra-lenke.md`
+  summary: Ulagrede importer ryddes bare bort etter et døgn (Story 3.2), og en import som ikke lagres, blir stående som rad til da. Gjenbruk av en gammel rad viser dataene fra første henting.
+  evidence: Bevisst etter spesifikasjonen («gjenbruk uten ny henting»). Vurder en «Hent på nytt»-handling eller en kortere levetid.
+- source_spec: `spec-2-2-importer-fra-lenke.md`
+  summary: Tekst som avkortes til `LIMITS` (tittel 200, ingrediens 300, steg 2000) og linjer utover 100 forkastes uten at brukeren får beskjed.
+  evidence: Spesifikasjonen krever avkorting, ikke varsel. Vurder en nøytral merknad på oppskriftssiden når noe er avkortet.
+- source_spec: `spec-2-2-importer-fra-lenke.md`
+  summary: Porsjonsdialogen «Hvor mange er oppskriften laget for?» mangler. En importert oppskrift uten antall (`originalServings = null`) vises uskalert uten porsjonsvelger, og «Rediger» krever et antall (feltet står tomt).
+  evidence: `IngredientList` håndterte `null` fra før; Story 2.4 bygger dialogen.
+- source_spec: `spec-2-2-importer-fra-lenke.md`
+  summary: Mikrodata/RDFa og sider som krever JavaScript for å vise oppskriften gir `no_recipe`; HTML hentes uten nettleser og uten cookies, så sider bak samtykkevegg eller innlogging feiler.
+  evidence: Videreført fra Story 2.1. Adapteren leser ikke HTML som kode.
+- source_spec: `spec-2-2-importer-fra-lenke.md`
+  summary: Adressesjekken er strengere enn spesifikasjonen på noen punkter: navn uten punktum (`intranett`) blokkeres, og `::/96`, `::ffff:0:0:0/96`, `64:ff9b:1::/48`, `2001::/32` (Teredo), `fec0::/10` blokkeres. 6to4 (`2002::/16`) godtas bare når den innebygde IPv4-adressen er offentlig.
+  evidence: Se Implementation Notes. Ingen av dem skal være nåbare offentlige oppskriftssider.
+- source_spec: `spec-2-2-importer-fra-lenke.md`
+  summary: Hvis Node startes med `NODE_USE_ENV_PROXY=1` eller en proxy via miljø, går forespørslene via proxyen og adressesjekken gjelder proxyens adresse, ikke målet. `http.request` bruker ikke proxy som standard.
+  evidence: Ikke testet. Dokumentér eller blokker proxybruk hvis appen noen gang kjøres bak en proxy.
+- source_spec: `spec-2-2-importer-fra-lenke.md`
+  summary: Ingen hastighetsbegrensning på importer; én bruker kan starte mange samtidige hentinger (hver maks 2 MB og 10 s).
+  evidence: Lokal enbrukerapp (PRD §6). Vurder en kø eller grense hvis appen hostes.
+- source_spec: `spec-2-2-importer-fra-lenke.md`
+  summary: Playwright-ende-til-ende-tester finnes ikke i repoet; nettleserkontrollen (360/1280 px, lys/mørk, forced-colors, uten JavaScript) ble gjort manuelt med et engangsskript utenfor repoet.
+  evidence: AD-11 nevner Playwright, men pakken er ikke installert i prosjektet, og Story 2.2 forbyr nye pakker.
+
+- source_spec: `spec-2-2-importer-fra-lenke.md`
+  summary: Fra kodegjennomgangen: adapteren begrenser ikke portnummer (bare offentlig adresse); `normalizeSourceUrl` normaliserer ikke store/små bokstaver i prosentkoding og behandler `ref` som sporingsparameter; omdirigeringer (alias-adresser) gir egne rader; `recipes.source_url` har ingen indeks; DNS-oppslaget har ikke eget tidsavbrudd; ingen samtidighetsgrense på importer.
+  evidence: Ingen av dem gir sikkerhetshull (adressepolicyen kontrolleres per hopp). Vurder ved hosting.

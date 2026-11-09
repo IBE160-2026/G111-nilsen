@@ -8,8 +8,9 @@ import {
   saveRecipe,
   setFavorite,
 } from "@/app/oppskrift/[id]/actions";
-import { editRecipeMessages } from "@/lib/messages";
+import { editRecipeMessages, sourceLinkMessages } from "@/lib/messages";
 import { sourceLabel } from "@/lib/source-label";
+import { isHttpUrl } from "@/lib/source-url";
 import IngredientList from "./IngredientList";
 import RecipeActions from "./RecipeActions";
 import StepList from "./StepList";
@@ -39,7 +40,21 @@ export default function RecipeView({ recipe, folders }: { recipe: Recipe; folder
             {editRecipeMessages.editLink}
           </Link>
         </div>
-        <p className={styles.meta}>{sourceLabel(recipe)}</p>
+        <p className={styles.meta}>
+          {recipe.sourceUrl !== null && isHttpUrl(recipe.sourceUrl) ? (
+            <a
+              href={recipe.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.source}
+              aria-label={`${sourceLabel(recipe)}, ${sourceLinkMessages.opensSuffix}`}
+            >
+              {sourceLabel(recipe)}
+            </a>
+          ) : (
+            sourceLabel(recipe)
+          )}
+        </p>
       </header>
 
       <div className={styles.columns}>
