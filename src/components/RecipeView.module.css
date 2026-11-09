@@ -49,26 +49,3 @@
     gap: var(--space-5);
   }
 }
-
-.card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border-hairline);
-  border-radius: var(--radius-md);
-  padding: var(--space-5) var(--space-4);
-}
-
-.steps {
-  margin: 0;
-  padding-left: var(--space-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.steps li::marker {
-  font-weight: var(--type-quantity-weight);
-  color: var(--color-ink-secondary);
-}

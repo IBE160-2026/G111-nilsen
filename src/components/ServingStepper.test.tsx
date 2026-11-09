@@ -44,18 +44,63 @@ describe("ServingStepper", () => {
     expect(screen.getByRole("button", { name: "Tilbakestill til 4" })).toBeInTheDocument();
   });
 
-  it("− er deaktivert ved 1, + ved 50", async () => {
+  it("− er aria-disabled ved 1, + ved 50, uten disabled", async () => {
     const user = userEvent.setup();
     const { unmount } = render(<Harness start={2} original={4} />);
     await user.click(minus());
     expect(field()).toHaveValue("1");
-    expect(minus()).toBeDisabled();
+    expect(minus()).toHaveAttribute("aria-disabled", "true");
+    expect(minus()).not.toBeDisabled();
+    expect(plus()).not.toHaveAttribute("aria-disabled");
     expect(screen.getByRole("status")).toHaveTextContent("1 person");
     unmount();
 
     render(<Harness start={50} original={4} />);
-    expect(plus()).toBeDisabled();
-    expect(minus()).toBeEnabled();
+    expect(plus()).toHaveAttribute("aria-disabled", "true");
+    expect(plus()).not.toBeDisabled();
+    expect(minus()).not.toHaveAttribute("aria-disabled");
+  });
+
+  it("Grense 1: fokus blir på − etter klikk og Enter/mellomrom, og antallet er uendret", async () => {
+    const user = userEvent.setup();
+    const spy = vi.fn();
+    render(<Harness start={2} original={4} spy={spy} />);
+    await user.click(minus());
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    minus().focus();
+    expect(minus()).toHaveFocus();
+    await user.click(minus());
+    await user.keyboard("{Enter}");
+    await user.keyboard(" ");
+    expect(minus()).toHaveFocus();
+    expect(field()).toHaveValue("1");
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(minus()).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("Grense 50: klikk på + gjør ingenting og fokus blir på +", async () => {
+    const user = userEvent.setup();
+    const spy = vi.fn();
+    render(<Harness start={49} original={4} spy={spy} />);
+    await user.click(plus());
+    expect(field()).toHaveValue("50");
+    await user.click(plus());
+    await user.keyboard("{Enter}");
+    await user.keyboard(" ");
+    expect(plus()).toHaveFocus();
+    expect(field()).toHaveValue("50");
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it("klikk ved grensen rører ikke en feilmelding som vises", async () => {
+    const user = userEvent.setup();
+    render(<Harness start={1} original={4} />);
+    await user.clear(field());
+    await user.type(field(), "abc{Enter}");
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    await user.click(minus());
+    expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
   it("annonserer ikke mens brukeren skriver, bare når verdien tas i bruk", async () => {

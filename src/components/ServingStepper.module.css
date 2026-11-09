@@ -52,7 +52,7 @@
   cursor: pointer;
 }
 
-.button:disabled {
+.button[aria-disabled="true"] {
   border-color: var(--color-border-strong);
   color: var(--color-ink-secondary);
   cursor: not-allowed;
@@ -62,7 +62,7 @@
   width: 2.6em;
   min-height: var(--tap-target-min);
   padding: 0 var(--space-1);
-  border: 1px solid var(--color-border-strong);
+  border: 1px solid var(--color-control-border);
   border-radius: var(--radius-sm);
   background: var(--color-surface-base);
   color: var(--color-ink-primary);

@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { formatQuantity, scaleLine, type RecipeLine, type ScaledLine } from "@/domain";
 import { LIMITS } from "@/lib/recipe-input";
+import CheckRow from "./CheckRow";
 import ServingStepper from "./ServingStepper";
+import { useCheckedSet } from "./use-checked-set";
 import styles from "./IngredientList.module.css";
 
 type Group = { section: string | null; lines: RecipeLine[] };
@@ -32,26 +34,43 @@ export function groupBySection(lines: readonly RecipeLine[]): Group[] {
   return [unsectioned, ...sections.values()].filter((group) => group.lines.length > 0);
 }
 
-function Line({ line }: { line: ScaledLine }) {
+function Line({
+  line,
+  id,
+  checked,
+  onToggle,
+}: {
+  line: ScaledLine;
+  id: number;
+  checked: boolean;
+  onToggle: (id: number) => void;
+}) {
+  const toggle = () => onToggle(id);
   if (!line.parseable || line.quantity === null) {
-    return <li className={`${styles.line} ${styles.unparsed}`}>{line.original}</li>;
+    return (
+      <CheckRow className={styles.row} checked={checked} onToggle={toggle}>
+        <span className={styles.unparsed}>{line.original}</span>
+      </CheckRow>
+    );
   }
   const amount = [formatQuantity(line.quantity), line.unit ?? ""].filter(Boolean).join(" ");
   return (
-    <li className={styles.line}>
-      {/* Mellomrommene gir lesbar tekst for skjermlesere og kopiering; grid og flex ignorerer dem. */}
-      <span className={styles.amount}>{amount}</span>
-      {line.name || line.approximate ? (
-        <>
-          {" "}
-          <span className={styles.name}>
-            {line.name ? <span>{line.name}</span> : null}
-            {line.name && line.approximate ? " " : null}
-            {line.approximate ? <span className={styles.approximate}>ca.</span> : null}
-          </span>
-        </>
-      ) : null}
-    </li>
+    <CheckRow className={styles.row} checked={checked} onToggle={toggle}>
+      <span className={styles.line}>
+        {/* Mellomrommene gir lesbar tekst for skjermlesere og kopiering; grid og flex ignorerer dem. */}
+        <span className={styles.amount}>{amount}</span>
+        {line.name || line.approximate ? (
+          <>
+            {" "}
+            <span className={styles.name}>
+              {line.name ? <span>{line.name}</span> : null}
+              {line.name && line.approximate ? " " : null}
+              {line.approximate ? <span className={styles.approximate}>ca.</span> : null}
+            </span>
+          </>
+        ) : null}
+      </span>
+    </CheckRow>
   );
 }
 
@@ -62,9 +81,10 @@ type Props = {
 };
 
 /**
- * Porsjonsvelger og ingredienser (Story 1.5). Valgt antall er bare React-tilstand.
- * Hver visning skalerer fra originalmengdene i `RecipeLine`, aldri fra forrige
- * skalerte verdi, og ingenting sendes til serveren.
+ * Porsjonsvelger og ingredienser (Story 1.5, 1.6). Valgt antall og avkrysning er bare
+ * React-tilstand. Hver visning skalerer fra originalmengdene i `RecipeLine`, aldri fra
+ * forrige skalerte verdi, og ingenting sendes til serveren. Avkrysningen er nøklet på
+ * linje-id, så den består når antallet endres.
  */
 /** Opprinnelig antall som kan skaleres fra: heltall innenfor 1–50, ellers `null`. */
 function validServings(value: number | null): number | null {
@@ -81,6 +101,7 @@ export default function IngredientList({ ingredients, originalServings: rawOrigi
   const originalServings = validServings(rawOriginal);
   const [selected, setSelected] = useState(originalServings);
   const factor = originalServings !== null && selected !== null ? selected / originalServings : 1;
+  const { isChecked, toggle } = useCheckedSet();
   const groups = groupBySection(ingredients);
 
   return (
@@ -102,7 +123,13 @@ export default function IngredientList({ ingredients, originalServings: rawOrigi
               ) : null}
               <ul className={styles.lines} aria-labelledby={labelId}>
                 {group.lines.map((line) => (
-                  <Line key={line.id} line={scaleLine(line, factor)} />
+                  <Line
+                    key={line.id}
+                    id={line.id}
+                    line={scaleLine(line, factor)}
+                    checked={isChecked(line.id)}
+                    onToggle={toggle}
+                  />
                 ))}
               </ul>
             </div>

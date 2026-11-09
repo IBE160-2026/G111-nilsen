@@ -12,7 +12,28 @@ Repoet inneholder applikasjonen og dokumentasjon av utvikling, testing og kvalit
 
 **RecipeMate** er en matlagingsassistent for oppskrifter fra nettet. Du limer inn en lenke (eller skriver inn oppskriften selv), og appen viser oppskriften i et fast og ryddig format der du kan velge antall personer, slik at alle mengder regnes om med en gang. Oppskrifter kan lagres i en samling, i mapper og som favoritter.
 
-Status: grunnmuren er på plass (Story 1.1–1.5 og 3.5), og du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`). Oppskriften lagres i en lokal SQLite-database og vises på `/oppskrift/{id}`. Du kan rette en oppskrift med «Rediger» (se under). Funksjonene bygges ut story for story.
+Status: Epic 1 («Les og skaler en oppskrift») er ferdig: Story 1.1–1.6, pluss Story 3.5 (redigering). Du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`), se den på `/oppskrift/{id}`, velge antall personer og krysse av ingredienser og steg mens du lager maten. Oppskriften lagres i en lokal SQLite-database. Import fra lenke, samling, mapper, favoritter og forslag kommer i senere epics.
+
+## Hva Epic 1 (og Story 3.5) inneholder
+
+- **Story 1.1, Start appen:** Next.js-prosjektet med toppmeny (Importer, Samlingen, Mapper, Favoritter), visuell profil som designtokens i lys og mørk palett, felles feilmeldinger og testoppsett.
+- **Story 1.2, Tolk ingredienslinjer:** «400 g mel», «1 ½ dl melk» og «2–3 ss sukker» deles i mengde, enhet og navn. Linjer uten mengde («salt og pepper») vises som de står.
+- **Story 1.3, Skaler og formater mengder:** mengder regnes om med fast avrunding, brøktegn (½, ¼, ¾) og «ca.» for udelelige ting som egg og løk.
+- **Story 1.4, Legg inn en oppskrift manuelt:** tittel, antall personer, ingredienser og steg lagres i databasen. Ved feil lagres ingenting.
+- **Story 1.5, Se oppskriften og velg antall personer:** fast format med tittel, kilde, porsjonsvelger (−/+ eller tall, 1–50, «Tilbakestill»), ingredienser per seksjon og nummererte steg.
+- **Story 1.6, Kryss av under matlaging:** hver ingrediens og hvert steg kan krysses av (se under). Porsjonsvelgerens −/+ beholder tastaturfokus ved 1 og 50.
+- **Story 3.5, Rediger en oppskrift:** se «Redigere en oppskrift» under.
+
+## Kryss av under matlaging
+
+På oppskriftssiden er hver ingredienslinje og hvert steg en avkrysningsboks. Trykk hvor som helst på raden, eller sett fokus på boksen med Tab og trykk mellomrom. Avkrysset rad har fylt boks med hake, gjennomstreket og dempet tekst, og nummeret på steget står igjen. Det gjelder også linjer som appen ikke kan tolke, som «salt og pepper».
+
+- Avkrysningen er bare tilstand i nettleseren. Den lagres ikke (ikke i databasen, `localStorage`, adressen eller en cookie), og det sendes ingen forespørsel til serveren.
+- Avkrysningen påvirker ikke skaleringen og består når du endrer antall personer eller trykker «Tilbakestill til N».
+- Når du forlater oppskriften eller åpner «Rediger» og går tilbake, er alt tomt igjen. Next.js med Cache Components skjuler en side i stedet for å fjerne den, så `useCheckedSet` (`src/components/use-checked-set.ts`) tømmer avkrysningene i en `useLayoutEffect`-opprydding.
+- Ingredienser og steg har hvert sitt sett av id-er, så en ingrediens og et steg med samme id aldri påvirker hverandre.
+- Ved 1 og 50 personer er −/+ merket med `aria-disabled` i stedet for `disabled`. Knappen beholder tastaturfokus, og et trykk gjør ingenting.
+- Koden ligger i `CheckRow.tsx` (rad, boks og hake med CSS), `IngredientList.tsx` og `StepList.tsx`. Fargene og størrelsene kommer fra `src/styles/tokens.css`.
 
 ## Krav
 
@@ -81,12 +102,23 @@ npm run format:check # sjekk formatering uten å endre filer
 
 `npm run lint` og `npm test` skal være grønne før hver commit.
 
+### Hva testene dekker
+
+`npm test` kjører Vitest én gang og gir i dag 35 testfiler og 581 tester. Ingen test bruker nettverket eller en ekte API-nøkkel.
+
+- **Domenet** (`src/domain/`): tolking av mengder og ingredienslinjer og skalering og formatering, med fasittabellen fra Epic 1 (400 g mel for 6 gir 600 g, «1 egg (ca.)», og så videre) som egne tester.
+- **Server** (`src/server/`): repositorier og tjenester mot en ekte SQLite-database i minnet, blant annet tilbakerulling ved feil og redigering.
+- **Komponenter og sider** (Testing Library og user-event i jsdom): toppmeny, skjema for ny og redigert oppskrift, porsjonsvelger (grenser, ugyldig inntasting, `aria-disabled` og fokus), ingredienser (skalering fra originalen, seksjoner, utolkbare linjer), steg og avkrysning (klikk på teksten, mellomrom med tastatur, skalering og «Tilbakestill» beholder avkrysningen, ingen serverkall, nullstilling når `<Activity>` skjuler siden og ved avmontering, også i Strict Mode).
+- **Designtokens**: fargene i `tokens.css` er de samme som i `DESIGN.md`, og avkrysningsboksen bruker tokens uten hardkodede farger.
+
+Det som ikke er automatisk testet, er utseendet i en ekte nettleser (oppsett, hake og fokusring). Det kontrolleres manuelt ved 360 og 1280 px i lys og mørk modus.
+
 ## Mappestruktur
 
 ```text
 src/
   app/          Sider og ruter (Next.js App Router)
-  components/   Gjenbrukbare React-komponenter (f.eks. TopNav, EmptyState)
+  components/   Gjenbrukbare React-komponenter (f.eks. TopNav, CheckRow, StepList)
   domain/       Ren domenekjerne: tolking og skalering (ingen React/Next/database)
   lib/          Felles hjelpere: Result-typen og norske feilmeldinger
   server/

@@ -18,6 +18,7 @@ colors:
   on-accent: '#FFFFFF'
   border-hairline: '#E9DFD1'
   border-strong: '#CDBFAE'
+  control-border: '#8A7A68'
   surface-base-dark: '#1C1814'
   surface-raised-dark: '#26211C'
   surface-tint-dark: '#33251F'
@@ -27,6 +28,7 @@ colors:
   on-accent-dark: '#1C1814'
   border-hairline-dark: '#3A332B'
   border-strong-dark: '#54493E'
+  control-border-dark: '#8A7D6E'
 typography:
   display:
     fontFamily: 'Georgia, "Times New Roman", serif'
@@ -105,6 +107,7 @@ Appen brukes ofte med mel på fingrene og telefonen et stykke unna. Derfor er te
 - **Blekk (`#2B2118`)** er brødtekst og titler. **Dempet (`#6E5E4E`)** brukes for kilde, metadata og seksjonsetiketter.
 - **Tomat (`#B8432F`)** er den eneste aksentfargen: primærknapper, porsjonsvelger, lenker, «ca.»-merket og venstrekant på feilmeldinger.
 - **Rosa tint (`#FFF4EC`)** markerer forslagskort.
+- **Kontrollkant (`#8A7A68`, mørk `#8A7D6E`)** brukes på kanten av skjemafelt, tallfeltet i porsjonsvelgeren og tomme avkrysningsbokser, slik at de skiller seg fra flaten med minst 3:1 (WCAG 1.4.11). `border-strong` er for dempede skillelinjer og deaktiverte knapper, ikke for kontroller.
 - **Mørk modus** følger systemet og bruker samme roller: `#1C1814` bakgrunn, `#26211C` kort, `#F2EBE1` tekst, `#BCAE9C` dempet og `#E58A6E` aksent.
 
 Alle par av tekst og bakgrunn oppfyller WCAG 2.1 AA (målt: brødtekst 14,8:1, dempet tekst 5,8:1, aksent på hvitt 5,4:1, mørk aksent 6,9:1).

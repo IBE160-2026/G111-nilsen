@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import { Activity } from "react";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -66,7 +67,7 @@ describe("IngredientList", () => {
     render(<IngredientList ingredients={lines("400 g mel")} originalServings={2} />);
     await user.click(minus());
     expect(field()).toHaveValue("1");
-    expect(minus()).toBeDisabled();
+    expect(minus()).toHaveAttribute("aria-disabled", "true");
     expect(shown()).toEqual(["200 g mel"]);
   });
 
@@ -191,4 +192,173 @@ describe("IngredientList", () => {
       expect(shown()).toEqual(["400 g mel", "1 egg", "salt og pepper"]);
     },
   );
+  describe("avkrysning (Story 1.6)", () => {
+    const box = (name: string) => screen.getByRole("checkbox", { name });
+    const boxes = () => screen.getAllByRole("checkbox");
+
+    it("Åpne: alle bokser er tomme, og hver rad har radens tekst som navn", () => {
+      render(<IngredientList ingredients={basic} originalServings={4} />);
+      expect(boxes()).toHaveLength(3);
+      for (const checkbox of boxes()) expect(checkbox).not.toBeChecked();
+      expect(box("400 g mel")).toBeInTheDocument();
+      expect(box("1 egg")).toBeInTheDocument();
+      expect(box("salt og pepper")).toBeInTheDocument();
+      // Hver boks ligger i en <label> som omslutter hele raden.
+      for (const checkbox of boxes()) expect(checkbox.closest("label")).toBeInTheDocument();
+    });
+
+    it("Trykk på tekst: «mel» i «400 g mel» krysser av raden, uten å berøre de andre", async () => {
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={basic} originalServings={4} />);
+      await user.click(screen.getByText("mel"));
+      expect(box("400 g mel")).toBeChecked();
+      expect(box("1 egg")).not.toBeChecked();
+      expect(box("salt og pepper")).not.toBeChecked();
+    });
+
+    it("Trykk igjen: avkrysningen fjernes", async () => {
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={basic} originalServings={4} />);
+      await user.click(screen.getByText("mel"));
+      await user.click(screen.getByText("400 g"));
+      expect(box("400 g mel")).not.toBeChecked();
+    });
+
+    it("Utolkbar linje: kan krysses av og beholder kursiv-stilen og teksten ved alle antall", async () => {
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={basic} originalServings={4} />);
+      await user.click(screen.getByText("salt og pepper"));
+      expect(box("salt og pepper")).toBeChecked();
+      for (const value of ["1", "17", "50"]) {
+        await user.clear(field());
+        await user.type(field(), `${value}{Enter}`);
+        expect(screen.getByText("salt og pepper")).toHaveClass("unparsed");
+        expect(screen.getByText("salt og pepper")).toHaveTextContent(/^salt og pepper$/);
+        expect(box("salt og pepper")).toBeChecked();
+      }
+    });
+
+    it("Tastatur: Tab til en boks, mellomrom veksler, og fokus blir stående", async () => {
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={basic} originalServings={4} />);
+      // Porsjonsvelgeren (−, felt, +) kommer først i tabulatorrekkefølgen.
+      await user.tab();
+      await user.tab();
+      await user.tab();
+      await user.tab();
+      expect(box("400 g mel")).toHaveFocus();
+      await user.keyboard(" ");
+      expect(box("400 g mel")).toBeChecked();
+      expect(box("400 g mel")).toHaveFocus();
+      await user.keyboard(" ");
+      expect(box("400 g mel")).not.toBeChecked();
+      expect(box("400 g mel")).toHaveFocus();
+    });
+
+    it("Skalering: «400 g mel» avkrysset beholder avkrysningen når antallet går fra 4 til 8", async () => {
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={basic} originalServings={4} />);
+      await user.click(screen.getByText("mel"));
+      await user.clear(field());
+      await user.type(field(), "8{Enter}");
+      expect(shown()).toEqual(["800 g mel", "2 egg", "salt og pepper"]);
+      expect(box("800 g mel")).toBeChecked();
+      expect(box("2 egg")).not.toBeChecked();
+    });
+
+    it("Skalering med −/+ beholder avkrysningen for flere rader, også «ca.»-linjer", async () => {
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={basic} originalServings={4} />);
+      await user.click(screen.getByText("egg"));
+      await user.click(plus());
+      expect(box("1 egg ca.")).toBeChecked();
+      await user.click(minus());
+      expect(box("1 egg")).toBeChecked();
+    });
+
+    it("Tilbakestill: avkrysningen beholdes når antallet endres og settes tilbake til 4", async () => {
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={basic} originalServings={4} />);
+      await user.click(screen.getByText("mel"));
+      await user.click(plus());
+      await user.click(screen.getByRole("button", { name: "Tilbakestill til 4" }));
+      expect(shown()).toEqual(["400 g mel", "1 egg", "salt og pepper"]);
+      expect(box("400 g mel")).toBeChecked();
+    });
+
+    it("ugyldig inntasting beholder avkrysningen og forrige verdi", async () => {
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={basic} originalServings={4} />);
+      await user.click(screen.getByText("mel"));
+      await user.clear(field());
+      await user.type(field(), "abc");
+      await user.tab();
+      expect(screen.getByText(servingStepperMessages.invalid)).toBeInTheDocument();
+      expect(box("400 g mel")).toBeChecked();
+    });
+
+    it("Seksjoner: avkrysning per linje, uavhengig av seksjon", async () => {
+      const user = userEvent.setup();
+      const sectioned = lines(["2 dl fløte", "Saus"], "400 g pasta", ["1 ts salt", "Saus"]);
+      render(<IngredientList ingredients={sectioned} originalServings={4} />);
+      await user.click(screen.getByText("fløte"));
+      expect(box("2 dl fløte")).toBeChecked();
+      expect(box("1 ts salt")).not.toBeChecked();
+      expect(box("400 g pasta")).not.toBeChecked();
+      await user.click(screen.getByText("pasta"));
+      expect(box("400 g pasta")).toBeChecked();
+      expect(box("1 ts salt")).not.toBeChecked();
+    });
+
+    it("Lukke og åpne: ingen rader er avkrysset etter at Activity har skjult og vist siden", async () => {
+      const user = userEvent.setup();
+      const view = (mode: "visible" | "hidden") => (
+        <Activity mode={mode}>
+          <IngredientList ingredients={basic} originalServings={4} />
+        </Activity>
+      );
+      const { rerender } = render(view("visible"));
+      await user.click(screen.getByText("mel"));
+      await user.click(plus());
+      expect(box("500 g mel")).toBeChecked();
+
+      rerender(view("hidden"));
+      rerender(view("visible"));
+      for (const checkbox of boxes()) expect(checkbox).not.toBeChecked();
+    });
+
+    it("Avmontere: ny montering har ingen avkryssede rader", async () => {
+      const user = userEvent.setup();
+      const { unmount } = render(<IngredientList ingredients={basic} originalServings={4} />);
+      await user.click(screen.getByText("mel"));
+      unmount();
+      render(<IngredientList ingredients={basic} originalServings={4} />);
+      for (const checkbox of boxes()) expect(checkbox).not.toBeChecked();
+    });
+
+    it("Ingen porsjoner: avkrysning virker som ellers, uten porsjonsvelger", async () => {
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={basic} originalServings={null} />);
+      expect(screen.queryByLabelText("Antall personer")).not.toBeInTheDocument();
+      await user.click(screen.getByText("mel"));
+      expect(box("400 g mel")).toBeChecked();
+    });
+
+    it("Skjermleser: navnet er radens tekst og tilstanden annonseres av boksen (checked)", async () => {
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={basic} originalServings={4} />);
+      expect(screen.getByRole("checkbox", { name: "400 g mel", checked: false })).toBeVisible();
+      await user.click(screen.getByText("mel"));
+      expect(screen.getByRole("checkbox", { name: "400 g mel", checked: true })).toBeVisible();
+    });
+
+    it("Avkrysning gir ingen serverkall", async () => {
+      const fetchSpy = vi.spyOn(globalThis, "fetch");
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={basic} originalServings={4} />);
+      await user.click(screen.getByText("mel"));
+      await user.click(screen.getByText("egg"));
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+  });
 });

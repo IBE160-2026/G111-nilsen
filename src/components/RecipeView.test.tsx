@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Activity } from "react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { Recipe } from "@/domain";
 import RecipeView, { sourceLabel } from "./RecipeView";
@@ -86,6 +87,9 @@ describe("RecipeView", () => {
         .getAllByRole("listitem")
         .map((li) => li.textContent),
     ).toEqual(["Visp sammen.", "Stek."]);
+    // Hvert steg og hver ingrediens er en avkrysningsboks.
+    expect(within(steps).getAllByRole("checkbox")).toHaveLength(2);
+    expect(within(ingredients).getAllByRole("checkbox")).toHaveLength(3);
   });
 
   it("har en «Rediger»-lenke ved tittelen som peker til redigeringssiden", () => {
@@ -145,5 +149,61 @@ describe("RecipeView", () => {
     rerender(<RecipeView recipe={{ ...recipe, id: 2, title: "Vafler", originalServings: 2 }} />);
     expect(screen.getByLabelText("Antall personer")).toHaveValue("2");
     expect(screen.queryByRole("button", { name: /Tilbakestill/ })).not.toBeInTheDocument();
+  });
+
+  it("nullstiller valgt antall og avkrysning når samme oppskrift er lagret på nytt (updatedAt endret)", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<RecipeView recipe={recipe} />);
+    await user.click(screen.getByRole("button", { name: "Flere personer" }));
+    await user.click(screen.getByText("Stek."));
+    await user.click(screen.getByText("melk"));
+
+    rerender(
+      <RecipeView
+        recipe={{ ...recipe, originalServings: 2, updatedAt: "2026-11-09T11:00:00.000Z" }}
+      />,
+    );
+    expect(screen.getByLabelText("Antall personer")).toHaveValue("2");
+    for (const checkbox of screen.getAllByRole("checkbox")) expect(checkbox).not.toBeChecked();
+  });
+
+  it("Lik id: ingrediens og steg med id 1 krysses av uavhengig av hverandre", async () => {
+    const user = userEvent.setup();
+    render(<RecipeView recipe={recipe} />);
+    const ingredients = screen.getByRole("region", { name: "Ingredienser" });
+    const steps = screen.getByRole("region", { name: "Slik gjør du" });
+
+    await user.click(within(ingredients).getByText("melk"));
+    expect(within(ingredients).getByRole("checkbox", { name: "1 ½ dl melk" })).toBeChecked();
+    expect(within(steps).getByRole("checkbox", { name: "Visp sammen." })).not.toBeChecked();
+
+    await user.click(within(steps).getByText("Visp sammen."));
+    expect(within(steps).getByRole("checkbox", { name: "Visp sammen." })).toBeChecked();
+    await user.click(within(ingredients).getByText("melk"));
+    expect(within(ingredients).getByRole("checkbox", { name: "1 ½ dl melk" })).not.toBeChecked();
+    expect(within(steps).getByRole("checkbox", { name: "Visp sammen." })).toBeChecked();
+  });
+
+  it("Lukke og åpne: avkrysninger i ingredienser og steg nullstilles når Activity skjuler siden", async () => {
+    const user = userEvent.setup();
+    const view = (mode: "visible" | "hidden") => (
+      <Activity mode={mode}>
+        <RecipeView recipe={recipe} />
+      </Activity>
+    );
+    const { rerender } = render(view("visible"));
+    await user.click(screen.getByText("Stek."));
+    await user.click(screen.getByText("melk"));
+    rerender(view("hidden"));
+    rerender(view("visible"));
+    for (const checkbox of screen.getAllByRole("checkbox")) expect(checkbox).not.toBeChecked();
+  });
+
+  it("nullstiller avkrysning når komponenten får en annen oppskrift", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<RecipeView recipe={recipe} />);
+    await user.click(screen.getByText("Stek."));
+    rerender(<RecipeView recipe={{ ...recipe, id: 2, title: "Vafler" }} />);
+    for (const checkbox of screen.getAllByRole("checkbox")) expect(checkbox).not.toBeChecked();
   });
 });

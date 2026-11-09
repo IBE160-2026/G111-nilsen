@@ -35,17 +35,21 @@
   padding: 0;
 }
 
+/* Raden (`<li>`) bærer skillelinjen; avkrysningsboksen og trykkflaten ligger i `CheckRow`. */
+.row {
+  border-bottom: 1px solid var(--color-border-hairline);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+/* Mengde og navn i hver sin kolonne, som i Story 1.5. */
 .line {
   display: grid;
   grid-template-columns: minmax(5.5em, auto) 1fr;
   column-gap: var(--space-3);
   align-items: baseline;
-  padding: var(--space-2) 0;
-  border-bottom: 1px solid var(--color-border-hairline);
-}
-
-.line:last-child {
-  border-bottom: none;
 }
 
 .amount {

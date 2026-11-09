@@ -33,7 +33,9 @@ type Props = {
 /**
  * Porsjonsvelgeren (UX-DR4). Kontrollert: forelderen eier valgt antall.
  * Inntastet tekst valideres når feltet mister fokus eller Enter trykkes; ugyldig
- * verdi gir melding under feltet, og forrige gyldige verdi beholdes.
+ * verdi gir melding under feltet, og forrige gyldige verdi beholdes. Ved 1 og 50 bruker
+ * −/+ `aria-disabled` i stedet for `disabled`, så tastaturfokus blir på knappen; klikk
+ * ved grensen gjør ingenting.
  */
 export default function ServingStepper({ value, onChange, original }: Props) {
   const id = useId();
@@ -82,8 +84,10 @@ export default function ServingStepper({ value, onChange, original }: Props) {
             className={styles.button}
             aria-label="Færre personer"
             aria-controls={inputId}
-            disabled={value <= MIN}
-            onClick={() => change(Math.max(MIN, value - 1))}
+            aria-disabled={value <= MIN ? true : undefined}
+            onClick={() => {
+              if (value > MIN) change(value - 1);
+            }}
           >
             <span aria-hidden="true">−</span>
           </button>
@@ -105,8 +109,10 @@ export default function ServingStepper({ value, onChange, original }: Props) {
             className={styles.button}
             aria-label="Flere personer"
             aria-controls={inputId}
-            disabled={value >= MAX}
-            onClick={() => change(Math.min(MAX, value + 1))}
+            aria-disabled={value >= MAX ? true : undefined}
+            onClick={() => {
+              if (value < MAX) change(value + 1);
+            }}
           >
             <span aria-hidden="true">+</span>
           </button>

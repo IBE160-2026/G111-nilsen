@@ -1,0 +1,97 @@
+// @vitest-environment jsdom
+import { cleanup, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { Activity } from "react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import type { Step } from "@/domain";
+import StepList from "./StepList";
+
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
+
+const steps: Step[] = [
+  { id: 2, position: 1, section: null, text: "Stek i panne." },
+  { id: 1, position: 0, section: null, text: "Finhakk løken" },
+  { id: 3, position: 2, section: null, text: "Server varmt." },
+];
+
+const box = (name: string) => screen.getByRole("checkbox", { name });
+
+describe("StepList", () => {
+  it("viser «Slik gjør du» som nummerert liste sortert på posisjon, alle bokser tomme", () => {
+    render(<StepList steps={steps} />);
+    const card = screen.getByRole("region", { name: "Slik gjør du" });
+    const list = within(card).getByRole("list");
+    expect(list.tagName).toBe("OL");
+    expect(
+      within(list)
+        .getAllByRole("listitem")
+        .map((li) => li.textContent),
+    ).toEqual(["Finhakk løken", "Stek i panne.", "Server varmt."]);
+    for (const checkbox of within(card).getAllByRole("checkbox")) {
+      expect(checkbox).not.toBeChecked();
+    }
+  });
+
+  it("Steg: klikk på teksten krysser av steget; stegene står i en nummerert liste", async () => {
+    const user = userEvent.setup();
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    render(<StepList steps={steps} />);
+    await user.click(screen.getByText("Finhakk løken"));
+    expect(box("Finhakk løken")).toBeChecked();
+    expect(box("Stek i panne.")).not.toBeChecked();
+    // Fortsatt tre listeelementer i en <ol>: nummeret er listemarkøren og endres ikke.
+    expect(within(screen.getByRole("list")).getAllByRole("listitem")).toHaveLength(3);
+    await user.click(screen.getByText("Finhakk løken"));
+    expect(box("Finhakk løken")).not.toBeChecked();
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("tastatur: mellomrom veksler steget og fokus blir stående", async () => {
+    const user = userEvent.setup();
+    render(<StepList steps={steps} />);
+    await user.tab();
+    expect(box("Finhakk løken")).toHaveFocus();
+    await user.keyboard(" ");
+    expect(box("Finhakk løken")).toBeChecked();
+    expect(box("Finhakk løken")).toHaveFocus();
+  });
+
+  it("viser ingenting uten steg", () => {
+    const { container } = render(<StepList steps={[]} />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("Lukke og åpne: ingen steg er avkrysset etter at Activity har skjult og vist siden", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <Activity mode="visible">
+        <StepList steps={steps} />
+      </Activity>,
+    );
+    await user.click(screen.getByText("Server varmt."));
+    expect(box("Server varmt.")).toBeChecked();
+    rerender(
+      <Activity mode="hidden">
+        <StepList steps={steps} />
+      </Activity>,
+    );
+    rerender(
+      <Activity mode="visible">
+        <StepList steps={steps} />
+      </Activity>,
+    );
+    expect(box("Server varmt.")).not.toBeChecked();
+  });
+
+  it("Avmontere: ny montering har ingen avkryssede steg", async () => {
+    const user = userEvent.setup();
+    const { unmount } = render(<StepList steps={steps} />);
+    await user.click(screen.getByText("Stek i panne."));
+    unmount();
+    render(<StepList steps={steps} />);
+    expect(box("Stek i panne.")).not.toBeChecked();
+  });
+});

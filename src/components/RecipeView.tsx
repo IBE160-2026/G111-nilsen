@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Recipe } from "@/domain";
 import { editRecipeMessages } from "@/lib/messages";
 import IngredientList from "./IngredientList";
+import StepList from "./StepList";
 import styles from "./RecipeView.module.css";
 
 /** Kilden som vises: navnet, ellers vertsnavnet fra lenken, ellers «Lagt inn selv». */
@@ -21,7 +22,8 @@ export function sourceLabel(recipe: Pick<Recipe, "sourceName" | "sourceUrl">): s
 /**
  * Oppskriften i fast format (FR-5, UX-DR15): tittel, kilde, porsjonsvelger,
  * ingredienser per seksjon og nummererte steg. Serverkomponent; porsjonsvelger og
- * skalering ligger i klientkomponenten `IngredientList`. Fra 768 px står
+ * skalering ligger i klientkomponenten `IngredientList`, og stegene (med avkrysning) i
+ * klientkomponenten `StepList`. Fra 768 px står
  * porsjonsvelger og ingredienser til venstre og stegene til høyre.
  */
 export default function RecipeView({ recipe }: { recipe: Recipe }) {
@@ -43,23 +45,12 @@ export default function RecipeView({ recipe }: { recipe: Recipe }) {
 
       <div className={styles.columns}>
         <IngredientList
-          key={recipe.id}
+          key={`ingredienser-${recipe.id}-${recipe.updatedAt}`}
           ingredients={recipe.ingredients}
           originalServings={recipe.originalServings}
         />
 
-        {recipe.steps.length > 0 ? (
-          <section className={styles.card} aria-labelledby="fremgangsmate">
-            <h2 id="fremgangsmate">Slik gjør du</h2>
-            <ol className={styles.steps}>
-              {[...recipe.steps]
-                .sort((a, b) => a.position - b.position)
-                .map((step) => (
-                  <li key={step.id}>{step.text}</li>
-                ))}
-            </ol>
-          </section>
-        ) : null}
+        <StepList key={`steg-${recipe.id}-${recipe.updatedAt}`} steps={recipe.steps} />
       </div>
     </article>
   );

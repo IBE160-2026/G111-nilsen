@@ -20,7 +20,7 @@ const [lightBlock, darkBlock] = tokens.split("@media (prefers-color-scheme: dark
 
 describe("designtokens (DESIGN.md)", () => {
   it("leser fargene fra DESIGN.md", () => {
-    expect(Object.keys(designColors).length).toBe(18);
+    expect(Object.keys(designColors).length).toBe(20);
   });
 
   it.each(Object.entries(designColors).filter(([name]) => !name.endsWith("-dark")))(
@@ -40,5 +40,23 @@ describe("designtokens (DESIGN.md)", () => {
 
   it("trykkflater er minst 44 px", () => {
     expect(tokens).toContain("--tap-target-min: 44px;");
+  });
+
+  it("avkrysningsboksen er 24 px og har tokens for hjørner, kant og hake", () => {
+    expect(tokens).toContain("--checkbox-size: 24px;");
+    for (const name of ["radius", "border-width", "check-stroke"]) {
+      expect(tokens).toMatch(new RegExp(`--checkbox-${name}: [0-9.]+px;`));
+    }
+  });
+
+  it("CheckRow.module.css bruker tokens: ingen hex-farger eller px-verdier", () => {
+    const css = readFileSync(join(root, "src/components/CheckRow.module.css"), "utf8");
+    expect(css).not.toMatch(/#[0-9a-f]{3,8}\b/i);
+    expect(css).not.toMatch(/\d\s*px\b/);
+    expect(css).toContain(":focus-visible");
+    expect(css).toContain("forced-colors: active");
+    expect(css).toContain("var(--checkbox-size)");
+    expect(css).toContain("var(--tap-target-min)");
+    expect(css).toContain("var(--color-on-accent)");
   });
 });

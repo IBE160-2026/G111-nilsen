@@ -1,0 +1,97 @@
+.row {
+  /* Én linje brødtekst; brukes til å sentrere boksen på første tekstlinje. */
+  --row-line-height: calc(var(--type-body-size) * var(--type-body-line-height));
+}
+
+/* Hele raden er trykkflate og minst like høy som --tap-target-min. */
+.label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-height: var(--tap-target-min);
+  padding-block: calc((var(--tap-target-min) - var(--row-line-height)) / 2);
+  cursor: pointer;
+}
+
+/* Den ekte boksen tegnes selv (appearance: none), så fokus, tastatur og skjermleser er native. */
+.input {
+  appearance: none;
+  display: grid;
+  place-content: center;
+  flex: none;
+  box-sizing: border-box;
+  width: var(--checkbox-size);
+  height: var(--checkbox-size);
+  margin: 0;
+  margin-top: calc((var(--row-line-height) - var(--checkbox-size)) / 2);
+  border: var(--checkbox-border-width) solid var(--color-control-border);
+  border-radius: var(--checkbox-radius);
+  background: transparent;
+  color: var(--color-on-accent);
+  cursor: pointer;
+}
+
+/*
+ * Haken er en rotert kant, ikke et bilde. Forholdstallene (bredde 0,3, høyde 0,55 og
+ * løft -0,1 av boksens størrelse) er valgt for at haken skal ligge midt i boksen;
+ * de følger --checkbox-size.
+ */
+.input::before {
+  content: "";
+  box-sizing: border-box;
+  width: calc(var(--checkbox-size) * 0.3);
+  height: calc(var(--checkbox-size) * 0.55);
+  margin-top: calc(var(--checkbox-size) * -0.1);
+  border: solid currentColor;
+  border-width: 0 var(--checkbox-check-stroke) var(--checkbox-check-stroke) 0;
+  transform: rotate(45deg);
+  visibility: hidden;
+}
+
+.input:checked {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.input:checked::before {
+  visibility: visible;
+}
+
+.input:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-accent);
+  outline-offset: var(--focus-ring-width);
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Avkrysset: dempet og gjennomstreket i tillegg til den fylte boksen. */
+.input:checked + .content {
+  color: var(--color-ink-secondary);
+  text-decoration: line-through;
+}
+
+/* Alt i den avkryssede raden er dempet, også «ca.» som ellers har aksentfarge. */
+.input:checked + .content * {
+  color: inherit;
+}
+
+/* Høykontrast: bakgrunner overstyres, så boksen og haken bruker systemfarger. */
+@media (forced-colors: active) {
+  .input {
+    border-color: ButtonText;
+  }
+
+  .input:checked {
+    background: Highlight;
+    border-color: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+
+  .input:focus-visible {
+    outline-color: Highlight;
+  }
+}
