@@ -36,3 +36,5 @@
 - [ ] 2026-11-09 [story-1-6](988-2026-11-09-16-20-00-story-1-6-kryss-av.md) — test avkrysning i nettleseren på Macen og ta skjermbilder på 360 og 1280 px (lys og mørk): stegnummer på linje, hake midt i boksen, 44 px, 200 % tekststørrelse, høykontrast, «Rediger» og tilbake gir ingen avkrysning
 - [ ] 2026-11-09 [story-1-6](988-2026-11-09-16-20-00-story-1-6-kryss-av.md) — utsatt: blur-commit før klikk på −/+ ved grensen (deferred-work.md); stegnummer og `role="list"` løst i issue 007
 - [ ] 2026-11-09 [story-1-6](988-2026-11-09-16-20-00-story-1-6-kryss-av.md) — kontroller på Macen at stegnumrene står riktig etter Rediger og tilbake (issue 007; feilen lot seg ikke gjenskape i Chrome på Linux)
+- [ ] 2026-11-09 [story-3-1](987-2026-11-09-16-40-00-story-3-1-se-samlingen.md) — test Samlingen i nettleseren på Macen og ta skjermbilder på 360 og 1280 px (lys og mørk): kort, tom-tilstand, fokusring, 200 % zoom, ny manuell oppskrift øverst etter lagring
+- [ ] 2026-11-09 [story-3-1](987-2026-11-09-16-40-00-story-3-1-se-samlingen.md) — utsatt: «sist åpnet», antall oppskrifter, sidedeling og søk i Samlingen (deferred-work.md)
