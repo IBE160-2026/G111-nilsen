@@ -91,6 +91,48 @@ describe("recipe-service", () => {
     expect(count(db, "recipes")).toBe(0);
   });
 
+  it.each<[string, Partial<ManualRecipeInput>, string]>([
+    ["tittel over 200 tegn", { title: "a".repeat(201) }, "title"],
+    ["antall over 50", { servings: 51 }, "servings"],
+    ["antall som ikke er heltall", { servings: 2.5 }, "servings"],
+    ["over 100 ingredienslinjer", { ingredients: Array(101).fill("1 egg") }, "ingredients"],
+    ["ingredienslinje over 300 tegn", { ingredients: ["a".repeat(301)] }, "ingredients"],
+    ["over 100 steg", { steps: Array(101).fill("Rør") }, "steps"],
+    ["steg over 2000 tegn", { steps: ["a".repeat(2001)] }, "steps"],
+    [
+      "linjeskift inne i en linje teller som flere linjer",
+      { steps: [Array(101).fill("Rør").join("\n")] },
+      "steps",
+    ],
+  ])("håndhever grensene: %s gir validation med feltnavn", (_, change, field) => {
+    const db = createTestDb();
+    expect(createManualRecipe({ ...input, ...change }, db)).toEqual({
+      ok: false,
+      error: { kind: "validation", detail: field },
+    });
+    expect(count(db, "recipes")).toBe(0);
+  });
+
+  it("godtar verdiene akkurat på grensene", () => {
+    const db = createTestDb();
+    const result = createManualRecipe(
+      {
+        title: "a".repeat(200),
+        servings: 50,
+        ingredients: Array(100).fill("a".repeat(300)),
+        steps: Array(100).fill("a".repeat(2000)),
+      },
+      db,
+    );
+    expect(result.ok).toBe(true);
+  });
+
+  it("deler linjer på samme måte som skjemaet (linjeskift, trimming, tomme linjer)", () => {
+    const recipe = saveAndRead({ ingredients: [" 2 egg \r\n\n 1 dl melk "], steps: ["Rør\rStek"] });
+    expect(recipe.ingredients.map((l) => l.original)).toEqual(["2 egg", "1 dl melk"]);
+    expect(recipe.steps.map((s) => s.text)).toEqual(["Rør", "Stek"]);
+  });
+
   it.each([999999, 0, -1, 1.5, Number.NaN])("Ukjent oppskrift: id %s gir not_found", (id) => {
     expect(getRecipe(id, createTestDb())).toEqual({ ok: false, error: { kind: "not_found" } });
   });

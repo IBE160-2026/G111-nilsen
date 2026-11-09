@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { messageFor } from "@/lib/messages";
+import { manualRecipeFieldInvalid, messageFor } from "@/lib/messages";
 import { createManualRecipe } from "@/server/services/recipe-service";
 import type { ManualRecipeFieldErrors, ManualRecipeValues } from "./form-fields";
 import { validateManualRecipe, valuesFromFormData } from "./manual-recipe-schema";
@@ -35,6 +35,15 @@ export async function saveManualRecipe(
       steps: validated.data.steps,
     });
     if (!result.ok) {
+      const field = result.error.detail;
+      if (
+        result.error.kind === "validation" &&
+        field &&
+        Object.hasOwn(manualRecipeFieldInvalid, field)
+      ) {
+        const key = field as keyof typeof manualRecipeFieldInvalid;
+        return { fieldErrors: { [key]: manualRecipeFieldInvalid[key] }, values };
+      }
       const message = messageFor(result.error.kind);
       return { fieldErrors: {}, values, formError: `${message.title} ${message.body}` };
     }

@@ -20,6 +20,7 @@
     "db:migrate": "tsx scripts/db-migrate.ts"
   },
   "dependencies": {
+    "@next/env": "^16.4.5",
     "better-sqlite3": "^13.0.3",
     "drizzle-orm": "^0.45.4",
     "next": "16.4.5",

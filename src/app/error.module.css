@@ -1,0 +1,17 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.retry {
+  min-height: var(--tap-target-min);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}

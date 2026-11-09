@@ -13,8 +13,10 @@
 
 ## Hvordan gjenskape
 1. Fjern `"gypfile": false` fra `node_modules/better-sqlite3` i `package-lock.json`.
-2. `git clone` til ny mappe, kjør `npm ci`.
-3. npm kjører `node-gyp rebuild` for better-sqlite3.
+2. Commit endringen (eller kopier låsefila inn i klonen etter steg 3).
+3. `git clone` til ny mappe.
+4. Kjør `npm ci` i klonen.
+5. npm kjører `node-gyp rebuild` for better-sqlite3.
 
 ## Årsak
 better-sqlite3 13 leverer ferdigbygde binærfiler for macOS, Linux og Windows i pakken og har `"gypfile": false` i sin `package.json` for å slå av automatisk bygging. npm (10.9) lagrer ikke feltet `gypfile` i `package-lock.json`. Når npm installerer fra låsefila, ser den bare `binding.gyp` i pakken og legger til `node-gyp rebuild` som installasjonsskript.

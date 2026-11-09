@@ -1,7 +1,8 @@
 import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import Database from "better-sqlite3";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { openDatabase, runMigrations } from "./migrate";
 
 const dirs: string[] = [];
@@ -39,5 +40,19 @@ describe("openDatabase (Første oppstart)", () => {
     const reopened = openDatabase(path);
     expect(reopened.$client.prepare("select title from recipes").all()).toEqual([{ title: "A" }]);
     reopened.$client.close();
+  });
+});
+
+describe("openDatabase ved feil", () => {
+  it("lukker tilkoblingen og kaster videre når migreringen feiler", () => {
+    const dir = mkdtempSync(join(tmpdir(), "recipemate-"));
+    dirs.push(dir);
+    const close = vi.spyOn(Database.prototype, "close");
+    try {
+      expect(() => openDatabase(join(dir, "x.db"), join(dir, "finnes-ikke"))).toThrow();
+      expect(close).toHaveBeenCalledTimes(1);
+    } finally {
+      close.mockRestore();
+    }
   });
 });

@@ -2,7 +2,7 @@
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { Recipe } from "@/domain";
-import RecipeView from "./RecipeView";
+import RecipeView, { sourceLabel } from "./RecipeView";
 
 afterEach(cleanup);
 
@@ -63,7 +63,7 @@ describe("RecipeView", () => {
     const items = within(screen.getAllByRole("list")[0]).getAllByRole("listitem");
     expect(items.map((item) => item.textContent)).toEqual([
       "1 ½ dl melk",
-      "2 ss ",
+      "2 ss",
       "salt og pepper",
     ]);
 
@@ -80,5 +80,23 @@ describe("RecipeView", () => {
     render(<RecipeView recipe={{ ...recipe, originalServings: 1, steps: [] }} />);
     expect(screen.queryByRole("heading", { name: "Slik gjør du" })).not.toBeInTheDocument();
     expect(screen.getByText(/Lagt inn selv/)).toHaveTextContent("Lagt inn selv · 1 person");
+  });
+
+  it("viser kilden når oppskriften har sourceUrl eller sourceName", () => {
+    render(
+      <RecipeView recipe={{ ...recipe, sourceUrl: "https://www.matprat.no/oppskrifter/x/" }} />,
+    );
+    expect(screen.getByText(/matprat\.no/)).toHaveTextContent("matprat.no · 4 personer");
+    expect(screen.queryByText(/Lagt inn selv/)).not.toBeInTheDocument();
+  });
+
+  it.each([
+    [{ sourceName: "Matprat", sourceUrl: "https://www.matprat.no/x" }, "Matprat"],
+    [{ sourceName: null, sourceUrl: "https://www.matprat.no/x" }, "matprat.no"],
+    [{ sourceName: "  ", sourceUrl: "https://example.com/a" }, "example.com"],
+    [{ sourceName: null, sourceUrl: "ikke en lenke" }, "Lagt inn selv"],
+    [{ sourceName: null, sourceUrl: null }, "Lagt inn selv"],
+  ])("sourceLabel(%j) = %s", (source, expected) => {
+    expect(sourceLabel(source)).toBe(expected);
   });
 });

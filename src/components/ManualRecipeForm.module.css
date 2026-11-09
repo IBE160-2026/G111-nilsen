@@ -57,8 +57,9 @@
   font-weight: 600;
 }
 
+/* Tom region tar ingen plass: negativ marg opphever mellomrommet (gap) i skjemaet. */
 .formError:empty {
-  display: none;
+  margin-top: calc(-1 * var(--space-5));
 }
 
 .submit {

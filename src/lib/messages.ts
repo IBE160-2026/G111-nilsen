@@ -66,3 +66,14 @@ export const manualRecipeFieldMessages = {
   stepsTooMany: "Du kan ha maks 100 steg.",
   stepTooLong: "Et steg kan være maks 2000 tegn. Del det opp i flere steg.",
 } as const;
+
+/**
+ * Feltmeldinger når tjenesten avviser et felt (`validation` med feltnavnet i `detail`).
+ * Skjemaets egen validering gir som regel en mer presis melding først.
+ */
+export const manualRecipeFieldInvalid = {
+  title: "Skriv en tittel på maks 200 tegn.",
+  servings: manualRecipeFieldMessages.servingsInvalid,
+  ingredients: "Skriv 1–100 ingredienser, én per linje, hver på maks 300 tegn.",
+  steps: "Du kan ha maks 100 steg, hvert på maks 2000 tegn.",
+} as const;

@@ -23,11 +23,13 @@ export const initialManualRecipeState: ManualRecipeFormState = {
 export default function ManualRecipeForm({ action }: { action: FormAction }) {
   const [state, formAction, pending] = useActionState(action, initialManualRecipeState);
   const formRef = useRef<HTMLFormElement>(null);
+  const formErrorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const first = MANUAL_RECIPE_FIELDS.find((field) => state.fieldErrors[field]);
     const element = first ? formRef.current?.elements.namedItem(first) : null;
     if (element instanceof HTMLElement) element.focus();
+    else if (state.formError) formErrorRef.current?.focus();
   }, [state]);
 
   const describedBy = (field: ManualRecipeField, hint?: boolean) =>
@@ -111,7 +113,8 @@ export default function ManualRecipeForm({ action }: { action: FormAction }) {
         {error("steps")}
       </div>
 
-      <div aria-live="polite" className={styles.formError}>
+      {/* Live-regionen står alltid i DOM-en, så skjermlesere fanger opp nye meldinger. */}
+      <div ref={formErrorRef} aria-live="polite" tabIndex={-1} className={styles.formError}>
         {state.formError ? <p className={styles.error}>{state.formError}</p> : null}
       </div>
 

@@ -46,7 +46,7 @@ npm run db:migrate   # opprett databasen og kjør migrasjonene manuelt (valgfrit
 npm run db:generate  # lag en ny migrasjon etter endring i src/server/db/schema.ts
 ```
 
-- Vil du ha fila et annet sted, sett `DATABASE_PATH` i `.env.local` (se `.env.example`).
+- Vil du ha fila et annet sted, sett `DATABASE_PATH` i `.env.local` (se `.env.example`). Både appen og `npm run db:migrate` leser `.env` og `.env.local` på samme måte (skriptet bruker `@next/env`).
 - Vil du starte med tom database, stopp appen og slett mappen `data/`.
 - Skjemaet ligger i `src/server/db/schema.ts`, og migrasjonene i `drizzle/` (de er med i git).
 

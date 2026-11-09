@@ -1,24 +1,9 @@
 import { z } from "zod";
 import { manualRecipeFieldMessages as m } from "@/lib/messages";
-
+import { LIMITS, splitLines } from "@/lib/recipe-input";
 import type { ManualRecipeField, ManualRecipeFieldErrors, ManualRecipeValues } from "./form-fields";
 
-export const LIMITS = {
-  titleLength: 200,
-  servingsMin: 1,
-  servingsMax: 50,
-  linesPerField: 100,
-  ingredientLineLength: 300,
-  stepLength: 2000,
-} as const;
-
-/** Deler tekst i linjer, trimmer hver linje og fjerner tomme. Rekkefølgen beholdes. */
-export function splitLines(text: string): string[] {
-  return text
-    .split(/\r\n|\r|\n/)
-    .map((line) => line.trim())
-    .filter((line) => line !== "");
-}
+export { LIMITS, splitLines };
 
 const lines = (maxLines: string, lineTooLong: string, maxLength: number) =>
   z

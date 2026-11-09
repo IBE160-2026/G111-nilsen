@@ -1,5 +1,6 @@
 import "server-only";
 import { parseLine, type Recipe } from "@/domain";
+import { LIMITS, splitLines } from "@/lib/recipe-input";
 import { appError, err, ok, type Result } from "@/lib/result";
 import { getDb, type Db } from "../db/client";
 import {
@@ -17,8 +18,36 @@ export type ManualRecipeInput = {
   steps: string[];
 };
 
-function cleanLines(lines: string[]): string[] {
-  return lines.map((line) => line.trim()).filter((line) => line !== "");
+type ManualRecipeField = "title" | "servings" | "ingredients" | "steps";
+
+function linesOf(texts: string[]): string[] {
+  return texts.flatMap(splitLines);
+}
+
+function tooLong(lines: string[], max: number): boolean {
+  return lines.length > LIMITS.linesPerField || lines.some((line) => line.length > max);
+}
+
+/** Finner første felt som bryter grensene i `LIMITS`, eller `null`. */
+function invalidField(
+  title: string,
+  servings: number,
+  ingredients: string[],
+  steps: string[],
+): ManualRecipeField | null {
+  if (title === "" || title.length > LIMITS.titleLength) return "title";
+  if (
+    !Number.isInteger(servings) ||
+    servings < LIMITS.servingsMin ||
+    servings > LIMITS.servingsMax
+  ) {
+    return "servings";
+  }
+  if (ingredients.length === 0 || tooLong(ingredients, LIMITS.ingredientLineLength)) {
+    return "ingredients";
+  }
+  if (tooLong(steps, LIMITS.stepLength)) return "steps";
+  return null;
 }
 
 /**
@@ -31,14 +60,11 @@ export function createManualRecipe(
   db: Db = getDb(),
 ): Result<{ id: number }> {
   const title = input.title.trim();
-  const ingredients = cleanLines(input.ingredients);
-  const stepTexts = cleanLines(input.steps);
+  const ingredients = linesOf(input.ingredients);
+  const stepTexts = linesOf(input.steps);
 
-  if (title === "") return err(appError("validation", "title"));
-  if (!Number.isInteger(input.servings) || input.servings < 1) {
-    return err(appError("validation", "servings"));
-  }
-  if (ingredients.length === 0) return err(appError("validation", "ingredients"));
+  const invalid = invalidField(title, input.servings, ingredients, stepTexts);
+  if (invalid) return err(appError("validation", invalid));
 
   const lines: NewIngredientLine[] = ingredients.map((text, position) => ({
     ...parseLine(text),

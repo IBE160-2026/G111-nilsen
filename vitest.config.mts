@@ -8,7 +8,7 @@ export default defineConfig({
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
       // `server-only` kaster utenfor React Server Components; i tester er den en tom modul.
-      "server-only": fileURLToPath(new URL("./node_modules/server-only/empty.js", import.meta.url)),
+      "server-only": fileURLToPath(new URL("./test/stubs/server-only.ts", import.meta.url)),
     },
   },
   test: {

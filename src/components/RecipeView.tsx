@@ -10,11 +10,26 @@ function LineText({ line }: { line: RecipeLine }) {
     return <span className={styles.unparsed}>{line.original}</span>;
   }
   const amount = [formatQuantity(line.quantity), line.unit ?? ""].filter(Boolean).join(" ");
+  if (line.name === "") return <span className={styles.amount}>{amount}</span>;
   return (
     <>
       <span className={styles.amount}>{amount}</span> <span>{line.name}</span>
     </>
   );
+}
+
+/** Kilden som vises: navnet, ellers vertsnavnet fra lenken, ellers «Lagt inn selv». */
+export function sourceLabel(recipe: Pick<Recipe, "sourceName" | "sourceUrl">): string {
+  const name = recipe.sourceName?.trim();
+  if (name) return name;
+  if (recipe.sourceUrl) {
+    try {
+      return new URL(recipe.sourceUrl).hostname.replace(/^www\./, "");
+    } catch {
+      // Ugyldig lenke: vis reserveteksten.
+    }
+  }
+  return "Lagt inn selv";
 }
 
 export default function RecipeView({ recipe }: { recipe: Recipe }) {
@@ -23,7 +38,7 @@ export default function RecipeView({ recipe }: { recipe: Recipe }) {
       <header className={styles.header}>
         <h1>{recipe.title}</h1>
         <p className={styles.meta}>
-          {recipe.sourceName ?? "Lagt inn selv"}
+          {sourceLabel(recipe)}
           {recipe.originalServings !== null ? (
             <> · {servingsText(recipe.originalServings)}</>
           ) : null}

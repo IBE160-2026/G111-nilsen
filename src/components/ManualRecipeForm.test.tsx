@@ -83,7 +83,14 @@ describe("ManualRecipeForm", () => {
     expect(screen.getByLabelText("Tittel")).toHaveFocus();
   });
 
-  it("viser skjemafeil i et aria-live-område", async () => {
+  it("har live-regionen i DOM-en også før det finnes en skjemafeil", () => {
+    const { container } = render(<ManualRecipeForm action={failingAction({})} />);
+    const region = container.querySelector('[aria-live="polite"]');
+    expect(region).toBeInTheDocument();
+    expect(region).toBeEmptyDOMElement();
+  });
+
+  it("viser skjemafeil i et aria-live-område og flytter fokus dit", async () => {
     const user = userEvent.setup();
     const action = vi.fn(async () => ({
       fieldErrors: {},
@@ -92,7 +99,10 @@ describe("ManualRecipeForm", () => {
     }));
     render(<ManualRecipeForm action={action} />);
     await user.click(screen.getByRole("button", { name: "Lagre oppskrift" }));
-    expect(await screen.findByText("Noe gikk galt. Prøv igjen.")).toBeInTheDocument();
+    const message = await screen.findByText("Noe gikk galt. Prøv igjen.");
+    const region = message.closest("[aria-live]");
+    expect(region).toHaveAttribute("aria-live", "polite");
+    await waitFor(() => expect(region).toHaveFocus());
     expect(screen.getByLabelText("Tittel")).toHaveValue("A");
   });
 });

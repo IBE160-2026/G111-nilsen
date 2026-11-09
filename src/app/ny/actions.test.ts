@@ -1,9 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, type Db } from "@/server/db/client";
-import { manualRecipeFieldMessages as m } from "@/lib/messages";
+import {
+  manualRecipeFieldInvalid,
+  manualRecipeFieldMessages as m,
+  messageFor,
+} from "@/lib/messages";
 import { initialManualRecipeState } from "@/components/ManualRecipeForm";
 
-const state = vi.hoisted(() => ({ db: null as Db | null }));
+const state = vi.hoisted(() => ({
+  db: null as Db | null,
+  serviceResult: null as null | { ok: false; error: { kind: "validation"; detail?: string } },
+}));
+
+vi.mock("@/server/services/recipe-service", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/server/services/recipe-service")>();
+  return {
+    ...actual,
+    createManualRecipe: (...args: Parameters<typeof actual.createManualRecipe>) =>
+      state.serviceResult ?? actual.createManualRecipe(...args),
+  };
+});
 
 vi.mock("@/server/db/client", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/server/db/client")>();
@@ -43,6 +59,7 @@ const valid = {
 
 beforeEach(() => {
   state.db = createTestDb();
+  state.serviceResult = null;
 });
 
 describe("saveManualRecipe", () => {
@@ -84,5 +101,28 @@ describe("saveManualRecipe", () => {
     expect(result.fieldErrors).toEqual({});
     expect(result.formError).toMatch(/^Noe gikk galt\./);
     spy.mockRestore();
+  });
+
+  it.each(["title", "servings", "ingredients", "steps"] as const)(
+    "validation fra tjenesten med detail %s blir feltfeil for det feltet",
+    async (field) => {
+      state.serviceResult = { ok: false, error: { kind: "validation", detail: field } };
+      const result = await saveManualRecipe(initialManualRecipeState, form(valid));
+      expect(result).toEqual({
+        fieldErrors: { [field]: manualRecipeFieldInvalid[field] },
+        values: valid,
+      });
+    },
+  );
+
+  it("validation uten kjent felt blir skjemafeil", async () => {
+    state.serviceResult = { ok: false, error: { kind: "validation", detail: "ukjent" } };
+    const result = await saveManualRecipe(initialManualRecipeState, form(valid));
+    const message = messageFor("validation");
+    expect(result).toEqual({
+      fieldErrors: {},
+      values: valid,
+      formError: `${message.title} ${message.body}`,
+    });
   });
 });

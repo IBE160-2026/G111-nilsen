@@ -21,24 +21,31 @@ export function migrationsFolder(): string {
 }
 
 /** Kjører alle migrasjoner som ikke er kjørt ennå. Trygg å kalle flere ganger. */
-export function runMigrations(db: Db): void {
-  migrate(db, { migrationsFolder: migrationsFolder() });
+export function runMigrations(db: Db, folder: string = migrationsFolder()): void {
+  migrate(db, { migrationsFolder: folder });
 }
 
 /**
  * Åpner (og oppretter ved behov) databasefila, slår på WAL, `busy_timeout` og
  * fremmednøkler, og kjører migrasjonene. Mappen for fila opprettes hvis den mangler.
+ * Feiler noe etter at fila er åpnet, lukkes tilkoblingen før feilen kastes videre.
  */
-export function openDatabase(path: string): Db {
+export function openDatabase(path: string, folder: string = migrationsFolder()): Db {
   if (path !== MEMORY_DATABASE) {
     mkdirSync(dirname(resolve(path)), { recursive: true });
   }
   const sqlite = new Database(path);
-  sqlite.pragma("busy_timeout = 5000");
-  sqlite.pragma("foreign_keys = ON");
-  if (path !== MEMORY_DATABASE) sqlite.pragma("journal_mode = WAL");
+  try {
+    sqlite.pragma("busy_timeout = 5000");
+    sqlite.pragma("foreign_keys = ON");
+    if (path !== MEMORY_DATABASE) sqlite.pragma("journal_mode = WAL");
 
-  const db = drizzle({ client: sqlite, schema });
-  runMigrations(db);
-  return db;
+    const db = drizzle({ client: sqlite, schema });
+    runMigrations(db, folder);
+    return db;
+  } catch (error) {
+    // Ikke la en halvåpnet tilkobling henge igjen (og holde fila låst).
+    sqlite.close();
+    throw error;
+  }
 }
