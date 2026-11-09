@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import type { ActionResult } from "@/app/_shared/action-result";
 import { formatQuantity, scaleLine, type RecipeLine, type ScaledLine } from "@/domain";
+import { servingsDialogMessages } from "@/lib/messages";
 import { LIMITS } from "@/lib/recipe-input";
 import CheckRow from "./CheckRow";
+import ServingsDialog, { DEFAULT_SERVINGS } from "./ServingsDialog";
 import ServingStepper from "./ServingStepper";
 import { useCheckedSet } from "./use-checked-set";
 import styles from "./IngredientList.module.css";
@@ -85,6 +88,11 @@ type Props = {
    * lagret oppskrift; uten den lagres ingenting. Svaret ventes ikke på, og feil logges.
    */
   onServingsChange?: (servings: number) => unknown;
+  /**
+   * Lagrer antallet oppskriften er skrevet for (Story 2.4). Uten den vises hverken dialogen
+   * «Hvor mange er oppskriften laget for?» eller «endre».
+   */
+  onOriginalServingsChange?: (servings: number) => Promise<ActionResult>;
 };
 
 /**
@@ -125,17 +133,29 @@ export default function IngredientList({
   originalServings: rawOriginal,
   selectedServings = null,
   onServingsChange,
+  onOriginalServingsChange,
 }: Props) {
   // Ugyldig opprinnelig antall (0, negativt, desimal, over 50) behandles som manglende.
-  const originalServings = validServings(rawOriginal);
+  // Etter lagring i dialogen er det lokale antallet fasit (siden revalideres i bakgrunnen).
+  const [savedOriginal, setSavedOriginal] = useState<number | null>(null);
+  const originalServings = savedOriginal ?? validServings(rawOriginal);
   // Ugyldig lagret antall (0, 99, desimal) gir opprinnelig antall.
   const [selected, setSelected] = useState(
     originalServings === null ? null : (validServings(selectedServings) ?? originalServings),
+  );
+  // Mangler antallet, spørres det før skalering er mulig (FR-3); «Avbryt» lar oppskriften stå uskalert.
+  const [dialogOpen, setDialogOpen] = useState(
+    originalServings === null && onOriginalServingsChange !== undefined,
   );
 
   function change(servings: number) {
     setSelected(servings);
     if (onServingsChange) remember(onServingsChange, servings);
+  }
+  function originalSaved(servings: number) {
+    setSavedOriginal(servings);
+    setSelected(servings);
+    setDialogOpen(false);
   }
   const factor = originalServings !== null && selected !== null ? selected / originalServings : 1;
   const { isChecked, toggle } = useCheckedSet();
@@ -144,7 +164,25 @@ export default function IngredientList({
   return (
     <div className={styles.root}>
       {originalServings !== null && selected !== null ? (
-        <ServingStepper value={selected} onChange={change} original={originalServings} />
+        <ServingStepper
+          value={selected}
+          onChange={change}
+          original={originalServings}
+          onEditOriginal={onOriginalServingsChange ? () => setDialogOpen(true) : undefined}
+        />
+      ) : onOriginalServingsChange ? (
+        <button type="button" className={styles.askServings} onClick={() => setDialogOpen(true)}>
+          {servingsDialogMessages.ask}
+        </button>
+      ) : null}
+      {onOriginalServingsChange ? (
+        <ServingsDialog
+          open={dialogOpen}
+          initial={originalServings ?? DEFAULT_SERVINGS}
+          onSave={onOriginalServingsChange}
+          onSaved={originalSaved}
+          onCancel={() => setDialogOpen(false)}
+        />
       ) : null}
 
       <section className={styles.card} aria-labelledby="ingredienser">

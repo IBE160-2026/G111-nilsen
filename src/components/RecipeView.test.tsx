@@ -12,6 +12,7 @@ const actions = vi.hoisted(() => ({
   moveToFolder: vi.fn(),
   moveToNewFolder: vi.fn(),
   setFavorite: vi.fn(),
+  changeOriginalServings: vi.fn(),
 }));
 vi.mock("@/app/oppskrift/[id]/actions", () => actions);
 
@@ -24,6 +25,7 @@ beforeEach(() => {
   actions.moveToFolder.mockReset().mockResolvedValue({ ok: true, folderName: null });
   actions.moveToNewFolder.mockReset().mockResolvedValue({ ok: true, folderName: "Ny" });
   actions.setFavorite.mockReset().mockResolvedValue({ ok: true });
+  actions.changeOriginalServings.mockReset().mockResolvedValue({ ok: true });
   HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
     this.setAttribute("open", "");
   };
@@ -151,9 +153,13 @@ describe("RecipeView", () => {
     ).toEqual(["1.Visp sammen.", "2.Stek."]);
   });
 
-  it("viser ingen porsjonsvelger når oppskriften mangler opprinnelig antall", () => {
+  it("mangler opprinnelig antall: dialogen spør, og valget lagres med oppskriftens id (Story 2.4)", async () => {
+    const user = userEvent.setup();
     render(<RecipeView recipe={{ ...recipe, originalServings: null }} folders={folders} />);
-    expect(screen.queryByLabelText("Antall personer")).not.toBeInTheDocument();
+    const dialog = screen.getByRole("dialog", { name: "Hvor mange er oppskriften laget for?" });
+    await user.click(within(dialog).getByRole("button", { name: "Lagre" }));
+    expect(actions.changeOriginalServings).toHaveBeenCalledWith(1, 4);
+    expect(await screen.findByText(/oppr\. 4/)).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Ingredienser" })).toBeInTheDocument();
   });
 
@@ -213,13 +219,15 @@ describe("RecipeView", () => {
       expect(screen.queryByRole("link", { name: /åpner kilden/ })).not.toBeInTheDocument();
     });
 
-    it("oppskrift uten porsjonsantall (null) krasjer ikke og viser uskalerte mengder", () => {
+    it("oppskrift uten porsjonsantall (null) krasjer ikke og viser uskalerte mengder", async () => {
+      const user = userEvent.setup();
       render(
         <RecipeView
           recipe={{ ...recipe, originalServings: null, sourceUrl: "https://a.no/x" }}
           folders={folders}
         />,
       );
+      await user.click(screen.getByRole("button", { name: "Avbryt" }));
       expect(screen.queryByLabelText("Antall personer")).not.toBeInTheDocument();
       expect(screen.getByText("1 ½ dl")).toBeInTheDocument();
       expect(document.body.textContent).not.toMatch(/NaN|undefined/);

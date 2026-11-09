@@ -63,6 +63,21 @@ export default function Dialog({
     }
   }, [open]);
 
+  // Skjules siden av `<Activity>` (eller monteres den om i utvikling), må en åpen modal dialog
+  // lukkes, ellers blir resten av dokumentet stående utilgjengelig. Eieren sin `open` er uendret,
+  // så dialogen åpnes igjen når effekten kjører på nytt. Den programmatiske lukkingen er ikke
+  // et «Avbryt».
+  const closingSilently = useRef(false);
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    return () => {
+      if (dialog?.open) {
+        closingSilently.current = true;
+        dialog.close();
+      }
+    };
+  }, []);
+
   return (
     <dialog
       ref={dialogRef}
@@ -77,6 +92,10 @@ export default function Dialog({
       }}
       // Lukkes dialogen likevel (for eksempel av nettleseren) mens eieren har den åpen, tolkes det som «Avbryt».
       onClose={() => {
+        if (closingSilently.current) {
+          closingSilently.current = false;
+          return;
+        }
         if (open) onCancel();
       }}
     >

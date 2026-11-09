@@ -26,8 +26,15 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("next/cache", () => ({ revalidatePath }));
 
-const { moveToFolder, moveToNewFolder, removeRecipe, rememberServings, saveRecipe, setFavorite } =
-  await import("./actions");
+const {
+  changeOriginalServings,
+  moveToFolder,
+  moveToNewFolder,
+  removeRecipe,
+  rememberServings,
+  saveRecipe,
+  setFavorite,
+} = await import("./actions");
 
 const failure = (kind: string | undefined) => {
   const message = messageFor(kind);
@@ -128,6 +135,29 @@ describe("removeRecipe", () => {
     breakDatabase();
     expect(await removeRecipe(id)).toEqual(failure(undefined));
     expect(console.error).toHaveBeenCalled();
+  });
+});
+
+describe("changeOriginalServings", () => {
+  it("lagrer antallet, også for ulagret oppskrift, og revaliderer", async () => {
+    unsave();
+    expect(await changeOriginalServings(id, 6)).toEqual({ ok: true });
+    expect(stored()).toMatchObject({ originalServings: 6, selectedServings: null });
+    expect(revalidatePath).toHaveBeenCalledWith("/", "layout");
+  });
+
+  it.each([0, 51, 2.5, -1, NaN, "6" as unknown as number])(
+    "ugyldig antall %s: validation, ingenting lagres",
+    async (bad) => {
+      const before = stored().originalServings;
+      expect(await changeOriginalServings(id, bad)).toEqual(failure("validation"));
+      expect(stored().originalServings).toBe(before);
+      expect(revalidatePath).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([999, 0, 1.5])("ukjent eller ugyldig id %s: not_found", async (bad) => {
+    expect(await changeOriginalServings(bad, 6)).toEqual(failure("not_found"));
   });
 });
 

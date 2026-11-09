@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Folder, Recipe } from "@/domain";
 import {
+  changeOriginalServings,
   moveToFolder,
   moveToNewFolder,
   removeRecipe,
@@ -63,6 +64,7 @@ export default function RecipeView({ recipe, folders }: { recipe: Recipe; folder
           ingredients={recipe.ingredients}
           originalServings={recipe.originalServings}
           selectedServings={recipe.selectedServings}
+          onOriginalServingsChange={changeOriginalServings.bind(null, recipe.id)}
           // Valgt antall huskes bare for oppskrifter i samlingen.
           onServingsChange={
             recipe.savedAt !== null ? rememberServings.bind(null, recipe.id) : undefined

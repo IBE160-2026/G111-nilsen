@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
+import { Activity, useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Dialog, { DialogActions, DialogButton } from "./Dialog";
 
@@ -102,5 +102,34 @@ describe("Dialog", () => {
     );
     expect(screen.getByRole("button", { name: "A" })).toHaveAttribute("type", "button");
     expect(screen.getByRole("button", { name: "B" })).toHaveAttribute("type", "submit");
+  });
+});
+
+describe("Dialog: skjules av Activity", () => {
+  function Hidable({ visible, onCancel }: { visible: boolean; onCancel: () => void }) {
+    return (
+      <Activity mode={visible ? "visible" : "hidden"}>
+        <Dialog open title="Tittel" onCancel={onCancel} getInitialFocus={() => null}>
+          <p>Innhold</p>
+        </Dialog>
+      </Activity>
+    );
+  }
+
+  it("lukkes stille når siden skjules, og åpnes igjen når den vises (ikke et «Avbryt»)", () => {
+    // Nettleseren sender «close» etter close(); etterlign det.
+    close.mockImplementation(function (this: HTMLDialogElement) {
+      this.removeAttribute("open");
+      this.dispatchEvent(new Event("close"));
+    });
+    const onCancel = vi.fn();
+    const { rerender } = render(<Hidable visible onCancel={onCancel} />);
+    const dialog = document.querySelector("dialog")!;
+    expect(dialog).toHaveAttribute("open");
+    rerender(<Hidable visible={false} onCancel={onCancel} />);
+    expect(dialog).not.toHaveAttribute("open");
+    rerender(<Hidable visible onCancel={onCancel} />);
+    expect(dialog).toHaveAttribute("open");
+    expect(onCancel).not.toHaveBeenCalled();
   });
 });

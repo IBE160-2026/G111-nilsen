@@ -13,6 +13,7 @@ import {
   markRecipeSaved,
   setRecipeFavorite,
   updateRecipe,
+  updateOriginalServings,
   updateSelectedServings,
   type NewRecipe,
   type RecipeUpdate,
@@ -351,6 +352,27 @@ describe("lagre, slette og rydde (Story 3.2)", () => {
 
     it("returnerer false for ukjent id", () => {
       expect(deleteRecipeById(createTestDb(), 999)).toBe(false);
+    });
+  });
+
+  describe("updateOriginalServings", () => {
+    it("lagrer antallet for lagret og ulagret oppskrift, nullstiller valgt antall, rører ikke updatedAt", () => {
+      const db = createTestDb();
+      const saved = insertRecipe(db, { ...base, savedAt: SAVED, originalServings: null });
+      const unsaved = insertRecipe(db, { ...base, originalServings: null });
+      updateSelectedServings(db, saved, 6);
+      for (const id of [saved, unsaved]) {
+        expect(updateOriginalServings(db, id, 8)).toBe(true);
+        expect(findRecipeById(db, id)).toMatchObject({
+          originalServings: 8,
+          selectedServings: null,
+          updatedAt: base.updatedAt,
+        });
+      }
+    });
+
+    it("returnerer false for ukjent id", () => {
+      expect(updateOriginalServings(createTestDb(), 999, 4)).toBe(false);
     });
   });
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState, type KeyboardEvent } from "react";
-import { servingStepperMessages } from "@/lib/messages";
+import { servingStepperMessages, servingsDialogMessages } from "@/lib/messages";
 import { LIMITS } from "@/lib/recipe-input";
 import styles from "./ServingStepper.module.css";
 
@@ -28,6 +28,10 @@ type Props = {
   onChange: (value: number) => void;
   /** Antallet oppskriften er skrevet for. */
   original: number;
+  /** Gir «oppr. N · endre»: kalles når brukeren vil endre det opprinnelige antallet. */
+  onEditOriginal?: () => void;
+  /** Bare velgeren (til dialogen): uten «oppr.», «Tilbakestill» og opplesing. */
+  bare?: boolean;
 };
 
 /**
@@ -37,7 +41,13 @@ type Props = {
  * −/+ `aria-disabled` i stedet for `disabled`, så tastaturfokus blir på knappen; klikk
  * ved grensen gjør ingenting.
  */
-export default function ServingStepper({ value, onChange, original }: Props) {
+export default function ServingStepper({
+  value,
+  onChange,
+  original,
+  onEditOriginal,
+  bare = false,
+}: Props) {
   const id = useId();
   const inputId = `${id}-antall`;
   const errorId = `${id}-feil`;
@@ -76,7 +86,24 @@ export default function ServingStepper({ value, onChange, original }: Props) {
           <label htmlFor={inputId} className={styles.label}>
             Antall personer
           </label>
-          <span className={styles.original}>oppr. {original}</span>
+          {bare ? null : (
+            <span className={styles.original}>
+              oppr. {original}
+              {onEditOriginal ? (
+                <>
+                  {" · "}
+                  <button
+                    type="button"
+                    className={styles.edit}
+                    aria-label={servingsDialogMessages.editLabel}
+                    onClick={onEditOriginal}
+                  >
+                    {servingsDialogMessages.edit}
+                  </button>
+                </>
+              ) : null}
+            </span>
+          )}
         </div>
         <div className={styles.controls}>
           <button
@@ -125,16 +152,18 @@ export default function ServingStepper({ value, onChange, original }: Props) {
         </p>
       ) : null}
 
-      {value !== original ? (
+      {!bare && value !== original ? (
         <button type="button" className={styles.reset} onClick={() => change(original)}>
           Tilbakestill til {original}
         </button>
       ) : null}
 
       {/* Leses opp når antallet er endret, ikke for hvert tastetrykk i feltet. */}
-      <p role="status" aria-live="polite" className="visually-hidden">
-        {servingsText(value)}
-      </p>
+      {bare ? null : (
+        <p role="status" aria-live="polite" className="visually-hidden">
+          {servingsText(value)}
+        </p>
+      )}
     </div>
   );
 }

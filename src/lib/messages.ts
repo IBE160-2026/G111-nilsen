@@ -107,6 +107,17 @@ export const servingStepperMessages = {
   invalid: `Skriv et helt tall fra ${LIMITS.servingsMin} til ${LIMITS.servingsMax}. Antallet er ikke endret.`,
 } as const;
 
+/** Dialogen «Hvor mange er oppskriften laget for?» (Story 2.4, FR-3, UX-DR13). */
+export const servingsDialogMessages = {
+  title: "Hvor mange er oppskriften laget for?",
+  description: "Velg antall personer oppskriften er skrevet for, så regnes mengdene riktig om.",
+  save: "Lagre",
+  cancel: "Avbryt",
+  ask: "Oppgi antall personer",
+  edit: "endre",
+  editLabel: "Endre antallet oppskriften er laget for",
+} as const;
+
 /** Tekster for redigering av en oppskrift (Story 3.5). */
 export const editRecipeMessages = {
   editLink: "Rediger",

@@ -11,6 +11,7 @@ import {
   purgeStaleUnsavedRecipes,
   saveRecipeToCollection,
   setFavorite,
+  setOriginalServings,
   setSelectedServings,
   updateManualRecipe,
   type ManualRecipeInput,
@@ -440,6 +441,31 @@ describe("lagre, slette og rydde (Story 3.2)", () => {
       const id = stored(db, "2026-11-09T11:00:00.000Z");
       deleteRecipe(id, db);
       expect(deleteRecipe(id, db)).toEqual({ ok: false, error: { kind: "not_found" } });
+    });
+  });
+
+  describe("setOriginalServings", () => {
+    it.each([1, 4, 50])("lagrer %s også for en ulagret oppskrift", (n) => {
+      const db = createTestDb();
+      const id = stored(db, null);
+      expect(setOriginalServings(id, n, db)).toEqual({ ok: true, value: { id } });
+      expect(read(db, id)).toMatchObject({ originalServings: n, selectedServings: null });
+    });
+
+    it.each([0, 51, 2.5, -3, NaN, Infinity])("antall %s gir validation (servings)", (n) => {
+      const db = createTestDb();
+      const id = stored(db, "2026-11-09T11:00:00.000Z");
+      expect(setOriginalServings(id, n, db)).toEqual({
+        ok: false,
+        error: { kind: "validation", detail: "servings" },
+      });
+    });
+
+    it.each([999, 0, 1.5])("ukjent eller ugyldig id %s gir not_found", (id) => {
+      expect(setOriginalServings(id, 4, createTestDb())).toEqual({
+        ok: false,
+        error: { kind: "not_found" },
+      });
     });
   });
 

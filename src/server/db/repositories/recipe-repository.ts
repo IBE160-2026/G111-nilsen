@@ -361,6 +361,21 @@ export function updateSelectedServings(db: Db, id: number, servings: number): bo
 }
 
 /**
+ * Lagrer antallet oppskriften er skrevet for (Story 2.4), for lagret og ulagret oppskrift. Valgt
+ * antall nullstilles, siden det hørte til det gamle antallet. `updatedAt` røres ikke (se
+ * `updateSelectedServings`). Returnerer `false` når id-en ikke finnes.
+ */
+export function updateOriginalServings(db: Db, id: number, servings: number): boolean {
+  return (
+    db
+      .update(recipes)
+      .set({ originalServings: servings, selectedServings: null })
+      .where(eq(recipes.id, id))
+      .run().changes > 0
+  );
+}
+
+/**
  * Sletter oppskrifter som aldri ble lagret i samlingen (`savedAt` er `null`) og ble laget
  * før `cutoff` (ISO-tekst). Linjer og steg følger med. Returnerer antall slettede oppskrifter.
  */

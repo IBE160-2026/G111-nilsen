@@ -13,6 +13,7 @@ import {
   markRecipeSaved,
   setRecipeFavorite,
   updateRecipe,
+  updateOriginalServings,
   updateSelectedServings,
   type NewIngredientLine,
   type NewStep,
@@ -175,6 +176,26 @@ export function setSelectedServings(
     return err(appError("validation", "servings"));
   }
   return updateSelectedServings(db, id, servings) ? ok({ id }) : err(appError("not_found"));
+}
+
+/**
+ * Lagrer antallet oppskriften er skrevet for (Story 2.4, FR-3). Antall utenfor 1–50 eller ikke
+ * heltall gir `validation` (felt `servings`); ukjent id gir `not_found`. Gjelder også ulagrede.
+ */
+export function setOriginalServings(
+  id: number,
+  servings: number,
+  db: Db = getDb(),
+): Result<{ id: number }> {
+  if (!isRecipeId(id)) return err(appError("not_found"));
+  if (
+    !Number.isInteger(servings) ||
+    servings < LIMITS.servingsMin ||
+    servings > LIMITS.servingsMax
+  ) {
+    return err(appError("validation", "servings"));
+  }
+  return updateOriginalServings(db, id, servings) ? ok({ id }) : err(appError("not_found"));
 }
 
 /** Oppskrifter som aldri ble lagret ryddes bort etter så lang tid. */

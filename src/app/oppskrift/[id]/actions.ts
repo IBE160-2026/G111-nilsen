@@ -16,6 +16,7 @@ import {
   deleteRecipe,
   saveRecipeToCollection,
   setFavorite as setFavoriteForRecipe,
+  setOriginalServings,
   setSelectedServings,
 } from "@/server/services/recipe-service";
 
@@ -78,6 +79,25 @@ export async function rememberServings(id: number, servings: number): Promise<Ac
     return { ok: true };
   } catch (error) {
     console.error("Kunne ikke lagre valgt antall", error);
+    return actionFailure(undefined);
+  }
+}
+
+/**
+ * Lagrer antallet oppskriften er skrevet for (Story 2.4, FR-3), for lagret og ulagret oppskrift.
+ * Sidene revalideres, så en bevart side ikke viser det gamle antallet. Feil gir en norsk melding.
+ */
+export async function changeOriginalServings(id: number, servings: number): Promise<ActionResult> {
+  if (!idSchema.safeParse(id).success) return actionFailure("not_found");
+  if (!servingsSchema.safeParse(servings).success) return actionFailure("validation");
+
+  try {
+    const result = setOriginalServings(id, servings);
+    if (!result.ok) return actionFailure(result.error.kind);
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (error) {
+    console.error("Kunne ikke lagre antallet oppskriften er laget for", error);
     return actionFailure(undefined);
   }
 }
