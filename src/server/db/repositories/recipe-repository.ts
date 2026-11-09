@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, isNotNull, isNull, lt } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, isNull, lt, type SQL } from "drizzle-orm";
 import type { Quantity, Recipe, RecipeLine, RecipeSummary, Step, UnitKey } from "@/domain";
 import type { Db } from "../client";
 import { folders, ingredientLines, recipes, steps } from "../schema";
@@ -183,6 +183,7 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
     selectedServings: row.selectedServings,
     savedAt: row.savedAt,
     folderId: row.folderId,
+    isFavorite: row.isFavorite,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     ingredients: lines.map((line) => ({
@@ -204,12 +205,8 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
   };
 }
 
-/**
- * Oppskriftene i samlingen (`savedAt` satt), sist lagret først og deretter høyest id først.
- * Med `folderId` bare oppskriftene i den mappen. `folderName` er mappen oppskriften ligger i.
- * Leser bare oppsummeringen; ingredienser og steg hentes ikke.
- */
-export function listSavedRecipes(db: Db, folderId?: number): RecipeSummary[] {
+/** Oppsummeringene for lagrede oppskrifter som oppfyller `extra`, sist lagret først, så høyest id. */
+function selectSavedSummaries(db: Db, extra?: SQL): RecipeSummary[] {
   const saved = isNotNull(recipes.savedAt);
   return db
     .select({
@@ -218,14 +215,51 @@ export function listSavedRecipes(db: Db, folderId?: number): RecipeSummary[] {
       sourceName: recipes.sourceName,
       sourceUrl: recipes.sourceUrl,
       savedAt: recipes.savedAt,
+      isFavorite: recipes.isFavorite,
       folderName: folders.name,
     })
     .from(recipes)
     .leftJoin(folders, eq(recipes.folderId, folders.id))
-    .where(folderId === undefined ? saved : and(saved, eq(recipes.folderId, folderId)))
+    .where(extra === undefined ? saved : and(saved, extra))
     .orderBy(desc(recipes.savedAt), desc(recipes.id))
     .all()
     .flatMap((row) => (row.savedAt === null ? [] : [{ ...row, savedAt: row.savedAt }]));
+}
+
+/**
+ * Oppskriftene i samlingen (`savedAt` satt), sist lagret først og deretter høyest id først.
+ * Med `folderId` bare oppskriftene i den mappen. `folderName` er mappen oppskriften ligger i.
+ * Leser bare oppsummeringen; ingredienser og steg hentes ikke.
+ */
+export function listSavedRecipes(db: Db, folderId?: number): RecipeSummary[] {
+  return selectSavedSummaries(
+    db,
+    folderId === undefined ? undefined : eq(recipes.folderId, folderId),
+  );
+}
+
+/**
+ * Lagrede favoritter (Story 3.4) i samme rekkefølge som samlingen: sist lagret først.
+ * Det finnes ingen «sist åpnet» ennå.
+ */
+export function listFavoriteRecipes(db: Db): RecipeSummary[] {
+  return selectSavedSummaries(db, eq(recipes.isFavorite, true));
+}
+
+/**
+ * Markerer eller avmarkerer en lagret oppskrift som favoritt (Story 3.4). Returnerer `false`
+ * når id-en ikke finnes eller oppskriften ikke er lagret, ellers `true`, også når verdien
+ * ikke endres (idempotent). `updatedAt` røres aldri: avkrysning og valgt antall er nøklet
+ * på den. Mappe, `savedAt` og innhold røres ikke.
+ */
+export function setRecipeFavorite(db: Db, id: number, isFavorite: boolean): boolean {
+  return (
+    db
+      .update(recipes)
+      .set({ isFavorite })
+      .where(and(eq(recipes.id, id), isNotNull(recipes.savedAt)))
+      .run().changes > 0
+  );
 }
 
 /**

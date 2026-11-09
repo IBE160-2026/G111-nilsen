@@ -75,6 +75,8 @@ export type Recipe = {
   savedAt: string | null;
   /** Mappen oppskriften ligger i (bare lagrede oppskrifter kan ligge i en mappe), ellers `null`. */
   folderId: number | null;
+  /** Favoritt (Story 3.4). Bare oppskrifter i samlingen kan være favoritt. */
+  isFavorite: boolean;
   createdAt: string;
   updatedAt: string;
   ingredients: RecipeLine[];
@@ -85,7 +87,10 @@ export type Recipe = {
  * En oppskrift slik den vises som kort i samlingen. `savedAt` er alltid satt. `folderName` er
  * navnet på mappen oppskriften ligger i, ellers `null`.
  */
-export type RecipeSummary = Pick<Recipe, "id" | "title" | "sourceUrl" | "sourceName"> & {
+export type RecipeSummary = Pick<
+  Recipe,
+  "id" | "title" | "sourceUrl" | "sourceName" | "isFavorite"
+> & {
   savedAt: string;
   folderName: string | null;
 };

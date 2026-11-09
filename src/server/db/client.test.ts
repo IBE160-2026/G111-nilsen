@@ -61,6 +61,7 @@ describe("getDb", () => {
     db.$client.exec(
       "delete from __drizzle_migrations where created_at > (select min(created_at) from __drizzle_migrations)",
     ); // bare 0000 er igjen
+    db.$client.exec("alter table recipes drop column is_favorite");
     db.$client.exec("alter table recipes drop column folder_id");
     expect(getDb()).toBe(db);
     expect(global.__recipemateDbMigrations).toBe(actual);

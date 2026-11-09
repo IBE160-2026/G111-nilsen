@@ -35,6 +35,8 @@ export const recipes = sqliteTable("recipes", {
   savedAt: text("saved_at"),
   /** `null` = ikke i noen mappe. Sletter man mappen, settes den til `null`. */
   folderId: integer("folder_id").references(() => folders.id, { onDelete: "set null" }),
+  /** Favoritt (Story 3.4), uavhengig av mappe. Bare lagrede oppskrifter kan være favoritt. */
+  isFavorite: integer("is_favorite", { mode: "boolean" }).notNull().default(false),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });

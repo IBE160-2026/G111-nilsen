@@ -6,6 +6,7 @@ import {
   removeRecipe,
   rememberServings,
   saveRecipe,
+  setFavorite,
 } from "@/app/oppskrift/[id]/actions";
 import { editRecipeMessages } from "@/lib/messages";
 import { sourceLabel } from "@/lib/source-label";
@@ -65,6 +66,8 @@ export default function RecipeView({ recipe, folders }: { recipe: Recipe; folder
         folderId={recipe.folderId}
         onMoveToFolder={moveToFolder.bind(null, recipe.id)}
         onMoveToNewFolder={moveToNewFolder.bind(null, recipe.id)}
+        isFavorite={recipe.isFavorite}
+        onSetFavorite={setFavorite.bind(null, recipe.id)}
       />
     </article>
   );

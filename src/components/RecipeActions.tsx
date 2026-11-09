@@ -3,13 +3,20 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ActionResult, FolderActionResult } from "@/app/_shared/action-result";
 import type { Folder } from "@/domain";
-import { deleteDialogMessages, fallbackMessage, recipeActionMessages } from "@/lib/messages";
+import {
+  deleteDialogMessages,
+  fallbackMessage,
+  favoriteMessages,
+  recipeActionMessages,
+} from "@/lib/messages";
+import { STATUS_MESSAGE_MS } from "@/lib/timing";
 import ConfirmDialog from "./ConfirmDialog";
+import FavoriteButton, { type FavoriteResult } from "./FavoriteButton";
 import FolderDialog from "./FolderDialog";
 import styles from "./RecipeActions.module.css";
 
 /** Hvor lenge «Lagret.», «Lagret i <navn>.» og «Fjernet fra mappen.» står, i millisekunder. */
-export const SAVED_MESSAGE_MS = 3000;
+export const SAVED_MESSAGE_MS = STATUS_MESSAGE_MS;
 
 type Props = {
   title: string;
@@ -29,6 +36,10 @@ type Props = {
   ) => Promise<FolderActionResult<{ folderName: string | null }>>;
   /** Server Action bundet til oppskriften: oppretter en mappe og legger oppskriften i den. */
   onMoveToNewFolder: (name: string) => Promise<FolderActionResult<{ folderName: string }>>;
+  /** Er oppskriften favoritt? (Story 3.4) Hjertet vises bare for en lagret oppskrift. */
+  isFavorite: boolean;
+  /** Server Action bundet til oppskriften: setter favoritt til eksplisitt verdi. */
+  onSetFavorite: (isFavorite: boolean) => Promise<ActionResult>;
 };
 
 function messageOf(error: unknown): string {
@@ -44,7 +55,9 @@ function messageOf(error: unknown): string {
  * For en lagret oppskrift står mappeknappen ved siden av «Slett» (Story 3.3): den viser
  * mappenavnet, eller «Lagre i mappe», og åpner dialogen «Lagre i mappe». Etter et vellykket
  * valg lukkes dialogen, fokus går til mappeknappen, og statusområdet sier «Lagret i <navn>.»
- * eller «Fjernet fra mappen.». Hjerte kommer i samme linje i Story 3.4.
+ * eller «Fjernet fra mappen.». Hjertet (Story 3.4) står først i samme linje, bare for en lagret
+ * oppskrift; statusområdet sier «Lagt til i favoritter.» eller «Fjernet fra favoritter.» i
+ * 3 sekunder, og en feil står til neste forsøk.
  */
 export default function RecipeActions({
   title,
@@ -55,6 +68,8 @@ export default function RecipeActions({
   folderId,
   onMoveToFolder,
   onMoveToNewFolder,
+  isFavorite,
+  onSetFavorite,
 }: Props) {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -150,6 +165,15 @@ export default function RecipeActions({
     }
   }
 
+  function favoriteChanged(result: FavoriteResult) {
+    if (result.ok) {
+      flash(result.isFavorite ? favoriteMessages.added : favoriteMessages.removed);
+    } else {
+      clearTimer();
+      setMessage(result.message);
+    }
+  }
+
   const folderName = folders.find((folder) => folder.id === folderId)?.name ?? null;
 
   return (
@@ -157,6 +181,12 @@ export default function RecipeActions({
       <div className={styles.actions}>
         {saved ? (
           <>
+            <FavoriteButton
+              title={title}
+              isFavorite={isFavorite}
+              onSetFavorite={onSetFavorite}
+              onResult={favoriteChanged}
+            />
             <button
               ref={folderButton}
               type="button"

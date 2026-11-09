@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, type Db } from "@/server/db/client";
 import { insertRecipe, type NewRecipe } from "@/server/db/repositories/recipe-repository";
 import { createFolder, moveRecipeToFolder } from "@/server/services/folder-service";
+import { setFavorite } from "@/server/services/recipe-service";
 
 const state = vi.hoisted(() => ({
   db: null as Db | null,
@@ -29,6 +30,8 @@ vi.mock("@/server/services/recipe-service", async (importOriginal) => {
     },
   };
 });
+
+vi.mock("@/app/oppskrift/[id]/actions", () => ({ setFavorite: vi.fn() }));
 
 vi.mock("next/server", () => ({
   connection: () => {
@@ -157,6 +160,26 @@ describe("/samlingen", () => {
       "I mappeMatprat · Hverdag",
       "Uten mappeMatprat",
     ]);
+  });
+
+  it("hvert kort har et hjerte som søsken til lenken: fylt for favoritter, omriss for andre (Story 3.4)", async () => {
+    const fav = insertRecipe(state.db!, recipe("Favoritten", "2026-11-09T11:00:00.000Z"));
+    insertRecipe(state.db!, recipe("Vanlig", "2026-11-09T10:00:00.000Z"));
+    setFavorite(fav, true, state.db!);
+    await show();
+    const items = within(screen.getByRole("list")).getAllByRole("listitem");
+    expect(items).toHaveLength(2);
+    expect(within(items[0]).getByRole("button", { name: "Favoritt: Favoritten" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(within(items[1]).getByRole("button", { name: "Favoritt: Vanlig" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    for (const item of items) {
+      expect(within(item).getByRole("link")).not.toContainElement(within(item).getByRole("button"));
+    }
   });
 
   it("utelater oppskrifter som ikke er i samlingen", async () => {

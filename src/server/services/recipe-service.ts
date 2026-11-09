@@ -8,8 +8,10 @@ import {
   deleteStaleUnsavedRecipes,
   findRecipeById,
   insertRecipe,
+  listFavoriteRecipes,
   listSavedRecipes,
   markRecipeSaved,
+  setRecipeFavorite,
   updateRecipe,
   updateSelectedServings,
   type NewIngredientLine,
@@ -200,4 +202,26 @@ export function getRecipe(id: number, db: Db = getDb()): Result<Recipe> {
 /** Oppskriftene i samlingen, sist lagret først. */
 export function listCollection(db: Db = getDb()): Result<RecipeSummary[]> {
   return ok(listSavedRecipes(db));
+}
+
+/**
+ * Markerer eller avmarkerer en lagret oppskrift som favoritt (Story 3.4). Eksplisitt verdi,
+ * ikke «bytt», så gjentatte kall gir samme resultat. Ugyldig eller ukjent id og oppskrift som
+ * ikke er i samlingen gir `not_found`, og ingenting endres.
+ */
+export function setFavorite(
+  recipeId: number,
+  isFavorite: boolean,
+  db: Db = getDb(),
+): Result<{ id: number; isFavorite: boolean }> {
+  if (!isRecipeId(recipeId)) return err(appError("not_found"));
+  if (typeof isFavorite !== "boolean") return err(appError("validation", "isFavorite"));
+  return setRecipeFavorite(db, recipeId, isFavorite)
+    ? ok({ id: recipeId, isFavorite })
+    : err(appError("not_found"));
+}
+
+/** Favorittene i samlingen, sist lagret først. */
+export function listFavorites(db: Db = getDb()): Result<RecipeSummary[]> {
+  return ok(listFavoriteRecipes(db));
 }

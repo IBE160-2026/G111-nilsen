@@ -25,6 +25,8 @@ const folderProps = {
   folderId: null,
   onMoveToFolder: vi.fn(),
   onMoveToNewFolder: vi.fn(),
+  isFavorite: false,
+  onSetFavorite: vi.fn().mockResolvedValue({ ok: true }),
 };
 
 function setup(overrides: Partial<React.ComponentProps<typeof RecipeActions>> = {}) {
@@ -457,5 +459,92 @@ describe("RecipeActions: mappe (Story 3.3)", () => {
     act(() => vi.advanceTimersByTime(3100));
     expect(status()).toBeEmptyDOMElement();
     expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+describe("RecipeActions: hjerte (Story 3.4)", () => {
+  const heart = () => screen.getByRole("button", { name: "Favoritt: Pannekaker" });
+
+  it("vises ikke for en oppskrift som ikke er lagret", () => {
+    setup({ saved: false });
+    expect(screen.queryByRole("button", { name: /Favoritt/ })).not.toBeInTheDocument();
+  });
+
+  it("står ved siden av mappeknappen og «Slett» for en lagret oppskrift, først i linjen", () => {
+    setup({ saved: true });
+    const buttons = screen
+      .getAllByRole("button")
+      .map((b) => b.getAttribute("aria-label") ?? b.textContent);
+    expect(buttons).toEqual(["Favoritt: Pannekaker", "Lagre i mappe", "Slett Pannekaker"]);
+  });
+
+  it("aria-pressed følger isFavorite", () => {
+    const { unmount } = setup({ saved: true, isFavorite: false });
+    expect(heart()).toHaveAttribute("aria-pressed", "false");
+    unmount();
+    setup({ saved: true, isFavorite: true });
+    expect(heart()).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("markering: kaller onSetFavorite(true) og sier «Lagt til i favoritter.» i 3 sekunder", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const onSetFavorite = vi.fn().mockResolvedValue({ ok: true });
+    setup({ saved: true, onSetFavorite });
+    await user.click(heart());
+    expect(onSetFavorite).toHaveBeenCalledExactlyOnceWith(true);
+    await waitFor(() => expect(status()).toHaveTextContent("Lagt til i favoritter."));
+    act(() => vi.advanceTimersByTime(2000));
+    expect(status()).toHaveTextContent("Lagt til i favoritter.");
+    act(() => vi.advanceTimersByTime(1100));
+    expect(status()).toBeEmptyDOMElement();
+  });
+
+  it("avmarkering: sier «Fjernet fra favoritter.»", async () => {
+    const user = userEvent.setup();
+    const onSetFavorite = vi.fn().mockResolvedValue({ ok: true });
+    setup({ saved: true, isFavorite: true, onSetFavorite });
+    await user.click(heart());
+    expect(onSetFavorite).toHaveBeenCalledExactlyOnceWith(false);
+    await waitFor(() => expect(status()).toHaveTextContent("Fjernet fra favoritter."));
+    expect(heart()).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("feil: hjertet rulles tilbake og meldingen står i statusområdet til neste handling", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const onSetFavorite = vi
+      .fn()
+      .mockResolvedValue({ ok: false, message: "Vi fant ikke oppskriften." });
+    setup({ saved: true, onSetFavorite });
+    await user.click(heart());
+    await waitFor(() => expect(status()).toHaveTextContent("Vi fant ikke oppskriften."));
+    expect(heart()).toHaveAttribute("aria-pressed", "false");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(10_000));
+    expect(status()).toHaveTextContent("Vi fant ikke oppskriften.");
+  });
+
+  it("ny isFavorite fra serveren (revalidering) oppdaterer hjertet", () => {
+    const { rerender } = setup({ saved: true, isFavorite: false });
+    rerender(
+      <RecipeActions
+        title="Pannekaker"
+        saved
+        onSave={vi.fn()}
+        onDelete={vi.fn()}
+        {...folderProps}
+        isFavorite
+      />,
+    );
+    expect(heart()).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("endrer ikke mappeknappen eller «Slett»", async () => {
+    const user = userEvent.setup();
+    setup({ saved: true });
+    await user.click(heart());
+    expect(screen.getByRole("button", { name: "Lagre i mappe" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Slett Pannekaker" })).toBeEnabled();
   });
 });

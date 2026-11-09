@@ -7,8 +7,10 @@ import {
   deleteRecipe,
   getRecipe,
   listCollection,
+  listFavorites,
   purgeStaleUnsavedRecipes,
   saveRecipeToCollection,
+  setFavorite,
   setSelectedServings,
   updateManualRecipe,
   type ManualRecipeInput,
@@ -499,5 +501,82 @@ describe("lagre, slette og rydde (Story 3.2)", () => {
       stored(db, null, "2000-01-01T00:00:00.000Z");
       expect(purgeStaleUnsavedRecipes(undefined, db)).toEqual({ ok: true, value: { deleted: 1 } });
     });
+  });
+});
+
+describe("favoritter (Story 3.4)", () => {
+  function seed() {
+    const db = createTestDb();
+    const created = createManualRecipe(input, db);
+    if (!created.ok) throw new Error("kunne ikke lagre");
+    return { db, id: created.value.id };
+  }
+  const recipeOf = (db: ReturnType<typeof createTestDb>, id: number) => {
+    const read = getRecipe(id, db);
+    if (!read.ok) throw new Error("fant ikke oppskriften");
+    return read.value;
+  };
+
+  it("setFavorite markerer og avmarkerer med eksplisitt verdi, og gjentatte kall gir samme resultat", () => {
+    const { db, id } = seed();
+    expect(setFavorite(id, true, db)).toEqual({ ok: true, value: { id, isFavorite: true } });
+    expect(setFavorite(id, true, db)).toEqual({ ok: true, value: { id, isFavorite: true } });
+    expect(recipeOf(db, id).isFavorite).toBe(true);
+    expect(setFavorite(id, false, db)).toEqual({ ok: true, value: { id, isFavorite: false } });
+    expect(recipeOf(db, id).isFavorite).toBe(false);
+  });
+
+  it("endrer ikke updatedAt", () => {
+    const { db, id } = seed();
+    const before = recipeOf(db, id).updatedAt;
+    setFavorite(id, true, db);
+    setFavorite(id, false, db);
+    expect(recipeOf(db, id).updatedAt).toBe(before);
+  });
+
+  it.each([999, 0, -1, 1.5, NaN, 2 ** 53])("ugyldig eller ukjent id %s gir not_found", (bad) => {
+    const { db } = seed();
+    expect(setFavorite(bad, true, db)).toEqual({
+      ok: false,
+      error: { kind: "not_found" },
+    });
+  });
+
+  it("en oppskrift som ikke er i samlingen gir not_found og endres ikke", () => {
+    const { db, id } = seed();
+    db.$client.prepare("update recipes set saved_at = null where id = ?").run(id);
+    expect(setFavorite(id, true, db)).toEqual({ ok: false, error: { kind: "not_found" } });
+    expect(recipeOf(db, id).isFavorite).toBe(false);
+  });
+
+  it("en verdi som ikke er boolsk gir validation", () => {
+    const { db, id } = seed();
+    const result = setFavorite(id, "ja" as unknown as boolean, db);
+    expect(result).toMatchObject({ ok: false, error: { kind: "validation" } });
+    expect(recipeOf(db, id).isFavorite).toBe(false);
+  });
+
+  it("listFavorites gir favorittene sist lagret først, og tom liste uten favoritter", () => {
+    const db = createTestDb();
+    expect(listFavorites(db)).toEqual({ ok: true, value: [] });
+    const a = createManualRecipe({ ...input, title: "A" }, db);
+    const b = createManualRecipe({ ...input, title: "B" }, db);
+    createManualRecipe({ ...input, title: "C" }, db);
+    if (!a.ok || !b.ok) throw new Error("kunne ikke lagre");
+    // Lik savedAt avgjøres av høyest id, så rekkefølgen er B før A.
+    setFavorite(a.value.id, true, db);
+    setFavorite(b.value.id, true, db);
+    const result = listFavorites(db);
+    expect(result.ok && result.value.map((r) => r.title)).toEqual(["B", "A"]);
+    expect(result.ok && result.value.every((r) => r.isFavorite)).toBe(true);
+  });
+
+  it("redigering beholder favoritten, og sletting fjerner den fra favorittene", () => {
+    const { db, id } = seed();
+    setFavorite(id, true, db);
+    expect(updateManualRecipe(id, { ...input, title: "Nytt navn" }, db).ok).toBe(true);
+    expect(recipeOf(db, id)).toMatchObject({ title: "Nytt navn", isFavorite: true });
+    deleteRecipe(id, db);
+    expect(listFavorites(db)).toEqual({ ok: true, value: [] });
   });
 });

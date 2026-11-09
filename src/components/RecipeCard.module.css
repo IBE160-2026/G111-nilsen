@@ -1,3 +1,17 @@
+/* Rammen rundt lenken og hjertet. Hjertet er plassert øverst til høyre, ikke inni lenken. */
+.root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.favorite {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+}
+
 /* Flatt kort uten skygge, som øvrige kort. Hele flaten er lenken. */
 .card {
   display: flex;
@@ -5,8 +19,10 @@
   gap: var(--space-1);
   box-sizing: border-box;
   min-height: var(--tap-target-min);
-  height: 100%;
+  flex: 1;
   padding: var(--space-4);
+  /* Plass til hjertet (44 px + marg), så tittel og meta ikke havner under det. */
+  padding-inline-end: calc(var(--tap-target-min) + var(--space-2));
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border-hairline);
   border-radius: var(--radius-md);

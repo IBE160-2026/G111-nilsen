@@ -26,7 +26,7 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("next/cache", () => ({ revalidatePath }));
 
-const { moveToFolder, moveToNewFolder, removeRecipe, rememberServings, saveRecipe } =
+const { moveToFolder, moveToNewFolder, removeRecipe, rememberServings, saveRecipe, setFavorite } =
   await import("./actions");
 
 const failure = (kind: string | undefined) => {
@@ -81,8 +81,8 @@ describe("saveRecipe", () => {
     expect(stored().savedAt).toBe(before);
   });
 
-  it.each([999, 0, -1, 1.5, NaN, Infinity, 2 ** 53, "1" as unknown as number])(
-    "ukjent eller ugyldig id %s: not_found, ingenting endres, ingen revalidering",
+  it.each([0, -1, 1.5, NaN, Infinity, 2 ** 53, "1" as unknown as number])(
+    "ugyldig id %s: not_found, ingenting endres, ingen revalidering",
     async (bad) => {
       unsave();
       expect(await saveRecipe(bad)).toEqual(failure("not_found"));
@@ -262,5 +262,74 @@ describe("moveToNewFolder (Story 3.3)", () => {
     breakDatabase();
     expect(await moveToNewFolder(id, "Fest")).toEqual(failure(undefined));
     expect(console.error).toHaveBeenCalled();
+  });
+});
+
+describe("setFavorite (Story 3.4)", () => {
+  it("markerer og avmarkerer med eksplisitt verdi, og revaliderer alle sider", async () => {
+    expect(await setFavorite(id, true)).toEqual({ ok: true });
+    expect(stored().isFavorite).toBe(true);
+    expect(revalidatePath).toHaveBeenLastCalledWith("/", "layout");
+    expect(await setFavorite(id, false)).toEqual({ ok: true });
+    expect(stored().isFavorite).toBe(false);
+    expect(revalidatePath).toHaveBeenCalledTimes(2);
+  });
+
+  it("gjentatte kall med samme verdi snur ikke tilstanden", async () => {
+    await setFavorite(id, true);
+    await setFavorite(id, true);
+    expect(stored().isFavorite).toBe(true);
+  });
+
+  it("endrer ikke updatedAt", async () => {
+    const before = stored().updatedAt;
+    await setFavorite(id, true);
+    expect(stored().updatedAt).toBe(before);
+  });
+
+  it.each([0, -1, 1.5, NaN, Infinity, 2 ** 53, "1" as unknown as number])(
+    "ugyldig id %s: not_found, ingenting endres, ingen revalidering",
+    async (bad) => {
+      expect(await setFavorite(bad, true)).toEqual(failure("not_found"));
+      expect(stored().isFavorite).toBe(false);
+      expect(revalidatePath).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(["true", 1, 0, null, undefined])(
+    "verdien %j er ikke boolsk: validation, ingenting endres",
+    async (bad) => {
+      expect(await setFavorite(id, bad as unknown as boolean)).toEqual(failure("validation"));
+      expect(stored().isFavorite).toBe(false);
+      expect(revalidatePath).not.toHaveBeenCalled();
+    },
+  );
+
+  it("ukjent id 999: not_found, ingenting endres, men sidene revalideres", async () => {
+    expect(await setFavorite(999, true)).toEqual(failure("not_found"));
+    expect(stored().isFavorite).toBe(false);
+    expect(revalidatePath).toHaveBeenCalledExactlyOnceWith("/", "layout");
+  });
+
+  it("oppskrift som ikke er lagret: not_found og ingenting endres", async () => {
+    unsave();
+    expect(await setFavorite(id, true)).toEqual(failure("not_found"));
+    expect(stored().isFavorite).toBe(false);
+    // Sidene oppdateres likevel, så et gammelt kort ikke blir stående.
+    expect(revalidatePath).toHaveBeenCalledExactlyOnceWith("/", "layout");
+  });
+
+  it("slettet oppskrift (annen fane): not_found", async () => {
+    await removeRecipe(id).catch(() => {});
+    revalidatePath.mockClear();
+    expect(await setFavorite(id, true)).toEqual(failure("not_found"));
+    expect(revalidatePath).toHaveBeenCalledExactlyOnceWith("/", "layout");
+  });
+
+  it("databasefeil: reservemelding, feilen logges og ingenting revalideres", async () => {
+    breakDatabase();
+    expect(await setFavorite(id, true)).toEqual(failure(undefined));
+    expect(console.error).toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
   });
 });

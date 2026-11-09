@@ -6,6 +6,7 @@ import {
   editRecipeMessages,
   errorMessages,
   fallbackMessage,
+  favoriteMessages,
   folderDialogMessages,
   folderMessages,
   manualRecipeFieldMessages,
@@ -46,6 +47,7 @@ describe("messageFor", () => {
       ...Object.values(folderMessages),
       ...Object.values(deleteFolderDialogMessages),
       ...Object.values(folderDialogMessages),
+      ...Object.values(favoriteMessages),
       recipeCountLabel(0),
       recipeCountLabel(1),
       recipeCountLabel(12),
@@ -103,5 +105,28 @@ describe("mappetekster (Story 3.3)", () => {
     [12, "12 oppskrifter"],
   ])("recipeCountLabel(%s) gir «%s»", (count, expected) => {
     expect(recipeCountLabel(count)).toBe(expected);
+  });
+});
+
+describe("favoriteMessages (Story 3.4)", () => {
+  it("har teksten fra spesifikasjonen, og tom-tilstanden er uendret fra før", () => {
+    expect(favoriteMessages).toEqual({
+      heading: "Favoritter",
+      loading: "Henter favorittene …",
+      loadFailed: "Kunne ikke hente favorittene",
+      emptyTitle: "Du har ingen favoritter ennå.",
+      emptyDescription: "Trykk på hjertet på en oppskrift for å gjøre den til favoritt.",
+      emptyAction: "Gå til samlingen",
+      labelPrefix: "Favoritt: ",
+      added: "Lagt til i favoritter.",
+      removed: "Fjernet fra favoritter.",
+    });
+  });
+
+  it("er korte setninger på norsk uten utropstegn", () => {
+    for (const text of Object.values(favoriteMessages)) {
+      expect(text.length).toBeGreaterThan(0);
+      expect(text).not.toContain("!");
+    }
   });
 });

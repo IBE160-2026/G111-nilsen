@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, type Db } from "@/server/db/client";
 import { insertRecipe, type NewRecipe } from "@/server/db/repositories/recipe-repository";
 import { createFolder, moveRecipeToFolder } from "@/server/services/folder-service";
+import { setFavorite } from "@/server/services/recipe-service";
 
 const state = vi.hoisted(() => ({ db: null as Db | null, forcedErrorKind: null as string | null }));
 
@@ -31,6 +32,7 @@ vi.mock("@/server/services/folder-service", async (importOriginal) => {
   };
 });
 
+vi.mock("@/app/oppskrift/[id]/actions", () => ({ setFavorite: vi.fn() }));
 vi.mock("next/server", () => ({ connection: () => Promise.resolve() }));
 
 const { default: FolderPage, generateMetadata } = await import("./page");
@@ -87,6 +89,24 @@ describe("/mapper/[id]", () => {
     expect(items.map((li) => li.textContent)).toEqual(["NyestLagt inn selv", "EldstMatprat"]);
     expect(within(items[0]).getByRole("link")).toHaveAttribute("href", `/oppskrift/${recent}`);
     expect(screen.queryByText("Utenfor")).not.toBeInTheDocument();
+  });
+
+  it("kortene i mappen har hjerte som viser favorittstatus (Story 3.4)", async () => {
+    createFolder("Hverdag", state.db!);
+    const a = insertRecipe(state.db!, recipe("Favoritten", "2026-11-09T11:00:00.000Z"));
+    const b = insertRecipe(state.db!, recipe("Vanlig", "2026-11-09T10:00:00.000Z"));
+    moveRecipeToFolder(a, 1, state.db!);
+    moveRecipeToFolder(b, 1, state.db!);
+    setFavorite(a, true, state.db!);
+    render(await renderPage("1"));
+    expect(screen.getByRole("button", { name: "Favoritt: Favoritten" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Favoritt: Vanlig" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
   });
 
   it("tom mappe: «Mappen er tom.» med forklaring og «Gå til samlingen»", async () => {

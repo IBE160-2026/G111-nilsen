@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { createTestDb } from "../client";
+import { assignRecipeToFolder, insertFolder } from "./folder-repository";
 import {
   deleteRecipeById,
   deleteStaleUnsavedRecipes,
   findRecipeById,
   insertRecipe,
+  listFavoriteRecipes,
   listSavedRecipes,
   markRecipeSaved,
+  setRecipeFavorite,
   updateRecipe,
   updateSelectedServings,
   type NewRecipe,
@@ -285,6 +288,7 @@ describe("listSavedRecipes", () => {
         sourceName: "Matprat",
         sourceUrl: "https://www.matprat.no/x",
         savedAt: "2026-11-09T10:00:00.000Z",
+        isFavorite: false,
         folderName: null,
       },
     ]);
@@ -405,5 +409,138 @@ describe("lagre, slette og rydde (Story 3.2)", () => {
       expect(deleteStaleUnsavedRecipes(db, cutoff)).toBe(2);
       expect(count(db, "recipes")).toBe(1);
     });
+  });
+});
+
+describe("favoritter (Story 3.4)", () => {
+  const T0 = "2026-11-09T10:00:00.000Z";
+  const saved = (title: string, savedAt: string, extra: Partial<NewRecipe> = {}): NewRecipe => ({
+    ...base,
+    title,
+    savedAt,
+    ...extra,
+  });
+  const row = (db: ReturnType<typeof createTestDb>, id: number) =>
+    db.$client
+      .prepare("select is_favorite, updated_at, saved_at, folder_id from recipes where id = ?")
+      .get(id);
+
+  it("nye oppskrifter er ikke favoritt, og findRecipeById og listSavedRecipes sier det", () => {
+    const db = createTestDb();
+    const id = insertRecipe(db, saved("A", T0));
+    expect(findRecipeById(db, id)?.isFavorite).toBe(false);
+    expect(listSavedRecipes(db)[0].isFavorite).toBe(false);
+  });
+
+  it("setRecipeFavorite markerer og avmarkerer, og returnerer true", () => {
+    const db = createTestDb();
+    const id = insertRecipe(db, saved("A", T0));
+    expect(setRecipeFavorite(db, id, true)).toBe(true);
+    expect(findRecipeById(db, id)?.isFavorite).toBe(true);
+    expect(listSavedRecipes(db)[0].isFavorite).toBe(true);
+    expect(setRecipeFavorite(db, id, false)).toBe(true);
+    expect(findRecipeById(db, id)?.isFavorite).toBe(false);
+  });
+
+  it("er idempotent: samme verdi to ganger gir true begge ganger", () => {
+    const db = createTestDb();
+    const id = insertRecipe(db, saved("A", T0));
+    expect(setRecipeFavorite(db, id, true)).toBe(true);
+    expect(setRecipeFavorite(db, id, true)).toBe(true);
+    expect(setRecipeFavorite(db, id, false)).toBe(true);
+    expect(setRecipeFavorite(db, id, false)).toBe(true);
+    expect(findRecipeById(db, id)?.isFavorite).toBe(false);
+  });
+
+  it("ukjent id og ikke-lagret oppskrift gir false og endrer ingenting", () => {
+    const db = createTestDb();
+    const unsaved = insertRecipe(db, base);
+    expect(setRecipeFavorite(db, 999, true)).toBe(false);
+    expect(setRecipeFavorite(db, unsaved, true)).toBe(false);
+    expect(findRecipeById(db, unsaved)?.isFavorite).toBe(false);
+    expect(count(db, "recipes")).toBe(1);
+  });
+
+  it("rører aldri updated_at, saved_at eller mappe", () => {
+    const db = createTestDb();
+    const folderId = insertFolder(db, { name: "Hverdag", nameKey: "hverdag", createdAt: T0 });
+    const id = insertRecipe(db, saved("A", T0, { updatedAt: "2026-11-09T09:00:00.000Z" }));
+    assignRecipeToFolder(db, id, folderId);
+    const before = row(db, id);
+    setRecipeFavorite(db, id, true);
+    setRecipeFavorite(db, id, false);
+    setRecipeFavorite(db, id, true);
+    expect(row(db, id)).toEqual({ ...(before as object), is_favorite: 1 });
+  });
+
+  it("listFavoriteRecipes gir bare lagrede favoritter, sist lagret først og deretter høyest id", () => {
+    const db = createTestDb();
+    const old = insertRecipe(db, saved("Eldst", "2026-11-09T09:00:00.000Z"));
+    const same1 = insertRecipe(db, saved("Samme 1", "2026-11-09T11:00:00.000Z"));
+    const same2 = insertRecipe(db, saved("Samme 2", "2026-11-09T11:00:00.000Z"));
+    insertRecipe(db, saved("Ikke favoritt", "2026-11-09T12:00:00.000Z"));
+    const unsaved = insertRecipe(db, base);
+    for (const id of [old, same1, same2]) setRecipeFavorite(db, id, true);
+    // En ulagret oppskrift kan ikke være favoritt, selv om kolonnen skulle være satt.
+    setRecipeFavorite(db, unsaved, true);
+
+    const favorites = listFavoriteRecipes(db);
+    expect(favorites.map((r) => r.title)).toEqual(["Samme 2", "Samme 1", "Eldst"]);
+    expect(favorites.every((r) => r.isFavorite)).toBe(true);
+    expect(favorites[2]).toEqual({
+      id: old,
+      title: "Eldst",
+      sourceName: null,
+      sourceUrl: null,
+      savedAt: "2026-11-09T09:00:00.000Z",
+      isFavorite: true,
+      folderName: null,
+    });
+  });
+
+  it("listFavoriteRecipes er tom uten favoritter, og har mappenavnet", () => {
+    const db = createTestDb();
+    expect(listFavoriteRecipes(db)).toEqual([]);
+    const folderId = insertFolder(db, { name: "Hverdag", nameKey: "hverdag", createdAt: T0 });
+    const id = insertRecipe(db, saved("A", T0));
+    assignRecipeToFolder(db, id, folderId);
+    setRecipeFavorite(db, id, true);
+    expect(listFavoriteRecipes(db).map((r) => r.folderName)).toEqual(["Hverdag"]);
+  });
+
+  it("redigering (updateRecipe) og markRecipeSaved beholder favoritten", () => {
+    const db = createTestDb();
+    const id = insertRecipe(db, saved("A", T0));
+    setRecipeFavorite(db, id, true);
+    updateRecipe(db, id, {
+      title: "Ny tittel",
+      originalServings: 2,
+      updatedAt: "2026-11-10T10:00:00.000Z",
+      ingredients: [],
+      steps: [],
+    });
+    markRecipeSaved(db, id, "2026-11-11T10:00:00.000Z");
+    expect(findRecipeById(db, id)).toMatchObject({ isFavorite: true, title: "Ny tittel" });
+  });
+
+  it("mappehandlinger og sletting av mappen beholder favoritten", () => {
+    const db = createTestDb();
+    const folderId = insertFolder(db, { name: "Hverdag", nameKey: "hverdag", createdAt: T0 });
+    const id = insertRecipe(db, saved("A", T0));
+    setRecipeFavorite(db, id, true);
+    assignRecipeToFolder(db, id, folderId);
+    expect(findRecipeById(db, id)?.isFavorite).toBe(true);
+    db.$client.prepare("delete from folders where id = ?").run(folderId);
+    expect(findRecipeById(db, id)).toMatchObject({ isFavorite: true, folderId: null });
+    assignRecipeToFolder(db, id, null);
+    expect(findRecipeById(db, id)?.isFavorite).toBe(true);
+  });
+
+  it("sletting av oppskriften fjerner den fra favorittene", () => {
+    const db = createTestDb();
+    const id = insertRecipe(db, saved("A", T0));
+    setRecipeFavorite(db, id, true);
+    deleteRecipeById(db, id);
+    expect(listFavoriteRecipes(db)).toEqual([]);
   });
 });

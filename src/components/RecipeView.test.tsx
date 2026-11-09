@@ -11,6 +11,7 @@ const actions = vi.hoisted(() => ({
   rememberServings: vi.fn(),
   moveToFolder: vi.fn(),
   moveToNewFolder: vi.fn(),
+  setFavorite: vi.fn(),
 }));
 vi.mock("@/app/oppskrift/[id]/actions", () => actions);
 
@@ -22,6 +23,7 @@ beforeEach(() => {
   actions.rememberServings.mockReset().mockResolvedValue({ ok: true });
   actions.moveToFolder.mockReset().mockResolvedValue({ ok: true, folderName: null });
   actions.moveToNewFolder.mockReset().mockResolvedValue({ ok: true, folderName: "Ny" });
+  actions.setFavorite.mockReset().mockResolvedValue({ ok: true });
   HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
     this.setAttribute("open", "");
   };
@@ -46,6 +48,7 @@ const recipe: Recipe = {
   selectedServings: null,
   savedAt: null,
   folderId: null,
+  isFavorite: false,
   createdAt: "2026-11-09T10:00:00.000Z",
   updatedAt: "2026-11-09T10:00:00.000Z",
   ingredients: [
@@ -297,6 +300,29 @@ describe("RecipeView", () => {
       await user.type(within(dialog).getByRole("textbox"), "Ny");
       await user.click(within(dialog).getByRole("button", { name: "Lagre" }));
       expect(actions.moveToNewFolder).toHaveBeenCalledExactlyOnceWith(7, "Ny");
+    });
+
+    it("hjertet kaller setFavorite med id og eksplisitt verdi (Story 3.4)", async () => {
+      const user = userEvent.setup();
+      render(<RecipeView recipe={saved} folders={folders} />);
+      const heart = screen.getByRole("button", { name: "Favoritt: Pannekaker" });
+      expect(heart).toHaveAttribute("aria-pressed", "false");
+      await user.click(heart);
+      expect(actions.setFavorite).toHaveBeenCalledExactlyOnceWith(7, true);
+      expect(await screen.findByText("Lagt til i favoritter.")).toBeInTheDocument();
+    });
+
+    it("hjertet er fylt (aria-pressed) for en favoritt, og vises ikke for en ulagret oppskrift", () => {
+      const { unmount } = render(
+        <RecipeView recipe={{ ...saved, isFavorite: true }} folders={folders} />,
+      );
+      expect(screen.getByRole("button", { name: "Favoritt: Pannekaker" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      unmount();
+      render(<RecipeView recipe={recipe} folders={folders} />);
+      expect(screen.queryByRole("button", { name: /Favoritt/ })).not.toBeInTheDocument();
     });
 
     it("åpner på sist valgte antall, med mengdene skalert", () => {

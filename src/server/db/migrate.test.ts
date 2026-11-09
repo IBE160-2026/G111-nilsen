@@ -140,6 +140,7 @@ describe("migrasjon 0001 (Story 3.1: manuelle oppskrifter i samlingen)", () => {
       "0000_init",
       "0001_move_manual_recipes_to_collection",
       "0002_folders",
+      "0003_favorites",
     ]);
     expect(existsSync(join(migrationsFolder(), "meta", "0001_snapshot.json"))).toBe(true);
   });
@@ -206,7 +207,11 @@ describe("migrasjon 0002 (Story 3.3: mapper)", () => {
 
     expect(tables(db)).toContain("folders");
     expect(rows(db, "select * from recipes order by id")).toEqual(
-      (before.recipes as Record<string, unknown>[]).map((row) => ({ ...row, folder_id: null })),
+      (before.recipes as Record<string, unknown>[]).map((row) => ({
+        ...row,
+        folder_id: null,
+        is_favorite: 0,
+      })),
     );
     expect(rows(db, "select * from ingredient_lines order by id")).toEqual(before.lines);
     expect(rows(db, "select * from steps order by id")).toEqual(before.steps);
@@ -283,5 +288,139 @@ describe("migrasjon 0002 (Story 3.3: mapper)", () => {
     expect(() => db.$client.prepare("update recipes set folder_id = 99").run()).toThrow(
       /FOREIGN KEY/,
     );
+  });
+});
+
+describe("migrasjon 0003 (Story 3.4: favoritter)", () => {
+  type Db = ReturnType<typeof openDatabase>;
+
+  /** En migrasjonsmappe med bare 0000–0002, slik databasen så ut før favoritter. */
+  function folderBefore0003(): string {
+    const dir = mkdtempSync(join(tmpdir(), "recipemate-"));
+    dirs.push(dir);
+    mkdirSync(join(dir, "meta"));
+    const journal = JSON.parse(
+      readFileSync(join(migrationsFolder(), "meta", "_journal.json"), "utf8"),
+    ) as { entries: { tag: string }[] };
+    journal.entries = journal.entries.slice(0, 3);
+    for (const { tag } of journal.entries) {
+      cpSync(join(migrationsFolder(), `${tag}.sql`), join(dir, `${tag}.sql`));
+      cpSync(
+        join(migrationsFolder(), "meta", `${tag.slice(0, 4)}_snapshot.json`),
+        join(dir, "meta", `${tag.slice(0, 4)}_snapshot.json`),
+      );
+    }
+    writeFileSync(join(dir, "meta", "_journal.json"), JSON.stringify(journal));
+    return dir;
+  }
+
+  const rows = (db: Db, sql: string): unknown[] => db.$client.prepare(sql).all();
+
+  /** Database slik den var etter 0002: mappe, oppskrifter i og utenfor den, linjer og steg. */
+  function seededBefore0003(): Db {
+    const db = openDatabase(MEMORY_DATABASE, folderBefore0003());
+    expect(
+      rows(db, "pragma table_info(recipes)").map((c) => (c as { name: string }).name),
+    ).not.toContain("is_favorite");
+    db.$client
+      .prepare(
+        "insert into folders (name, name_key, created_at) values ('Hverdag', 'hverdag', 'f')",
+      )
+      .run();
+    const insertRecipe = db.$client.prepare(
+      "insert into recipes (title, source_url, saved_at, selected_servings, folder_id, created_at, updated_at) values (?, ?, ?, ?, ?, 'c', 'u')",
+    );
+    insertRecipe.run("Pannekaker", null, "lagret", 6, 1);
+    insertRecipe.run("Vafler", null, "lagret", null, null);
+    insertRecipe.run("Importert", "https://www.matprat.no/x", null, null, null);
+    db.$client
+      .prepare(
+        "insert into ingredient_lines (recipe_id, position, original_text, name, parseable) values (1, 0, '3 egg', 'egg', 1)",
+      )
+      .run();
+    db.$client
+      .prepare("insert into steps (recipe_id, position, text) values (1, 0, 'Visp.')")
+      .run();
+    return db;
+  }
+
+  it("bevarer alle data og gir is_favorite = 0 på eksisterende rader", () => {
+    const db = seededBefore0003();
+    const before = {
+      recipes: rows(db, "select * from recipes order by id") as Record<string, unknown>[],
+      folders: rows(db, "select * from folders"),
+      lines: rows(db, "select * from ingredient_lines"),
+      steps: rows(db, "select * from steps"),
+    };
+
+    runMigrations(db);
+
+    expect(rows(db, "select * from recipes order by id")).toEqual(
+      before.recipes.map((row) => ({ ...row, is_favorite: 0 })),
+    );
+    expect(rows(db, "select * from folders")).toEqual(before.folders);
+    expect(rows(db, "select * from ingredient_lines")).toEqual(before.lines);
+    expect(rows(db, "select * from steps")).toEqual(before.steps);
+    expect(rows(db, "select count(*) as n from recipes where is_favorite = 0")).toEqual([{ n: 3 }]);
+  });
+
+  it("kan kjøres på nytt uten feil og uten å endre data", () => {
+    const db = seededBefore0003();
+    runMigrations(db);
+    db.$client.prepare("update recipes set is_favorite = 1 where id = 2").run();
+    const once = rows(db, "select * from recipes order by id");
+    expect(() => runMigrations(db)).not.toThrow();
+    expect(() => runMigrations(db)).not.toThrow();
+    expect(rows(db, "select * from recipes order by id")).toEqual(once);
+  });
+
+  it("kolonnen er heltall, NOT NULL med standardverdi 0, og avviser NULL", () => {
+    const db = openDatabase(MEMORY_DATABASE);
+    const column = (
+      rows(db, "pragma table_info(recipes)") as {
+        name: string;
+        type: string;
+        notnull: number;
+        dflt_value: string | null;
+      }[]
+    ).find((c) => c.name === "is_favorite");
+    expect(column).toMatchObject({ type: "INTEGER", notnull: 1, dflt_value: "0" });
+    db.$client
+      .prepare("insert into recipes (title, created_at, updated_at) values ('A', 'x', 'x')")
+      .run();
+    expect(rows(db, "select is_favorite from recipes")).toEqual([{ is_favorite: 0 }]);
+    expect(() => db.$client.prepare("update recipes set is_favorite = NULL").run()).toThrow(
+      /NOT NULL/,
+    );
+  });
+
+  it("er en ren ALTER TABLE ADD COLUMN, i journalen med snapshot", () => {
+    const sql = readFileSync(join(migrationsFolder(), "0003_favorites.sql"), "utf8");
+    const statements = sql
+      .split("\n")
+      .filter((line) => !line.startsWith("--"))
+      .join("\n");
+    expect(statements.trim()).toMatch(
+      /^ALTER TABLE `recipes` ADD `is_favorite` integer DEFAULT 0 NOT NULL;$/,
+    );
+    expect(existsSync(join(migrationsFolder(), "meta", "0003_snapshot.json"))).toBe(true);
+  });
+
+  it("favoritt og mappe er uavhengige: mappen kan slettes uten å miste favoritten", () => {
+    const db = seededBefore0003();
+    runMigrations(db);
+    db.$client.prepare("update recipes set is_favorite = 1 where id = 1").run();
+    db.$client.prepare("delete from folders where id = 1").run();
+    expect(rows(db, "select id, folder_id, is_favorite from recipes where id = 1")).toEqual([
+      { id: 1, folder_id: null, is_favorite: 1 },
+    ]);
+  });
+
+  it("sletting av oppskriften fjerner favoritten med den", () => {
+    const db = seededBefore0003();
+    runMigrations(db);
+    db.$client.prepare("update recipes set is_favorite = 1 where id = 1").run();
+    db.$client.prepare("delete from recipes where id = 1").run();
+    expect(rows(db, "select count(*) as n from recipes where is_favorite = 1")).toEqual([{ n: 0 }]);
   });
 });

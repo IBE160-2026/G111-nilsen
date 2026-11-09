@@ -12,7 +12,7 @@ Repoet inneholder applikasjonen og dokumentasjon av utvikling, testing og kvalit
 
 **RecipeMate** er en matlagingsassistent for oppskrifter fra nettet. Du limer inn en lenke (eller skriver inn oppskriften selv), og appen viser oppskriften i et fast og ryddig format der du kan velge antall personer, slik at alle mengder regnes om med en gang. Oppskrifter kan lagres i en samling, i mapper og som favoritter.
 
-Status: Epic 1 («Les og skaler en oppskrift») er ferdig: Story 1.1–1.6, pluss Story 3.5 (redigering), Story 3.1 (Samlingen), Story 3.2 (lagre og slette) og Story 3.3 (mapper). Du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`), finne den igjen i Samlingen (`/samlingen`), se den på `/oppskrift/{id}`, velge antall personer og krysse av ingredienser og steg mens du lager maten. Oppskriften lagres i en lokal SQLite-database. Import fra lenke, favoritter og forslag kommer i senere epics.
+Status: Epic 1 («Les og skaler en oppskrift») er ferdig: Story 1.1–1.6, pluss Story 3.5 (redigering), Story 3.1 (Samlingen), Story 3.2 (lagre og slette), Story 3.3 (mapper) og Story 3.4 (favoritter). Du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`), finne den igjen i Samlingen (`/samlingen`), se den på `/oppskrift/{id}`, velge antall personer og krysse av ingredienser og steg mens du lager maten. Oppskriften lagres i en lokal SQLite-database. Import fra lenke og forslag kommer i senere epics.
 
 ## Hva Epic 1 (og Story 3.5) inneholder
 
@@ -91,12 +91,23 @@ På Mapper-siden (`/mapper`) kan du opprette, gi nytt navn til og slette mapper.
 - Koden ligger i `src/app/mapper/` (sider og Server Actions), `moveToFolder` og `moveToNewFolder` i `src/app/oppskrift/[id]/actions.ts`, `FolderManager`, `FolderRow`, `FolderNameForm`, `FolderDialog` og den felles `Dialog` i `src/components/`, `folder-service.ts`, `folder-repository.ts` og `src/lib/folder-name.ts`.
 - Testes med `npm test`: migrasjonen fra 0000 og 0001 med data, fremmednøkkelen (`SET NULL`), unik `name_key`, tilbakerulling når «Ny mappe» feiler midt i transaksjonen, navneregler, handlinger, dialoger, mapperaden og sidene.
 
+## Favoritter
+
+Hver oppskrift i samlingen har et hjerte. Trykk på hjertet for å markere eller avmarkere oppskriften som favoritt; oppskriften åpnes ikke. Hjertet står øverst til høyre på kortene i Samlingen, i mapper og i Favoritter, og først i lagre-linjen nederst på oppskriftssiden (ved siden av mappeknappen og «Slett»). Lagre-linjen sier «Lagt til i favoritter.» eller «Fjernet fra favoritter.» i tre sekunder. En oppskrift som ikke er lagret i samlingen har ikke hjerte; den må lagres først.
+
+- **Favoritter-siden** (`/favoritter`) viser favorittene som kort i samme rutenett som Samlingen, sist lagret først, med mappenavnet i meta. Uten favoritter vises en tom-tilstand med «Gå til samlingen». Avmarkerer du en favoritt her, forsvinner kortet, endringen kunngjøres for skjermleser, og fokus flyttes til overskriften i stedet for å gå tapt.
+- **Hjerteknappen** er en av/på-knapp (`aria-pressed`) med en fast etikett («Favoritt: Pannekaker»). Fylt hjerte betyr favoritt og omriss betyr ikke, så tilstanden bæres ikke av farge alene. Hjertet skifter med en gang og rulles tilbake med en melding hvis lagringen feiler. Trykker du flere ganger raskt, sendes kallene ett om gangen, og det siste trykket vinner. Handlingen sender alltid en eksplisitt verdi («sett til favoritt»), aldri «bytt», så to faner kan ikke snu feil vei.
+- Favoritt er uavhengig av mappe: å bytte eller slette en mappe, redigere oppskriften eller lagre den på nytt beholder favoritten. Å markere eller avmarkere endrer ikke `updatedAt`, så avkrysning og valgt antall står. Sletter du oppskriften, forsvinner favoritten med den. Egen favorittrekkefølge, søk og filter er ikke med.
+- **Datamodell:** kolonnen `recipes.is_favorite` (heltall, `NOT NULL DEFAULT 0`). Migrasjonen `drizzle/0003_favorites.sql` er en ren `ALTER TABLE ... ADD COLUMN`; eksisterende oppskrifter får 0, og den kan kjøres på nytt.
+- Koden ligger i `setFavorite` i `src/app/oppskrift/[id]/actions.ts`, `FavoriteButton`, `FavoriteFeedback`, `RecipeCard` og `RecipeActions` i `src/components/`, `src/app/favoritter/page.tsx`, `setFavorite` og `listFavorites` i `src/server/services/recipe-service.ts` og `setRecipeFavorite` og `listFavoriteRecipes` i `recipe-repository.ts`. Tekstene står i `favoriteMessages` i `src/lib/messages.ts`.
+- Testes med `npm test`: repository og tjeneste mot en ekte SQLite-database i minnet (idempotens, ulagret oppskrift, `updatedAt` uendret, mappe og redigering beholder favoritten), migrasjonen fra 0002 med data, handlingen, hjerteknappen (optimistisk visning, tilbakerulling, raske trykk i kø, `<Activity>`), kort, lagre-linje og Favoritter-siden (fokus og kunngjøring).
+
 ## Redigere en oppskrift
 
 På oppskriftssiden (`/oppskrift/{id}`) står «Rediger» ved tittelen. Den åpner `/oppskrift/{id}/rediger` med samme skjema som «Legg inn selv», forhåndsutfylt med tittel, antall personer, ingredienser (én per linje, slik de ble skrevet) og steg. «Lagre endringer» bruker samme validering og tolking som ny oppskrift, erstatter ingredienser og steg i én databasetransaksjon og sender deg tilbake til oppskriften. «Avbryt» går tilbake uten å endre noe.
 
 - Endres antall personer, nullstilles et tidligere valgt antall. Kilde og samlingsstatus røres ikke.
-- Redigering virker på alle oppskrifter og beholder mappen. Kilde, favoritt og seksjonsoverskrifter kan ikke redigeres ennå, og mappe velges fra lagre-linjen.
+- Redigering virker på alle oppskrifter og beholder mappen. Kilde og seksjonsoverskrifter kan ikke redigeres ennå; mappe og favoritt velges fra lagre-linjen, og redigering beholder begge.
 - Koden ligger i `src/app/oppskrift/[id]/rediger/` (side og Server Action), `updateManualRecipe` i `src/server/services/recipe-service.ts` og `updateRecipe` i `src/server/db/repositories/recipe-repository.ts`.
 - Testes med `npm test`: repository og tjeneste mot en ekte SQLite-database i minnet (blant annet tilbakerulling ved feil midt i oppdateringen), og skjema, side og handling med Testing Library.
 
@@ -138,7 +149,7 @@ npm run format:check # sjekk formatering uten å endre filer
 
 ### Hva testene dekker
 
-`npm test` kjører Vitest én gang og gir i dag 54 testfiler og 1001 tester. Ingen test bruker nettverket eller en ekte API-nøkkel.
+`npm test` kjører Vitest én gang og gir i dag 56 testfiler og 1107 tester. Ingen test bruker nettverket eller en ekte API-nøkkel.
 
 - **Domenet** (`src/domain/`): tolking av mengder og ingredienslinjer og skalering og formatering, med fasittabellen fra Epic 1 (400 g mel for 6 gir 600 g, «1 egg (ca.)», og så videre) som egne tester.
 - **Server** (`src/server/`): repositorier og tjenester mot en ekte SQLite-database i minnet, blant annet tilbakerulling ved feil, redigering, samlingen, lagring, sletting og opprydding, og datamigrasjonen (en database med bare den første migrasjonen oppgraderes).

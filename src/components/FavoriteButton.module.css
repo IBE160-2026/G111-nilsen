@@ -1,0 +1,53 @@
+/* Trykkflate på minst 44 × 44 (tap-target-min); selve ikonet er mindre. Fargen følger teksten (tokens). */
+.button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-accent);
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--color-surface-tint);
+}
+
+.button:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-accent);
+  outline-offset: 0;
+}
+
+.icon {
+  display: block;
+  pointer-events: none;
+}
+
+/* Feilmeldingen står i flyten under kortet (i lagre-linjen vises den i statusområdet). */
+.error {
+  margin: var(--space-1) 0 0;
+  color: var(--color-ink-primary);
+  font-size: var(--type-meta-size);
+}
+
+@media (forced-colors: active) {
+  /* Systemfargene tar over; fylt vs. omriss viser fortsatt tilstanden. */
+  .button {
+    color: ButtonText;
+  }
+
+  .button:hover {
+    background: transparent;
+    outline: var(--button-border-width) solid Highlight;
+  }
+
+  .button:focus-visible {
+    outline-color: Highlight;
+  }
+}

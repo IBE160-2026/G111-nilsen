@@ -195,6 +195,7 @@ describe("listRecipesInFolder", () => {
       sourceName: "Matprat",
       sourceUrl: null,
       savedAt: "2026-11-09T09:00:00.000Z",
+      isFavorite: false,
       folderName: "Hverdag",
     });
     expect(listRecipesInFolder(db, 999)).toEqual([]);

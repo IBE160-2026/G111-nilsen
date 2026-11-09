@@ -97,3 +97,37 @@
 - source_spec: `spec-3-3-mapper.md`
   summary: Gjentatt sletting eller flytting av en mappe som allerede er slettet (annen fane) revaliderer ikke, så raden eller valget står igjen til neste innlasting.
   evidence: Samme mønster som `removeRecipe` ved `not_found` i 3.2; brukeren får en melding. Tas hvis det oppstår.
+
+## Story 3.4: favoritter
+
+- source_spec: `spec-3-4-favoritter.md`
+  summary: Favoritter sorteres som Samlingen (sist lagret først); det finnes ingen «sist åpnet» ennå.
+  evidence: Spesifikasjonen ber om samme sortering, og ingen kolonne for sist åpnet finnes. Tas hvis egen rekkefølge eller «sist åpnet» innføres (utenfor Never-listen i 3.4).
+- source_spec: `spec-3-4-favoritter.md`
+  summary: To avmarkeringer på Favoritter innen 3 sekunder kunngjøres ikke begge for skjermleser (samme tekst i `role="status"` leses ikke på nytt).
+  evidence: `FavoriteFeedback` setter samme melding to ganger; teksten endres ikke. Kan løses med et teller-suffiks usynlig for syn, eller ved å tømme området mellom meldingene.
+- source_spec: `spec-3-4-favoritter.md`
+  summary: Fokus flyttes til overskriften når et avmarkert kort forsvinner, ikke til neste korts hjerte.
+  evidence: Valgt som enkleste stabile mål (tillatt i spesifikasjonen). Brukeren som vil fjerne flere favoritter må tabbe tilbake til listen etter hver fjerning.
+- source_spec: `spec-3-4-favoritter.md`
+  summary: Raske trykk på hjertet gir like mange serverkall som trykk (i kø), ikke ett kall for siste verdi.
+  evidence: Kallene sendes ett om gangen og er idempotente, så sluttilstanden er riktig, men et sammenslått kall (bare siste ønskede verdi) ville spart kall. Ikke gjort for å holde logikken enkel.
+- source_spec: `spec-3-4-favoritter.md`
+  summary: En feilmelding på et kort vises under kortet og lukkes ikke av seg selv; den forsvinner først ved neste trykk på hjertet.
+  evidence: Gjelder bare Samlingen, mapper og Favoritter (lagre-linjen bruker statusområdet). Greit for feil som er sjeldne (slettet i annen fane, databasefeil).
+- source_spec: `spec-3-4-favoritter.md`
+  summary: Å avmarkere en favoritt i en annen fane oppdaterer ikke åpne sider før de revalideres; hjertet kan vise gammel tilstand til neste navigasjon.
+  evidence: Ingen live-oppdatering; eksplisitt verdi i handlingen gjør at et trykk likevel ikke snur feil vei.
+- source_spec: `spec-3-4-favoritter.md`
+  summary: `forced-colors`, 200 % zoom, Safari og 1280 px er ikke målt for hjertet og kortene.
+  evidence: Bare CSS-reglene er testet som tekst (tokens, px, `forced-colors: active`). Sjekkes sammen med øvrige forced-colors-punkter fra 3.3 og 1.6.
+- source_spec: `spec-3-4-favoritter.md`
+  summary: Redigeringsskjemaet kan ikke endre favoritt; hjertet står bare i lagre-linjen og på kort.
+  evidence: Redigering beholder favoritten (`updateRecipe` rører ikke `is_favorite`), som i Story 3.5-notatet om kilde, mappe og favoritt.
+- source_spec: `spec-3-4-favoritter.md`
+  summary: Ekte-nettleser-test (Playwright) for hjerte og kort ved 360 px; test for «skjult Activity mens hjertet har fokus».
+  evidence: Layouttestene er jsdom og tekst-regex; målt manuelt i Chromium i kodegjennomgangen (ingen overlapp, ingen sidescroll ved 360, 768, 1280 px).
+- source_spec: `spec-3-4-favoritter.md`
+  summary: Hjertet i lagre-linjen har ingen ramme og ser løsrevet ut ved siden av rammede knapper.
+  evidence: Estetikk; vurderes etter Majas skjermbilder.
+

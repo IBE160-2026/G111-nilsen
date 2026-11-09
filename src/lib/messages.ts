@@ -202,3 +202,17 @@ export const folderDialogMessages = {
   save: "Lagre",
   cancel: "Avbryt",
 } as const;
+
+/** Tekster for favoritter (Story 3.4): hjerteknappen og siden Favoritter. */
+export const favoriteMessages = {
+  heading: "Favoritter",
+  loading: "Henter favorittene …",
+  loadFailed: "Kunne ikke hente favorittene",
+  emptyTitle: "Du har ingen favoritter ennå.",
+  emptyDescription: "Trykk på hjertet på en oppskrift for å gjøre den til favoritt.",
+  emptyAction: "Gå til samlingen",
+  /** Foran oppskriftens tittel i hjerteknappens tilgjengelige navn: «Favoritt: Pannekaker». */
+  labelPrefix: "Favoritt: ",
+  added: "Lagt til i favoritter.",
+  removed: "Fjernet fra favoritter.",
+} as const;

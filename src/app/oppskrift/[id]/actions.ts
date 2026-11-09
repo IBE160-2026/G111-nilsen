@@ -15,6 +15,7 @@ import { moveRecipeToFolder, moveRecipeToNewFolder } from "@/server/services/fol
 import {
   deleteRecipe,
   saveRecipeToCollection,
+  setFavorite as setFavoriteForRecipe,
   setSelectedServings,
 } from "@/server/services/recipe-service";
 
@@ -125,6 +126,30 @@ export async function moveToNewFolder(
     return { ok: true, folderName: result.value.folder.name };
   } catch (error) {
     console.error("Kunne ikke opprette mappen og legge oppskriften i den", error);
+    return actionFailure(undefined);
+  }
+}
+
+/**
+ * Markerer eller avmarkerer en lagret oppskrift som favoritt (Story 3.4). Verdien er
+ * eksplisitt, ikke «bytt», så gjentatte trykk og to faner ikke snur feil vei. Alle sider
+ * revalideres, siden hjertet står på kort, i Favoritter og i lagre-linjen. Feil gir en norsk
+ * melding og endrer ingenting.
+ */
+export async function setFavorite(recipeId: number, isFavorite: boolean): Promise<ActionResult> {
+  if (!idSchema.safeParse(recipeId).success) return actionFailure("not_found");
+  if (!z.boolean().safeParse(isFavorite).success) return actionFailure("validation");
+  try {
+    const result = setFavoriteForRecipe(recipeId, isFavorite);
+    if (!result.ok) {
+      // Oppskriften er borte (for eksempel slettet i en annen fane): oppdater sidene så kortet forsvinner.
+      if (result.error.kind === "not_found") revalidatePath("/", "layout");
+      return actionFailure(result.error.kind);
+    }
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (error) {
+    console.error("Kunne ikke endre favorittmarkeringen", error);
     return actionFailure(undefined);
   }
 }
