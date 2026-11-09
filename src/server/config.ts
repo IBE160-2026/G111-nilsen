@@ -10,6 +10,8 @@ export type Config = {
   llmModel: string | undefined;
   /** Sti til SQLite-fila. */
   databasePath: string;
+  /** True i produksjonsbygg (`NODE_ENV=production`). */
+  isProduction: boolean;
 };
 
 export const DEFAULT_DATABASE_PATH = "data/recipemate.db";
@@ -26,6 +28,7 @@ export function loadConfig(env: Env = process.env): Config {
     llmApiKey: optional(env.LLM_API_KEY),
     llmModel: optional(env.LLM_MODEL),
     databasePath: optional(env.DATABASE_PATH) ?? DEFAULT_DATABASE_PATH,
+    isProduction: env.NODE_ENV === "production",
   };
 }
 

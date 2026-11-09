@@ -110,6 +110,7 @@ npm run db:generate  # lag en ny migrasjon etter endring i src/server/db/schema.
 ```
 
 - Vil du ha fila et annet sted, sett `DATABASE_PATH` i `.env.local` (se `.env.example`). Både appen og `npm run db:migrate` leser `.env` og `.env.local` på samme måte (skriptet bruker `@next/env`).
+- Nye migrasjoner (for eksempel etter en ny story) kjøres automatisk også mens `npm run dev` går. Får du likevel «no such table», stopp dev-serveren og start den på nytt (se [issue 008](issues/008-dev-server-mangler-nye-migrasjoner.md)).
 - Vil du starte med tom database, stopp appen og slett mappen `data/`.
 - Skjemaet ligger i `src/server/db/schema.ts`, og migrasjonene i `drizzle/` (de er med i git).
 
@@ -137,7 +138,7 @@ npm run format:check # sjekk formatering uten å endre filer
 
 ### Hva testene dekker
 
-`npm test` kjører Vitest én gang og gir i dag 54 testfiler og 999 tester. Ingen test bruker nettverket eller en ekte API-nøkkel.
+`npm test` kjører Vitest én gang og gir i dag 54 testfiler og 1001 tester. Ingen test bruker nettverket eller en ekte API-nøkkel.
 
 - **Domenet** (`src/domain/`): tolking av mengder og ingredienslinjer og skalering og formatering, med fasittabellen fra Epic 1 (400 g mel for 6 gir 600 g, «1 egg (ca.)», og så videre) som egne tester.
 - **Server** (`src/server/`): repositorier og tjenester mot en ekte SQLite-database i minnet, blant annet tilbakerulling ved feil, redigering, samlingen, lagring, sletting og opprydding, og datamigrasjonen (en database med bare den første migrasjonen oppgraderes).

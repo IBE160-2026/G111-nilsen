@@ -20,7 +20,14 @@ describe("loadConfig", () => {
       llmApiKey: "test-key",
       llmModel: "test-model",
       databasePath: "/tmp/test.db",
+      isProduction: false,
     });
+  });
+
+  it("vet om den kjører i produksjon", () => {
+    expect(loadConfig({ NODE_ENV: "production" }).isProduction).toBe(true);
+    expect(loadConfig({ NODE_ENV: "development" }).isProduction).toBe(false);
+    expect(loadConfig({}).isProduction).toBe(false);
   });
 
   it("behandler tomme verdier som manglende", () => {
