@@ -46,3 +46,5 @@
 - [ ] 2026-11-09 [story-3-4](984-2026-11-09-20-55-00-story-3-4-favoritter.md) — test favoritter i nettleseren på Macen (360 og 1280 px, lys og mørk): hjerte på kort og i lagre-linjen, avmarkering i Favoritter (kort forsvinner, fokus, melding), tom-tilstand, tilbake fra oppskrift, 200 % zoom
 - [ ] 2026-11-09 [story-3-4](984-2026-11-09-20-55-00-story-3-4-favoritter.md) — utsatt: feilmelding på kort, ekte-nettleser-test for hjerte, hjerte uten ramme i lagre-linjen, kall i kø (deferred-work.md)
 - [ ] 2026-11-09 [story-3-4](984-2026-11-09-20-55-00-story-3-4-favoritter.md) — avgjør om adressen /samlingen skal bli /oppskrifter (menyen heter nå Oppskrifter)
+- [ ] 2026-11-09 [story-2-1](983-2026-11-09-21-35-00-story-2-1-les-oppskriftsdata.md) — kjør npm test på Macen og bekreft grønn suite (ytelsestestene tar ca. 20 s)
+- [ ] 2026-11-09 [story-2-1](983-2026-11-09-21-35-00-story-2-1-les-oppskriftsdata.md) — utsatt: tomt skall som første Recipe, Result/AppError i domenet, servings null i 2.2/2.4 (deferred-work.md)
