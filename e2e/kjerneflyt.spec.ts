@@ -191,6 +191,14 @@ test("UJ-1: importer, skaler til ett flere, lagre i mappe og gjør til favoritt"
     "aria-pressed",
     "true",
   );
+  // Notater og «sist laget» (Story 6.3).
+  await page.getByRole("button", { name: "Laget i dag" }).click();
+  await expect(page.getByText(/laget 1 gang/)).toBeVisible();
+  await field(page, "Dine notater").fill("Stek litt kortere.");
+  await page.getByRole("button", { name: "Lagre notat" }).click();
+  await expect(page.getByText("Notatet er lagret.")).toBeVisible();
+  await page.reload();
+  await expect(field(page, "Dine notater")).toHaveValue("Stek litt kortere.");
 });
 
 test("UJ-2: forslag tas i bruk og huskes; oversiktsside gir melding", async ({

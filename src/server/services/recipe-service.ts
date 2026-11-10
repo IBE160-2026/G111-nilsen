@@ -21,9 +21,11 @@ import {
   listFavoriteRecipes,
   listSavedIngredientNames,
   listSavedRecipes,
+  markCooked,
   markRecipeSaved,
   setRecipeFavorite,
   updateRecipe,
+  updateNotes,
   updateOriginalServings,
   updateSelectedServings,
   type NewIngredientLine,
@@ -318,4 +320,40 @@ export function canAccessRecipe(viewer: number | null, id: number, db: Db = getD
 export function getRecipeFor(viewer: number | null, id: number, db: Db = getDb()): Result<Recipe> {
   if (!canAccessRecipe(viewer, id, db)) return err(appError("not_found"));
   return getRecipe(id, db);
+}
+
+/** Hvor lange notatene kan være (Story 6.3). */
+export const NOTES_MAX_LENGTH = 2000;
+
+/**
+ * Lagrer notatene på en lagret oppskrift (Story 6.3). Teksten trimmes; tom tekst fjerner
+ * notatene. Over 2000 tegn gir `validation` (felt `notes`). Ukjent eller ulagret oppskrift gir
+ * `not_found`.
+ */
+export function setRecipeNotes(
+  id: number,
+  notes: string,
+  db: Db = getDb(),
+): Result<{ notes: string | null }> {
+  if (!isRecipeId(id)) return err(appError("not_found"));
+  if (typeof notes !== "string") return err(appError("validation", "notes"));
+  const clean = notes.replace(/\r\n?/g, "\n").trim();
+  if (clean.length > NOTES_MAX_LENGTH) return err(appError("validation", "notes"));
+  const value = clean === "" ? null : clean;
+  return updateNotes(db, id, value) ? ok({ notes: value }) : err(appError("not_found"));
+}
+
+/**
+ * «Laget i dag» (Story 6.3): setter sist laget til `now` og øker antallet. Ukjent eller ulagret
+ * oppskrift gir `not_found`.
+ */
+export function markRecipeCooked(
+  id: number,
+  db: Db = getDb(),
+  now: () => Date = () => new Date(),
+): Result<{ lastCookedAt: string; cookedCount: number }> {
+  if (!isRecipeId(id)) return err(appError("not_found"));
+  const at = now().toISOString();
+  const count = markCooked(db, id, at);
+  return count === null ? err(appError("not_found")) : ok({ lastCookedAt: at, cookedCount: count });
 }

@@ -64,6 +64,9 @@ describe("getDb", () => {
       "delete from __drizzle_migrations where created_at > (select min(created_at) from __drizzle_migrations)",
     ); // bare 0000 er igjen
     db.$client.exec("drop table sessions");
+    db.$client.exec("alter table recipes drop column cooked_count");
+    db.$client.exec("alter table recipes drop column last_cooked_at");
+    db.$client.exec("alter table recipes drop column notes");
     db.$client.exec("alter table recipes drop column total_minutes");
     db.$client.exec("alter table recipes drop column user_id");
     db.$client.exec("drop table users");

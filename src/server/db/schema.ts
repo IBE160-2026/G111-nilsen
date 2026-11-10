@@ -76,6 +76,12 @@ export const recipes = sqliteTable("recipes", {
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
   /** Hvor lang tid oppskriften tar, i minutter (Story 6.2); `null` = ikke oppgitt. */
   totalMinutes: integer("total_minutes"),
+  /** Brukerens egne notater (Story 6.3); `null` = ingen. */
+  notes: text("notes"),
+  /** Sist brukeren trykket «Laget i dag» (Story 6.3), ISO-tid; `null` = aldri. */
+  lastCookedAt: text("last_cooked_at"),
+  /** Hvor mange ganger oppskriften er laget (Story 6.3). */
+  cookedCount: integer("cooked_count").notNull().default(0),
 });
 
 export const ingredientLines = sqliteTable(

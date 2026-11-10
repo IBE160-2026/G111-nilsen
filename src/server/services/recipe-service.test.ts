@@ -5,6 +5,8 @@ import { insertRecipe } from "../db/repositories/recipe-repository";
 import {
   canAccessRecipe,
   createManualRecipe,
+  markRecipeCooked,
+  setRecipeNotes,
   listShoppingRecipes,
   getRecipeFor,
   deleteRecipe,
@@ -785,5 +787,60 @@ describe("tid i minutter (Story 6.2)", () => {
       });
     }
     expect(db.$client.prepare("select count(*) as n from recipes").get()).toEqual({ n: 0 });
+  });
+});
+
+describe("notater og sist laget (Story 6.3)", () => {
+  function saved(db: ReturnType<typeof createTestDb>): number {
+    const created = createManualRecipe(TEST_USER_ID, input, db);
+    if (!created.ok) throw new Error("feil");
+    return created.value.id;
+  }
+
+  it("lagrer notater trimmet, fjerner dem med tom tekst, og rører ikke updatedAt", () => {
+    const db = createTestDb();
+    const id = saved(db);
+    const before = getRecipe(id, db);
+    expect(setRecipeNotes(id, "  Halv sukker.\r\nStek kortere.  ", db)).toEqual({
+      ok: true,
+      value: { notes: "Halv sukker.\nStek kortere." },
+    });
+    const after = getRecipe(id, db);
+    expect(after.ok && after.value.notes).toBe("Halv sukker.\nStek kortere.");
+    expect(after.ok && before.ok && after.value.updatedAt).toBe(
+      before.ok && before.value.updatedAt,
+    );
+    expect(setRecipeNotes(id, "   ", db)).toEqual({ ok: true, value: { notes: null } });
+  });
+
+  it("for lange notater, ulagret og ukjent oppskrift avvises", () => {
+    const db = createTestDb();
+    const id = saved(db);
+    expect(setRecipeNotes(id, "x".repeat(2001), db)).toEqual({
+      ok: false,
+      error: { kind: "validation", detail: "notes" },
+    });
+    expect(setRecipeNotes(id, "x".repeat(2000), db).ok).toBe(true);
+    db.$client.prepare("update recipes set saved_at = null").run();
+    expect(setRecipeNotes(id, "a", db)).toMatchObject({ ok: false, error: { kind: "not_found" } });
+    expect(setRecipeNotes(999, "a", db)).toMatchObject({ ok: false, error: { kind: "not_found" } });
+  });
+
+  it("«Laget i dag» setter dato og teller opp", () => {
+    const db = createTestDb();
+    const id = saved(db);
+    const day1 = () => new Date("2026-11-09T18:00:00.000Z");
+    const day2 = () => new Date("2026-11-10T18:00:00.000Z");
+    expect(markRecipeCooked(id, db, day1)).toEqual({
+      ok: true,
+      value: { lastCookedAt: "2026-11-09T18:00:00.000Z", cookedCount: 1 },
+    });
+    expect(markRecipeCooked(id, db, day2)).toMatchObject({ ok: true, value: { cookedCount: 2 } });
+    const recipe = getRecipe(id, db);
+    expect(recipe.ok && [recipe.value.lastCookedAt, recipe.value.cookedCount]).toEqual([
+      "2026-11-10T18:00:00.000Z",
+      2,
+    ]);
+    expect(markRecipeCooked(999, db)).toMatchObject({ ok: false, error: { kind: "not_found" } });
   });
 });

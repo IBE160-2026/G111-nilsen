@@ -275,6 +275,9 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
     sourceName: row.sourceName,
     originalServings: row.originalServings,
     totalMinutes: row.totalMinutes,
+    notes: row.notes,
+    lastCookedAt: row.lastCookedAt,
+    cookedCount: row.cookedCount,
     selectedServings: row.selectedServings,
     savedAt: row.savedAt,
     folderId: row.folderId,
@@ -473,4 +476,32 @@ export function deleteStaleUnsavedRecipes(db: Db, cutoff: string): number {
 /** Setter tiden (Story 6.2). `updatedAt` røres ikke. Returnerer `false` når id-en ikke finnes. */
 export function updateTotalMinutes(db: Db, id: number, totalMinutes: number | null): boolean {
   return db.update(recipes).set({ totalMinutes }).where(eq(recipes.id, id)).run().changes > 0;
+}
+
+/**
+ * Lagrer notatene (Story 6.3) for en lagret oppskrift. `updatedAt` røres ikke, så avkrysningen
+ * på siden består. Returnerer `false` når oppskriften ikke finnes eller ikke er lagret.
+ */
+export function updateNotes(db: Db, id: number, notes: string | null): boolean {
+  return (
+    db
+      .update(recipes)
+      .set({ notes })
+      .where(and(eq(recipes.id, id), isNotNull(recipes.savedAt)))
+      .run().changes > 0
+  );
+}
+
+/**
+ * «Laget i dag» (Story 6.3): setter sist laget og øker antallet med én, for en lagret oppskrift.
+ * Returnerer det nye antallet, eller `null` når oppskriften ikke finnes eller ikke er lagret.
+ */
+export function markCooked(db: Db, id: number, at: string): number | null {
+  const row = db
+    .update(recipes)
+    .set({ lastCookedAt: at, cookedCount: sql`${recipes.cookedCount} + 1` })
+    .where(and(eq(recipes.id, id), isNotNull(recipes.savedAt)))
+    .returning({ cookedCount: recipes.cookedCount })
+    .get();
+  return row?.cookedCount ?? null;
 }

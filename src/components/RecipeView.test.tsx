@@ -17,6 +17,8 @@ const actions = vi.hoisted(() => ({
   applySuggestion: vi.fn(),
   removeSuggestion: vi.fn(),
   fetchTimeFromSource: vi.fn(),
+  saveNotes: vi.fn(),
+  markCookedToday: vi.fn(),
 }));
 vi.mock("@/app/oppskrift/[id]/actions", () => actions);
 
@@ -545,5 +547,20 @@ describe("RecipeView: tid (Story 6.2)", () => {
       <RecipeView recipe={{ ...recipe, sourceUrl: null, totalMinutes: null }} folders={folders} />,
     );
     expect(screen.queryByRole("button", { name: "Hent tid fra kilden" })).not.toBeInTheDocument();
+  });
+});
+
+describe("RecipeView: notater (Story 6.3)", () => {
+  it("vises bare for lagrede oppskrifter", () => {
+    const { unmount } = render(
+      <RecipeView
+        recipe={{ ...recipe, savedAt: "2026-11-09T10:00:00.000Z", notes: "Halv sukker." }}
+        folders={folders}
+      />,
+    );
+    expect(screen.getByLabelText("Dine notater")).toHaveValue("Halv sukker.");
+    unmount();
+    render(<RecipeView recipe={{ ...recipe, savedAt: null }} folders={folders} />);
+    expect(screen.queryByRole("heading", { name: "Notater" })).not.toBeInTheDocument();
   });
 });

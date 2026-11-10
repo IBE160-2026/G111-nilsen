@@ -1,0 +1,94 @@
+// @vitest-environment jsdom
+import { cleanup, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import RecipeNotes, { formatCookedDate } from "./RecipeNotes";
+
+afterEach(cleanup);
+
+function setup(overrides: Partial<React.ComponentProps<typeof RecipeNotes>> = {}) {
+  const props = {
+    notes: null,
+    lastCookedAt: null,
+    cookedCount: 0,
+    onSaveNotes: vi.fn(async () => ({ ok: true as const })),
+    onCooked: vi.fn(async () => ({
+      ok: true as const,
+      lastCookedAt: "2026-11-10T18:00:00.000Z",
+      cookedCount: 1,
+    })),
+    ...overrides,
+  };
+  render(<RecipeNotes {...props} />);
+  return props;
+}
+
+describe("RecipeNotes", () => {
+  it("viser notatene og sist laget", () => {
+    setup({ notes: "Halv sukker.", lastCookedAt: "2026-11-03T10:00:00.000Z", cookedCount: 4 });
+    expect(screen.getByRole("heading", { name: "Notater" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Dine notater")).toHaveValue("Halv sukker.");
+    expect(screen.getByText("Sist laget 3. november 2026 · laget 4 ganger")).toBeInTheDocument();
+  });
+
+  it("uten notater og aldri laget", () => {
+    setup();
+    expect(screen.getByLabelText("Dine notater")).toHaveValue("");
+    expect(screen.getByText("Ikke laget ennå.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Lagre notat" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+  });
+
+  it("«Lagre notat» sender teksten og melder fra", async () => {
+    const user = userEvent.setup();
+    const props = setup();
+    await user.type(screen.getByLabelText("Dine notater"), "Stek kortere.");
+    await user.click(screen.getByRole("button", { name: "Lagre notat" }));
+    expect(props.onSaveNotes).toHaveBeenCalledWith("Stek kortere.");
+    expect(await screen.findByText("Notatet er lagret.")).toBeInTheDocument();
+  });
+
+  it("viser feilen under feltet og beholder teksten", async () => {
+    const user = userEvent.setup();
+    setup({
+      onSaveNotes: vi.fn(async () => ({
+        ok: false as const,
+        message: "Notatene kan være maks 2000 tegn. Gjør dem kortere.",
+      })),
+    });
+    await user.type(screen.getByLabelText("Dine notater"), "Lang tekst");
+    await user.click(screen.getByRole("button", { name: "Lagre notat" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("maks 2000 tegn");
+    expect(screen.getByLabelText("Dine notater")).toHaveValue("Lang tekst");
+    expect(screen.getByLabelText("Dine notater")).toHaveAttribute("aria-invalid", "true");
+  });
+
+  it("«Laget i dag» oppdaterer dato og antall", async () => {
+    const user = userEvent.setup();
+    const props = setup();
+    await user.click(screen.getByRole("button", { name: "Laget i dag" }));
+    expect(props.onCooked).toHaveBeenCalled();
+    expect(
+      await screen.findByText("Sist laget 10. november 2026 · laget 1 gang"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Merket som laget i dag.")).toBeInTheDocument();
+  });
+
+  it("feil fra serveren eller nettet vises og logges", async () => {
+    const user = userEvent.setup();
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    setup({ onCooked: vi.fn(async () => Promise.reject(new Error("nett"))) });
+    await user.click(screen.getByRole("button", { name: "Laget i dag" }));
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(log).toHaveBeenCalled();
+    log.mockRestore();
+  });
+});
+
+describe("formatCookedDate", () => {
+  it("bruker norsk tid, også nær midnatt", () => {
+    expect(formatCookedDate("2026-11-10T23:30:00.000Z")).toBe("11. november 2026");
+  });
+});

@@ -4,12 +4,14 @@ import {
   applySuggestion,
   changeOriginalServings,
   fetchTimeFromSource,
+  markCookedToday,
   moveToFolder,
   moveToNewFolder,
   removeRecipe,
   removeSuggestion,
   rememberServings,
   requestSuggestions,
+  saveNotes,
   saveRecipe,
   setFavorite,
 } from "@/app/oppskrift/[id]/actions";
@@ -19,6 +21,7 @@ import { isHttpUrl } from "@/lib/source-url";
 import CookingMode from "./CookingMode";
 import FetchTimeButton from "./FetchTimeButton";
 import IngredientList from "./IngredientList";
+import RecipeNotes from "./RecipeNotes";
 import RecipeTime from "./RecipeTime";
 import { loginHref } from "./LoginRequired";
 import RecipeActions from "./RecipeActions";
@@ -122,6 +125,20 @@ export default function RecipeView({
                 key={`steg-${recipe.id}-${recipe.updatedAt}`}
                 steps={shown.steps}
                 tips={shown.tips}
+              />
+            </div>
+          ) : null}
+
+          {/* Notater og «sist laget» bare for lagrede oppskrifter (Story 6.3). */}
+          {recipe.savedAt !== null ? (
+            <div className={styles.notes}>
+              <RecipeNotes
+                key={`notater-${recipe.id}`}
+                notes={recipe.notes ?? null}
+                lastCookedAt={recipe.lastCookedAt ?? null}
+                cookedCount={recipe.cookedCount ?? 0}
+                onSaveNotes={saveNotes.bind(null, recipe.id)}
+                onCooked={markCookedToday.bind(null, recipe.id)}
               />
             </div>
           ) : null}

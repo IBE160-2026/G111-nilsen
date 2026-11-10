@@ -218,6 +218,23 @@ export const unitMessages = {
   hint: "Kopper, unser og pund regnes om til norske mål. Mel, sukker, smør, melk og andre vanlige varer regnes mellom dl og gram (ca.).",
 } as const;
 
+/** Notater og «sist laget» (Story 6.3). */
+export const notesMessages = {
+  heading: "Notater",
+  label: "Dine notater",
+  hint: "Bare for deg, for eksempel «brukte halv sukker» eller «stek 2 minutter kortere».",
+  save: "Lagre notat",
+  saving: "Lagrer …",
+  saved: "Notatet er lagret.",
+  tooLong: "Notatene kan være maks 2000 tegn. Gjør dem kortere.",
+  cooked: "Laget i dag",
+  cookedSaving: "Lagrer …",
+  cookedDone: "Merket som laget i dag.",
+  never: "Ikke laget ennå.",
+  lastCooked: (date: string, count: number) =>
+    `Sist laget ${date} · ${count === 1 ? "laget 1 gang" : `laget ${count} ganger`}`,
+} as const;
+
 /** Kontoer og innlogging (Story 5.13). */
 export const accountMessages = {
   login: "Logg inn",

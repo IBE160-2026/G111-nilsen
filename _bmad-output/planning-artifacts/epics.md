@@ -793,7 +793,7 @@ slik at oppskriftene mine lagres på kontoen min.
 
 ## Epic 6: Videre utvikling
 
-Lagt til 2026-11-10 (PRD §4.7). Rekkefølgen under er planen; hver story får spec (`spec-6-N-*.md`) før den bygges, og akseptansekriteriene utdypes der.
+Lagt til 2026-11-10 (PRD §4.7). Rekkefølgen under er planen (egen nettadresse tas til slutt, etter sikkerhetstiltakene); hver story får spec (`spec-6-N-*.md`) før den bygges, og akseptansekriteriene utdypes der.
 
 | Story | Innhold | Krav |
 |---|---|---|
@@ -818,6 +818,8 @@ Lagt til 2026-11-10 (PRD §4.7). Rekkefølgen under er planen; hver story får s
 | 6.19 | Delt handleliste eller samling i husstanden | FR-38 |
 | 6.20 | Offentlig lenke til en oppskrift (bare lesing) | FR-38 |
 | 6.21 | Glemt passord | FR-39 |
+| 6.22 | Sikkerhet før publisering: grense på innloggingsforsøk, importer uten innlogging kan ikke endres av andre | FR-27, NFR-4 |
+| 6.23 | Egen nettadresse: midlertidig lenke (tunnel) og fast hosting med lagringsdisk | NFR-1 |
 
 ### Story 6.1: Forslag i ingredienslisten
 
@@ -847,4 +849,20 @@ slik at jeg kan velge noe som passer tiden jeg har.
 **Gitt** «Legg inn selv» eller «Rediger»
 **Når** jeg fyller inn tid i minutter (valgfritt)
 **Så** lagres og vises den på samme måte; tomt felt betyr ingen tid
+
+### Story 6.3: Notater og sist laget
+
+Som Ida,
+vil jeg skrive egne notater på en oppskrift og se når jeg sist laget den,
+slik at jeg husker justeringene mine og hva vi har spist nylig.
+
+**Akseptansekriterier:**
+
+**Gitt** en lagret oppskrift
+**Når** jeg skriver i «Dine notater» og trykker «Lagre notat»
+**Så** lagres notatene (maks 2000 tegn) og står der neste gang (FR-30)
+
+**Gitt** en lagret oppskrift
+**Når** jeg trykker «Laget i dag»
+**Så** står «Sist laget <dato> · laget N ganger», og antallet kan brukes til sortering senere (6.9)
 

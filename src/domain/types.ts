@@ -90,6 +90,12 @@ export type Recipe = {
   steps: Step[];
   /** Hvor lang tid oppskriften tar, i minutter (Story 6.2); `null` eller utelatt = ikke oppgitt. */
   totalMinutes?: number | null;
+  /** Egne notater (Story 6.3); `null` eller utelatt = ingen. */
+  notes?: string | null;
+  /** Sist laget, ISO-tid (Story 6.3); `null` eller utelatt = aldri. */
+  lastCookedAt?: string | null;
+  /** Antall ganger laget (Story 6.3). */
+  cookedCount?: number;
   /** Forslag brukeren har tatt i bruk (Story 4.2), eldste først. Endrer aldri ingredienser eller steg. */
   suggestions: AppliedSuggestion[];
 };

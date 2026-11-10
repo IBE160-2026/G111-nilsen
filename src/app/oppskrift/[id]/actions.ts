@@ -11,7 +11,7 @@ import {
   type SuggestionsActionResult,
 } from "@/app/_shared/action-result";
 import { folderFailure, folderIdSchema, parseFolderName } from "@/app/_shared/folder-action";
-import { recipeTimeMessages } from "@/lib/messages";
+import { notesMessages, recipeTimeMessages } from "@/lib/messages";
 import { parseRecipeId } from "@/lib/recipe-id";
 import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import { moveRecipeToFolder, moveRecipeToNewFolder } from "@/server/services/folder-service";
@@ -20,6 +20,8 @@ import { currentUserId } from "@/server/session";
 import {
   canAccessRecipe,
   deleteRecipe,
+  markRecipeCooked,
+  setRecipeNotes,
   saveRecipeToCollection,
   setFavorite as setFavoriteForRecipe,
   setOriginalServings,
@@ -298,4 +300,45 @@ export async function fetchTimeFromSource(id: number): Promise<ActionResult> {
   revalidatePath(`/oppskrift/${id}`);
   revalidatePath("/oppskrifter");
   return { ok: true };
+}
+
+/**
+ * Lagrer notatene på en lagret oppskrift (Story 6.3). For lang tekst gir egen melding. Siden
+ * revalideres ikke (notatene står i feltet allerede), så avkrysning og valgt antall består.
+ */
+export async function saveNotes(id: number, notes: string): Promise<ActionResult> {
+  if (!idSchema.safeParse(id).success) return actionFailure("not_found");
+  if (typeof notes !== "string") return actionFailure("validation");
+  try {
+    if (!(await mayChange(id))) return actionFailure("not_found");
+    const result = setRecipeNotes(id, notes);
+    if (!result.ok) {
+      return result.error.detail === "notes"
+        ? { ok: false, message: notesMessages.tooLong }
+        : actionFailure(result.error.kind);
+    }
+    return { ok: true };
+  } catch (error) {
+    console.error("Kunne ikke lagre notatene", error);
+    return actionFailure("unknown");
+  }
+}
+
+/** «Laget i dag» (Story 6.3). Svarer med ny dato og antall, så komponenten kan vise dem. */
+export async function markCookedToday(
+  id: number,
+): Promise<
+  { ok: true; lastCookedAt: string; cookedCount: number } | { ok: false; message: string }
+> {
+  if (!idSchema.safeParse(id).success) return actionFailure("not_found");
+  try {
+    if (!(await mayChange(id))) return actionFailure("not_found");
+    const result = markRecipeCooked(id);
+    if (!result.ok) return actionFailure(result.error.kind);
+    revalidatePath("/oppskrifter");
+    return { ok: true, ...result.value };
+  } catch (error) {
+    console.error("Kunne ikke merke oppskriften som laget", error);
+    return actionFailure("unknown");
+  }
 }

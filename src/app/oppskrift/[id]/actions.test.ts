@@ -45,6 +45,8 @@ const {
   saveRecipe,
   setFavorite,
   fetchTimeFromSource,
+  saveNotes,
+  markCookedToday,
 } = await import("./actions");
 
 const failure = (kind: string | undefined) => {
@@ -605,5 +607,36 @@ describe("fetchTimeFromSource (Story 6.2)", () => {
       message: expect.stringContaining("Vi fant ikke oppskriften"),
     });
     expect(await fetchTimeFromSource(0)).toMatchObject({ ok: false });
+  });
+});
+
+describe("saveNotes og markCookedToday (Story 6.3)", () => {
+  afterEach(() => {
+    session.userId = TEST_USER_ID;
+  });
+
+  it("lagrer notater og merker som laget for eieren", async () => {
+    expect(await saveNotes(id, "Halv sukker.")).toEqual({ ok: true });
+    expect(stored()).toMatchObject({ notes: "Halv sukker." });
+    expect(await markCookedToday(id)).toMatchObject({ ok: true, cookedCount: 1 });
+    expect(await saveNotes(id, "x".repeat(2001))).toEqual({
+      ok: false,
+      message: "Notatene kan være maks 2000 tegn. Gjør dem kortere.",
+    });
+  });
+
+  it("en annens oppskrift og ugyldig input avvises", async () => {
+    session.userId = Number(
+      state
+        .db!.$client.prepare(
+          "insert into users (email, password_hash, created_at) values ('c@c.no', 'x', 'x')",
+        )
+        .run().lastInsertRowid,
+    );
+    expect(await saveNotes(id, "a")).toMatchObject({ ok: false });
+    expect(await markCookedToday(id)).toMatchObject({ ok: false });
+    session.userId = TEST_USER_ID;
+    expect(await saveNotes(id, 5 as unknown as string)).toMatchObject({ ok: false });
+    expect(await markCookedToday(0)).toMatchObject({ ok: false });
   });
 });
