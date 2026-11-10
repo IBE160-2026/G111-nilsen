@@ -185,7 +185,7 @@ describe("CookingMode", () => {
     expect(within(dialog()).getByText("Visp sammen mel og melk.")).toBeInTheDocument();
   });
 
-  it("følger metriske mål valgt på siden", async () => {
+  it("følger målene valgt på siden", async () => {
     const user = userEvent.setup();
     const us: RecipeLine[] = ["2 cups flour", "1 tbsp salt"].map((text, i) => ({
       ...parseLine(text),
@@ -209,10 +209,16 @@ describe("CookingMode", () => {
     expect(within(dialog()).getByText("2 cup flour")).toBeInTheDocument();
     await user.keyboard("{Escape}");
     dialog().dispatchEvent(new Event("cancel", { cancelable: true }));
-    await user.click(screen.getByLabelText(/Vis i metriske mål/));
+    await user.click(screen.getByRole("radio", { name: "Volum (dl)" }));
     await user.click(openButton());
     expect(within(dialog()).getByText("4,8 dl flour (ca.)")).toBeInTheDocument();
     expect(within(dialog()).getByText("1 ss salt")).toBeInTheDocument();
+    await user.keyboard("{Escape}");
+    dialog().dispatchEvent(new Event("cancel", { cancelable: true }));
+    await user.click(screen.getByRole("radio", { name: "Vekt (gram)" }));
+    await user.click(openButton());
+    expect(within(dialog()).getByText("290 g flour (ca.)")).toBeInTheDocument();
+    expect(within(dialog()).getByText("18 g salt (ca.)")).toBeInTheDocument();
   });
 
   it("viser ingrediensene som brukes i steget, med mengde i valgt antall", async () => {

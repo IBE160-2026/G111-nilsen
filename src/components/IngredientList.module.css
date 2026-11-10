@@ -87,25 +87,3 @@
   text-decoration: underline;
   cursor: pointer;
 }
-
-.unitToggle {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  min-height: var(--tap-target-min);
-  margin-bottom: var(--space-3);
-  cursor: pointer;
-}
-
-.unitToggle input {
-  width: 1.25rem;
-  height: 1.25rem;
-  margin-top: 0.15rem;
-  accent-color: var(--color-accent);
-}
-
-.unitHint {
-  display: block;
-  color: var(--color-ink-secondary);
-  font-size: var(--type-meta-size);
-}

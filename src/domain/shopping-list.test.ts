@@ -64,9 +64,20 @@ describe("buildShoppingList", () => {
         { recipe: recipe(1, "A", ["1 cup milk"]), servings: 4 },
         { recipe: recipe(2, "B", ["1 dl milk"]), servings: 4 },
       ],
-      "metric",
+      "dl",
     );
     expect(texts(list)).toEqual(["3,4 dl milk (ca.)"]);
+  });
+
+  it("i gram-visning slås dl og gram av samme vare sammen", () => {
+    const list = buildShoppingList(
+      [
+        { recipe: recipe(1, "A", ["2 dl mel"]), servings: 4 },
+        { recipe: recipe(2, "B", ["400 g mel"]), servings: 4 },
+      ],
+      "gram",
+    );
+    expect(texts(list)).toEqual(["520 g mel (ca.)"]);
   });
 
   it("linjer uten mengde eller som ikke kan tolkes står som de er, én gang per tekst", () => {

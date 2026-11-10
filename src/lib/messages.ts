@@ -195,8 +195,11 @@ export const shoppingMessages = {
 
 /** Metriske mål (Story 5.5). */
 export const unitMessages = {
-  metric: "Vis i metriske mål",
-  metricHint: "Kopper, unser og pund regnes om til dl, gram og kg (ca.).",
+  legend: "Vis mengder i",
+  original: "Som i oppskriften",
+  dl: "Volum (dl)",
+  gram: "Vekt (gram)",
+  hint: "Kopper, unser og pund regnes om til norske mål. Mel, sukker, smør, melk og andre vanlige varer regnes mellom dl og gram (ca.).",
 } as const;
 
 /** Kokemodus (Story 5.4). */

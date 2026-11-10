@@ -9,13 +9,9 @@ import {
   type UnitSystem,
 } from "@/domain";
 import type { ActionResult, PantryActionResult } from "@/app/_shared/action-result";
-import {
-  fallbackMessage,
-  pantryMessages as p,
-  shoppingMessages as m,
-  unitMessages,
-} from "@/lib/messages";
+import { fallbackMessage, pantryMessages as p, shoppingMessages as m } from "@/lib/messages";
 import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
+import UnitChoice from "./UnitChoice";
 import CheckRow from "./CheckRow";
 import styles from "./ShoppingList.module.css";
 
@@ -200,14 +196,7 @@ export default function ShoppingList({
 
       <section aria-labelledby={`${id}-liste`} className={styles.card}>
         <h2 id={`${id}-liste`}>{m.listHeading}</h2>
-        <label className={styles.metric}>
-          <input
-            type="checkbox"
-            checked={system === "metric"}
-            onChange={(event) => setSystem(event.target.checked ? "metric" : "original")}
-          />
-          <span>{unitMessages.metric}</span>
-        </label>
+        <UnitChoice value={system} onChange={setSystem} />
 
         {items.length === 0 ? (
           <p className={styles.hint}>{m.nothingPicked}</p>

@@ -244,7 +244,9 @@ describe("IngredientList", () => {
     it("Tastatur: Tab til en boks, mellomrom veksler, og fokus blir stående", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={basic} originalServings={4} />);
-      // Porsjonsvelgeren (−, felt, +, glidebryter, ½) kommer først i tabulatorrekkefølgen.
+      // Porsjonsvelgeren (−, felt, +, glidebryter, ½) og målvalget (én stopp for radiogruppen)
+      // kommer først i tabulatorrekkefølgen.
+      await user.tab();
       await user.tab();
       await user.tab();
       await user.tab();
@@ -521,32 +523,52 @@ describe("IngredientList", () => {
     });
   });
 
-  describe("metriske mål (Story 5.5)", () => {
+  describe("mål: dl og gram (Story 5.5 og 5.9)", () => {
     const us = lines("2 cups flour", "1 lb beef", "2 tbsp butter", "3 egg");
-    const toggle = () => screen.getByLabelText(/Vis i metriske mål/);
+    const choose = (name: string) => screen.getByRole("radio", { name });
 
-    it("vises bare når en linje har amerikansk enhet", () => {
-      const { unmount } = render(<IngredientList ingredients={basic} originalServings={4} />);
-      expect(screen.queryByLabelText(/Vis i metriske mål/)).not.toBeInTheDocument();
+    it("vises bare når en linje kan regnes om", () => {
+      const { unmount } = render(
+        <IngredientList ingredients={lines("3 egg", "2 dl buljong")} originalServings={4} />,
+      );
+      expect(screen.queryByRole("radio", { name: "Vekt (gram)" })).not.toBeInTheDocument();
       unmount();
       render(<IngredientList ingredients={us} originalServings={4} />);
-      expect(toggle()).not.toBeChecked();
+      expect(screen.getByRole("group", { name: "Vis mengder i" })).toBeInTheDocument();
+      expect(choose("Som i oppskriften")).toBeChecked();
     });
 
-    it("regner om til dl, g og ss, og tilbake til originalen", async () => {
+    it("vises også for dl og gram av en kjent vare", () => {
+      render(<IngredientList ingredients={lines("4 dl melk", "3 egg")} originalServings={4} />);
+      expect(choose("Vekt (gram)")).not.toBeChecked();
+    });
+
+    it("regner om til dl, og tilbake til originalen", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={us} originalServings={4} />);
       expect(shown()).toEqual(["2 cup flour", "1 lb beef", "2 tbsp butter", "3 egg"]);
-      await user.click(toggle());
+      await user.click(choose("Volum (dl)"));
       expect(shown()).toEqual(["4,8 dl flour ca.", "450 g beef ca.", "2 ss butter", "3 egg"]);
-      await user.click(toggle());
+      await user.click(choose("Som i oppskriften"));
       expect(shown()).toEqual(["2 cup flour", "1 lb beef", "2 tbsp butter", "3 egg"]);
+    });
+
+    it("regner om til gram for kjente varer", async () => {
+      const user = userEvent.setup();
+      render(
+        <IngredientList
+          ingredients={lines("4 dl melk", "2 ss smør", "3 dl buljong", "3 egg")}
+          originalServings={4}
+        />,
+      );
+      await user.click(choose("Vekt (gram)"));
+      expect(shown()).toEqual(["400 g melk ca.", "27 g smør ca.", "3 dl buljong", "3 egg"]);
     });
 
     it("regner om etter skalering", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={lines("1 cup milk")} originalServings={4} />);
-      await user.click(toggle());
+      await user.click(choose("Volum (dl)"));
       await user.click(plus());
       expect(shown()).toEqual(["3 dl milk ca."]);
     });

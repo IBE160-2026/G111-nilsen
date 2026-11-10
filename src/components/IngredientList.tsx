@@ -11,12 +11,13 @@ import {
   type ScaledLine,
   type UnitSystem,
 } from "@/domain";
-import { servingsDialogMessages, unitMessages } from "@/lib/messages";
+import { servingsDialogMessages } from "@/lib/messages";
 import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import CheckRow from "./CheckRow";
 import { useReportSelectedServings, useReportUnitSystem } from "./SelectedServings";
 import ServingsDialog, { DEFAULT_SERVINGS } from "./ServingsDialog";
 import ServingStepper from "./ServingStepper";
+import UnitChoice from "./UnitChoice";
 import { useCheckedSet } from "./use-checked-set";
 import styles from "./IngredientList.module.css";
 
@@ -210,19 +211,7 @@ export default function IngredientList({
 
       <section className={styles.card} aria-labelledby="ingredienser">
         <h2 id="ingredienser">Ingredienser</h2>
-        {canConvert ? (
-          <label className={styles.unitToggle}>
-            <input
-              type="checkbox"
-              checked={unitSystem === "metric"}
-              onChange={(event) => changeUnitSystem(event.target.checked ? "metric" : "original")}
-            />
-            <span>
-              {unitMessages.metric}
-              <span className={styles.unitHint}>{unitMessages.metricHint}</span>
-            </span>
-          </label>
-        ) : null}
+        {canConvert ? <UnitChoice value={unitSystem} onChange={changeUnitSystem} /> : null}
         {groups.map((group, index) => {
           const labelId = group.section ? `ingrediensseksjon-${index}` : undefined;
           return (

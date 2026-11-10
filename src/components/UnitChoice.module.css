@@ -1,0 +1,39 @@
+.root {
+  min-width: 0;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  border: none;
+}
+
+.legend {
+  padding: 0;
+  font-weight: var(--type-label-weight);
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-4);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target-min);
+  cursor: pointer;
+}
+
+.option input {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}

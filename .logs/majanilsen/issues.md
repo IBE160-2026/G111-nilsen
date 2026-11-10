@@ -76,3 +76,4 @@
 - [ ] 2026-11-10 [story 5.6](969-2026-11-10-16-00-00-story-5-6-ingredienser-per-steg.md) — Maja: npm test (2410), e2e, prøv kokemodus og send steg som bommer, push
 - [ ] 2026-11-10 [story 5.7](968-2026-11-10-17-00-00-story-5-7-handleliste.md) — Maja: npm test (2432), e2e (16), prøv handlelisten med to oppskrifter og kopier listen, push
 - [ ] 2026-11-10 [story 5.8](967-2026-11-10-17-45-00-story-5-8-har-hjemme.md) — Maja: npm test (2458), e2e (16), prøv «Har hjemme» og last siden på nytt, push
+- [ ] 2026-11-10 [story 5.9](966-2026-11-10-18-30-00-story-5-9-mal-dl-og-gram.md) — Maja: npm test (2500), e2e (16), prøv dl/gram på oppskrift og handleliste, push

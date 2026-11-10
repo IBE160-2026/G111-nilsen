@@ -195,6 +195,15 @@ test("Versjon 2: søk i Oppskrifter, halv porsjon og kokemodus", async ({ page }
   await page.getByRole("button", { name: "Legg til en halv porsjon" }).click();
   await expect(page.getByLabel("Antall personer", { exact: true })).toHaveValue("4,5");
 
+  // Mål: gram og dl endrer mengdene, og «Som i oppskriften» gir tilbake originalen.
+  const before = await ingredientsText(page);
+  await page.getByRole("radio", { name: "Vekt (gram)" }).check();
+  await expect(page.getByRole("radio", { name: "Vekt (gram)" })).toBeChecked();
+  expect(await ingredientsText(page)).not.toBe(before);
+  expect(await ingredientsText(page)).toContain("ca.");
+  await page.getByRole("radio", { name: "Som i oppskriften" }).check();
+  expect(await ingredientsText(page)).toBe(before);
+
   await page.getByRole("button", { name: /^Åpne kokemodus/ }).click();
   const cooking = page.getByRole("dialog", { name: /^Kokemodus/ });
   await expect(cooking.getByText(/^Steg 1 av \d+$/)).toBeVisible();

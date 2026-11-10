@@ -100,15 +100,26 @@ describe("ShoppingList", () => {
     expect(screen.getByRole("checkbox", { name: /6 dl melk/ })).not.toBeChecked();
   });
 
-  it("metriske mål regnes om før sammenslåing", async () => {
+  it("dl-visning regner om før sammenslåing", async () => {
     const user = userEvent.setup();
     render(
       <ShoppingList recipes={[recipe(1, "A", ["1 cup milk"]), recipe(2, "B", ["1 dl milk"])]} />,
     );
     await user.click(pick("A"));
     await user.click(pick("B"));
-    await user.click(screen.getByLabelText("Vis i metriske mål"));
+    await user.click(screen.getByRole("radio", { name: "Volum (dl)" }));
     expect(items()).toEqual(["3,4 dl milk (ca.)Til A, B"]);
+  });
+
+  it("gram-visning slår sammen dl og gram av samme vare", async () => {
+    const user = userEvent.setup();
+    render(
+      <ShoppingList recipes={[recipe(1, "A", ["2 dl mel"]), recipe(2, "B", ["400 g mel"])]} />,
+    );
+    await user.click(pick("A"));
+    await user.click(pick("B"));
+    await user.click(screen.getByRole("radio", { name: "Vekt (gram)" }));
+    expect(items()).toEqual(["520 g mel (ca.)Til A, B"]);
   });
 
   it("«Kopier listen» kopierer bare det som ikke er krysset av, og melder fra", async () => {
