@@ -16,9 +16,9 @@ Tekniske valg, begrunnelser og forkastede alternativer som hører til arkitektur
 ## Forkastede alternativer
 
 - **Python med `recipe-scrapers`:** biblioteket støtter over 745 sider, men gir to kjøremiljøer (Python og Node) for sensor å installere. Lesing av JSON-LD er enkelt nok til å gjøre selv i TypeScript, og egen kode gir mer å teste og forklare.
-- **Konto og innlogging:** gir mer arbeid og personopplysninger uten å støtte suksessmålene for v1.
+- **Konto og innlogging:** gir mer arbeid og personopplysninger uten å støtte suksessmålene for v1. Tatt inn i versjon 2 (FR-27, 2026-11-10) som lokale kontoer med e-post og passord, uten ekstern innloggingstjeneste, så NFR-1 fortsatt holder.
 - **Oppskrift i flere mapper:** gir en mange-til-mange-relasjon og mer komplisert grensesnitt. Favoritt dekker behovet for en ekstra gruppering.
-- **Forslag som endrer ingredienslisten direkte:** gjør det uklart hva som er originalen og vanskeliggjør skalering. Forslag lagres i stedet ved siden av oppskriften.
+- **Forslag som endrer ingredienslisten direkte:** gjør det uklart hva som er originalen og vanskeliggjør skalering. Forslag lagres i stedet ved siden av oppskriften. I versjon 2 (FR-26) vises de i listene og stegteksten, men de lagrede linjene endres fortsatt ikke.
 - **Manuell innlegging som innlimt fritekst:** krever tolking av hele oppskriften (i praksis KI). Et enkelt skjema bruker samme tolking som importen.
 
 ## Forslag fra språkmodell

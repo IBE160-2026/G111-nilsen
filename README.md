@@ -23,7 +23,22 @@ Repoet inneholder applikasjonen og dokumentasjon av utvikling, testing og kvalit
 - Lagrer oppskriftene på kontoen din (e-post og passord), i mapper og som favoritter, og du kan krysse av under matlaging.
 - Gir 1–3 forslag til hvordan retten kan bli bedre. Uten nøkkel er det enkle forslag laget av regler ut fra ingrediensene og stegene (merket «Enkle forslag»); med nøkkel lager en språkmodell forslag til akkurat denne oppskriften. Forslag du tar i bruk lagres med oppskriften og vises i ingredienslisten eller ved riktig steg, merket «Forslag» (også i kokemodus og handlelisten); originalen endres ikke, og «Fjern» tar dem bort igjen.
 
-Å hente, vise og skalere oppskrifter virker uten konto; å lagre, mapper, favoritter og handleliste krever innlogging (se «Kontoer»). Ingenting krever nøkkel eller nett unntatt språkmodellen (importen kan kjøres mot lagrede sider, se «Importere fra lenke»). Status: Epic 1–4 er bygget (Story 1.1–4.4). Åpne saker står i [`issues/`](issues/README.md) og i `_bmad-output/implementation-artifacts/deferred-work.md`.
+Å hente, vise og skalere oppskrifter virker uten konto; å lagre, mapper, favoritter og handleliste krever innlogging (se «Kontoer»). Ingenting krever nøkkel eller nett unntatt språkmodellen (importen kan kjøres mot lagrede sider, se «Importere fra lenke»). Status: versjon 1 (Epic 1–4, Story 1.1–4.4) og versjon 2 (Epic 5, Story 5.1–5.13) er bygget, se «Hva versjon 2 inneholder». Åpne saker står i [`issues/`](issues/README.md) og i `_bmad-output/implementation-artifacts/deferred-work.md`.
+
+## Hva versjon 2 inneholder
+
+Versjon 2 (Epic 5) kom etter at v1 var levert. Endringene i planen står i [`sprint-change-proposal-2026-11-10.md`](_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-10.md), kravene i PRD §4.6 (FR-19–FR-27), og hver story har en spec i `_bmad-output/implementation-artifacts/spec-5-N-*.md`.
+
+![RecipeMate versjon 2: forslag flettet inn i stegene, valg av mål og et ingrediensforslag i listen](docs/skjermbilde-versjon-2.png)
+
+- **Halve porsjoner og glidebryter (5.1, 5.3):** 0,5–50 personer i halve steg med «+ ½», feltet («4,5») eller glidebryteren.
+- **Søk og filtrering (5.2):** søk i tittel, kilde, mappe og ingredienser på Oppskrifter, med «Bare favoritter» og mappevalg.
+- **Kokemodus (5.4, 5.6):** ett steg om gangen i stor tekst, med ingrediensene steget bruker og skjermen holdt våken.
+- **Velg mål (5.5, 5.9):** «Vis mengder i» som i oppskriften, volum (dl) eller vekt (gram). Kopper, unser og pund regnes om, og vanlige varer regnes mellom dl og gram (merket «ca.»).
+- **Handleliste og «Har hjemme» (5.7, 5.8):** velg oppskrifter og antall, få én sammenslått liste å krysse av og kopiere, og skjul det du har hjemme.
+- **Forslag som passer (5.10):** uten nøkkel lages forslagene av regler ut fra oppskriften («Enkle forslag»).
+- **Forslag i oppskriften (5.11, 5.12):** et forslag du tar i bruk, står i ingredienslisten og inne i riktig steg, merket og uthevet. Originalen endres ikke.
+- **Kontoer (5.13):** e-post og passord, egne oppskrifter per konto (se «Kontoer»).
 
 ## Hva Epic 1 (og Story 3.5) inneholder
 
@@ -241,7 +256,7 @@ Playwright-versjonen er låst i `package-lock.json`. Ligger nettleseren et annet
 
 ### Hva testene dekker
 
-`npm test` kjører Vitest én gang og gir i dag 79 testfiler og 2313 tester (ende-til-ende-testene kommer i tillegg, se over). Ingen test bruker nettverket (bare lokale 127.0.0.1-tjenere) eller en ekte API-nøkkel.
+`npm test` kjører Vitest én gang og gir i dag 99 testfiler og 2618 tester (ende-til-ende-testene kommer i tillegg, se over). Ingen test bruker nettverket (bare lokale 127.0.0.1-tjenere) eller en ekte API-nøkkel.
 
 - **Domenet** (`src/domain/`): tolking av mengder og ingredienslinjer og skalering og formatering, med fasittabellen fra Epic 1 (400 g mel for 6 gir 600 g, «1 egg (ca.)», og så videre) som egne tester, og lesing av oppskriftsdata fra lagrede HTML-sider (JSON-LD, normalisering, tekstrensing, ytelse for 2 MB og aldri-kaster-egenskap).
 - **Server** (`src/server/`): repositorier og tjenester mot en ekte SQLite-database i minnet, blant annet tilbakerulling ved feil, redigering, samlingen, lagring, sletting og opprydding, og datamigrasjonen (en database med bare den første migrasjonen oppgraderes).

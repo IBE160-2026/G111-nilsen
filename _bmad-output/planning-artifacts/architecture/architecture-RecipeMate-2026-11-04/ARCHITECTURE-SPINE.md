@@ -4,11 +4,11 @@ type: architecture-spine
 purpose: build-substrate
 altitude: feature
 paradigm: 'Funksjonell kjerne, imperativt skall (lagdelt: domene → tjenester → app)'
-scope: 'RecipeMate v1: import, visning, skalering, forslag, lagring og organisering'
+scope: 'RecipeMate v1: import, visning, skalering, forslag, lagring og organisering; v2 (2026-11-10): søk, kokemodus, mål, handleliste, forslag i oppskriften, kontoer'
 status: draft
 created: '2026-11-04'
-updated: '2026-11-04'
-binds: [FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-16, FR-17, FR-18, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7]
+updated: '2026-11-10'
+binds: [FR-1, FR-2, FR-3, FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-10, FR-11, FR-12, FR-13, FR-14, FR-15, FR-16, FR-17, FR-18, FR-19, FR-20, FR-21, FR-22, FR-23, FR-24, FR-25, FR-26, FR-27, NFR-1, NFR-2, NFR-3, NFR-4, NFR-5, NFR-6, NFR-7]
 sources:
   - ../../prds/prd-RecipeMate-2026-11-04/prd.md
   - ../../prds/prd-RecipeMate-2026-11-04/addendum.md
@@ -114,6 +114,12 @@ Pilene viser lovlige avhengigheter. Alt annet er forbudt.
 - **Prevents:** Tester som avhenger av nettet, en ekte språkmodell eller utviklerens database.
 - **Rule:** Enhetstester (Vitest) for `src/domain/` dekker minst alle eksemplene i FR-8. Integrasjonstester for import bruker fixture-adapteren. Ende-til-ende-tester (Playwright) kjører mot en midlertidig database og mock-forslag. Ingen test gjør nettverkskall.
 
+### AD-12 — Kontoer, økter og eierskap (versjon 2)
+
+- **Binds:** FR-27, FR-13–FR-16, FR-23, FR-24, NFR-4, NFR-7
+- **Prevents:** At en bruker ser eller endrer en annens oppskrifter, mapper eller «Har hjemme»; passord eller innloggingsnøkler som kan leses fra databasen; innlogging som avhenger av en ekstern tjeneste eller nøkkel (NFR-1).
+- **Rule:** Tabellene `users` og `sessions` og kolonnen `user_id` på `recipes`, `folders` og `pantry_items` (migrasjon `0006_accounts`). Passord hashes med scrypt og eget salt; økten er et tilfeldig token i en httpOnly-cookie, og databasen har bare SHA-256 av tokenet. Cookien leses og skrives bare i `src/server/session.ts`. Tjenester for lister, mapper og «Har hjemme» tar `userId` som første parameter; enkeltoppskrifter sjekkes med `canAccessRecipe(viewer, id)` i hver Server Action og med `getRecipeFor` på sidene. En lagret oppskrift har alltid eier; en import uten innlogging har ingen eier og kan åpnes av alle med lenken til den lagres eller ryddes bort. En annens data gir `not_found`, aldri en egen «ingen tilgang»-feil.
+
 ## Consistency Conventions
 
 | Concern | Convention |
@@ -199,12 +205,17 @@ Kjøring: kun lokalt (`npm install`, `npm run db:migrate`, `npm run dev`). Ingen
 | Skalering og tolking (FR-7–FR-9) | `domain/` | AD-1, AD-2, AD-11 |
 | Forslag (FR-10–FR-12) | `services/suggestion-service`, `ports/`, `adapters/*-suggestions` | AD-5, AD-7, AD-9 |
 | Lagring, redigering, mapper, favoritter (FR-13–FR-16, FR-18) | `services/recipe-service`, `services/folder-service`, `db/repositories` | AD-3, AD-6 |
+| Søk og filtrering (FR-20) | `domain/filter-collection`, `components/CollectionBrowser` | AD-1 |
+| Kokemodus og mål (FR-19, FR-21, FR-22) | `components/CookingMode`, `components/UnitChoice`, `domain/convert-units`, `domain/step-ingredients` | AD-1, AD-2, AD-10 |
+| Handleliste og «Har hjemme» (FR-23, FR-24) | `app/handleliste`, `domain/shopping-list`, `services/pantry-service` | AD-1, AD-3, AD-12 |
+| Forslag uten nøkkel og i oppskriften (FR-25, FR-26) | `domain/suggest-for-recipe`, `domain/apply-suggestions`, `adapters/mock-suggestions` | AD-2, AD-5 |
+| Kontoer og eierskap (FR-27) | `services/auth-service`, `server/session.ts`, `app/account-actions.ts`, `app/logg-inn`, `app/ny-konto` | AD-3, AD-7, AD-12 |
 | Kjørbarhet og hemmeligheter (NFR-1, NFR-4) | `server/config.ts`, `.env.example`, README | AD-9 |
 
 ## Deferred
 
 - **Leverandør og modell for forslag:** velges når forslags-epicen starter; må være billig og støtte JSON-svar. Grensesnittet (AD-5) gjør valget lokalt.
 - **Hosting og deploy:** ikke i v1; appen kjøres lokalt etter README.
-- **Konto, autentisering og flere brukere:** utenfor v1 (PRD §6).
+- **Konto, autentisering og flere brukere:** utenfor v1 (PRD §6); lokale kontoer kom i versjon 2 (AD-12). Glemt passord (krever e-post), begrensning av innloggingsforsøk og sletting av konto er fortsatt utsatt.
 - **KI som reserve for import, søk og ingredienssubstitusjoner:** «hvis tid»; passer inn som nye tjenester uten å endre AD-ene.
 - **Ytelse og caching:** ikke nødvendig for én lokal bruker.

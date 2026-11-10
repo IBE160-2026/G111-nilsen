@@ -36,6 +36,7 @@ Dette dokumentet deler kravene fra PRD, UX (DESIGN.md og EXPERIENCE.md) og arkit
 - FR-16: Finne igjen: samlingen, én mappe og favoritter, sist lagret/åpnet først, med tittel, kilde og favorittmerke; tomme visninger forklarer og gir vei videre.
 - FR-17: Avkrysning av ingredienslinjer og steg under matlaging; påvirker ikke skalering; lagres ikke.
 - FR-18: Redigere tittel, opprinnelig porsjonsantall, ingredienser og steg i en lagret oppskrift med samme skjema og tolking som FR-4 (lagt til 2026-11-09).
+- FR-19 til FR-27 (versjon 2, lagt til 2026-11-10, se `sprint-change-proposal-2026-11-10.md` og PRD §4.6): halve porsjoner og glidebryter (FR-19), søk og filtrering (FR-20), kokemodus (FR-21), velge mål dl/gram (FR-22), handleliste (FR-23), «Har hjemme» (FR-24), forslag som passer oppskriften uten nøkkel (FR-25), forslag i oppskriften (FR-26), kontoer og egne oppskrifter (FR-27).
 
 ### Ikke-funksjonelle krav
 
@@ -104,6 +105,7 @@ Dette dokumentet deler kravene fra PRD, UX (DESIGN.md og EXPERIENCE.md) og arkit
 - FR-16: Epic 3 – finne igjen
 - FR-17: Epic 1 – avkrysning under matlaging
 - FR-18: Epic 3 – redigere en oppskrift
+- FR-19–FR-27: Epic 5 – versjon 2
 
 ## Epic-liste
 
@@ -122,6 +124,10 @@ Brukeren kan lagre og slette oppskrifter, sortere dem i mapper, markere favoritt
 ### Epic 4: Forbedringsforslag
 Brukeren kan få 1–3 konkrete forslag til oppskriften og ta dem i bruk, også uten nøkkel til språkmodell (eksempelforslag).
 **Krav:** FR-10, FR-11, FR-12
+
+### Epic 5: Versjon 2 (lagt til 2026-11-10)
+Brukeren får mer ut av oppskriftene sine: halve porsjoner, søk, kokemodus, valg av mål, handleliste med «Har hjemme», forslag som passer retten og står i oppskriften, og en konto å lagre på.
+**Krav:** FR-19, FR-20, FR-21, FR-22, FR-23, FR-24, FR-25, FR-26, FR-27
 
 NFR og UX-DR dekkes i storiene som trenger dem. README oppdateres i siste story i hver epic.
 
@@ -602,3 +608,177 @@ slik at jeg kan vurdere at den gjør det PRD-en lover.
 **Gitt** appen på 360 px og på desktop, i lys og mørk modus
 **Når** kjerneflyten gjennomgås med tastatur
 **Så** er alt nåbart med synlig fokus, og kontrasten følger DESIGN.md (NFR-5, UX-DR16)
+
+## Epic 5: Versjon 2
+
+Lagt til 2026-11-10 etter at Epic 1–4 var levert (`sprint-change-proposal-2026-11-10.md`). Storiene ble bygget én og én i denne rekkefølgen. Hver story har en spec med full oppførsel, testmatrise og gjennomgang i `_bmad-output/implementation-artifacts/spec-5-N-*.md`; akseptansekriteriene under er sammendraget.
+
+### Story 5.1: Halve porsjoner
+
+Som Ida,
+vil jeg kunne velge 4,5 eller 6,5 personer,
+slik at mengdene passer når noen spiser lite.
+
+**Akseptansekriterier:**
+
+**Gitt** en oppskrift med opprinnelig antall
+**Når** jeg trykker «+ ½» eller skriver «4,5»
+**Så** skaleres mengdene til 4,5 personer, og valget huskes for en lagret oppskrift (FR-19)
+**Og** antallet oppskriften er skrevet for er fortsatt et helt tall
+
+### Story 5.2: Søk og filtrering i Oppskrifter
+
+Som Ida,
+vil jeg søke etter tittel eller ingrediens og filtrere på mappe og favoritter,
+slik at jeg finner en oppskrift raskt når samlingen er stor.
+
+**Akseptansekriterier:**
+
+**Gitt** lagrede oppskrifter
+**Når** jeg skriver i «Søk i oppskrifter», krysser av «Bare favoritter» eller velger en mappe
+**Så** vises bare oppskriftene der alle ordene finnes i tittel, kilde, mappe eller ingredienser, og treffantallet leses opp (FR-20)
+**Og** ingen treff gir «Ingen oppskrifter passer.» med «Nullstill søk»
+
+### Story 5.3: Glidebryter for antall personer
+
+Som Ida,
+vil jeg dra en glidebryter fra 0,5 til 50,
+slik at jeg kan endre antallet raskt på mobil.
+
+**Akseptansekriterier:**
+
+**Gitt** porsjonsvelgeren
+**Når** jeg drar glidebryteren eller bruker piltastene
+**Så** endres antallet i halve steg fra 0,5 til 50, og mengdene oppdateres som med −/+ (FR-19, UX-DR16)
+
+### Story 5.4: Kokemodus
+
+Som Ida,
+vil jeg se ett steg om gangen i stor tekst,
+slik at jeg kan følge oppskriften fra kjøkkenbenken.
+
+**Akseptansekriterier:**
+
+**Gitt** en oppskrift med steg
+**Når** jeg trykker «Kokemodus»
+**Så** vises ett steg om gangen med «Steg N av M», «Forrige» og «Neste», ingrediensene i valgt antall, og skjermen holdes våken der det støttes (FR-21)
+**Og** «Avslutt» eller Escape lukker, og fokus går tilbake til knappen
+
+### Story 5.5: Metriske mål
+
+Som Tor,
+vil jeg se kopper og unser som dl og gram,
+slik at jeg kan bruke engelske oppskrifter.
+
+**Akseptansekriterier:**
+
+**Gitt** en oppskrift med amerikanske mål
+**Når** jeg velger metriske mål
+**Så** vises kopper som dl og unser og pund som gram (merket «ca.»), og originalen endres ikke (FR-22, AD-2)
+
+### Story 5.6: Ingredienser per steg i kokemodus
+
+Som Ida,
+vil jeg se mengden av ingrediensene som brukes i steget,
+slik at jeg slipper å bla tilbake til listen.
+
+**Akseptansekriterier:**
+
+**Gitt** kokemodus
+**Når** steget nevner en ingrediens («Visp mel og egg»)
+**Så** står «I dette steget» med mengdene for de ingrediensene, i valgt antall og mål (FR-21)
+
+### Story 5.7: Handleliste
+
+Som Ida,
+vil jeg lage én handleliste fra flere oppskrifter,
+slik at jeg handler alt på én tur.
+
+**Akseptansekriterier:**
+
+**Gitt** lagrede oppskrifter
+**Når** jeg velger oppskrifter og antall personer for hver under «Handleliste»
+**Så** får jeg én sortert liste der samme vare med samme enhet er lagt sammen, med «Til <oppskrifter>», avkrysning og «Kopier listen» (FR-23)
+**Og** «Handleliste» er et eget punkt i toppmenyen
+
+### Story 5.8: Har hjemme
+
+Som Ida,
+vil jeg merke det jeg alltid har hjemme,
+slik at det ikke står på handlelisten.
+
+**Akseptansekriterier:**
+
+**Gitt** handlelisten
+**Når** jeg trykker «Har hjemme» på en vare eller skriver inn en vare
+**Så** skjules alle varer med det navnet fra listen og kopien, det huskes, og «Legg tilbake» viser dem igjen (FR-24)
+
+### Story 5.9: Velg mål – dl eller gram
+
+Som Ida,
+vil jeg velge om ingrediensene vises i dl eller gram,
+slik at jeg kan bruke vekt eller målebeger etter hva jeg har.
+
+**Akseptansekriterier:**
+
+**Gitt** en oppskrift eller handleliste
+**Når** jeg velger «Volum (dl)» eller «Vekt (gram)» under «Vis mengder i»
+**Så** regnes vanlige varer (mel, sukker, smør, melk m.fl.) mellom dl og gram og merkes «ca.»; ukjente varer og stykk endres ikke (FR-22)
+
+### Story 5.10: Forslag som passer oppskriften
+
+Som Tor,
+vil jeg få forslag som passer retten også uten nøkkel,
+slik at forslagene er til nytte.
+
+**Akseptansekriterier:**
+
+**Gitt** ingen språkmodellnøkkel
+**Når** jeg trykker «Få forslag»
+**Så** får jeg 1–3 forslag laget ut fra ingrediensene og stegene (for eksempel hvile røren for pannekaker), merket «Enkle forslag», uten råd oppskriften allerede følger (FR-25, AD-5)
+**Og** passer ingen regel, vises de generelle eksemplene
+
+### Story 5.11: Forslag i oppskriften
+
+Som Tor,
+vil jeg at et forslag jeg tar i bruk står i oppskriften,
+slik at jeg ser det når jeg lager maten.
+
+**Akseptansekriterier:**
+
+**Gitt** et forslag
+**Når** jeg trykker «Ta i bruk»
+**Så** vises et ingrediensforslag som merket linje i ingredienslisten (skalert), og et forslag om hele retten under stegene (FR-26)
+**Og** de lagrede linjene og stegene endres ikke, og «Fjern» tar forslaget bort (AD-2)
+
+### Story 5.12: Forslag flettet inn i stegteksten
+
+Som Tor,
+vil jeg at forslaget står i teksten i steget det hører til,
+slik at oppskriften leses som én helhet.
+
+**Akseptansekriterier:**
+
+**Gitt** et stegforslag som er tatt i bruk
+**Når** jeg leser stegene eller bruker kokemodus
+**Så** står forslaget uthevet inne i riktig steg («La røren hvile …» foran «Stek …») og leses opp som «Forslag:» (FR-26, UX-DR16)
+**Og** et ingrediensforslag nevnes også i steget der ingrediensene blandes
+
+### Story 5.13: Innlogging og egne oppskrifter
+
+Som Ida,
+vil jeg logge inn med e-post og passord,
+slik at oppskriftene mine lagres på kontoen min.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg ikke er logget inn
+**Når** jeg henter en oppskrift
+**Så** kan jeg se og skalere den, og «Lagre» blir «Logg inn for å lagre», som sender meg tilbake etter innlogging (FR-27)
+
+**Gitt** en konto
+**Når** jeg logger inn
+**Så** ser jeg bare mine egne oppskrifter, mapper, favoritter, handleliste og «Har hjemme», og andre får «Fant ikke oppskriften» for mine (FR-27, AD-12)
+**Og** den første kontoen overtar det som fantes fra før, passord lagres bare som hash, og feil e-post og feil passord gir samme melding (NFR-7)
+
+**Og** README er oppdatert med versjon 2

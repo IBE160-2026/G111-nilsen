@@ -2,7 +2,7 @@
 title: RecipeMate – EXPERIENCE
 status: draft
 created: 2026-11-04
-updated: 2026-11-04
+updated: 2026-11-10
 sources:
   - ../../prds/prd-RecipeMate-2026-11-04/prd.md
   - DESIGN.md
@@ -17,7 +17,7 @@ sources:
 
 ## Information Architecture
 
-Toppmenyen har fire punkter. Alle andre skjermer nås derfra.
+Toppmenyen har fire punkter i v1 og fem fra versjon 2 (Handleliste), pluss «Logg inn»/«Logg ut» ved logoen. Alle andre skjermer nås derfra. «Samlingen» heter «Oppskrifter» i menyen.
 
 | Skjerm | Hva den gjør | Nås fra | Krav |
 |---|---|---|---|
@@ -28,6 +28,9 @@ Toppmenyen har fire punkter. Alle andre skjermer nås derfra.
 | **Mapper** | Liste over mapper med antall oppskrifter; opprett, gi nytt navn, slett | Toppmeny | FR-14 |
 | **Mappe** | Oppskriftene i én mappe | Mapper | FR-14, FR-16 |
 | **Favoritter** | Alle favoritter | Toppmeny | FR-15, FR-16 |
+| **Handleliste** (v2) | Velg oppskrifter og antall, sammenslått liste med avkrysning og «Kopier listen», «Har hjemme» | Toppmeny, Oppskrifter | FR-23, FR-24 |
+| **Kokemodus** (v2) | Fullskjerm over oppskriften: ett steg om gangen, ingrediensene i steget | Oppskrift | FR-21 |
+| **Logg inn / Lag konto** (v2) | E-post og passord; sender tilbake dit brukeren kom fra | Toppmeny, «Logg inn for å lagre», sider som krever konto | FR-27 |
 
 **Dialoger:** «Hvor mange er oppskriften laget for?» (FR-3), «Lagre i mappe» (velg mappe, ny mappe eller ingen), «Slette oppskriften?» og «Slette mappen?».
 
@@ -111,3 +114,15 @@ Toppmenyen har fire punkter. Alle andre skjermer nås derfra.
 1. Ida trykker «Favoritter» i toppmenyen.
 2. **Klimaks:** tacooppskriften ligger øverst. Hun åpner den, og den står på 5 personer som sist.
 3. Hun endrer til 3 og lager maten.
+
+## Versjon 2 (2026-11-10)
+
+Mønstrene over gjelder også for det som kom i versjon 2. Det som er nytt:
+
+- **Porsjonsvelger:** «+ ½» og en glidebryter fra 0,5 til 50 under feltet (FR-19).
+- **Oppskrifter:** søkefelt, «Bare favoritter» og mappevalg over listen; treffantall leses opp; «Nullstill søk» ved ingen treff (FR-20).
+- **«Vis mengder i»:** radiogruppe «Som i oppskriften / Volum (dl) / Vekt (gram)» over ingrediensene og i handlelisten; omregnede mengder merkes «ca.» (FR-22).
+- **Forslag i oppskriften:** en ingredienslinje fra et forslag har merket «Forslag»; et stegforslag står uthevet inne i stegteksten og leses opp som «Forslag:» (FR-26). Uten nøkkel heter merket på forslagene «Enkle forslag» (FR-25).
+- **Uten konto:** sider som krever konto viser «Logg inn for å se dette» med «Logg inn» og «Lag konto»; lagre-linjen viser «Logg inn for å lagre» (FR-27).
+
+Fullstendig oppførsel per skjerm står i `spec-5-1` til `spec-5-13` under `_bmad-output/implementation-artifacts/`.

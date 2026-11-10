@@ -2,14 +2,14 @@
 title: RecipeMate
 status: draft
 created: 2026-11-04
-updated: 2026-11-04
+updated: 2026-11-10
 ---
 
 # PRD: RecipeMate
 
 ## 0. Om dokumentet
 
-Denne PRD-en beskriver hva første versjon (v1) av RecipeMate skal gjøre. Den bygger på `product-brief.md`, `_bmad-output/planning-artifacts/research-og-avklaringer.md` og tilbakemeldingen på briefen (`tilbakemelding-product-brief.md`), og er grunnlaget for UX, arkitektur, epics og stories. Begrepene i §3 brukes likt i alle senere dokumenter. Krav har faste ID-er (FR-n, NFR-n, UJ-n, SM-n) som stories, tester og commits kan vise til. Tekniske valg og begrunnelser står i `addendum.md`. Antakelser er merket `[ANTAKELSE]` og samlet i §10.
+Denne PRD-en beskriver hva første versjon (v1) av RecipeMate skal gjøre, og (§4.6, lagt til 2026-11-10) hva versjon 2 la til; se `sprint-change-proposal-2026-11-10.md`. Den bygger på `product-brief.md`, `_bmad-output/planning-artifacts/research-og-avklaringer.md` og tilbakemeldingen på briefen (`tilbakemelding-product-brief.md`), og er grunnlaget for UX, arkitektur, epics og stories. Begrepene i §3 brukes likt i alle senere dokumenter. Krav har faste ID-er (FR-n, NFR-n, UJ-n, SM-n) som stories, tester og commits kan vise til. Tekniske valg og begrunnelser står i `addendum.md`. Antakelser er merket `[ANTAKELSE]` og samlet i §10.
 
 ## 1. Visjon
 
@@ -194,10 +194,10 @@ Brukeren kan ta i bruk eller hoppe over hvert forslag. Valgte forslag lagres på
 **Konsekvenser (testbare):**
 - Et valgt forslag vises merket i oppskriften og finnes fortsatt etter at oppskriften er lagret og åpnet igjen.
 - Brukeren kan fjerne et valgt forslag.
-- Ingredienslinjer og steg endres ikke når et forslag tas i bruk.
+- Ingredienslinjer og steg endres ikke når et forslag tas i bruk. (Fra versjon 2 vises forslaget merket i ingredienslisten og stegteksten uten at de lagrede linjene endres, se FR-26.)
 
 #### FR-12: Demomodus uten nøkkel
-Uten nøkkel til språkmodell gir appen forhåndslagrede eksempelforslag og viser at de er eksempler.
+Uten nøkkel til språkmodell gir appen forhåndslagrede eksempelforslag og viser at de er eksempler. (Fra versjon 2 lages forslagene uten nøkkel av regler ut fra oppskriften, se FR-25.)
 
 **Konsekvenser (testbare):**
 - Appen starter og hele kjerneflyten virker uten nøkkel.
@@ -205,7 +205,7 @@ Uten nøkkel til språkmodell gir appen forhåndslagrede eksempelforslag og vise
 
 ### 4.5 Lagring og organisering
 
-**Beskrivelse:** Brukeren lagrer oppskrifter i samlingen, sorterer dem i mapper og markerer favoritter. Alt lagres lokalt uten konto. Realiserer UJ-1, UJ-3.
+**Beskrivelse:** Brukeren lagrer oppskrifter i samlingen, sorterer dem i mapper og markerer favoritter. I v1 lagres alt lokalt uten konto; fra versjon 2 lagres det lokalt på brukerens konto (FR-27). Realiserer UJ-1, UJ-3.
 
 #### FR-13: Lagre og slette oppskrifter
 Brukeren kan lagre en oppskrift i samlingen og slette den igjen. En manuelt innlagt oppskrift lagres i samlingen med en gang («Lagre oppskrift»); en importert oppskrift lagres med en egen Lagre-knapp.
@@ -247,22 +247,58 @@ Brukeren kan se samlingen, én mappe om gangen og favoritter, sortert med sist l
 - Hver visning viser tittel, kilde og favorittmarkering per oppskrift.
 - Tomme visninger har en forklarende tekst og en vei videre (f.eks. «Importer din første oppskrift»).
 
+### 4.6 Versjon 2 (lagt til 2026-11-10)
+
+**Beskrivelse:** Funksjoner som kom etter v1, fra «hvis tid»-listen i §7.2 og fra bruk. Hver har en egen spec (`_bmad-output/implementation-artifacts/spec-5-N-*.md`) med full oppførsel og testmatrise.
+
+#### FR-19: Halve porsjoner og glidebryter
+Valgt antall personer kan være hele og halve tall fra 0,5 til 50, med «+ ½», feltet («4,5») og en glidebryter i halve steg. Antallet oppskriften er skrevet for er fortsatt et heltall 1–50. (Story 5.1, 5.3)
+
+#### FR-20: Søk og filtrering i Oppskrifter
+Brukeren kan søke i tittel, kilde, mappe og ingredienser (alle ord må finnes) og filtrere på mappe og favoritter. Treffantallet leses opp; ingen treff gir «Nullstill søk». (Story 5.2)
+
+#### FR-21: Kokemodus
+Fullskjerm med ett steg om gangen i stor tekst, ingrediensene for steget og for hele oppskriften i valgt antall, og skjermen holdt våken der nettleseren støtter det. (Story 5.4, 5.6)
+
+#### FR-22: Velge mål
+Mengder kan vises «som i oppskriften», som volum (dl) eller som vekt (gram). Kopper, unser og pund regnes om til norske mål; vanlige varer (mel, sukker, smør, melk m.fl.) regnes mellom dl og gram med faste kjøkkenverdier og merkes «ca.». Gjelder oppskrift, kokemodus og handleliste. (Story 5.5, 5.9)
+
+#### FR-23: Handleliste
+Brukeren velger lagrede oppskrifter og antall personer for hver og får én sammenslått liste (samme navn og enhet legges sammen) som kan krysses av og kopieres. Eget punkt i toppmenyen. (Story 5.7)
+
+#### FR-24: Har hjemme
+Brukeren kan merke varer som «Har hjemme» (fra listen eller ved å skrive dem inn); de skjules fra handlelisten og kopien og huskes. (Story 5.8)
+
+#### FR-25: Forslag som passer oppskriften uten nøkkel
+Uten nøkkel lages 1–3 forslag med faste regler ut fra hva oppskriften inneholder (pannekaker, kjøttdeig, gjærbakst, pasta, fisk, kylling, supper m.fl.), merket «Enkle forslag». Råd oppskriften allerede følger, hoppes over. Passer ingen regel, brukes de generelle eksemplene. (Story 5.10)
+
+#### FR-26: Forslag i oppskriften
+Et forslag som tas i bruk, vises i oppskriften: ingrediensforslag som merket linje i ingredienslisten (skaleres), stegforslag flettet inn og uthevet i steget det hører til, og forslag om hele retten under stegene. De lagrede linjene og stegene endres ikke, og «Fjern» tar forslaget bort. (Story 5.11, 5.12)
+
+#### FR-27: Kontoer og egne oppskrifter
+Brukeren kan lage konto med e-post og passord, logge inn og ut. Lagring, mapper, favoritter, handleliste, «Har hjemme» og «Legg inn selv» krever innlogging; å hente, se og skalere oppskrifter gjør det ikke. Hver konto ser bare sine egne data. Den første kontoen overtar det som allerede finnes. (Story 5.13)
+
+**Konsekvenser (testbare):**
+- Uten innlogging gir «Lagre» lenken «Logg inn for å lagre», og brukeren kommer tilbake til oppskriften etterpå.
+- En annen bruker får «Fant ikke oppskriften» for en lagret oppskrift som ikke er hans.
+- Feil e-post og feil passord gir samme melding; passord lagres aldri i klartekst.
+
 ## 5. Tverrgående krav (NFR)
 
-- **NFR-1 Kjørbarhet:** Appen kan installeres og startes lokalt etter README med Node.js og npm, uten egen databaseserver, betalte kontoer eller nøkler. Hele kjerneflyten (import, visning, skalering, lagring, mapper, favoritter) virker uten nøkkel.
+- **NFR-1 Kjørbarhet:** Appen kan installeres og startes lokalt etter README med Node.js og npm, uten egen databaseserver, betalte kontoer eller nøkler. Hele kjerneflyten (import, visning, skalering, lagring, mapper, favoritter) virker uten nøkkel. Kontoer (FR-27) er lokale i appen og krever ingen ekstern tjeneste.
 - **NFR-2 Testbarhet:** Import testes mot lagrede testsider i `test/fixtures/`, ikke mot nettet. Forslag testes mot lagrede eksempelsvar. Alle eksemplene i FR-8 er automatiske tester.
 - **NFR-3 Ytelse:** Henting av en kilde avbrytes etter 10 sekunder. Skalering oppdateres uten merkbar forsinkelse.
 - **NFR-4 Sikkerhet:** Nøkler ligger bare i `.env`, som ikke versjoneres; `.env.example` følger med uten ekte verdier. Import henter bare http/https-adresser, begrenser størrelse på svaret, kjører ikke skript fra kilden og viser ikke HTML fra kilden ufiltrert. Adresser til lokal maskin og interne nett avvises `[ANTAKELSE: viktig selv om appen kjøres lokalt]`.
 - **NFR-5 Tilgjengelighet og design:** Fungerer fra 360 px bredde (mobil) til desktop. Lesbar tekststørrelse på kjøkkenbenken. Kontrast etter WCAG 2.1 AA, alle handlinger kan nås med tastatur, og alle skjemafelt har etiketter.
 - **NFR-6 Språk:** Grensesnitt, meldinger og forslag er på norsk (bokmål).
-- **NFR-7 Personvern og opphavsrett:** Ingen personopplysninger samles inn. Oppskrifter er til personlig bruk, viser alltid kilde og lagrer ikke bilder fra kilden.
+- **NFR-7 Personvern og opphavsrett:** Ingen personopplysninger samles inn i v1. Fra versjon 2 lagres bare e-post og en hash av passordet (aldri passordet), lokalt i databasen. Oppskrifter er til personlig bruk, viser alltid kilde og lagrer ikke bilder fra kilden.
 
 ## 6. Ikke-mål
 
 - RecipeMate lager ikke nye oppskrifter med KI og er ikke en oppskriftsdatabase eller søkemotor for nettet.
 - RecipeMate er ikke et sosialt nettverk: ingen deling, kommentarer eller vurderinger.
 - RecipeMate er ikke et ernærings- eller kostholdsverktøy.
-- RecipeMate er ikke en skytjeneste med kontoer og synkronisering mellom enheter i v1.
+- RecipeMate er ikke en skytjeneste med synkronisering mellom enheter. (Lokale kontoer kom i versjon 2, FR-27.)
 
 ## 7. MVP-omfang
 
@@ -274,9 +310,9 @@ Brukeren kan se samlingen, én mappe om gangen og favoritter, sortert med sist l
 - Lagring, redigering, mapper, favoritter og oversikter (FR-13–FR-16, FR-18)
 
 ### 7.2 Ikke med i v1
-- Ingredienssubstitusjoner, automatisk handleliste, egne notater, søk og filtrering, kostholdspreferanser og allergier, tidsplan, import fra bilder, ukemenyer (fra briefen).
-- Konto og synkronisering (se §6).
-- Konvertering mellom enheter (f.eks. ss til dl).
+- Ingredienssubstitusjoner, automatisk handleliste, egne notater, søk og filtrering, kostholdspreferanser og allergier, tidsplan, import fra bilder, ukemenyer (fra briefen). Handleliste og søk og filtrering kom i versjon 2 (FR-20, FR-23).
+- Konto og synkronisering (se §6). Lokale kontoer kom i versjon 2 (FR-27); synkronisering er fortsatt utenfor.
+- Konvertering mellom enheter (f.eks. ss til dl). Omregning mellom dl og gram og fra amerikanske mål kom i versjon 2 (FR-22).
 - KI som reserve for import fra sider uten oppskriftsdata.
 
 **Hvis tid (i prioritert rekkefølge):** 1) søk og filtrering i samlingen, 2) KI som reserve for import, 3) ingredienssubstitusjoner.
