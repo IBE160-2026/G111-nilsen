@@ -65,15 +65,25 @@
   border-bottom-color: var(--color-accent);
 }
 
-/* Fem menypunkter skal få plass på én linje fra 360 px. På smalere skjermer eller ved stor tekst brytes de til neste linje (flex-wrap). */
-@media (max-width: 479px) {
+/* Seks menypunkter får ikke plass på én linje under 560 px: to jevne rader med tre i hver. */
+@media (max-width: 559px) {
   .list {
-    column-gap: 4px;
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: space-between;
+    column-gap: var(--space-2);
   }
 
   .link {
     padding-inline: 2px;
-    font-size: 0.78rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* Fra 560 px til 767 px: alle seks på én linje. */
+@media (min-width: 560px) and (max-width: 767px) {
+  .link {
+    font-size: 0.85rem;
   }
 }
 

@@ -221,7 +221,6 @@ export const unitMessages = {
 /** Ukemeny (Story 6.4). */
 export const weekMessages = {
   heading: "Ukemeny",
-  link: "Ukemeny",
   loading: "Henter ukemenyen …",
   loadFailed: "Kunne ikke hente ukemenyen",
   previous: "Forrige uke",
@@ -231,7 +230,9 @@ export const weekMessages = {
   emptyDay: "Ingenting planlagt.",
   addLabel: (day: string) => `Legg til på ${day}`,
   recipeLabel: "Oppskrift",
-  choose: "Velg oppskrift",
+  searchPlaceholder: "Søk etter oppskrift",
+  noMatch: (query: string) => `Ingen lagrede oppskrifter passer «${query}».`,
+  pickFromList: "Velg en oppskrift fra listen.",
   servingsLabel: "Personer",
   add: "Legg til",
   adding: "Legger til …",

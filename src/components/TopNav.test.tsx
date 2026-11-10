@@ -21,7 +21,7 @@ describe("TopNav", () => {
   });
   afterEach(cleanup);
 
-  it("viser logo og fem menypunkter i riktig rekkefølge", () => {
+  it("viser logo og seks menypunkter i riktig rekkefølge", () => {
     render(<TopNav />);
     expect(screen.getByRole("link", { name: "RecipeMate" })).toHaveAttribute("href", "/");
     const links = navLinks();
@@ -30,6 +30,7 @@ describe("TopNav", () => {
       "Oppskrifter",
       "Mapper",
       "Favoritter",
+      "Ukemeny",
       "Handleliste",
     ]);
     expect(links.map((l) => l.getAttribute("href"))).toEqual([
@@ -37,6 +38,7 @@ describe("TopNav", () => {
       "/oppskrifter",
       "/mapper",
       "/favoritter",
+      "/ukemeny",
       "/handleliste",
     ]);
   });
@@ -47,6 +49,8 @@ describe("TopNav", () => {
     ["/mapper", "Mapper"],
     ["/mapper/3", "Mapper"],
     ["/favoritter", "Favoritter"],
+    ["/ukemeny", "Ukemeny"],
+    ["/handleliste", "Handleliste"],
   ])("markerer riktig punkt på %s", (path, expected) => {
     pathnameMock.current = path;
     render(<TopNav />);

@@ -5,6 +5,7 @@ import { useId, useState } from "react";
 import type { ActionResult } from "@/app/_shared/action-result";
 import { fallbackMessage, weekMessages as m } from "@/lib/messages";
 import { formatServings, isSelectedServings, LIMITS } from "@/lib/recipe-input";
+import RecipePicker from "./RecipePicker";
 import styles from "./WeekPlan.module.css";
 
 export type WeekDay = { day: string; label: string; isToday: boolean };
@@ -64,7 +65,7 @@ export default function WeekPlan({
   async function add(day: WeekDay, recipeId: number, servings: number): Promise<string | null> {
     if (pending) return null;
     const recipe = recipes.find((other) => other.id === recipeId);
-    if (!recipe) return m.pickRecipe;
+    if (!recipe) return m.pickFromList;
     if (!isSelectedServings(servings)) return m.invalidServings;
     setPending(true);
     try {
@@ -167,7 +168,9 @@ function AddForm({
   onAdd: (day: WeekDay, recipeId: number, servings: number) => Promise<string | null>;
 }) {
   const id = useId();
-  const [recipeId, setRecipeId] = useState("");
+  const [recipeId, setRecipeId] = useState<number | null>(null);
+  // Ny nøkkel tømmer søkefeltet etter at noe er lagt til.
+  const [pickerKey, setPickerKey] = useState(0);
   const [servings, setServings] = useState("");
   const [error, setError] = useState("");
 
@@ -177,15 +180,15 @@ function AddForm({
       aria-label={m.addLabel(day.label)}
       onSubmit={(event) => {
         event.preventDefault();
-        const chosen = Number(recipeId);
-        const recipe = recipes.find((other) => other.id === chosen);
+        const recipe = recipes.find((other) => other.id === recipeId);
         const count =
           servings.trim() === "" ? defaultServings(recipe) : Number(servings.replace(",", "."));
-        void onAdd(day, chosen, count).then((message) => {
+        void onAdd(day, recipeId ?? 0, count).then((message) => {
           setError(message ?? "");
           if (message === null) {
-            setRecipeId("");
+            setRecipeId(null);
             setServings("");
+            setPickerKey((key) => key + 1);
           }
         });
       }}
@@ -193,24 +196,21 @@ function AddForm({
       <label htmlFor={`${id}-oppskrift`} className={styles.label}>
         {m.recipeLabel}
       </label>
-      <select
-        id={`${id}-oppskrift`}
-        className={styles.select}
-        value={recipeId}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-feil` : undefined}
-        onChange={(event) => {
-          setRecipeId(event.target.value);
-          setError("");
-        }}
-      >
-        <option value="">{m.choose}</option>
-        {recipes.map((recipe) => (
-          <option key={recipe.id} value={recipe.id}>
-            {recipe.title}
-          </option>
-        ))}
-      </select>
+      <div className={styles.picker}>
+        <RecipePicker
+          key={pickerKey}
+          inputId={`${id}-oppskrift`}
+          label={m.recipeLabel}
+          recipes={recipes}
+          value={recipeId}
+          invalid={Boolean(error)}
+          errorId={error ? `${id}-feil` : undefined}
+          onChange={(next) => {
+            setRecipeId(next);
+            setError("");
+          }}
+        />
+      </div>
       <label htmlFor={`${id}-personer`} className={styles.label}>
         {m.servingsLabel}
       </label>
@@ -223,7 +223,7 @@ function AddForm({
         step={0.5}
         className={styles.number}
         placeholder={formatServings(
-          defaultServings(recipes.find((recipe) => String(recipe.id) === recipeId)),
+          defaultServings(recipes.find((recipe) => recipe.id === recipeId)),
         )}
         value={servings}
         onChange={(event) => setServings(event.target.value)}

@@ -366,17 +366,29 @@ test("Versjon 2: handleliste fra lagret oppskrift", async ({ page }, testInfo) =
 
 test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
   await page.goto("/oppskrifter");
-  await page.getByRole("link", { name: "Ukemeny", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Hovedmeny" })
+    .getByRole("link", { name: "Ukemeny" })
+    .click();
   await expect(page.getByRole("heading", { level: 1, name: "Ukemeny" })).toBeVisible();
   await expect(page.getByText(/^Uke \d+ · /)).toBeVisible();
 
   // Første dag i uka: velg oppskriften med 3 personer.
   const form = page.getByRole("form", { name: /^Legg til på mandag/ });
-  // Den første lagrede oppskriften i valget (hvilke som er lagret avhenger av tidligere tester).
-  const select = form.getByLabel("Oppskrift");
-  const title = ((await select.locator("option").nth(1).textContent()) ?? "").trim();
+  // Søk: åpne listen og finn den første lagrede oppskriften (hvilke som er lagret avhenger av
+  // tidligere tester), så skriv starten av tittelen og velg med tastaturet.
+  const search = form.getByRole("combobox", { name: "Oppskrift" });
+  await search.click();
+  const first = form.getByRole("option").first();
+  const title = ((await first.textContent()) ?? "").trim();
   expect(title).not.toBe("");
-  await select.selectOption({ label: title });
+  await search.fill(title.slice(0, 6));
+  await expect(form.getByRole("option", { name: title, exact: true })).toBeVisible();
+  // Den første oppskriften er også først blant treffene, og er markert: Enter velger den.
+  await search.press("ArrowDown");
+  await search.press("ArrowUp");
+  await search.press("Enter");
+  await expect(search).toHaveValue(title);
   await form.getByLabel("Personer").fill("3");
   await form.getByRole("button", { name: "Legg til" }).click();
   const monday = page.locator("li", {
@@ -396,7 +408,7 @@ test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
   await expect(page.getByLabel(`Antall personer for ${title}`)).toHaveValue("3");
 
   // Rydder, så andre kjøringer starter med en tom uke.
-  await page.getByRole("link", { name: "Ukemeny", exact: true }).click();
+  await page.getByRole("link", { name: "Ukemeny", exact: true }).first().click();
   await monday.getByRole("button", { name: new RegExp(`^Fjern ${title}`) }).click();
   await expect(monday.getByText("Ingenting planlagt.")).toBeVisible();
 });

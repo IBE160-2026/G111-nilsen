@@ -10,6 +10,7 @@ export const NAV_ITEMS = [
   { href: "/oppskrifter", label: "Oppskrifter" },
   { href: "/mapper", label: "Mapper" },
   { href: "/favoritter", label: "Favoritter" },
+  { href: "/ukemeny", label: "Ukemeny" },
   { href: "/handleliste", label: "Handleliste" },
 ] as const;
 

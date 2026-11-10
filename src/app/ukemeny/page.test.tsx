@@ -107,8 +107,8 @@ describe("/ukemeny", () => {
     expect(wednesday).toHaveTextContent("3 pers.");
     const options = within(
       screen.getByRole("form", { name: "Legg til på mandag 9. november" }),
-    ).getAllByRole("option");
-    expect(options.map((o) => o.textContent)).toEqual(["Velg oppskrift", "Pannekaker"]);
+    ).getAllByRole("option", { hidden: true });
+    expect(options.map((o) => o.textContent)).toEqual(["Pannekaker"]);
   });
 
   it("viser tom-tilstand uten lagrede oppskrifter", async () => {

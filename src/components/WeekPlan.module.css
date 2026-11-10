@@ -115,7 +115,6 @@
   grid-area: servingsLabel;
 }
 
-.select,
 .number {
   min-width: 0;
   min-height: var(--tap-target-min);
@@ -127,13 +126,9 @@
   font: inherit;
 }
 
-.select {
+.picker {
   grid-area: recipe;
-}
-
-.select[aria-invalid="true"] {
-  border-color: var(--color-accent);
-  border-width: 2px;
+  min-width: 0;
 }
 
 .number {

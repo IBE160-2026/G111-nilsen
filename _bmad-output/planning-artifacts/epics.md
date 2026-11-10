@@ -875,7 +875,7 @@ slik at jeg planlegger middagene og handler alt på én gang.
 **Akseptansekriterier:**
 
 **Gitt** at jeg er logget inn og har lagrede oppskrifter
-**Når** jeg åpner «Ukemeny» og velger oppskrift og antall personer på en dag
+**Når** jeg åpner «Ukemeny» i toppmenyen, søker etter en oppskrift og velger den og antall personer på en dag
 **Så** står oppskriften på dagen, også etter ny innlasting, og kan fjernes igjen
 
 **Gitt** en uke med oppskrifter

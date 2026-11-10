@@ -17,7 +17,7 @@ sources:
 
 ## Information Architecture
 
-Toppmenyen har fire punkter i v1 og fem fra versjon 2 (Handleliste), pluss «Logg inn»/«Logg ut» ved logoen. Alle andre skjermer nås derfra. «Samlingen» heter «Oppskrifter» i menyen.
+Toppmenyen har fire punkter i v1, fem fra versjon 2 (Handleliste) og seks fra Story 6.4 (Ukemeny, foran Handleliste), pluss «Logg inn»/«Logg ut» ved logoen. Alle andre skjermer nås derfra. «Samlingen» heter «Oppskrifter» i menyen.
 
 | Skjerm | Hva den gjør | Nås fra | Krav |
 |---|---|---|---|
@@ -28,7 +28,8 @@ Toppmenyen har fire punkter i v1 og fem fra versjon 2 (Handleliste), pluss «Log
 | **Mapper** | Liste over mapper med antall oppskrifter; opprett, gi nytt navn, slett | Toppmeny | FR-14 |
 | **Mappe** | Oppskriftene i én mappe | Mapper | FR-14, FR-16 |
 | **Favoritter** | Alle favoritter | Toppmeny | FR-15, FR-16 |
-| **Handleliste** (v2) | Velg oppskrifter og antall, sammenslått liste med avkrysning og «Kopier listen», «Har hjemme» | Toppmeny, Oppskrifter | FR-23, FR-24 |
+| **Ukemeny** (6.4) | Én boks per dag med oppskrifter og antall personer; søk etter lagret oppskrift og legg til; forrige/neste uke; «Lag handleliste for uka» | Toppmeny | FR-31 |
+| **Handleliste** (v2) | Velg oppskrifter og antall, sammenslått liste med avkrysning og «Kopier listen», «Har hjemme» | Toppmeny, Oppskrifter, Ukemeny | FR-23, FR-24, FR-31 |
 | **Kokemodus** (v2) | Fullskjerm over oppskriften: ett steg om gangen, ingrediensene i steget | Oppskrift | FR-21 |
 | **Logg inn / Lag konto** (v2) | E-post og passord; sender tilbake dit brukeren kom fra | Toppmeny, «Logg inn for å lagre», sider som krever konto | FR-27 |
 
@@ -46,7 +47,7 @@ Toppmenyen har fire punkter i v1 og fem fra versjon 2 (Handleliste), pluss «Log
 
 | Komponent | Oppførsel |
 |---|---|
-| Toppmeny | Alltid synlig øverst. Aktiv side markert med understrek. Under 768 px ligger logoen på egen linje og de fire menypunktene på linjen under, fordelt over hele bredden (logo og fire punkter får ikke plass på én linje på 360 px). Hvert punkt er minst 44 px høyt. |
+| Toppmeny | Alltid synlig øverst. Aktiv side markert med understrek. Under 768 px ligger logoen på egen linje og menypunktene under, fordelt over hele bredden. Med seks punkter står de under 560 px i to rader med tre i hver. Hvert punkt er minst 44 px høyt. |
 | Lenkefelt | Fokuseres automatisk på Importer. Enter starter import. Knappen er deaktivert mens import pågår. |
 | Porsjonsvelger | −/+ endrer med 1 innenfor 1–50. Tallet kan skrives inn; ugyldig verdi gir melding under feltet og beholder forrige verdi. «Tilbakestill til 4» vises når valgt ≠ opprinnelig. Opprinnelig antall kan endres via «oppr. 4 · endre». |
 | Ingredienslinje | Trykk på hele linjen krysser av og fjerner avkrysning. Skalering endrer ikke avkrysning. |

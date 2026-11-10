@@ -1,0 +1,73 @@
+.root {
+  position: relative;
+  min-width: 0;
+}
+
+.input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--tap-target-min);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-base);
+  color: var(--color-ink-primary);
+  font: inherit;
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--color-accent);
+  border-width: 2px;
+}
+
+/* role="listbox" i markupen; listen legger seg over innholdet under. */
+.list {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 16rem;
+  margin: 0;
+  padding: var(--space-1) 0;
+  overflow-y: auto;
+  list-style: none;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 12%);
+}
+
+.list[hidden] {
+  display: none;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap-target-min);
+  padding: 0 var(--space-3);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.option[aria-selected="true"] {
+  background: var(--color-surface-base);
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.none {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: var(--space-3);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}
