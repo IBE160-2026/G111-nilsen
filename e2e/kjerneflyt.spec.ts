@@ -132,17 +132,17 @@ test("UJ-2: forslag tas i bruk og huskes; oversiktsside gir melding", async ({
       .click();
   }
   await expect(page.getByText("Du har tatt stilling til alle forslagene.")).toBeVisible();
-  // Forslaget vises i ingredienslisten eller ved et steg, merket «Forslag» (Story 5.11). Teksten
-  // «Forslag» står ellers bare som overskriften på forslagsdelen.
-  const badges = page.locator("span").getByText("Forslag", { exact: true });
-  await expect(badges).toHaveCount(1);
+  // Forslaget vises i ingredienslisten og/eller flettet inn i stegteksten, merket som forslag
+  // (Story 5.11, 5.12).
+  const badges = page.locator("[data-suggested]");
+  await expect(badges.first()).toBeVisible();
   expect(await ingredientsText(page)).not.toBe("");
 
   await saveInNewFolder(page, data.folders.uj2);
   await page.reload();
   await expect(page.getByRole("heading", { name: "Dine valgte forslag" })).toBeVisible();
   await expect(page.getByText("Tatt i bruk", { exact: true })).toBeVisible();
-  await expect(badges).toHaveCount(1);
+  await expect(badges.first()).toBeVisible();
 
   // «Fjern» tar forslaget ut av oppskriften igjen.
   await page

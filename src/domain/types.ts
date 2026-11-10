@@ -63,6 +63,9 @@ export type Step = {
   text: string;
   /** Satt for et steg som kommer fra et forslag brukeren har tatt i bruk (Story 5.11). */
   suggested?: boolean;
+  /** Forslag som er flettet inn i stegteksten, før og etter den lagrede teksten (Story 5.12). */
+  addedBefore?: string[];
+  addedAfter?: string[];
 };
 
 /**

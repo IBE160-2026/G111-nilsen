@@ -206,6 +206,8 @@ export const unitMessages = {
 export const appliedSuggestionMessages = {
   badge: "Forslag",
   tipsHeading: "Forslag til retten",
+  /** Leses opp foran et forslag som er flettet inn i stegteksten (Story 5.12). */
+  inlinePrefix: "Forslag:",
 } as const;
 
 /** Kokemodus (Story 5.4). */

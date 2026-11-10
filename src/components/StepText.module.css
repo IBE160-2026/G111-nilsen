@@ -1,0 +1,8 @@
+/* Forslag flettet inn i stegteksten: tydelig uthevet uten å se ut som en lenke. */
+.added {
+  padding: 0 0.15em;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  box-shadow: inset 0 -2px 0 var(--color-accent);
+  color: inherit;
+}

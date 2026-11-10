@@ -3,7 +3,7 @@
 import type { Step } from "@/domain";
 import { appliedSuggestionMessages } from "@/lib/messages";
 import CheckRow from "./CheckRow";
-import SuggestedBadge from "./SuggestedBadge";
+import StepText from "./StepText";
 import styles from "./StepList.module.css";
 import { useCheckedSet } from "./use-checked-set";
 
@@ -37,13 +37,7 @@ export default function StepList({
               onToggle={() => toggle(step.id)}
               marker={`${index + 1}.`}
             >
-              {step.text}
-              {step.suggested ? (
-                <>
-                  {" "}
-                  <SuggestedBadge />
-                </>
-              ) : null}
+              <StepText step={step} />
             </CheckRow>
           ))}
       </ol>

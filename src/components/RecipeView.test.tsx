@@ -188,7 +188,7 @@ describe("RecipeView", () => {
     expect(screen.getByText("Tilsett sitron.")).toBeInTheDocument();
   });
 
-  it("viser forslag som er tatt i bruk i ingrediensene og stegene, merket «Forslag» (Story 5.11)", () => {
+  it("viser forslag som er tatt i bruk i ingrediensene og stegene, merket «Forslag» (Story 5.11, 5.12)", () => {
     render(
       <RecipeView
         recipe={{
@@ -218,7 +218,12 @@ describe("RecipeView", () => {
     ).toBeInTheDocument();
     const stepCard = screen.getByRole("region", { name: "Slik gjør du" });
     expect(
-      within(stepCard).getByRole("checkbox", { name: "Smak til med salt. Forslag" }),
+      within(stepCard).getByRole("checkbox", { name: "Stek. Forslag: Smak til med salt." }),
+    ).toBeInTheDocument();
+    expect(
+      within(stepCard).getByRole("checkbox", {
+        name: "Visp sammen. Forslag: Rør inn vaniljesukker eller kardemomme.",
+      }),
     ).toBeInTheDocument();
     expect(within(stepCard).getByText("Server med bær.")).toBeInTheDocument();
   });

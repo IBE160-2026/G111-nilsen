@@ -14,7 +14,7 @@ import { cookingModeMessages as m } from "@/lib/messages";
 import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import { useGetSelectedServings, useGetUnitSystem } from "./SelectedServings";
 import { servingsText } from "./ServingStepper";
-import SuggestedBadge from "./SuggestedBadge";
+import StepText from "./StepText";
 import styles from "./CookingMode.module.css";
 
 type Props = {
@@ -178,7 +178,12 @@ function Session({
   const [index, setIndex] = useState(0);
   const last = index === sorted.length - 1;
   const lines = [...ingredients].sort((a, b) => a.position - b.position);
-  const stepLines = ingredientsForStep(sorted[index].text, lines);
+  const current = sorted[index];
+  // Forslag som er flettet inn i steget teller med, så for eksempel vaniljesukker vises her også.
+  const stepLines = ingredientsForStep(
+    [...(current.addedBefore ?? []), current.text, ...(current.addedAfter ?? [])].join(" "),
+    lines,
+  );
 
   function previous() {
     setIndex((i) => Math.max(0, i - 1));
@@ -218,13 +223,7 @@ function Session({
 
       <div className={styles.stepArea}>
         <p className={styles.step} aria-live="polite">
-          {sorted[index].text}
-          {sorted[index].suggested ? (
-            <>
-              {" "}
-              <SuggestedBadge />
-            </>
-          ) : null}
+          <StepText step={sorted[index]} />
         </p>
         {stepLines.length > 0 ? (
           <section className={styles.stepIngredients} aria-labelledby="kokemodus-i-steget">

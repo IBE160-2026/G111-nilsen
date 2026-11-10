@@ -123,6 +123,25 @@ describe("StepList", () => {
     expect(screen.getByText("Server med bær.")).toBeInTheDocument();
   });
 
+  it("viser forslag flettet inn i stegteksten, uthevet, og med i navnet på boksen (Story 5.12)", () => {
+    render(
+      <StepList
+        steps={[
+          {
+            id: 2,
+            position: 1,
+            section: null,
+            text: "Stek i panne.",
+            addedBefore: ["La røren hvile."],
+            addedAfter: ["Smak til."],
+          },
+        ]}
+      />,
+    );
+    expect(box("Forslag: La røren hvile. Stek i panne. Forslag: Smak til.")).toBeInTheDocument();
+    expect(document.querySelectorAll("mark")).toHaveLength(2);
+  });
+
   it("viser kortet med bare forslag til retten, uten steg", () => {
     render(<StepList steps={[]} tips={["Server med bær."]} />);
     expect(screen.getByRole("region", { name: "Slik gjør du" })).toBeInTheDocument();

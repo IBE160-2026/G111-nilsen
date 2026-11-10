@@ -11,11 +11,17 @@ export type SuggestInput = {
 type Context = { title: string; ingredients: string; steps: string; all: string };
 
 /**
- * Hvordan et råd vises i oppskriften når det er tatt i bruk (Story 5.11): `line` er
- * ingredienslinjen (tolkes og skaleres som de andre), `before` stammer for steget det settes
- * foran («*» betyr først). Uten `before` legges steget sist.
+ * Hvordan et råd vises i oppskriften når det er tatt i bruk (Story 5.11, 5.12): `line` er
+ * ingredienslinjen (tolkes og skaleres som de andre). `before` er stammer for steget et stegråd
+ * flettes inn foran («*» betyr første steg). For ingrediensråd er `stepText` setningen som flettes
+ * inn etter teksten i første steg som passer `into`.
  */
-export type TipPlacement = { line?: string; before?: readonly string[] };
+export type TipPlacement = {
+  line?: string;
+  before?: readonly string[];
+  stepText?: string;
+  into?: readonly string[];
+};
 
 type Tip = Suggestion & TipPlacement & { skipWhen?: (c: Context) => boolean };
 type Group = { matches: (c: Context) => boolean; tips: readonly Tip[] };
@@ -44,6 +50,8 @@ const GROUPS: readonly Group[] = [
         reason: "Grønnsakene gir fuktighet, så kjøttet blir saftigere og smaker mer.",
         appliesTo: "ingredients",
         line: "1 revet gulrot eller finhakket løk",
+        stepText: "Rør inn revet gulrot eller finhakket løk i kjøttdeigen.",
+        into: ["kjøttdeig", "deig", "bland", "rør"],
         skipWhen: (c) => any(c.ingredients, ["gulrot", "løk"]),
       },
       {
@@ -77,6 +85,8 @@ const GROUPS: readonly Group[] = [
         reason: "Gir mer smak og fiber uten at deigen blir for tung.",
         appliesTo: "ingredients",
         line: "Bytt ¼ av hvetemelet med grovt eller sammalt mel",
+        stepText: "Bytt ¼ av hvetemelet med grovt eller sammalt mel.",
+        into: ["mel", "elt", "bland", "deig"],
         skipWhen: (c) => any(c.ingredients, ["sammalt", "grov", "rug", "spelt"]),
       },
       {
@@ -109,6 +119,8 @@ const GROUPS: readonly Group[] = [
         reason: "Gir ekstra duft og smak uten å endre konsistensen.",
         appliesTo: "ingredients",
         line: "1 ts vaniljesukker eller kardemomme",
+        stepText: "Rør inn vaniljesukker eller kardemomme.",
+        into: ["visp", "rør", "bland", "mel"],
         skipWhen: (c) => any(c.ingredients, ["vanilje", "kardemomme", "kanel"]),
       },
       {
@@ -140,6 +152,8 @@ const GROUPS: readonly Group[] = [
         reason: "Salt fremhever det søte og gir mer smak.",
         appliesTo: "ingredients",
         line: "1 klype salt",
+        stepText: "Ha i en klype salt.",
+        into: ["visp", "rør", "bland", "mel"],
         skipWhen: (c) => any(c.ingredients, ["salt"], true),
       },
     ],
@@ -170,6 +184,8 @@ const GROUPS: readonly Group[] = [
         reason: "Det demper syren fra tomatene og runder av smaken.",
         appliesTo: "ingredients",
         line: "1 klype sukker eller en skvett balsamico",
+        stepText: "Rør inn en klype sukker eller en skvett balsamico.",
+        into: ["tomat", "saus"],
         skipWhen: (c) => any(c.ingredients, ["sukker", "balsamico", "honning"], true),
       },
       {
@@ -205,6 +221,8 @@ const GROUPS: readonly Group[] = [
         reason: "Syre og friske urter løfter smaken av fisk.",
         appliesTo: "ingredients",
         line: "Sitron, dill eller persille",
+        stepText: "Press over litt sitron og strø på dill eller persille.",
+        into: ["server", "stek", "ovn"],
         skipWhen: (c) => any(c.ingredients, ["sitron", "dill", "persille"]),
       },
       {
@@ -228,6 +246,8 @@ const GROUPS: readonly Group[] = [
         reason: "Syre og olje gir smak og holder kjøttet mørt.",
         appliesTo: "ingredients",
         line: "Olje, sitron og hvitløk til marinade",
+        stepText: "Mariner kyllingen i olje, sitron og hvitløk et par timer først.",
+        into: ["kylling"],
         skipWhen: (c) => any(c.all, ["marin"]),
       },
     ],
@@ -250,6 +270,8 @@ const GROUPS: readonly Group[] = [
         reason: "Friske urter gir friskhet til en lang og dyp smak.",
         appliesTo: "ingredients",
         line: "Hakket persille eller dill",
+        stepText: "Rør inn hakket persille eller dill rett før servering.",
+        into: ["server", "smak"],
         skipWhen: (c) => any(c.ingredients, ["persille", "dill", "gressløk"]),
       },
     ],
@@ -350,7 +372,7 @@ export function suggestForRecipe(recipe: SuggestInput): Suggestion[] {
 const PLACEMENTS: ReadonlyMap<string, TipPlacement> = new Map(
   GROUPS.flatMap((group) => group.tips).map((tip) => [
     tip.text,
-    { line: tip.line, before: tip.before },
+    { line: tip.line, before: tip.before, stepText: tip.stepText, into: tip.into },
   ]),
 );
 

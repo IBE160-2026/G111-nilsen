@@ -79,3 +79,4 @@
 - [ ] 2026-11-10 [story 5.9](966-2026-11-10-18-30-00-story-5-9-mal-dl-og-gram.md) — Maja: npm test (2500), e2e (16), prøv dl/gram på oppskrift og handleliste, push
 - [ ] 2026-11-10 [story 5.10](965-2026-11-10-19-15-00-story-5-10-forslag-som-passer.md) — Maja: npm test (2518), e2e (16), prøv «Få forslag» på egne oppskrifter, push
 - [ ] 2026-11-10 [story 5.11](964-2026-11-10-20-00-00-story-5-11-forslag-i-oppskriften.md) — Maja: npm test (2532), e2e (16), ta i bruk forslag og se dem i listene og kokemodus, push
+- [ ] 2026-11-10 [story 5.12](963-2026-11-10-20-45-00-story-5-12-forslag-i-stegteksten.md) — Maja: npm test (2536), e2e (16), ta i bruk forslag og les stegene, push
