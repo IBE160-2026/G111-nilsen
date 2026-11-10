@@ -54,3 +54,5 @@
 - [ ] 2026-11-09 [story-2-3](981-2026-11-09-22-55-00-story-2-3-forsta-hvorfor-import-feilet.md) — se de tre feilmeldingene i nettleseren sammen med testen av Story 2.2
 - [ ] 2026-11-10 [story-2-4](980-2026-11-10-00-10-00-story-2-4-oppgi-porsjonsantall.md) — test porsjonsdialogen og «oppr. N · endre» i nettleseren på Macen (360 og 1280 px, lys og mørk, 200 % zoom); kjør npm test (2164 grønne)
 - [ ] 2026-11-10 [story-2-4](980-2026-11-10-00-10-00-story-2-4-oppgi-porsjonsantall.md) — utsatt: rediger-skjemaet krever antall, ingen uavhengige reviews (spec-2-4)
+- [ ] 2026-11-10 [story-4-1](979-2026-11-10-09-50-09-story-4-1-forslag-i-demomodus.md) — test «Få forslag» i nettleseren på Macen (360 og 1280 px, lys og mørk, 200 % zoom): plassholdere, «Eksempelforslag», fokus, feilmelding; kjør npm test (2221 grønne)
+- [ ] 2026-11-10 [story-4-1](979-2026-11-10-09-50-09-story-4-1-forslag-i-demomodus.md) — utsatt: llm-modus bruker mock til 4.3, grense mot gjentatte språkmodellkall, visuell vs. dokumentrekkefølge på smal skjerm, ingen uavhengige reviews (deferred-work.md, spec-4-1)
