@@ -6,6 +6,7 @@ import { z } from "zod";
 import {
   actionFailure,
   type ActionResult,
+  type ApplySuggestionActionResult,
   type FolderActionResult,
   type SuggestionsActionResult,
 } from "@/app/_shared/action-result";
@@ -20,7 +21,11 @@ import {
   setOriginalServings,
   setSelectedServings,
 } from "@/server/services/recipe-service";
-import { getSuggestions } from "@/server/services/suggestion-service";
+import {
+  applySuggestion as applySuggestionToRecipe,
+  getSuggestions,
+  removeAppliedSuggestion,
+} from "@/server/services/suggestion-service";
 
 // Id og antall er bundet fra siden, men Server Actions er offentlige endepunkter og
 // valideres på nytt (samme regler som `parseRecipeId` og porsjonsvelgeren).
@@ -191,5 +196,50 @@ export async function requestSuggestions(id: number): Promise<SuggestionsActionR
   } catch (error) {
     console.error("Kunne ikke hente forslag", error);
     return { ok: false };
+  }
+}
+
+/**
+ * Tar et forslag i bruk og lagrer det med oppskriften (Story 4.2, FR-11). Id og forslag valideres
+ * på nytt (endepunktet er offentlig). Sidene revalideres, så en ny åpning viser det lagrede.
+ * Ingredienser og steg endres ikke. Feil gir en norsk melding og lagrer ingenting.
+ */
+export async function applySuggestion(
+  recipeId: number,
+  suggestion: unknown,
+): Promise<ApplySuggestionActionResult> {
+  if (!idSchema.safeParse(recipeId).success) return actionFailure("not_found");
+
+  try {
+    const result = applySuggestionToRecipe(recipeId, suggestion);
+    if (!result.ok) return actionFailure(result.error.kind);
+    revalidatePath("/", "layout");
+    return { ok: true, suggestion: result.value };
+  } catch (error) {
+    console.error("Kunne ikke ta i bruk forslaget", error);
+    return actionFailure(undefined);
+  }
+}
+
+/** Fjerner et valgt forslag fra oppskriften (Story 4.2). Feil gir en norsk melding og endrer ingenting. */
+export async function removeSuggestion(
+  recipeId: number,
+  suggestionId: number,
+): Promise<ActionResult> {
+  if (!idSchema.safeParse(recipeId).success) return actionFailure("not_found");
+  if (!idSchema.safeParse(suggestionId).success) return actionFailure("not_found");
+
+  try {
+    const result = removeAppliedSuggestion(recipeId, suggestionId);
+    if (!result.ok) {
+      // Forslaget er borte (for eksempel fjernet i en annen fane): oppdater sidene.
+      if (result.error.kind === "not_found") revalidatePath("/", "layout");
+      return actionFailure(result.error.kind);
+    }
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (error) {
+    console.error("Kunne ikke fjerne forslaget", error);
+    return actionFailure(undefined);
   }
 }

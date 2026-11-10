@@ -57,6 +57,7 @@ describe("getDb", () => {
     const actual = global.__recipemateDbMigrations;
     expect(actual).toBeGreaterThan(0);
     global.__recipemateDbMigrations = 1; // later som tilkoblingen ble åpnet før nyere migrasjoner fantes
+    db.$client.exec("drop table suggestions");
     db.$client.exec("drop table folders");
     db.$client.exec(
       "delete from __drizzle_migrations where created_at > (select min(created_at) from __drizzle_migrations)",

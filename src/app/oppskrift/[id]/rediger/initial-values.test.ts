@@ -37,6 +37,7 @@ const recipe: Recipe = {
     },
   ],
   steps: [{ id: 1, position: 0, section: null, text: "Stek." }],
+  suggestions: [],
 };
 
 describe("initialValuesOf", () => {

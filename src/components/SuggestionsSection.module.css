@@ -42,24 +42,83 @@
   outline-offset: var(--focus-ring-width);
 }
 
-.pending {
+.status {
   color: var(--color-ink-secondary);
 }
 
 /* Tomt statusfelt tar ikke plass. */
-.pending:empty {
+.status:empty {
   display: none;
+}
+
+/* Overskriften får fokus etter en handling, når knappen som ble trykket er borte. */
+.heading:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-accent);
+  outline-offset: var(--focus-ring-width);
+}
+
+.chosen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.subheading {
+  font-size: var(--type-card-title-size);
+  font-weight: 600;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+/* Merket står som tekst med kant, ikke bare som farge. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-full);
+  color: var(--color-accent);
+  font-size: var(--type-meta-size);
+  font-weight: 600;
+}
+
+/* Sekundærknapp: kantlinje i stedet for fyll, ikke rød (som i RecipeActions). */
+.secondary {
+  min-height: var(--tap-target-min);
+  padding: var(--space-3) var(--space-4);
+  border: var(--button-border-width) solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-ink-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondary:hover {
+  border-color: var(--color-accent);
+}
+
+.secondary:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-accent);
+  outline-offset: var(--focus-ring-width);
+}
+
+.secondary[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .results {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-}
-
-.resultsHeading {
-  font-size: var(--type-card-title-size);
-  font-weight: 600;
 }
 
 .example {

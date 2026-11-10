@@ -27,10 +27,12 @@ vi.mock("next/navigation", () => ({
 vi.mock("next/cache", () => ({ revalidatePath }));
 
 const {
+  applySuggestion,
   changeOriginalServings,
   moveToFolder,
   moveToNewFolder,
   removeRecipe,
+  removeSuggestion,
   rememberServings,
   requestSuggestions,
   saveRecipe,
@@ -401,6 +403,98 @@ describe("requestSuggestions (Story 4.1)", () => {
   it("databasefeil: ok: false, og feilen logges", async () => {
     breakDatabase();
     expect(await requestSuggestions(id)).toEqual({ ok: false });
+    expect(console.error).toHaveBeenCalled();
+  });
+});
+
+describe("applySuggestion og removeSuggestion (Story 4.2)", () => {
+  const suggestion = { text: "Tilsett sitron.", reason: "Gir friskhet.", appliesTo: "recipe" };
+
+  it("tar i bruk: lagrer med oppskriften, gir forslaget tilbake og revaliderer", async () => {
+    const before = stored();
+    const result = await applySuggestion(id, suggestion);
+    expect(result).toEqual({ ok: true, suggestion: { id: expect.any(Number), ...suggestion } });
+    expect(revalidatePath).toHaveBeenCalledExactlyOnceWith("/", "layout");
+    const after = stored();
+    expect(after.suggestions).toEqual([result.ok && result.suggestion]);
+    // Ingredienser, steg og updatedAt endres ikke (avkrysning er nøklet på updatedAt).
+    expect(after.ingredients).toEqual(before.ingredients);
+    expect(after.steps).toEqual(before.steps);
+    expect(after.updatedAt).toBe(before.updatedAt);
+  });
+
+  it("virker også for en oppskrift som ikke er i samlingen", async () => {
+    unsave();
+    expect((await applySuggestion(id, suggestion)).ok).toBe(true);
+  });
+
+  it("tatt i bruk to ganger: én rad", async () => {
+    await applySuggestion(id, suggestion);
+    await applySuggestion(id, { ...suggestion });
+    expect(stored().suggestions).toHaveLength(1);
+  });
+
+  it.each([0, -1, 1.5, NaN, Infinity, 2 ** 53, "1" as unknown as number])(
+    "ugyldig oppskrifts-id %s: not_found, ingenting lagres, ingen revalidering",
+    async (bad) => {
+      expect(await applySuggestion(bad, suggestion)).toEqual(failure("not_found"));
+      expect(count("suggestions")).toBe(0);
+      expect(revalidatePath).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([undefined, "forslag", { text: "a" }, { ...suggestion, appliesTo: "alt" }])(
+    "ugyldig forslag %j: validation, ingenting lagres, ingen revalidering",
+    async (bad) => {
+      expect(await applySuggestion(id, bad)).toEqual(failure("validation"));
+      expect(count("suggestions")).toBe(0);
+      expect(revalidatePath).not.toHaveBeenCalled();
+    },
+  );
+
+  it("ukjent oppskrift: not_found", async () => {
+    expect(await applySuggestion(id + 100, suggestion)).toEqual(failure("not_found"));
+  });
+
+  it("databasefeil: reservemelding og feilen logges", async () => {
+    breakDatabase();
+    expect(await applySuggestion(id, suggestion)).toEqual(failure(undefined));
+    expect(console.error).toHaveBeenCalled();
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("fjerner: sletter bare det valgte forslaget og revaliderer", async () => {
+    const a = await applySuggestion(id, suggestion);
+    await applySuggestion(id, { ...suggestion, text: "Annet." });
+    revalidatePath.mockClear();
+    if (!a.ok) throw new Error("kunne ikke ta i bruk");
+
+    expect(await removeSuggestion(id, a.suggestion.id)).toEqual({ ok: true });
+
+    expect(stored().suggestions.map((s) => s.text)).toEqual(["Annet."]);
+    expect(revalidatePath).toHaveBeenCalledExactlyOnceWith("/", "layout");
+  });
+
+  it("fjerner et forslag som allerede er borte: not_found, og sidene oppdateres", async () => {
+    expect(await removeSuggestion(id, 9999)).toEqual(failure("not_found"));
+    expect(revalidatePath).toHaveBeenCalledExactlyOnceWith("/", "layout");
+  });
+
+  it.each([0, -1, 1.5, NaN, "1" as unknown as number])(
+    "fjerner med ugyldig id %s: not_found, ingen revalidering",
+    async (bad) => {
+      await applySuggestion(id, suggestion);
+      revalidatePath.mockClear();
+      expect(await removeSuggestion(id, bad)).toEqual(failure("not_found"));
+      expect(await removeSuggestion(bad, 1)).toEqual(failure("not_found"));
+      expect(stored().suggestions).toHaveLength(1);
+      expect(revalidatePath).not.toHaveBeenCalled();
+    },
+  );
+
+  it("fjerner: databasefeil gir reservemelding", async () => {
+    breakDatabase();
+    expect(await removeSuggestion(id, 1)).toEqual(failure(undefined));
     expect(console.error).toHaveBeenCalled();
   });
 });

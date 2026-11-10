@@ -205,3 +205,13 @@
 - source_spec: `spec-4-1-forslag-i-demomodus.md`
   summary: På smal skjerm står forslagene visuelt mellom ingredienser og steg (UX), men etter stegene i dokumentet, slik at tastaturrekkefølgen følger bredt oppsett.
   evidence: Ikke testet med skjermleser. Vurder å flytte forslagene i dokumentet hvis det viser seg forvirrende.
+
+- source_spec: `spec-4-2-ta-i-bruk-forslag.md`
+  summary: Ingen grense for antall valgte forslag per oppskrift. Hvert forslag er maks 300 + 400 tegn, men antallet er ubegrenset; unik indeks hindrer bare identisk tekst.
+  evidence: Lokal enbrukerapp (PRD §6). Vurder en grense (for eksempel 20) hvis appen hostes.
+- source_spec: `spec-4-2-ta-i-bruk-forslag.md`
+  summary: Forslagsdelen eier listen over valgte forslag i klienttilstand (startverdi fra siden). En endring gjort i en annen fane eller økt vises først når siden åpnes på nytt.
+  evidence: Valgt for at listen ikke skal hoppe ved revalidering. Fjern/ta i bruk på et forslag som er borte gir en melding.
+- source_spec: `spec-4-2-ta-i-bruk-forslag.md`
+  summary: Sporadisk testfeil sett én gang på Macen under Story 4.1: `ManualRecipeForm.test.tsx > deaktiverer knappen mens skjemaet sendes` (forventet fokus på tittelfeltet, fikk knappen). Bestod ved neste kjøring og i alle kjøringer i skymiljøet.
+  evidence: Fokusforventningen etter `waitFor(enabled)` er timing-avhengig. Kjørt på kode uten 4.1-endringer (HEAD 7155096). Rett testen (vent på fokus i stedet for knappen) ved neste anledning.

@@ -1,4 +1,4 @@
-import type { SuggestionSet } from "@/domain";
+import type { AppliedSuggestion, SuggestionSet } from "@/domain";
 import { messageFor } from "@/lib/messages";
 
 /** Svaret fra en Server Action som ikke sender brukeren videre: ok, eller en norsk melding. */
@@ -19,3 +19,7 @@ export type FolderActionResult<T extends object = object> =
 
 /** Svaret fra «Få forslag» (Story 4.1): forslagene, eller `ok: false` (komponenten viser meldingen). */
 export type SuggestionsActionResult = ({ ok: true } & SuggestionSet) | { ok: false };
+
+/** Svaret fra «Ta i bruk» (Story 4.2): det lagrede forslaget, eller en norsk melding. */
+export type ApplySuggestionActionResult =
+  { ok: true; suggestion: AppliedSuggestion } | { ok: false; message: string };

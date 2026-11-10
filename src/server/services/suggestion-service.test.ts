@@ -3,7 +3,13 @@ import { appError, err, ok } from "@/lib/result";
 import { createTestDb, type Db } from "../db/client";
 import type { SuggestionProvider } from "../ports/suggestion-provider";
 import { createManualRecipe } from "./recipe-service";
-import { getSuggestions, providerFor } from "./suggestion-service";
+import { getRecipe } from "./recipe-service";
+import {
+  applySuggestion,
+  getSuggestions,
+  providerFor,
+  removeAppliedSuggestion,
+} from "./suggestion-service";
 
 let db: Db;
 let id: number;
@@ -127,5 +133,100 @@ describe("providerFor", () => {
       const result = await getSuggestions(created.value.id, db, providerFor(mode));
       expect(result.ok && result.value.isExample).toBe(true);
     }
+  });
+});
+
+describe("applySuggestion (Story 4.2)", () => {
+  const suggestion = valid[0];
+  const at = () => new Date("2026-11-10T09:00:00.000Z");
+
+  it("lagrer forslaget med oppskriften og gir det tilbake med id", () => {
+    const result = applySuggestion(id, suggestion, db, at);
+    expect(result).toEqual({ ok: true, value: { id: expect.any(Number), ...suggestion } });
+    const recipe = getRecipe(id, db);
+    expect(recipe.ok && recipe.value.suggestions).toEqual([result.ok && result.value]);
+  });
+
+  it("endrer ikke ingredienser, steg, valgt antall eller updatedAt", () => {
+    const before = getRecipe(id, db);
+    applySuggestion(id, suggestion, db, at);
+    const after = getRecipe(id, db);
+    if (!before.ok || !after.ok) throw new Error("fant ikke oppskriften");
+    expect(after.value.ingredients).toEqual(before.value.ingredients);
+    expect(after.value.steps).toEqual(before.value.steps);
+    expect(after.value.updatedAt).toBe(before.value.updatedAt);
+    expect(after.value.selectedServings).toBe(before.value.selectedServings);
+  });
+
+  it("samme forslag to ganger gir samme rad", () => {
+    const first = applySuggestion(id, suggestion, db, at);
+    const again = applySuggestion(id, { ...suggestion }, db, at);
+    expect(again).toEqual(first);
+    const recipe = getRecipe(id, db);
+    expect(recipe.ok && recipe.value.suggestions).toHaveLength(1);
+  });
+
+  it("trimmer teksten og fjerner ukjente felt", () => {
+    const result = applySuggestion(
+      id,
+      { ...suggestion, text: "  Tilsett sitron.  ", ekstra: 1 },
+      db,
+    );
+    expect(result).toEqual({ ok: true, value: { id: expect.any(Number), ...suggestion } });
+  });
+
+  it.each([
+    ["ingenting", undefined],
+    ["tekst", "forslag"],
+    ["tom tekst", { ...valid[0], text: "  " }],
+    ["manglende begrunnelse", { text: "a", appliesTo: "recipe" }],
+    ["ukjent appliesTo", { ...valid[0], appliesTo: "alt" }],
+    ["for lang tekst", { ...valid[0], text: "a".repeat(301) }],
+  ])("avviser ugyldig forslag (%s) med validation, og lagrer ingenting", (_name, input) => {
+    expect(applySuggestion(id, input, db)).toEqual({
+      ok: false,
+      error: { kind: "validation", detail: "suggestion" },
+    });
+    const recipe = getRecipe(id, db);
+    expect(recipe.ok && recipe.value.suggestions).toEqual([]);
+  });
+
+  it("gir not_found for ukjent oppskrift", () => {
+    expect(applySuggestion(9999, suggestion, db)).toEqual({
+      ok: false,
+      error: { kind: "not_found" },
+    });
+    expect(applySuggestion(0, suggestion, db)).toEqual({ ok: false, error: { kind: "not_found" } });
+  });
+});
+
+describe("removeAppliedSuggestion (Story 4.2)", () => {
+  it("sletter forslaget fra oppskriften", () => {
+    const applied = applySuggestion(id, valid[0], db);
+    if (!applied.ok) throw new Error("kunne ikke ta i bruk");
+    expect(removeAppliedSuggestion(id, applied.value.id, db)).toEqual({
+      ok: true,
+      value: { id: applied.value.id },
+    });
+    const recipe = getRecipe(id, db);
+    expect(recipe.ok && recipe.value.suggestions).toEqual([]);
+  });
+
+  it.each([9999, 0, -1, 1.5, NaN])("ukjent eller ugyldig id %s gir not_found", (bad) => {
+    applySuggestion(id, valid[0], db);
+    expect(removeAppliedSuggestion(id, bad, db)).toEqual({
+      ok: false,
+      error: { kind: "not_found" },
+    });
+    const recipe = getRecipe(id, db);
+    expect(recipe.ok && recipe.value.suggestions).toHaveLength(1);
+  });
+
+  it("sletter ikke et forslag som hører til en annen oppskrift", () => {
+    const applied = applySuggestion(id, valid[0], db);
+    if (!applied.ok) throw new Error("kunne ikke ta i bruk");
+    expect(removeAppliedSuggestion(id + 1, applied.value.id, db).ok).toBe(false);
+    const recipe = getRecipe(id, db);
+    expect(recipe.ok && recipe.value.suggestions).toHaveLength(1);
   });
 });

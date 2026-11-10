@@ -1,10 +1,12 @@
 import Link from "next/link";
 import type { Folder, Recipe } from "@/domain";
 import {
+  applySuggestion,
   changeOriginalServings,
   moveToFolder,
   moveToNewFolder,
   removeRecipe,
+  removeSuggestion,
   rememberServings,
   requestSuggestions,
   saveRecipe,
@@ -88,6 +90,9 @@ export default function RecipeView({ recipe, folders }: { recipe: Recipe; folder
           <SuggestionsSection
             key={`forslag-${recipe.id}`}
             onRequest={requestSuggestions.bind(null, recipe.id)}
+            applied={recipe.suggestions}
+            onApply={applySuggestion.bind(null, recipe.id)}
+            onRemove={removeSuggestion.bind(null, recipe.id)}
           />
         </div>
       </div>

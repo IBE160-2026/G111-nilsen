@@ -1,8 +1,16 @@
 import "server-only";
 import { and, asc, desc, eq, isNotNull, isNull, lt, sql, type SQL } from "drizzle-orm";
-import type { Quantity, Recipe, RecipeLine, RecipeSummary, Step, UnitKey } from "@/domain";
+import type {
+  Quantity,
+  Recipe,
+  RecipeLine,
+  RecipeSummary,
+  Step,
+  SuggestionTarget,
+  UnitKey,
+} from "@/domain";
 import type { Db } from "../client";
-import { folders, ingredientLines, recipes, steps } from "../schema";
+import { folders, ingredientLines, recipes, steps, suggestions } from "../schema";
 
 /** En ingredienslinje klar til lagring (tolket, ikke skalert). */
 export type NewIngredientLine = Omit<RecipeLine, "id">;
@@ -215,7 +223,7 @@ function toQuantity(min: number | null, max: number | null): Quantity | null {
   return max === null ? { min } : { min, max };
 }
 
-/** Henter en oppskrift med linjer og steg sortert på `position`, eller `null`. */
+/** Henter en oppskrift med linjer og steg sortert på `position`, og valgte forslag (eldste først), eller `null`. */
 export function findRecipeById(db: Db, id: number): Recipe | null {
   const row = db.select().from(recipes).where(eq(recipes.id, id)).get();
   if (!row) return null;
@@ -232,6 +240,13 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
     .from(steps)
     .where(eq(steps.recipeId, id))
     .orderBy(asc(steps.position), asc(steps.id))
+    .all();
+
+  const suggestionRows = db
+    .select()
+    .from(suggestions)
+    .where(eq(suggestions.recipeId, id))
+    .orderBy(asc(suggestions.id))
     .all();
 
   return {
@@ -261,6 +276,12 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
       position: step.position,
       section: step.section,
       text: step.text,
+    })),
+    suggestions: suggestionRows.map((suggestion) => ({
+      id: suggestion.id,
+      text: suggestion.text,
+      reason: suggestion.reason,
+      appliesTo: suggestion.appliesTo as SuggestionTarget,
     })),
   };
 }

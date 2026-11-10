@@ -14,6 +14,8 @@ const actions = vi.hoisted(() => ({
   setFavorite: vi.fn(),
   changeOriginalServings: vi.fn(),
   requestSuggestions: vi.fn(),
+  applySuggestion: vi.fn(),
+  removeSuggestion: vi.fn(),
 }));
 vi.mock("@/app/oppskrift/[id]/actions", () => actions);
 
@@ -27,6 +29,11 @@ beforeEach(() => {
   actions.moveToNewFolder.mockReset().mockResolvedValue({ ok: true, folderName: "Ny" });
   actions.setFavorite.mockReset().mockResolvedValue({ ok: true });
   actions.changeOriginalServings.mockReset().mockResolvedValue({ ok: true });
+  actions.applySuggestion.mockReset().mockResolvedValue({
+    ok: true,
+    suggestion: { id: 21, text: "Tilsett sitron.", reason: "Gir friskhet.", appliesTo: "recipe" },
+  });
+  actions.removeSuggestion.mockReset().mockResolvedValue({ ok: true });
   actions.requestSuggestions.mockReset().mockResolvedValue({
     ok: true,
     isExample: true,
@@ -95,6 +102,7 @@ const recipe: Recipe = {
     { id: 1, position: 0, section: null, text: "Visp sammen." },
     { id: 2, position: 1, section: null, text: "Stek." },
   ],
+  suggestions: [],
 };
 
 describe("RecipeView", () => {
@@ -146,6 +154,37 @@ describe("RecipeView", () => {
 
     expect(actions.requestSuggestions).toHaveBeenCalledExactlyOnceWith(7);
     expect(await screen.findByText("Eksempelforslag")).toBeInTheDocument();
+    expect(screen.getByText("Tilsett sitron.")).toBeInTheDocument();
+  });
+
+  it("viser valgte forslag fra oppskriften og binder «Ta i bruk» og «Fjern» til oppskriftens id (Story 4.2)", async () => {
+    const user = userEvent.setup();
+    render(
+      <RecipeView
+        recipe={{
+          ...recipe,
+          id: 7,
+          suggestions: [
+            { id: 5, text: "Server med salat.", reason: "Gir kontrast.", appliesTo: "recipe" },
+          ],
+        }}
+        folders={folders}
+      />,
+    );
+    const chosen = screen.getByRole("group", { name: "Dine valgte forslag" });
+    expect(within(chosen).getByText("Server med salat.")).toBeInTheDocument();
+    expect(within(chosen).getByText("Tatt i bruk")).toBeInTheDocument();
+
+    await user.click(within(chosen).getByRole("button", { name: "Fjern: Server med salat." }));
+    expect(actions.removeSuggestion).toHaveBeenCalledExactlyOnceWith(7, 5);
+
+    await user.click(screen.getByRole("button", { name: "Få forslag" }));
+    await user.click(await screen.findByRole("button", { name: "Ta i bruk: Tilsett sitron." }));
+    expect(actions.applySuggestion).toHaveBeenCalledExactlyOnceWith(7, {
+      text: "Tilsett sitron.",
+      reason: "Gir friskhet.",
+      appliesTo: "recipe",
+    });
     expect(screen.getByText("Tilsett sitron.")).toBeInTheDocument();
   });
 

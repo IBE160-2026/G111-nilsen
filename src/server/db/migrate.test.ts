@@ -141,6 +141,7 @@ describe("migrasjon 0001 (Story 3.1: manuelle oppskrifter i samlingen)", () => {
       "0001_move_manual_recipes_to_collection",
       "0002_folders",
       "0003_favorites",
+      "0004_suggestions",
     ]);
     expect(existsSync(join(migrationsFolder(), "meta", "0001_snapshot.json"))).toBe(true);
   });
@@ -422,5 +423,31 @@ describe("migrasjon 0003 (Story 3.4: favoritter)", () => {
     db.$client.prepare("update recipes set is_favorite = 1 where id = 1").run();
     db.$client.prepare("delete from recipes where id = 1").run();
     expect(rows(db, "select count(*) as n from recipes where is_favorite = 1")).toEqual([{ n: 0 }]);
+  });
+});
+
+describe("migrasjon 0004 (Story 4.2: valgte forslag)", () => {
+  it("oppretter tabellen med unik indeks og cascade fra oppskriften", () => {
+    const db = openDatabase(MEMORY_DATABASE);
+    expect(tables(db)).toContain("suggestions");
+    const columns = (
+      db.$client.prepare("pragma table_info('suggestions')").all() as { name: string }[]
+    ).map((c) => c.name);
+    expect(columns).toEqual(["id", "recipe_id", "text", "reason", "applies_to", "created_at"]);
+
+    db.$client
+      .prepare("insert into recipes (title, created_at, updated_at) values ('A', 'x', 'x')")
+      .run();
+    const insert = db.$client.prepare(
+      "insert into suggestions (recipe_id, text, reason, applies_to, created_at) values (?, ?, 'r', 'recipe', 'x')",
+    );
+    insert.run(1, "t");
+    // Samme tekst to ganger på samme oppskrift avvises av den unike indeksen.
+    expect(() => insert.run(1, "t")).toThrow(/UNIQUE/);
+    // Ukjent oppskrift avvises av fremmednøkkelen.
+    expect(() => insert.run(99, "u")).toThrow(/FOREIGN KEY/);
+    db.$client.prepare("delete from recipes where id = 1").run();
+    expect(db.$client.prepare("select count(*) as n from suggestions").get()).toEqual({ n: 0 });
+    db.$client.close();
   });
 });

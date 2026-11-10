@@ -1,4 +1,5 @@
 export type {
+  AppliedSuggestion,
   Folder,
   FolderSummary,
   ParsedLine,

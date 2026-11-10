@@ -262,4 +262,15 @@ export const suggestionMessages = {
   resultsHeading: "Forslag til retten",
   exampleLabel: "Eksempelforslag",
   exampleNote: "Koble til en språkmodell for forslag til akkurat denne oppskriften.",
+  /** Overskrift over forslagene brukeren har tatt i bruk (Story 4.2). */
+  chosenHeading: "Dine valgte forslag",
+  /** Merket på et valgt forslag. */
+  appliedBadge: "Tatt i bruk",
+  apply: "Ta i bruk",
+  skip: "Hopp over",
+  remove: "Fjern",
+  appliedStatus: "Forslaget er tatt i bruk.",
+  skippedStatus: "Forslaget er hoppet over.",
+  removedStatus: "Forslaget er fjernet.",
+  allHandled: "Du har tatt stilling til alle forslagene.",
 } as const;

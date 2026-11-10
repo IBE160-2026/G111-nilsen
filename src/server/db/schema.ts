@@ -73,3 +73,22 @@ export const steps = sqliteTable(
   },
   (table) => [index("steps_recipe_idx").on(table.recipeId, table.position)],
 );
+
+/**
+ * Valgte forslag (Story 4.2, AD-5). Bare forslag brukeren har tatt i bruk lagres; «hopp over»
+ * lagres aldri. Samme tekst kan bare tas i bruk én gang per oppskrift.
+ */
+export const suggestions = sqliteTable(
+  "suggestions",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    recipeId: integer("recipe_id")
+      .notNull()
+      .references(() => recipes.id, { onDelete: "cascade" }),
+    text: text("text").notNull(),
+    reason: text("reason").notNull(),
+    appliesTo: text("applies_to").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [uniqueIndex("suggestions_recipe_text_unique").on(table.recipeId, table.text)],
+);

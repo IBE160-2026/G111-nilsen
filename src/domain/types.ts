@@ -81,6 +81,8 @@ export type Recipe = {
   updatedAt: string;
   ingredients: RecipeLine[];
   steps: Step[];
+  /** Forslag brukeren har tatt i bruk (Story 4.2), eldste først. Endrer aldri ingredienser eller steg. */
+  suggestions: AppliedSuggestion[];
 };
 
 /**
@@ -110,6 +112,9 @@ export type Suggestion = {
   reason: string;
   appliesTo: SuggestionTarget;
 };
+
+/** Et forslag brukeren har tatt i bruk og som er lagret med oppskriften (Story 4.2). */
+export type AppliedSuggestion = Suggestion & { id: number };
 
 /** Forslag for en oppskrift. `isExample` er sant når de er eksempelforslag (demomodus). */
 export type SuggestionSet = {

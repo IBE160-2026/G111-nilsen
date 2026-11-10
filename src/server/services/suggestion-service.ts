@@ -1,10 +1,18 @@
 import "server-only";
-import type { SuggestionSet } from "@/domain";
+import type { AppliedSuggestion, SuggestionSet } from "@/domain";
 import { appError, err, ok, type Result } from "@/lib/result";
 import { createMockSuggestionProvider } from "../adapters/mock-suggestions";
 import { config, type SuggestionMode } from "../config";
 import { getDb, type Db } from "../db/client";
-import { suggestionsSchema, type SuggestionProvider } from "../ports/suggestion-provider";
+import {
+  deleteAppliedSuggestion,
+  insertAppliedSuggestion,
+} from "../db/repositories/suggestion-repository";
+import {
+  suggestionSchema,
+  suggestionsSchema,
+  type SuggestionProvider,
+} from "../ports/suggestion-provider";
 import { getRecipe } from "./recipe-service";
 
 /**
@@ -46,4 +54,36 @@ export async function getSuggestions(
     return err(appError("suggestion_failed", "invalid_response"));
   }
   return ok({ suggestions: parsed.data, isExample: raw.value.isExample });
+}
+
+/**
+ * Tar et forslag i bruk og lagrer det med oppskriften (Story 4.2, FR-11). Forslaget valideres
+ * med `suggestionSchema` (kommer fra klienten); ugyldig gir `validation`, ukjent oppskrift
+ * `not_found`. Samme tekst to ganger gir det som allerede er lagret. Ingredienser, steg og
+ * `updatedAt` endres ikke.
+ */
+export function applySuggestion(
+  recipeId: number,
+  suggestion: unknown,
+  db: Db = getDb(),
+  now: () => Date = () => new Date(),
+): Result<AppliedSuggestion> {
+  const recipe = getRecipe(recipeId, db);
+  if (!recipe.ok) return recipe;
+  const parsed = suggestionSchema.safeParse(suggestion);
+  if (!parsed.success) return err(appError("validation", "suggestion"));
+  const stored = insertAppliedSuggestion(db, recipeId, parsed.data, now().toISOString());
+  return stored ? ok(stored) : err(appError("not_found"));
+}
+
+/** Fjerner et valgt forslag fra oppskriften (Story 4.2). Ukjent forslag eller oppskrift gir `not_found`. */
+export function removeAppliedSuggestion(
+  recipeId: number,
+  suggestionId: number,
+  db: Db = getDb(),
+): Result<{ id: number }> {
+  if (!Number.isSafeInteger(suggestionId) || suggestionId < 1) return err(appError("not_found"));
+  return deleteAppliedSuggestion(db, recipeId, suggestionId)
+    ? ok({ id: suggestionId })
+    : err(appError("not_found"));
 }

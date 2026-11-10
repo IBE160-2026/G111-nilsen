@@ -21,6 +21,7 @@ function recipe(id: number): Recipe {
     updatedAt: "2026-11-10T08:00:00.000Z",
     ingredients: [],
     steps: [],
+    suggestions: [],
   };
 }
 
