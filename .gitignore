@@ -62,3 +62,8 @@ Thumbs.db
 
 # RecipeMate: lokal SQLite-database
 /data/
+
+# Ende-til-ende-tester: midlertidig database og resultater
+/.e2e/
+/test-results/
+/playwright-report/

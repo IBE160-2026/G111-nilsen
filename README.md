@@ -12,7 +12,18 @@ Repoet inneholder applikasjonen og dokumentasjon av utvikling, testing og kvalit
 
 **RecipeMate** er en matlagingsassistent for oppskrifter fra nettet. Du limer inn en lenke (eller skriver inn oppskriften selv), og appen viser oppskriften i et fast og ryddig format der du kan velge antall personer, slik at alle mengder regnes om med en gang. Oppskrifter kan lagres i Oppskrifter, i mapper og som favoritter.
 
-Status: Story 2.2 (import fra lenke) er ferdig, se «Importere fra lenke» under. Epic 1 («Les og skaler en oppskrift») er ferdig: Story 1.1–1.6, pluss Story 3.5 (redigering), Story 3.1 (Oppskrifter-siden), Story 3.2 (lagre og slette), Story 3.3 (mapper) og Story 3.4 (favoritter). Du kan legge inn en oppskrift selv via «Legg inn selv» på Importer-siden (`/ny`), finne den igjen under Oppskrifter (`/samlingen`), se den på `/oppskrift/{id}`, velge antall personer og krysse av ingredienser og steg mens du lager maten. Oppskriften lagres i en lokal SQLite-database. Import fra lenke (Story 2.2) er på plass; forslag og porsjonsdialogen for oppskrifter uten antall kommer i senere stories.
+![RecipeMate: en oppskrift skalert til 5 personer, med et valgt forslag](docs/skjermbilde-oppskrift.png)
+
+**For hvem:** alle som lager mat fra oppskrifter på nettet og må regne om mengdene når det varierer hvor mange som skal spise.
+
+**Hva appen gjør:**
+
+- Importerer en oppskrift fra en lenke (JSON-LD på siden), eller du skriver den inn selv.
+- Viser den i fast format og regner om alle mengder når du velger antall personer.
+- Lagrer oppskriftene lokalt, i mapper og som favoritter, og du kan krysse av under matlaging.
+- Gir 1–3 forslag til hvordan retten kan bli bedre. Uten nøkkel er det eksempelforslag; med nøkkel lager en språkmodell forslag til akkurat denne oppskriften. Forslag du tar i bruk lagres med oppskriften og endrer aldri ingredienser eller steg.
+
+Alt unntatt språkmodellen virker uten konto, nøkkel eller nett (importen kan kjøres mot lagrede sider, se «Importere fra lenke»). Status: Epic 1–4 er bygget (Story 1.1–4.4). Åpne saker står i [`issues/`](issues/README.md) og i `_bmad-output/implementation-artifacts/deferred-work.md`.
 
 ## Hva Epic 1 (og Story 3.5) inneholder
 
@@ -42,6 +53,7 @@ På oppskriftssiden er hver ingredienslinje og hvert steg en avkrysningsboks. Tr
 
 - [Node.js](https://nodejs.org/) 22 eller nyere (npm følger med). Testet med Node.js 22.23 og npm 10.9.
 - Ingen database-server, konto eller API-nøkkel trengs (nøkkel til språkmodell er valgfri, se «Forslag»)
+- Bare for ende-til-ende-testene: en nettleser for Playwright (`npx playwright install chromium`, én gang, ca. 150 MB nedlasting)
 
 ## Installasjon
 
@@ -184,20 +196,41 @@ npm run lint         # ESLint
 npm run typecheck    # typekontroll med TypeScript (tsc --noEmit)
 npm run format       # formater koden med Prettier
 npm run format:check # sjekk formatering uten å endre filer
+npm run test:e2e     # ende-til-ende-tester (Playwright), se under
 ```
 
 `npm run lint` og `npm test` skal være grønne før hver commit.
 
+### Ende-til-ende-tester
+
+```bash
+npx playwright install chromium   # bare første gang
+npm run test:e2e
+```
+
+`npm run test:e2e` bygger appen og starter den på port 3100 med en midlertidig database (`.e2e/`, slettes ved hver kjøring), lagrede oppskriftssider i stedet for nettet (`IMPORT_SOURCE=fixtures`) og uten språkmodellnøkkel (eksempelforslag). Ingen test bruker nettverket. Stopp `npm run dev` først, siden bygget bruker samme `.next`-mappe.
+
+`e2e/kjerneflyt.spec.ts` kjører hver gang ved 360 px og 1280 px:
+
+- **UJ-1:** importer en oppskrift, velg ett flere personer, lagre i en ny mappe og gjør den til favoritt.
+- **UJ-2:** velg 5 personer, få forslag, ta i bruk ett og hopp over resten, lagre i mappe og se at forslaget huskes etter at siden lastes på nytt. Kanttilfelle: en oversiktsside gir «Fant ingen oppskrift på siden».
+- **UJ-3:** finn oppskriften igjen under Favoritter, se at antallet huskes, og endre det.
+- **Tastatur:** Tab når «Færre personer», «Flere personer» og «Få forslag», og fokus er synlig overalt, i lys og mørk modus.
+
+Én kjent forskjell fra PRD: et antall som velges *før* «Lagre» huskes ikke, bare et valgt etter lagring (se [issue 009](issues/009-valgt-antall-glemmes-ved-lagring.md)); testen følger dagens oppførsel.
+
+Playwright-versjonen er låst i `package-lock.json`. Ligger nettleseren et annet sted enn Playwright forventer, sett `E2E_CHROMIUM_PATH` til stien til `chrome`.
+
 ### Hva testene dekker
 
-`npm test` kjører Vitest én gang og gir i dag 73 testfiler og 2164 tester. Ingen test bruker nettverket (bare lokale 127.0.0.1-tjenere) eller en ekte API-nøkkel.
+`npm test` kjører Vitest én gang og gir i dag 79 testfiler og 2303 tester (ende-til-ende-testene kommer i tillegg, se over). Ingen test bruker nettverket (bare lokale 127.0.0.1-tjenere) eller en ekte API-nøkkel.
 
 - **Domenet** (`src/domain/`): tolking av mengder og ingredienslinjer og skalering og formatering, med fasittabellen fra Epic 1 (400 g mel for 6 gir 600 g, «1 egg (ca.)», og så videre) som egne tester, og lesing av oppskriftsdata fra lagrede HTML-sider (JSON-LD, normalisering, tekstrensing, ytelse for 2 MB og aldri-kaster-egenskap).
 - **Server** (`src/server/`): repositorier og tjenester mot en ekte SQLite-database i minnet, blant annet tilbakerulling ved feil, redigering, samlingen, lagring, sletting og opprydding, og datamigrasjonen (en database med bare den første migrasjonen oppgraderes).
 - **Komponenter og sider** (Testing Library og user-event i jsdom): toppmeny, skjema for ny og redigert oppskrift, porsjonsvelger (grenser, ugyldig inntasting, `aria-disabled` og fokus), ingredienser (skalering fra originalen, seksjoner, utolkbare linjer), steg og avkrysning (klikk på teksten, mellomrom med tastatur, skalering og «Tilbakestill» beholder avkrysningen, ingen serverkall, nullstilling når `<Activity>` skjuler siden og ved avmontering, også i Strict Mode).
 - **Designtokens**: fargene i `tokens.css` er de samme som i `DESIGN.md`, og avkrysningsboksen bruker tokens uten hardkodede farger.
 
-Det som ikke er automatisk testet, er utseendet i en ekte nettleser (oppsett, hake og fokusring). Det kontrolleres manuelt ved 360 og 1280 px i lys og mørk modus.
+Utseendet (oppsett, farger og kontrast) er ikke automatisk testet. Ende-til-ende-testene dekker kjerneflyten og synlig tastaturfokus; resten kontrolleres manuelt ved 360 og 1280 px, i lys og mørk modus og ved 200 % zoom.
 
 ## Mappestruktur
 
@@ -210,12 +243,14 @@ src/
   server/
     config.ts   Eneste sted som leser miljøvariabler
     services/   Tjenester som brukes av sider og Server Actions
-    ports/      Grensesnitt mot omverdenen (RecipeSourceFetcher)
-    adapters/   Implementasjoner av portene (http-fetcher, fixture-fetcher, address-policy)
+    ports/      Grensesnitt mot omverdenen (RecipeSourceFetcher, SuggestionProvider)
+    adapters/   Implementasjoner av portene (http-fetcher, fixture-fetcher, address-policy, mock-suggestions, llm-suggestions)
     db/         Databaseskjema, tilkobling, migrering og repositorier
   styles/       Designtokens (farger, typografi, avstander)
 drizzle/        Databasemigrasjoner (genereres med npm run db:generate)
-test/fixtures/  Lagrede eksempelsider brukt som testdata
+test/fixtures/  Lagrede eksempelsider, eksempelforslag og eksempelsvar fra språkmodell brukt som testdata
+e2e/           Ende-til-ende-tester (Playwright); konfigurasjon i playwright.config.ts
+docs/          Skjermbilde brukt i denne fila
 scripts/        Hjelpeskript; db-migrate.ts kjører migrasjonene, fetch-fixtures.sh henter testsidene
 issues/         Feil og problemer underveis, og hva som kan endres (én fil per sak)
 ```
