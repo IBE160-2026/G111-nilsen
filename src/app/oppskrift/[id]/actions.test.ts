@@ -1,8 +1,15 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { messageFor } from "@/lib/messages";
-import { createTestDb, type Db } from "@/server/db/client";
+import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import { createFolder, listFolders } from "@/server/services/folder-service";
 import { createManualRecipe, getRecipe } from "@/server/services/recipe-service";
+
+const session = vi.hoisted(() => ({ userId: 1 as number | null }));
+vi.mock("@/server/session", () => ({
+  currentUserId: async () => session.userId,
+  currentUser: async () =>
+    session.userId === null ? null : { id: session.userId, email: "test@example.com" },
+}));
 
 const state = vi.hoisted(() => ({ db: null as Db | null }));
 
@@ -70,6 +77,7 @@ beforeEach(() => {
   revalidatePath.mockClear();
   state.db = createTestDb();
   const created = createManualRecipe(
+    TEST_USER_ID,
     { title: "Pannekaker", servings: 4, ingredients: ["3 egg"], steps: ["Visp."] },
     state.db,
   );
@@ -226,8 +234,8 @@ describe("rememberServings", () => {
 
 describe("moveToFolder (Story 3.3)", () => {
   beforeEach(() => {
-    createFolder("Hverdag", state.db!);
-    createFolder("Helg", state.db!);
+    createFolder(TEST_USER_ID, "Hverdag", state.db!);
+    createFolder(TEST_USER_ID, "Helg", state.db!);
   });
 
   it("legger oppskriften i mappen, gir mappenavnet og revaliderer hele appen", async () => {
@@ -276,7 +284,7 @@ describe("moveToFolder (Story 3.3)", () => {
 
 describe("moveToNewFolder (Story 3.3)", () => {
   const folderNames = () => {
-    const result = listFolders(state.db!);
+    const result = listFolders(TEST_USER_ID, state.db!);
     return result.ok ? result.value.map((f) => f.name) : [];
   };
 
@@ -298,7 +306,7 @@ describe("moveToNewFolder (Story 3.3)", () => {
   });
 
   it("opptatt navn: melding under feltet, oppskriften blir der den var", async () => {
-    createFolder("Fest", state.db!);
+    createFolder(TEST_USER_ID, "Fest", state.db!);
     expect(await moveToNewFolder(id, "FEST")).toEqual({
       ok: false,
       field: "name",
@@ -524,5 +532,67 @@ describe("applySuggestion og removeSuggestion (Story 4.2)", () => {
     breakDatabase();
     expect(await removeSuggestion(id, 1)).toEqual(failure(undefined));
     expect(console.error).toHaveBeenCalled();
+  });
+});
+
+describe("innlogging og eierskap (Story 5.13)", () => {
+  function otherUser(): number {
+    return Number(
+      state
+        .db!.$client.prepare(
+          "insert into users (email, password_hash, created_at) values ('b@b.no', 'x', 'x')",
+        )
+        .run().lastInsertRowid,
+    );
+  }
+
+  afterEach(() => {
+    session.userId = TEST_USER_ID;
+  });
+
+  it("lagring uten innlogging gir «Du må logge inn» og lagrer ingenting", async () => {
+    unsave();
+    session.userId = null;
+    expect(await saveRecipe(id)).toEqual({
+      ok: false,
+      message: "Du må logge inn. Logg inn eller lag en konto for å lagre oppskrifter.",
+    });
+    expect(stored().savedAt).toBeNull();
+  });
+
+  it("mapper uten innlogging gir «Du må logge inn»", async () => {
+    session.userId = null;
+    expect(await moveToFolder(id, null)).toMatchObject({ ok: false });
+    expect(await moveToNewFolder(id, "Ny")).toMatchObject({
+      ok: false,
+      message: expect.stringContaining("Du må logge inn"),
+    });
+  });
+
+  it("en annens oppskrift behandles som ukjent i alle handlinger", async () => {
+    session.userId = otherUser();
+    const notFound = { ok: false, message: expect.stringContaining("Vi fant ikke oppskriften") };
+    expect(await rememberServings(id, 6)).toEqual(notFound);
+    expect(await changeOriginalServings(id, 6)).toEqual(notFound);
+    expect(await setFavorite(id, true)).toEqual(notFound);
+    expect(await removeRecipe(id)).toEqual(notFound);
+    expect(await requestSuggestions(id)).toEqual({ ok: false });
+    expect(
+      await applySuggestion(id, { text: "Salt.", reason: "Smak.", appliesTo: "recipe" }),
+    ).toEqual(notFound);
+    expect(await saveRecipe(id)).toEqual(notFound);
+    expect(stored()).toMatchObject({ originalServings: 4, isFavorite: false });
+  });
+
+  it("en import uten eier kan endres uten innlogging, men ikke lagres", async () => {
+    state.db!.$client.prepare("update recipes set user_id = null, saved_at = null").run();
+    session.userId = null;
+    expect(await changeOriginalServings(id, 6)).toEqual({ ok: true });
+    expect(await saveRecipe(id)).toMatchObject({ ok: false });
+    session.userId = TEST_USER_ID;
+    expect(await saveRecipe(id)).toEqual({ ok: true });
+    expect(
+      state.db!.$client.prepare("select user_id as u from recipes where id = ?").get(id),
+    ).toEqual({ u: TEST_USER_ID });
   });
 });

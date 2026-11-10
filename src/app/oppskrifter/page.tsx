@@ -5,7 +5,9 @@ import { Suspense } from "react";
 import EmptyState from "@/components/EmptyState";
 import CollectionBrowser from "@/components/CollectionBrowser";
 import { collectionMessages, shoppingMessages } from "@/lib/messages";
+import LoginRequired from "@/components/LoginRequired";
 import { listCollection } from "@/server/services/recipe-service";
+import { currentUserId } from "@/server/session";
 import listStyles from "../list-page.module.css";
 import styles from "./page.module.css";
 
@@ -33,8 +35,10 @@ export default function SamlingenPage() {
 
 async function CollectionLoader() {
   await connection();
+  const userId = await currentUserId();
+  if (userId === null) return <LoginRequired next="/oppskrifter" />;
 
-  const result = listCollection();
+  const result = listCollection(userId);
   // Feil vises av error.tsx; en tom samling skal aldri skjule en databasefeil.
   if (!result.ok) throw new Error(`${collectionMessages.loadFailed} (${result.error.kind})`);
 

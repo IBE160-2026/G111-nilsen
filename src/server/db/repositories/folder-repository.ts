@@ -6,7 +6,7 @@ import { folders, recipes } from "../schema";
 import { listSavedRecipes } from "./recipe-repository";
 
 /** En mappe klar til lagring: `nameKey` er det normaliserte navnet (unikt). */
-export type NewFolder = { name: string; nameKey: string; createdAt: string };
+export type NewFolder = { name: string; nameKey: string; createdAt: string; userId: number };
 
 /**
  * Mappehandlinger rører aldri `recipes.updated_at`: avkrysning og valgt antall på
@@ -18,9 +18,19 @@ export function insertFolder(db: Db, folder: NewFolder): number {
   return db.insert(folders).values(folder).returning({ id: folders.id }).get().id;
 }
 
-/** Endrer navn og nøkkel. Returnerer `false` når id-en ikke finnes. */
-export function renameFolder(db: Db, id: number, name: { name: string; nameKey: string }): boolean {
-  return db.update(folders).set(name).where(eq(folders.id, id)).run().changes > 0;
+/** Mappen `id` hvis den tilhører `userId` (Story 5.13). */
+function mine(userId: number, id: number) {
+  return and(eq(folders.id, id), eq(folders.userId, userId));
+}
+
+/** Endrer navn og nøkkel. Returnerer `false` når id-en ikke finnes for brukeren. */
+export function renameFolder(
+  db: Db,
+  userId: number,
+  id: number,
+  name: { name: string; nameKey: string },
+): boolean {
+  return db.update(folders).set(name).where(mine(userId, id)).run().changes > 0;
 }
 
 /**
@@ -28,33 +38,31 @@ export function renameFolder(db: Db, id: number, name: { name: string; nameKey: 
  * `ON DELETE SET NULL` (fremmednøkler er slått på i `openDatabase`). Returnerer `false`
  * når id-en ikke finnes.
  */
-export function deleteFolder(db: Db, id: number): boolean {
-  return db.delete(folders).where(eq(folders.id, id)).run().changes > 0;
+export function deleteFolder(db: Db, userId: number, id: number): boolean {
+  return db.delete(folders).where(mine(userId, id)).run().changes > 0;
 }
 
-export function findFolderById(db: Db, id: number): Folder | null {
+/** Brukerens mappe med denne id-en, eller `null`. */
+export function findFolderById(db: Db, userId: number, id: number): Folder | null {
+  return (
+    db.select({ id: folders.id, name: folders.name }).from(folders).where(mine(userId, id)).get() ??
+    null
+  );
+}
+
+/** Brukerens mappe med dette normaliserte navnet, eller `null`. */
+export function findFolderByNameKey(db: Db, userId: number, nameKey: string): Folder | null {
   return (
     db
       .select({ id: folders.id, name: folders.name })
       .from(folders)
-      .where(eq(folders.id, id))
+      .where(and(eq(folders.nameKey, nameKey), eq(folders.userId, userId)))
       .get() ?? null
   );
 }
 
-/** Mappen med dette normaliserte navnet, eller `null`. */
-export function findFolderByNameKey(db: Db, nameKey: string): Folder | null {
-  return (
-    db
-      .select({ id: folders.id, name: folders.name })
-      .from(folders)
-      .where(eq(folders.nameKey, nameKey))
-      .get() ?? null
-  );
-}
-
-/** Alle mapper med antall oppskrifter i samlingen (0 for en tom mappe), sortert på id. */
-export function listFolders(db: Db): FolderSummary[] {
+/** Brukerens mapper med antall oppskrifter i samlingen (0 for en tom mappe), sortert på id. */
+export function listFolders(db: Db, userId: number): FolderSummary[] {
   return db
     .select({
       id: folders.id,
@@ -63,26 +71,33 @@ export function listFolders(db: Db): FolderSummary[] {
     })
     .from(folders)
     .leftJoin(recipes, and(eq(recipes.folderId, folders.id), isNotNull(recipes.savedAt)))
+    .where(eq(folders.userId, userId))
     .groupBy(folders.id)
     .orderBy(folders.id)
     .all();
 }
 
 /** Oppskriftene i mappen, samme oppsummering og rekkefølge som samlingen. */
-export function listRecipesInFolder(db: Db, folderId: number): RecipeSummary[] {
-  return listSavedRecipes(db, folderId);
+export function listRecipesInFolder(db: Db, userId: number, folderId: number): RecipeSummary[] {
+  return listSavedRecipes(db, userId, folderId);
 }
 
 /**
  * Legger en lagret oppskrift i mappen, eller tar den ut av mappen med `null`. Returnerer
- * `false` når oppskriften ikke finnes eller ikke er lagret (ingenting endres). Mappen må finnes.
+ * `false` når oppskriften ikke finnes, ikke er lagret eller er en annen brukers (ingenting endres).
+ * Mappen må finnes og være brukerens (sjekkes i tjenesten).
  */
-export function assignRecipeToFolder(db: Db, recipeId: number, folderId: number | null): boolean {
+export function assignRecipeToFolder(
+  db: Db,
+  userId: number,
+  recipeId: number,
+  folderId: number | null,
+): boolean {
   return (
     db
       .update(recipes)
       .set({ folderId })
-      .where(and(eq(recipes.id, recipeId), isNotNull(recipes.savedAt)))
+      .where(and(eq(recipes.id, recipeId), isNotNull(recipes.savedAt), eq(recipes.userId, userId)))
       .run().changes > 0
   );
 }
@@ -97,12 +112,15 @@ export function assignRecipeToNewFolder(
   recipeId: number,
   folder: NewFolder,
 ): number | null {
+  const userId = folder.userId;
   return db.transaction(
     (tx) => {
       const recipe = tx
         .select({ id: recipes.id })
         .from(recipes)
-        .where(and(eq(recipes.id, recipeId), isNotNull(recipes.savedAt)))
+        .where(
+          and(eq(recipes.id, recipeId), isNotNull(recipes.savedAt), eq(recipes.userId, userId)),
+        )
         .get();
       if (!recipe) return null;
 

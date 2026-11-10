@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, isNotNull, isNull, lt, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, isNull, lt, or, sql, type SQL } from "drizzle-orm";
 import type {
   Quantity,
   Recipe,
@@ -27,6 +27,8 @@ export type NewRecipe = {
   updatedAt: string;
   ingredients: NewIngredientLine[];
   steps: NewStep[];
+  /** Eieren (Story 5.13); `null` eller utelatt = importert uten innlogging. */
+  userId?: number | null;
 };
 
 type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
@@ -44,6 +46,7 @@ function insertRecipeRows(tx: Tx, recipe: NewRecipe): number {
       savedAt: recipe.savedAt,
       createdAt: recipe.createdAt,
       updatedAt: recipe.updatedAt,
+      userId: recipe.userId ?? null,
     })
     .returning({ id: recipes.id })
     .get();
@@ -90,15 +93,25 @@ export function insertRecipe(db: Db, recipe: NewRecipe): number {
 /** En eksisterende oppskrift med en gitt kilde-adresse: id og om den er i samlingen. */
 export type ExistingSource = { id: number; saved: boolean };
 
+/** Betingelsen «eid av `ownerId`», der `null` betyr uten eier. */
+function ownedBy(ownerId: number | null): SQL {
+  return ownerId === null ? isNull(recipes.userId) : eq(recipes.userId, ownerId);
+}
+
 /**
- * Finner oppskriften med nøyaktig denne `source_url` (allerede normalisert). En lagret oppskrift
- * (`savedAt` satt) går foran en ulagret; blant like går den eldste (lavest id) først.
+ * Finner oppskriften med nøyaktig denne `source_url` (allerede normalisert) for samme eier
+ * (Story 5.13: `null` = uten innlogging). En lagret oppskrift (`savedAt` satt) går foran en
+ * ulagret; blant like går den eldste (lavest id) først.
  */
-export function findRecipeBySourceUrl(db: Db | Tx, sourceUrl: string): ExistingSource | null {
+export function findRecipeBySourceUrl(
+  db: Db | Tx,
+  sourceUrl: string,
+  ownerId: number | null = null,
+): ExistingSource | null {
   const row = db
     .select({ id: recipes.id, savedAt: recipes.savedAt })
     .from(recipes)
-    .where(eq(recipes.sourceUrl, sourceUrl))
+    .where(and(eq(recipes.sourceUrl, sourceUrl), ownedBy(ownerId)))
     .orderBy(sql`${recipes.savedAt} IS NULL`, asc(recipes.id))
     .limit(1)
     .get();
@@ -134,7 +147,7 @@ export function insertImportedRecipe(
 ): ImportedInsert {
   return db.transaction(
     (tx) => {
-      const found = findRecipeBySourceUrl(tx, recipe.sourceUrl);
+      const found = findRecipeBySourceUrl(tx, recipe.sourceUrl, recipe.userId ?? null);
       if (found) return { kind: found.saved ? "duplicate" : "existing", id: found.id } as const;
       return { kind: "inserted", id: insertRecipeRows(tx, recipe) } as const;
     },
@@ -286,9 +299,12 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
   };
 }
 
-/** Oppsummeringene for lagrede oppskrifter som oppfyller `extra`, sist lagret først, så høyest id. */
-function selectSavedSummaries(db: Db, extra?: SQL): RecipeSummary[] {
-  const saved = isNotNull(recipes.savedAt);
+/**
+ * Oppsummeringene for brukerens lagrede oppskrifter som oppfyller `extra`, sist lagret først, så
+ * høyest id.
+ */
+function selectSavedSummaries(db: Db, userId: number, extra?: SQL): RecipeSummary[] {
+  const saved = and(isNotNull(recipes.savedAt), eq(recipes.userId, userId));
   return db
     .select({
       id: recipes.id,
@@ -312,9 +328,10 @@ function selectSavedSummaries(db: Db, extra?: SQL): RecipeSummary[] {
  * Med `folderId` bare oppskriftene i den mappen. `folderName` er mappen oppskriften ligger i.
  * Leser bare oppsummeringen; ingredienser og steg hentes ikke.
  */
-export function listSavedRecipes(db: Db, folderId?: number): RecipeSummary[] {
+export function listSavedRecipes(db: Db, userId: number, folderId?: number): RecipeSummary[] {
   return selectSavedSummaries(
     db,
+    userId,
     folderId === undefined ? undefined : eq(recipes.folderId, folderId),
   );
 }
@@ -323,12 +340,12 @@ export function listSavedRecipes(db: Db, folderId?: number): RecipeSummary[] {
  * Ingrediensnavn for alle lagrede oppskrifter i én spørring (Story 5.2), nøklet på oppskrifts-id.
  * Brukes til søk i Samlingen; rekkefølgen følger linjene.
  */
-export function listSavedIngredientNames(db: Db): Map<number, string[]> {
+export function listSavedIngredientNames(db: Db, userId: number): Map<number, string[]> {
   const rows = db
     .select({ recipeId: ingredientLines.recipeId, name: ingredientLines.name })
     .from(ingredientLines)
     .innerJoin(recipes, eq(ingredientLines.recipeId, recipes.id))
-    .where(isNotNull(recipes.savedAt))
+    .where(and(isNotNull(recipes.savedAt), eq(recipes.userId, userId)))
     .orderBy(asc(ingredientLines.recipeId), asc(ingredientLines.position), asc(ingredientLines.id))
     .all();
   const names = new Map<number, string[]>();
@@ -344,8 +361,8 @@ export function listSavedIngredientNames(db: Db): Map<number, string[]> {
  * Lagrede favoritter (Story 3.4) i samme rekkefølge som samlingen: sist lagret først.
  * Det finnes ingen «sist åpnet» ennå.
  */
-export function listFavoriteRecipes(db: Db): RecipeSummary[] {
-  return selectSavedSummaries(db, eq(recipes.isFavorite, true));
+export function listFavoriteRecipes(db: Db, userId: number): RecipeSummary[] {
+  return selectSavedSummaries(db, userId, eq(recipes.isFavorite, true));
 }
 
 /**
@@ -365,18 +382,35 @@ export function setRecipeFavorite(db: Db, id: number, isFavorite: boolean): bool
 }
 
 /**
- * Legger en oppskrift i samlingen: setter `savedAt` bare når den er `null`, så en allerede
- * lagret oppskrift beholder tidspunktet (og plassen i Samlingen). `updatedAt` røres ikke.
- * Returnerer `false` når id-en ikke finnes.
+ * Legger en oppskrift i brukerens samling: setter `savedAt` og eier bare når den ikke er lagret
+ * og ikke har en annen eier, så en allerede lagret oppskrift beholder tidspunktet (og plassen i
+ * Samlingen). `updatedAt` røres ikke. Returnerer `false` når id-en ikke finnes eller oppskriften
+ * er en annen brukers.
  */
-export function markRecipeSaved(db: Db, id: number, savedAt: string): boolean {
+export function markRecipeSaved(db: Db, id: number, savedAt: string, userId: number): boolean {
   const { changes } = db
     .update(recipes)
-    .set({ savedAt })
-    .where(and(eq(recipes.id, id), isNull(recipes.savedAt)))
+    .set({ savedAt, userId })
+    .where(
+      and(
+        eq(recipes.id, id),
+        isNull(recipes.savedAt),
+        or(isNull(recipes.userId), eq(recipes.userId, userId)),
+      ),
+    )
     .run();
   if (changes > 0) return true;
-  return db.select({ id: recipes.id }).from(recipes).where(eq(recipes.id, id)).get() !== undefined;
+  return findRecipeOwner(db, id)?.userId === userId;
+}
+
+/**
+ * Eieren av oppskriften (Story 5.13): `{ userId: null }` for en import uten innlogging, og `null`
+ * når id-en ikke finnes.
+ */
+export function findRecipeOwner(db: Db, id: number): { userId: number | null } | null {
+  return (
+    db.select({ userId: recipes.userId }).from(recipes).where(eq(recipes.id, id)).get() ?? null
+  );
 }
 
 /**

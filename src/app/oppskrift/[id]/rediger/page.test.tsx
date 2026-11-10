@@ -2,8 +2,15 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createTestDb, type Db } from "@/server/db/client";
+import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import { createManualRecipe } from "@/server/services/recipe-service";
+
+const session = vi.hoisted(() => ({ userId: 1 as number | null }));
+vi.mock("@/server/session", () => ({
+  currentUserId: async () => session.userId,
+  currentUser: async () =>
+    session.userId === null ? null : { id: session.userId, email: "test@example.com" },
+}));
 
 const state = vi.hoisted(() => ({ db: null as Db | null, forcedErrorKind: null as string | null }));
 
@@ -25,10 +32,10 @@ vi.mock("@/server/services/recipe-service", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/server/services/recipe-service")>();
   return {
     ...actual,
-    getRecipe: (...args: Parameters<typeof actual.getRecipe>) =>
+    getRecipeFor: (...args: Parameters<typeof actual.getRecipeFor>) =>
       state.forcedErrorKind
         ? { ok: false, error: { kind: state.forcedErrorKind } }
-        : actual.getRecipe(...args),
+        : actual.getRecipeFor(...args),
   };
 });
 
@@ -53,8 +60,9 @@ async function renderPage(id: string): Promise<ReactElement> {
   return (loader.type as AsyncComponent)(loader.props);
 }
 
-function create(values: Partial<Parameters<typeof createManualRecipe>[0]> = {}): number {
+function create(values: Partial<Parameters<typeof createManualRecipe>[1]> = {}): number {
   const created = createManualRecipe(
+    TEST_USER_ID,
     {
       title: "Pannekaker",
       servings: 4,

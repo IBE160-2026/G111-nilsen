@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LIMITS } from "@/lib/recipe-input";
 import { appError, err, ok } from "@/lib/result";
-import { createTestDb } from "../db/client";
+import { createTestDb, TEST_USER_ID } from "../db/client";
 import { createFixtureFetcher } from "../adapters/fixture-fetcher";
 import type { RecipeSourceFetcher } from "../ports/recipe-source-fetcher";
 import { buildImportedContent, importRecipe } from "./import-service";
@@ -12,6 +12,7 @@ const deps = (extra: Parameters<typeof importRecipe>[1] = {}) => ({
   db: createTestDb(),
   fetcher: createFixtureFetcher(),
   now: () => NOW,
+  userId: TEST_USER_ID,
   ...extra,
 });
 
@@ -202,7 +203,7 @@ describe("importRecipe: duplikat (FR-13)", () => {
     const first = await importRecipe(url, d);
     expect(first.ok).toBe(true);
     if (!first.ok) return;
-    expect(saveRecipeToCollection(first.value.id, d.db).ok).toBe(true);
+    expect(saveRecipeToCollection(TEST_USER_ID, first.value.id, d.db).ok).toBe(true);
 
     forbiddenFetcher.fetch.mockClear();
     const again = await importRecipe(`${url}?utm_source=nyhetsbrev&fbclid=1#fremgangsmate`, {
@@ -290,7 +291,7 @@ describe("importRecipe: duplikat (FR-13)", () => {
       fetch: vi.fn(async (url: string) => {
         // Samtidig import fra en annen fane som lagres i samlingen mens denne henter.
         const other = await importRecipe("https://a.no/x", { ...d, fetcher: staticFetcher(html) });
-        if (other.ok) saveRecipeToCollection(other.value.id, d.db);
+        if (other.ok) saveRecipeToCollection(TEST_USER_ID, other.value.id, d.db);
         return ok({ html, finalUrl: url });
       }),
     };
@@ -443,5 +444,31 @@ describe("buildImportedContent", () => {
       { text: "Rør.", position: 0, section: "Deig" },
       { text: "Stek.", position: 1, section: null },
     ]);
+  });
+});
+
+describe("importRecipe og eierskap (Story 5.13)", () => {
+  const url = "https://www.matprat.no/oppskrifter/familien/rundstykker/";
+  it("en import uten innlogging har ingen eier, og en innlogget import blir brukerens", async () => {
+    const d = deps({ userId: null });
+    const anonymous = await importRecipe(url, d);
+    expect(anonymous.ok).toBe(true);
+    if (!anonymous.ok) return;
+    const owner = d.db.$client
+      .prepare("select user_id from recipes where id = ?")
+      .get(anonymous.value.id) as { user_id: number | null };
+    expect(owner.user_id).toBeNull();
+
+    const mine = await importRecipe(url, { ...d, userId: TEST_USER_ID });
+    expect(mine.ok && mine.value.id !== anonymous.value.id).toBe(true);
+  });
+
+  it("en annens lagrede oppskrift med samme adresse gir ikke duplicate", async () => {
+    const d = deps();
+    const first = await importRecipe(url, d);
+    if (!first.ok) throw new Error("feil");
+    expect(saveRecipeToCollection(TEST_USER_ID, first.value.id, d.db).ok).toBe(true);
+    const anonymous = await importRecipe(url, { ...d, userId: null });
+    expect(anonymous.ok).toBe(true);
   });
 });

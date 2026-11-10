@@ -15,6 +15,7 @@ import {
   deleteRecipeById,
   deleteStaleUnsavedRecipes,
   findRecipeById,
+  findRecipeOwner,
   insertRecipe,
   listFavoriteRecipes,
   listSavedIngredientNames,
@@ -99,6 +100,7 @@ function buildContent(input: ManualRecipeInput): Result<RecipeContent> {
  * Oppskriften legges rett i samlingen: `savedAt` settes til lagringstidspunktet.
  */
 export function createManualRecipe(
+  userId: number,
   input: ManualRecipeInput,
   db: Db = getDb(),
 ): Result<{ id: number }> {
@@ -117,6 +119,7 @@ export function createManualRecipe(
     updatedAt: now,
     ingredients: content.value.ingredients,
     steps: content.value.steps,
+    userId,
   });
   return ok({ id });
 }
@@ -151,12 +154,16 @@ function isRecipeId(id: number): boolean {
 }
 
 /**
- * Legger en oppskrift i samlingen (Story 3.2). En allerede lagret oppskrift beholder sitt
- * tidspunkt. Ugyldig eller ukjent id gir `not_found`.
+ * Legger en oppskrift i brukerens samling (Story 3.2, 5.13). En allerede lagret oppskrift beholder
+ * sitt tidspunkt. Ugyldig eller ukjent id, og en annen brukers oppskrift, gir `not_found`.
  */
-export function saveRecipeToCollection(id: number, db: Db = getDb()): Result<{ id: number }> {
+export function saveRecipeToCollection(
+  userId: number,
+  id: number,
+  db: Db = getDb(),
+): Result<{ id: number }> {
   if (!isRecipeId(id)) return err(appError("not_found"));
-  return markRecipeSaved(db, id, new Date().toISOString())
+  return markRecipeSaved(db, id, new Date().toISOString(), userId)
     ? ok({ id })
     : err(appError("not_found"));
 }
@@ -227,10 +234,10 @@ export function getRecipe(id: number, db: Db = getDb()): Result<Recipe> {
  * Oppskriftene i samlingen, sist lagret først, hver med søketekst (Story 5.2): tittel, kilde,
  * mappe og ingrediensnavn.
  */
-export function listCollection(db: Db = getDb()): Result<CollectionEntry[]> {
-  const names = listSavedIngredientNames(db);
+export function listCollection(userId: number, db: Db = getDb()): Result<CollectionEntry[]> {
+  const names = listSavedIngredientNames(db, userId);
   return ok(
-    listSavedRecipes(db).map((recipe) => ({
+    listSavedRecipes(db, userId).map((recipe) => ({
       ...recipe,
       searchText: buildSearchText([
         recipe.title,
@@ -246,9 +253,9 @@ export function listCollection(db: Db = getDb()): Result<CollectionEntry[]> {
  * Lagrede oppskrifter med ingredienser, til handlelisten (Story 5.7). Sist lagret først, som i
  * samlingen. Ingrediensforslag som er tatt i bruk og har mengde er med (Story 5.11).
  */
-export function listShoppingRecipes(db: Db = getDb()): Result<ShoppingRecipe[]> {
+export function listShoppingRecipes(userId: number, db: Db = getDb()): Result<ShoppingRecipe[]> {
   const recipes: ShoppingRecipe[] = [];
-  for (const summary of listSavedRecipes(db)) {
+  for (const summary of listSavedRecipes(db, userId)) {
     const recipe = findRecipeById(db, summary.id);
     if (!recipe) continue;
     recipes.push({
@@ -285,6 +292,22 @@ export function setFavorite(
 }
 
 /** Favorittene i samlingen, sist lagret først. */
-export function listFavorites(db: Db = getDb()): Result<RecipeSummary[]> {
-  return ok(listFavoriteRecipes(db));
+export function listFavorites(userId: number, db: Db = getDb()): Result<RecipeSummary[]> {
+  return ok(listFavoriteRecipes(db, userId));
+}
+
+/**
+ * Om `viewer` (innlogget bruker, eller `null`) kan se og endre oppskriften (Story 5.13): eieren kan
+ * det, og en import uten eier (ulagret, uten innlogging) kan alle med lenken. Ukjent id gir `false`.
+ */
+export function canAccessRecipe(viewer: number | null, id: number, db: Db = getDb()): boolean {
+  if (!isRecipeId(id)) return false;
+  const owner = findRecipeOwner(db, id);
+  return owner !== null && (owner.userId === null || owner.userId === viewer);
+}
+
+/** Henter oppskriften for `viewer`, eller `not_found` når den ikke finnes eller er en annens. */
+export function getRecipeFor(viewer: number | null, id: number, db: Db = getDb()): Result<Recipe> {
+  if (!canAccessRecipe(viewer, id, db)) return err(appError("not_found"));
+  return getRecipe(id, db);
 }

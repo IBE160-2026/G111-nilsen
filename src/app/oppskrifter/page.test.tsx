@@ -2,10 +2,17 @@
 import { cleanup, render, screen, within } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createTestDb, type Db } from "@/server/db/client";
+import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import { insertRecipe, type NewRecipe } from "@/server/db/repositories/recipe-repository";
 import { createFolder, moveRecipeToFolder } from "@/server/services/folder-service";
 import { setFavorite } from "@/server/services/recipe-service";
+
+const session = vi.hoisted(() => ({ userId: 1 as number | null }));
+vi.mock("@/server/session", () => ({
+  currentUserId: async () => session.userId,
+  currentUser: async () =>
+    session.userId === null ? null : { id: session.userId, email: "test@example.com" },
+}));
 
 const state = vi.hoisted(() => ({
   db: null as Db | null,
@@ -58,6 +65,7 @@ const recipe = (title: string, savedAt: string | null, extra: Partial<NewRecipe>
   savedAt,
   createdAt: "2026-11-09T10:00:00.000Z",
   updatedAt: "2026-11-09T10:00:00.000Z",
+  userId: TEST_USER_ID,
   ingredients: [],
   steps: [],
   ...extra,
@@ -154,7 +162,7 @@ describe("/oppskrifter", () => {
   });
 
   it("viser mappenavnet på kortet: «Matprat · Hverdag», og bare kilden uten mappe", async () => {
-    createFolder("Hverdag", state.db!);
+    createFolder(TEST_USER_ID, "Hverdag", state.db!);
     const inFolder = insertRecipe(
       state.db!,
       recipe("I mappe", "2026-11-09T11:00:00.000Z", { sourceName: "Matprat" }),
@@ -163,7 +171,7 @@ describe("/oppskrifter", () => {
       state.db!,
       recipe("Uten mappe", "2026-11-09T10:00:00.000Z", { sourceName: "Matprat" }),
     );
-    moveRecipeToFolder(inFolder, 1, state.db!);
+    moveRecipeToFolder(TEST_USER_ID, inFolder, 1, state.db!);
     await show();
     const links = screen
       .getAllByRole("link")
@@ -205,5 +213,26 @@ describe("/oppskrifter", () => {
   it("kaster en feil til error.tsx når lesingen feiler, i stedet for å vise tom samling", async () => {
     state.forcedErrorKind = "unknown";
     await expect(renderPage()).rejects.toThrow(/Kunne ikke hente oppskriftene \(unknown\)/);
+  });
+});
+
+describe("/oppskrifter uten innlogging (Story 5.13)", () => {
+  it("viser «Logg inn for å se dette» med lenker som sender brukeren tilbake", async () => {
+    session.userId = null;
+    try {
+      await show();
+      expect(screen.getByRole("heading", { name: "Logg inn for å se dette" })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Logg inn" })).toHaveAttribute(
+        "href",
+        "/logg-inn?neste=%2Foppskrifter",
+      );
+      expect(screen.getByRole("link", { name: "Lag konto" })).toHaveAttribute(
+        "href",
+        "/ny-konto?neste=%2Foppskrifter",
+      );
+      expect(state.calls).not.toContain("listCollection");
+    } finally {
+      session.userId = TEST_USER_ID;
+    }
   });
 });

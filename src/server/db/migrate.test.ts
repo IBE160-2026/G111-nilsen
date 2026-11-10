@@ -143,6 +143,7 @@ describe("migrasjon 0001 (Story 3.1: manuelle oppskrifter i samlingen)", () => {
       "0003_favorites",
       "0004_suggestions",
       "0005_pantry",
+      "0006_accounts",
     ]);
     expect(existsSync(join(migrationsFolder(), "meta", "0001_snapshot.json"))).toBe(true);
   });
@@ -213,6 +214,7 @@ describe("migrasjon 0002 (Story 3.3: mapper)", () => {
         ...row,
         folder_id: null,
         is_favorite: 0,
+        user_id: null,
       })),
     );
     expect(rows(db, "select * from ingredient_lines order by id")).toEqual(before.lines);
@@ -236,16 +238,19 @@ describe("migrasjon 0002 (Story 3.3: mapper)", () => {
     expect(rows(db, "select count(*) as n from folders")).toEqual([{ n: 0 }]);
   });
 
-  it("har unik indeks på folders.name_key", () => {
+  it("har unik indeks på folders (user_id, name_key) etter 0006", () => {
     const db = openDatabase(MEMORY_DATABASE);
     const indexes = db.$client.pragma("index_list(folders)") as { name: string; unique: number }[];
     const unique = indexes.filter((index) => index.unique === 1);
     expect(unique).toHaveLength(1);
     const columns = db.$client.pragma(`index_info(${unique[0].name})`) as { name: string }[];
-    expect(columns.map((column) => column.name)).toEqual(["name_key"]);
+    expect(columns.map((column) => column.name)).toEqual(["user_id", "name_key"]);
 
+    db.$client
+      .prepare("insert into users (email, password_hash, created_at) values ('a@b.no', 'x', 'x')")
+      .run();
     const insert = db.$client.prepare(
-      "insert into folders (name, name_key, created_at) values (?, ?, 'x')",
+      "insert into folders (name, name_key, created_at, user_id) values (?, ?, 'x', 1)",
     );
     insert.run("Hverdag", "hverdag");
     expect(() => insert.run("HVERDAG", "hverdag")).toThrow(/UNIQUE/);
@@ -258,9 +263,13 @@ describe("migrasjon 0002 (Story 3.3: mapper)", () => {
       table: string;
       on_delete: string;
     }[];
-    expect(keys).toEqual([
-      expect.objectContaining({ from: "folder_id", table: "folders", on_delete: "SET NULL" }),
-    ]);
+    expect(keys).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ from: "folder_id", table: "folders", on_delete: "SET NULL" }),
+        expect.objectContaining({ from: "user_id", table: "users", on_delete: "CASCADE" }),
+      ]),
+    );
+    expect(keys).toHaveLength(2);
   });
 
   it("setter folder_id til NULL når mappen slettes, uten å slette oppskriften", () => {
@@ -358,9 +367,11 @@ describe("migrasjon 0003 (Story 3.4: favoritter)", () => {
     runMigrations(db);
 
     expect(rows(db, "select * from recipes order by id")).toEqual(
-      before.recipes.map((row) => ({ ...row, is_favorite: 0 })),
+      before.recipes.map((row) => ({ ...row, is_favorite: 0, user_id: null })),
     );
-    expect(rows(db, "select * from folders")).toEqual(before.folders);
+    expect(rows(db, "select * from folders")).toEqual(
+      (before.folders as Record<string, unknown>[]).map((row) => ({ ...row, user_id: null })),
+    );
     expect(rows(db, "select * from ingredient_lines")).toEqual(before.lines);
     expect(rows(db, "select * from steps")).toEqual(before.steps);
     expect(rows(db, "select count(*) as n from recipes where is_favorite = 0")).toEqual([{ n: 3 }]);

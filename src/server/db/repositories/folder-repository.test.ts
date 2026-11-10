@@ -1,3 +1,4 @@
+import { TEST_USER_ID } from "@/server/db/client";
 import { describe, expect, it } from "vitest";
 import { createTestDb } from "../client";
 import {
@@ -49,6 +50,7 @@ const recipe = (
     },
   ],
   steps: [{ position: 0, section: null, text: "Visp." }],
+  userId: TEST_USER_ID,
   ...extra,
 });
 
@@ -56,6 +58,7 @@ const folder = (name: string): NewFolder => ({
   name,
   nameKey: name.toLocaleLowerCase("nb"),
   createdAt: T0,
+  userId: TEST_USER_ID,
 });
 
 function count(db: ReturnType<typeof createTestDb>, table: string): number {
@@ -70,10 +73,10 @@ describe("insertFolder, findFolderById, findFolderByNameKey", () => {
   it("lagrer en mappe og finner den på id og navnenøkkel", () => {
     const db = createTestDb();
     const id = insertFolder(db, folder("Hverdag"));
-    expect(findFolderById(db, id)).toEqual({ id, name: "Hverdag" });
-    expect(findFolderByNameKey(db, "hverdag")).toEqual({ id, name: "Hverdag" });
-    expect(findFolderById(db, 999)).toBeNull();
-    expect(findFolderByNameKey(db, "finnes-ikke")).toBeNull();
+    expect(findFolderById(db, TEST_USER_ID, id)).toEqual({ id, name: "Hverdag" });
+    expect(findFolderByNameKey(db, TEST_USER_ID, "hverdag")).toEqual({ id, name: "Hverdag" });
+    expect(findFolderById(db, TEST_USER_ID, 999)).toBeNull();
+    expect(findFolderByNameKey(db, TEST_USER_ID, "finnes-ikke")).toBeNull();
   });
 
   it("avviser en mappe med samme navnenøkkel (unik indeks)", () => {
@@ -88,20 +91,22 @@ describe("renameFolder", () => {
   it("endrer navn og nøkkel, og returnerer false for ukjent id", () => {
     const db = createTestDb();
     const id = insertFolder(db, folder("Hverdag"));
-    expect(renameFolder(db, id, { name: "Hverdagsmat", nameKey: "hverdagsmat" })).toBe(true);
-    expect(findFolderById(db, id)).toEqual({ id, name: "Hverdagsmat" });
-    expect(findFolderByNameKey(db, "hverdag")).toBeNull();
-    expect(renameFolder(db, 999, { name: "X", nameKey: "x" })).toBe(false);
+    expect(
+      renameFolder(db, TEST_USER_ID, id, { name: "Hverdagsmat", nameKey: "hverdagsmat" }),
+    ).toBe(true);
+    expect(findFolderById(db, TEST_USER_ID, id)).toEqual({ id, name: "Hverdagsmat" });
+    expect(findFolderByNameKey(db, TEST_USER_ID, "hverdag")).toBeNull();
+    expect(renameFolder(db, TEST_USER_ID, 999, { name: "X", nameKey: "x" })).toBe(false);
   });
 
   it("rører ikke updatedAt på oppskriftene i mappen", () => {
     const db = createTestDb();
     const folderId = insertFolder(db, folder("Hverdag"));
     const id = insertRecipe(db, recipe("Pannekaker", T0));
-    assignRecipeToFolder(db, id, folderId);
-    renameFolder(db, folderId, { name: "Helg", nameKey: "helg" });
+    assignRecipeToFolder(db, TEST_USER_ID, id, folderId);
+    renameFolder(db, TEST_USER_ID, folderId, { name: "Helg", nameKey: "helg" });
     expect(updatedAtOf(db, id)).toBe(T0);
-    expect(listSavedRecipes(db)[0].folderName).toBe("Helg");
+    expect(listSavedRecipes(db, TEST_USER_ID)[0].folderName).toBe("Helg");
   });
 });
 
@@ -112,14 +117,14 @@ describe("deleteFolder", () => {
     const ids = [1, 2, 3].map((n) =>
       insertRecipe(db, recipe(`R${n}`, `2026-11-09T1${n}:00:00.000Z`)),
     );
-    for (const id of ids) assignRecipeToFolder(db, id, folderId);
+    for (const id of ids) assignRecipeToFolder(db, TEST_USER_ID, id, folderId);
     const other = insertFolder(db, folder("Helg"));
     const stays = insertRecipe(db, recipe("Blir i Helg", T0));
-    assignRecipeToFolder(db, stays, other);
+    assignRecipeToFolder(db, TEST_USER_ID, stays, other);
 
-    expect(deleteFolder(db, folderId)).toBe(true);
+    expect(deleteFolder(db, TEST_USER_ID, folderId)).toBe(true);
 
-    expect(findFolderById(db, folderId)).toBeNull();
+    expect(findFolderById(db, TEST_USER_ID, folderId)).toBeNull();
     expect(count(db, "recipes")).toBe(4);
     expect(count(db, "ingredient_lines")).toBe(4);
     expect(count(db, "steps")).toBe(4);
@@ -127,14 +132,14 @@ describe("deleteFolder", () => {
       expect(findRecipeById(db, id)).toMatchObject({ folderId: null, updatedAt: T0 });
     }
     expect(findRecipeById(db, stays)?.folderId).toBe(other);
-    expect(listSavedRecipes(db).filter((r) => r.folderName !== null)).toHaveLength(1);
-    expect(listSavedRecipes(db).filter((r) => r.folderName === null)).toHaveLength(3);
+    expect(listSavedRecipes(db, TEST_USER_ID).filter((r) => r.folderName !== null)).toHaveLength(1);
+    expect(listSavedRecipes(db, TEST_USER_ID).filter((r) => r.folderName === null)).toHaveLength(3);
   });
 
   it("returnerer false for ukjent id og endrer ingenting", () => {
     const db = createTestDb();
     insertFolder(db, folder("Hverdag"));
-    expect(deleteFolder(db, 999)).toBe(false);
+    expect(deleteFolder(db, TEST_USER_ID, 999)).toBe(false);
     expect(count(db, "folders")).toBe(1);
   });
 });
@@ -149,11 +154,11 @@ describe("listFolders", () => {
     const r2 = insertRecipe(db, recipe("R2", T0));
     const r3 = insertRecipe(db, recipe("R3", T0));
     insertRecipe(db, recipe("Uten mappe", T0));
-    assignRecipeToFolder(db, r1, a);
-    assignRecipeToFolder(db, r2, a);
-    assignRecipeToFolder(db, r3, b);
+    assignRecipeToFolder(db, TEST_USER_ID, r1, a);
+    assignRecipeToFolder(db, TEST_USER_ID, r2, a);
+    assignRecipeToFolder(db, TEST_USER_ID, r3, b);
 
-    expect(listFolders(db)).toEqual([
+    expect(listFolders(db, TEST_USER_ID)).toEqual([
       { id: a, name: "Hverdag", recipeCount: 2 },
       { id: b, name: "Helg", recipeCount: 1 },
       { id: 3, name: "Tom", recipeCount: 0 },
@@ -164,13 +169,15 @@ describe("listFolders", () => {
     const db = createTestDb();
     const folderId = insertFolder(db, folder("Hverdag"));
     const id = insertRecipe(db, recipe("R1", T0));
-    assignRecipeToFolder(db, id, folderId);
+    assignRecipeToFolder(db, TEST_USER_ID, id, folderId);
     deleteRecipeById(db, id);
-    expect(listFolders(db)).toEqual([{ id: folderId, name: "Hverdag", recipeCount: 0 }]);
+    expect(listFolders(db, TEST_USER_ID)).toEqual([
+      { id: folderId, name: "Hverdag", recipeCount: 0 },
+    ]);
   });
 
   it("er tom uten mapper", () => {
-    expect(listFolders(createTestDb())).toEqual([]);
+    expect(listFolders(createTestDb(), TEST_USER_ID)).toEqual([]);
   });
 });
 
@@ -185,9 +192,9 @@ describe("listRecipesInFolder", () => {
     const same1 = insertRecipe(db, recipe("Samme 1", "2026-11-09T11:00:00.000Z"));
     const same2 = insertRecipe(db, recipe("Samme 2", "2026-11-09T11:00:00.000Z"));
     insertRecipe(db, recipe("Annen mappe", "2026-11-09T12:00:00.000Z"));
-    for (const id of [old, same1, same2]) assignRecipeToFolder(db, id, folderId);
+    for (const id of [old, same1, same2]) assignRecipeToFolder(db, TEST_USER_ID, id, folderId);
 
-    const inFolder = listRecipesInFolder(db, folderId);
+    const inFolder = listRecipesInFolder(db, TEST_USER_ID, folderId);
     expect(inFolder.map((r) => r.title)).toEqual(["Samme 2", "Samme 1", "Eldst"]);
     expect(inFolder[2]).toEqual({
       id: old,
@@ -198,7 +205,7 @@ describe("listRecipesInFolder", () => {
       isFavorite: false,
       folderName: "Hverdag",
     });
-    expect(listRecipesInFolder(db, 999)).toEqual([]);
+    expect(listRecipesInFolder(db, TEST_USER_ID, 999)).toEqual([]);
   });
 });
 
@@ -209,12 +216,12 @@ describe("assignRecipeToFolder", () => {
     const b = insertFolder(db, folder("Helg"));
     const id = insertRecipe(db, recipe("R", T0));
 
-    expect(assignRecipeToFolder(db, id, a)).toBe(true);
+    expect(assignRecipeToFolder(db, TEST_USER_ID, id, a)).toBe(true);
     expect(findRecipeById(db, id)?.folderId).toBe(a);
-    expect(assignRecipeToFolder(db, id, b)).toBe(true);
+    expect(assignRecipeToFolder(db, TEST_USER_ID, id, b)).toBe(true);
     expect(findRecipeById(db, id)?.folderId).toBe(b);
-    expect(listFolders(db).map((f) => f.recipeCount)).toEqual([0, 1]);
-    expect(assignRecipeToFolder(db, id, null)).toBe(true);
+    expect(listFolders(db, TEST_USER_ID).map((f) => f.recipeCount)).toEqual([0, 1]);
+    expect(assignRecipeToFolder(db, TEST_USER_ID, id, null)).toBe(true);
     expect(findRecipeById(db, id)?.folderId).toBeNull();
   });
 
@@ -222,8 +229,8 @@ describe("assignRecipeToFolder", () => {
     const db = createTestDb();
     const folderId = insertFolder(db, folder("Hverdag"));
     const id = insertRecipe(db, recipe("R", T0, { selectedServings: 6 }));
-    assignRecipeToFolder(db, id, folderId);
-    assignRecipeToFolder(db, id, null);
+    assignRecipeToFolder(db, TEST_USER_ID, id, folderId);
+    assignRecipeToFolder(db, TEST_USER_ID, id, null);
     expect(findRecipeById(db, id)).toMatchObject({ updatedAt: T0, selectedServings: 6 });
   });
 
@@ -231,15 +238,15 @@ describe("assignRecipeToFolder", () => {
     const db = createTestDb();
     const folderId = insertFolder(db, folder("Hverdag"));
     const unsaved = insertRecipe(db, recipe("Ulagret", null));
-    expect(assignRecipeToFolder(db, unsaved, folderId)).toBe(false);
+    expect(assignRecipeToFolder(db, TEST_USER_ID, unsaved, folderId)).toBe(false);
     expect(findRecipeById(db, unsaved)?.folderId).toBeNull();
-    expect(assignRecipeToFolder(db, 999, folderId)).toBe(false);
+    expect(assignRecipeToFolder(db, TEST_USER_ID, 999, folderId)).toBe(false);
   });
 
   it("kaster for en mappe som ikke finnes (fremmednøkkel)", () => {
     const db = createTestDb();
     const id = insertRecipe(db, recipe("R", T0));
-    expect(() => assignRecipeToFolder(db, id, 999)).toThrow(/FOREIGN KEY/);
+    expect(() => assignRecipeToFolder(db, TEST_USER_ID, id, 999)).toThrow(/FOREIGN KEY/);
     expect(findRecipeById(db, id)?.folderId).toBeNull();
   });
 });
@@ -250,7 +257,7 @@ describe("assignRecipeToNewFolder", () => {
     const id = insertRecipe(db, recipe("R", T0));
     const folderId = assignRecipeToNewFolder(db, id, folder("Fest"));
     expect(folderId).not.toBeNull();
-    expect(findFolderById(db, folderId!)).toEqual({ id: folderId, name: "Fest" });
+    expect(findFolderById(db, TEST_USER_ID, folderId!)).toEqual({ id: folderId, name: "Fest" });
     expect(findRecipeById(db, id)).toMatchObject({ folderId, updatedAt: T0 });
   });
 
@@ -288,7 +295,7 @@ describe("mappe og andre oppskriftshandlinger", () => {
     const db = createTestDb();
     const folderId = insertFolder(db, folder("Hverdag"));
     const id = insertRecipe(db, recipe("R", T0));
-    assignRecipeToFolder(db, id, folderId);
+    assignRecipeToFolder(db, TEST_USER_ID, id, folderId);
     updateRecipe(db, id, {
       title: "Endret",
       originalServings: 2,
@@ -303,7 +310,7 @@ describe("mappe og andre oppskriftshandlinger", () => {
     const db = createTestDb();
     const folderId = insertFolder(db, folder("Hverdag"));
     const id = insertRecipe(db, recipe("R", T0));
-    assignRecipeToFolder(db, id, folderId);
+    assignRecipeToFolder(db, TEST_USER_ID, id, folderId);
     updateSelectedServings(db, id, 6);
     expect(findRecipeById(db, id)?.folderId).toBe(folderId);
   });
@@ -314,8 +321,8 @@ describe("mappe og andre oppskriftshandlinger", () => {
     const a = insertRecipe(db, recipe("I mappe", "2026-11-09T11:00:00.000Z"));
     insertRecipe(db, recipe("Uten", "2026-11-09T10:00:00.000Z"));
     insertRecipe(db, recipe("Ulagret", null));
-    assignRecipeToFolder(db, a, folderId);
-    expect(listSavedRecipes(db).map((r) => [r.title, r.folderName])).toEqual([
+    assignRecipeToFolder(db, TEST_USER_ID, a, folderId);
+    expect(listSavedRecipes(db, TEST_USER_ID).map((r) => [r.title, r.folderName])).toEqual([
       ["I mappe", "Hverdag"],
       ["Uten", null],
     ]);

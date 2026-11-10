@@ -17,6 +17,7 @@ import { sourceLabel } from "@/lib/source-label";
 import { isHttpUrl } from "@/lib/source-url";
 import CookingMode from "./CookingMode";
 import IngredientList from "./IngredientList";
+import { loginHref } from "./LoginRequired";
 import RecipeActions from "./RecipeActions";
 import { SelectedServingsProvider } from "./SelectedServings";
 import StepList from "./StepList";
@@ -35,7 +36,16 @@ import styles from "./RecipeView.module.css";
  * `folders` er mappene å velge mellom i «Lagre i mappe» (Story 3.3); oppskriftens egen mappe er
  * `recipe.folderId`.
  */
-export default function RecipeView({ recipe, folders }: { recipe: Recipe; folders: Folder[] }) {
+export default function RecipeView({
+  recipe,
+  folders,
+  signedIn = true,
+}: {
+  recipe: Recipe;
+  folders: Folder[];
+  /** `false` uten innlogging: lagre-linjen viser «Logg inn for å lagre» (Story 5.13). */
+  signedIn?: boolean;
+}) {
   // Forslag som er tatt i bruk vises i listene, merket «Forslag» (Story 5.11); originalen endres ikke.
   const shown = withAppliedSuggestions(recipe.ingredients, recipe.steps, recipe.suggestions);
   return (
@@ -124,6 +134,7 @@ export default function RecipeView({ recipe, folders }: { recipe: Recipe; folder
           onMoveToNewFolder={moveToNewFolder.bind(null, recipe.id)}
           isFavorite={recipe.isFavorite}
           onSetFavorite={setFavorite.bind(null, recipe.id)}
+          loginHref={signedIn ? undefined : loginHref(`/oppskrift/${recipe.id}`)}
         />
       </article>
     </SelectedServingsProvider>

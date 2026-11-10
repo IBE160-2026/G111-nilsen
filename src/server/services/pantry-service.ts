@@ -12,9 +12,9 @@ import {
 /** Feilkoder i `detail` når et navn avvises (`validation`). */
 export const PANTRY_NAME_ERRORS = ["name_required", "name_too_long"] as const;
 
-/** Alt brukeren har hjemme (Story 5.8), sortert på navn. */
-export function listPantry(db: Db = getDb()): Result<PantryItem[]> {
-  return ok(listPantryItems(db));
+/** Alt brukeren har hjemme (Story 5.8), sortert på navn. Hver bruker har sin egen liste (Story 5.13). */
+export function listPantry(userId: number, db: Db = getDb()): Result<PantryItem[]> {
+  return ok(listPantryItems(db, userId));
 }
 
 /**
@@ -22,6 +22,7 @@ export function listPantry(db: Db = getDb()): Result<PantryItem[]> {
  * `name_too_long`. Samme navn to ganger (uavhengig av store og små bokstaver) gir den som finnes.
  */
 export function addPantryItem(
+  userId: number,
   name: string,
   db: Db = getDb(),
   now: () => Date = () => new Date(),
@@ -29,11 +30,15 @@ export function addPantryItem(
   const clean = cleanPantryName(name);
   if (clean === "") return err(appError("validation", "name_required"));
   if (clean.length > PANTRY_NAME_MAX_LENGTH) return err(appError("validation", "name_too_long"));
-  return ok(insertPantryItem(db, clean, pantryNameKey(clean), now().toISOString()));
+  return ok(insertPantryItem(db, userId, clean, pantryNameKey(clean), now().toISOString()));
 }
 
 /** Tar noe ut av «har hjemme», så det kommer tilbake på handlelisten. Ukjent id gir `not_found`. */
-export function removePantryItem(id: number, db: Db = getDb()): Result<{ id: number }> {
+export function removePantryItem(
+  userId: number,
+  id: number,
+  db: Db = getDb(),
+): Result<{ id: number }> {
   if (!Number.isSafeInteger(id) || id < 1) return err(appError("not_found"));
-  return deletePantryItem(db, id) ? ok({ id }) : err(appError("not_found"));
+  return deletePantryItem(db, userId, id) ? ok({ id }) : err(appError("not_found"));
 }

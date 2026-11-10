@@ -1,0 +1,8 @@
+.switch {
+  color: var(--color-ink-secondary);
+}
+
+.switch a {
+  color: var(--color-accent);
+  font-weight: 600;
+}

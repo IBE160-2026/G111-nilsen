@@ -5,7 +5,8 @@ import { redirect } from "next/navigation";
 import { formStateForError, formStateForUnexpectedError } from "@/app/_shared/form-errors";
 import type { ManualRecipeFormState } from "@/app/_shared/form-fields";
 import { validateManualRecipe, valuesFromFormData } from "@/app/_shared/manual-recipe-schema";
-import { updateManualRecipe } from "@/server/services/recipe-service";
+import { canAccessRecipe, updateManualRecipe } from "@/server/services/recipe-service";
+import { currentUserId } from "@/server/session";
 
 /**
  * Server Action for «Rediger» (Story 3.5). Binds til oppskriftens id på siden
@@ -23,6 +24,10 @@ export async function saveRecipeEdits(
   if (!validated.ok) return { fieldErrors: validated.fieldErrors, values };
 
   try {
+    // En annens oppskrift behandles som ukjent (Story 5.13).
+    if (!canAccessRecipe(await currentUserId(), id)) {
+      return formStateForError({ kind: "not_found" }, values);
+    }
     const result = updateManualRecipe(id, {
       title: validated.data.title,
       servings: validated.data.servings,

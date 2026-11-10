@@ -29,8 +29,11 @@
   text-align: left;
 }
 
-/* Primærknapp som i EmptyState. */
+/* Primærknapp som i EmptyState. Brukes også for lenken «Logg inn for å lagre» (Story 5.13). */
 .primary {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
   border: var(--button-border-width) solid var(--color-accent);
   background: var(--color-accent);
   color: var(--color-on-accent);

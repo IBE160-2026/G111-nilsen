@@ -7,6 +7,13 @@ import {
 } from "@/lib/messages";
 import { initialManualRecipeState } from "@/components/ManualRecipeForm";
 
+const session = vi.hoisted(() => ({ userId: 1 as number | null }));
+vi.mock("@/server/session", () => ({
+  currentUserId: async () => session.userId,
+  currentUser: async () =>
+    session.userId === null ? null : { id: session.userId, email: "test@example.com" },
+}));
+
 const state = vi.hoisted(() => ({
   db: null as Db | null,
   serviceResult: null as null | { ok: false; error: { kind: "validation"; detail?: string } },

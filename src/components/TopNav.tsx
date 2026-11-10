@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 import styles from "./TopNav.module.css";
 
 export const NAV_ITEMS = [
@@ -18,14 +19,26 @@ export function isActive(href: string, pathname: string | null): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** Selve menyen. `pathname = null` gir meny uten markert punkt (brukes som Suspense-fallback). */
-export function TopNavView({ pathname }: { pathname: string | null }) {
+/**
+ * Selve menyen. `pathname = null` gir meny uten markert punkt (brukes som Suspense-fallback).
+ * `account` er innlogging/utlogging (Story 5.13): ved logoen på mobil, sist i raden på desktop.
+ */
+export function TopNavView({
+  pathname,
+  account = null,
+}: {
+  pathname: string | null;
+  account?: ReactNode;
+}) {
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
-        <Link href="/" className={styles.logo}>
-          RecipeMate
-        </Link>
+        <div className={styles.top}>
+          <Link href="/" className={styles.logo}>
+            RecipeMate
+          </Link>
+          <div className={styles.account}>{account}</div>
+        </div>
         <nav aria-label="Hovedmeny">
           <ul className={styles.list}>
             {NAV_ITEMS.map((item) => {
@@ -49,7 +62,7 @@ export function TopNavView({ pathname }: { pathname: string | null }) {
   );
 }
 
-export default function TopNav() {
+export default function TopNav({ account = null }: { account?: ReactNode }) {
   const pathname = usePathname();
-  return <TopNavView pathname={pathname} />;
+  return <TopNavView pathname={pathname} account={account} />;
 }

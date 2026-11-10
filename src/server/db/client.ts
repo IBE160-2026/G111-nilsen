@@ -47,7 +47,22 @@ export function getDb(): Db {
   return globalForDb.__recipemateDb;
 }
 
-/** Ny, tom database i minnet med alle migrasjoner kjørt. Brukes i tester. */
-export function createTestDb(): Db {
-  return openDatabase(MEMORY_DATABASE);
+/** Id-en til testbrukeren som `createTestDb` lager (Story 5.13). */
+export const TEST_USER_ID = 1;
+
+/**
+ * Ny database i minnet med alle migrasjoner kjørt. Brukes i tester. Har som standard én bruker
+ * (`TEST_USER_ID`, test@example.com), så eide oppskrifter, mapper og «Har hjemme» kan lages
+ * direkte; `{ users: false }` gir en database helt uten brukere.
+ */
+export function createTestDb(options: { users?: boolean } = {}): Db {
+  const db = openDatabase(MEMORY_DATABASE);
+  if (options.users !== false) {
+    db.$client
+      .prepare(
+        "insert into users (id, email, password_hash, created_at) values (?, 'test@example.com', 'x', '2026-01-01T00:00:00.000Z')",
+      )
+      .run(TEST_USER_ID);
+  }
+  return db;
 }

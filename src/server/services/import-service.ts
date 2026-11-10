@@ -19,6 +19,8 @@ export type ImportDeps = {
   fetcher?: RecipeSourceFetcher;
   db?: Db;
   now?: () => Date;
+  /** Innlogget bruker som blir eier av importen (Story 5.13); utelatt = uten innlogging. */
+  userId?: number | null;
 };
 
 /**
@@ -74,7 +76,8 @@ export async function importRecipe(
     const db = deps.db ?? getDb();
 
     const now = (deps.now ?? (() => new Date()))().toISOString();
-    const known = findRecipeBySourceUrl(db, sourceUrl);
+    const userId = deps.userId ?? null;
+    const known = findRecipeBySourceUrl(db, sourceUrl, userId);
     if (known) {
       if (known.saved) return err(appError("duplicate", String(known.id)));
       refreshUnsavedRecipe(db, known.id, now);
@@ -102,6 +105,7 @@ export async function importRecipe(
       updatedAt: now,
       ingredients: content.ingredients,
       steps: content.steps,
+      userId,
     });
     return stored.kind === "duplicate"
       ? err(appError("duplicate", String(stored.id)))

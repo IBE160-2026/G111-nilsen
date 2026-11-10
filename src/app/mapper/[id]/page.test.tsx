@@ -2,10 +2,17 @@
 import { cleanup, render, screen, within } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createTestDb, type Db } from "@/server/db/client";
+import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import { insertRecipe, type NewRecipe } from "@/server/db/repositories/recipe-repository";
 import { createFolder, moveRecipeToFolder } from "@/server/services/folder-service";
 import { setFavorite } from "@/server/services/recipe-service";
+
+const session = vi.hoisted(() => ({ userId: 1 as number | null }));
+vi.mock("@/server/session", () => ({
+  currentUserId: async () => session.userId,
+  currentUser: async () =>
+    session.userId === null ? null : { id: session.userId, email: "test@example.com" },
+}));
 
 const state = vi.hoisted(() => ({ db: null as Db | null, forcedErrorKind: null as string | null }));
 
@@ -53,6 +60,7 @@ const recipe = (title: string, savedAt: string, extra: Partial<NewRecipe> = {}):
   savedAt,
   createdAt: savedAt,
   updatedAt: savedAt,
+  userId: TEST_USER_ID,
   ingredients: [],
   steps: [],
   ...extra,
@@ -70,15 +78,15 @@ async function renderPage(id: string): Promise<ReactElement> {
 
 describe("/mapper/[id]", () => {
   it("viser mappenavnet, lenken «Alle mapper» og kortene sist lagret først, uten mappenavn på kortene", async () => {
-    createFolder("Hverdag", state.db!);
+    createFolder(TEST_USER_ID, "Hverdag", state.db!);
     const old = insertRecipe(
       state.db!,
       recipe("Eldst", "2026-11-09T09:00:00.000Z", { sourceName: "Matprat" }),
     );
     const recent = insertRecipe(state.db!, recipe("Nyest", "2026-11-09T11:00:00.000Z"));
     insertRecipe(state.db!, recipe("Utenfor", "2026-11-09T12:00:00.000Z"));
-    moveRecipeToFolder(old, 1, state.db!);
-    moveRecipeToFolder(recent, 1, state.db!);
+    moveRecipeToFolder(TEST_USER_ID, old, 1, state.db!);
+    moveRecipeToFolder(TEST_USER_ID, recent, 1, state.db!);
 
     render(await renderPage("1"));
     expect(screen.getByRole("heading", { level: 1, name: "Hverdag" })).toBeInTheDocument();
@@ -92,11 +100,11 @@ describe("/mapper/[id]", () => {
   });
 
   it("kortene i mappen har hjerte som viser favorittstatus (Story 3.4)", async () => {
-    createFolder("Hverdag", state.db!);
+    createFolder(TEST_USER_ID, "Hverdag", state.db!);
     const a = insertRecipe(state.db!, recipe("Favoritten", "2026-11-09T11:00:00.000Z"));
     const b = insertRecipe(state.db!, recipe("Vanlig", "2026-11-09T10:00:00.000Z"));
-    moveRecipeToFolder(a, 1, state.db!);
-    moveRecipeToFolder(b, 1, state.db!);
+    moveRecipeToFolder(TEST_USER_ID, a, 1, state.db!);
+    moveRecipeToFolder(TEST_USER_ID, b, 1, state.db!);
     setFavorite(a, true, state.db!);
     render(await renderPage("1"));
     expect(screen.getByRole("button", { name: "Favoritt: Favoritten" })).toHaveAttribute(
@@ -110,7 +118,7 @@ describe("/mapper/[id]", () => {
   });
 
   it("tom mappe: «Mappen er tom.» med forklaring og «Gå til oppskriftene»", async () => {
-    createFolder("Tom", state.db!);
+    createFolder(TEST_USER_ID, "Tom", state.db!);
     render(await renderPage("1"));
     expect(screen.getByRole("heading", { level: 1, name: "Tom" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: "Mappen er tom." })).toBeInTheDocument();
@@ -142,7 +150,7 @@ describe("/mapper/[id]", () => {
   });
 
   it("setter mappenavnet som fanetittel, og standardtittel for ukjent mappe", async () => {
-    createFolder("Hverdag", state.db!);
+    createFolder(TEST_USER_ID, "Hverdag", state.db!);
     expect((await generateMetadata({ params: Promise.resolve({ id: "1" }) })).title).toBe(
       "Hverdag",
     );
@@ -158,5 +166,37 @@ describe("/mapper/[id]", () => {
     render(<FolderNotFound />);
     expect(screen.getByRole("heading", { level: 1, name: "Fant ikke mappen" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Se alle mapper" })).toHaveAttribute("href", "/mapper");
+  });
+});
+
+describe("uten innlogging og andres mapper (Story 5.13)", () => {
+  it("uten innlogging: «Logg inn for å se dette»", async () => {
+    session.userId = null;
+    try {
+      render(await renderPage("1"));
+      expect(screen.getByRole("link", { name: "Logg inn" })).toHaveAttribute(
+        "href",
+        "/logg-inn?neste=%2Fmapper%2F1",
+      );
+    } finally {
+      session.userId = 1;
+    }
+  });
+
+  it("en annens mappe gir ikke funnet", async () => {
+    createFolder(TEST_USER_ID, "Hverdag", state.db!);
+    const other = Number(
+      state
+        .db!.$client.prepare(
+          "insert into users (email, password_hash, created_at) values ('b@b.no', 'x', 'x')",
+        )
+        .run().lastInsertRowid,
+    );
+    session.userId = other;
+    try {
+      await expect(renderPage("1")).rejects.toBeInstanceOf(NotFoundError);
+    } finally {
+      session.userId = 1;
+    }
   });
 });

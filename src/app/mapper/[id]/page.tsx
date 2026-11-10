@@ -4,25 +4,30 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { cache, Suspense } from "react";
 import EmptyState from "@/components/EmptyState";
+import LoginRequired from "@/components/LoginRequired";
 import RecipeCard from "@/components/RecipeCard";
 import { folderMessages } from "@/lib/messages";
 import { parseRecipeId } from "@/lib/recipe-id";
 import { getFolderWithRecipes } from "@/server/services/folder-service";
+import { currentUserId } from "@/server/session";
 import styles from "../../list-page.module.css";
 
 type Params = Promise<{ id: string }>;
 
 /** Leser mappen én gang per forespørsel, selv om både metadata og side trenger den. */
-const loadFolder = cache((rawId: string) => {
+const loadFolder = cache(async (rawId: string) => {
   const id = parseRecipeId(rawId);
-  return id === null ? null : getFolderWithRecipes(id);
+  if (id === null) return null;
+  // Uten innlogging, eller en annens mappe: som en ukjent mappe (Story 5.13).
+  const userId = await currentUserId();
+  return userId === null ? null : getFolderWithRecipes(userId, id);
 });
 
 /** Fanetittel «<navn> · RecipeMate» (malen ligger i rotlayouten). */
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { id } = await params;
   await connection();
-  const result = loadFolder(id);
+  const result = await loadFolder(id);
   return { title: result?.ok ? result.value.folder.name : folderMessages.folderDefaultTitle };
 }
 
@@ -41,8 +46,9 @@ export default function FolderPage({ params }: { params: Params }) {
 async function FolderLoader({ params }: { params: Params }) {
   const { id } = await params;
   await connection();
+  if ((await currentUserId()) === null) return <LoginRequired next={`/mapper/${id}`} />;
 
-  const result = loadFolder(id);
+  const result = await loadFolder(id);
   if (result === null) notFound();
   if (!result.ok) {
     if (result.error.kind === "not_found") notFound();

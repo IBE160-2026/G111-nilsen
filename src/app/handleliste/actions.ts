@@ -8,6 +8,7 @@ import {
 } from "@/app/_shared/action-result";
 import { pantryMessages } from "@/lib/messages";
 import { addPantryItem, removePantryItem } from "@/server/services/pantry-service";
+import { currentUserId } from "@/server/session";
 
 // Server Actions er offentlige endepunkter: id og navn valideres på nytt her.
 const idSchema = z.number().int().min(1).max(Number.MAX_SAFE_INTEGER);
@@ -20,7 +21,9 @@ export async function addToPantry(name: string): Promise<PantryActionResult> {
   if (typeof name !== "string")
     return { ok: false, field: "name", message: pantryMessages.nameRequired };
   try {
-    const result = addPantryItem(name);
+    const userId = await currentUserId();
+    if (userId === null) return actionFailure("login_required");
+    const result = addPantryItem(userId, name);
     if (!result.ok) {
       if (result.error.kind === "validation") {
         return {
@@ -45,7 +48,9 @@ export async function addToPantry(name: string): Promise<PantryActionResult> {
 export async function removeFromPantry(id: number): Promise<ActionResult> {
   if (!idSchema.safeParse(id).success) return actionFailure("not_found");
   try {
-    const result = removePantryItem(id);
+    const userId = await currentUserId();
+    if (userId === null) return actionFailure("login_required");
+    const result = removePantryItem(userId, id);
     if (!result.ok) return actionFailure(result.error.kind);
     return { ok: true };
   } catch (error) {

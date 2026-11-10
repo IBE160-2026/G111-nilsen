@@ -35,46 +35,54 @@ type CleanName = { name: string; nameKey: string };
  * `nameKey`. `ownId` er mappen som får nytt navn (den kan beholde sitt eget navn med andre
  * store og små bokstaver).
  */
-function checkName(db: Db, raw: string, ownId?: number): Result<CleanName> {
+function checkName(db: Db, userId: number, raw: string, ownId?: number): Result<CleanName> {
   const name = cleanFolderName(typeof raw === "string" ? raw : "");
   if (name === "") return err(appError("validation", "name_required"));
   if (folderNameLength(name) > FOLDER_NAME_MAX_LENGTH) {
     return err(appError("validation", "name_too_long"));
   }
   const nameKey = folderNameKey(name);
-  const existing = findFolderByNameKey(db, nameKey);
+  const existing = findFolderByNameKey(db, userId, nameKey);
   if (existing && existing.id !== ownId) return err(appError("validation", "name_taken"));
   return ok({ name, nameKey });
 }
 
-/** Oppretter en mappe. Ugyldig eller opptatt navn gir `validation` med årsak i `detail`. */
-export function createFolder(name: string, db: Db = getDb()): Result<Folder> {
-  const checked = checkName(db, name);
+/**
+ * Oppretter en mappe for brukeren. Ugyldig eller opptatt navn (blant brukerens mapper) gir
+ * `validation` med årsak i `detail`.
+ */
+export function createFolder(userId: number, name: string, db: Db = getDb()): Result<Folder> {
+  const checked = checkName(db, userId, name);
   if (!checked.ok) return checked;
-  const id = insertFolder(db, { ...checked.value, createdAt: new Date().toISOString() });
+  const id = insertFolder(db, { ...checked.value, createdAt: new Date().toISOString(), userId });
   return ok({ id, name: checked.value.name });
 }
 
 /** Gir mappen nytt navn. Ukjent id gir `not_found`; ellers samme regler som `createFolder`. */
-export function renameFolder(id: number, name: string, db: Db = getDb()): Result<Folder> {
-  if (!isId(id) || !findFolderById(db, id)) return err(appError("not_found"));
-  const checked = checkName(db, name, id);
+export function renameFolder(
+  userId: number,
+  id: number,
+  name: string,
+  db: Db = getDb(),
+): Result<Folder> {
+  if (!isId(id) || !findFolderById(db, userId, id)) return err(appError("not_found"));
+  const checked = checkName(db, userId, name, id);
   if (!checked.ok) return checked;
-  if (!renameFolderRow(db, id, checked.value)) return err(appError("not_found"));
+  if (!renameFolderRow(db, userId, id, checked.value)) return err(appError("not_found"));
   return ok({ id, name: checked.value.name });
 }
 
 /** Sletter mappen; oppskriftene blir liggende i samlingen uten mappe. Ukjent id gir `not_found`. */
-export function deleteFolder(id: number, db: Db = getDb()): Result<{ id: number }> {
+export function deleteFolder(userId: number, id: number, db: Db = getDb()): Result<{ id: number }> {
   if (!isId(id)) return err(appError("not_found"));
-  return deleteFolderRow(db, id) ? ok({ id }) : err(appError("not_found"));
+  return deleteFolderRow(db, userId, id) ? ok({ id }) : err(appError("not_found"));
 }
 
 const collator = new Intl.Collator("nb");
 
-/** Alle mapper med antall oppskrifter, sortert alfabetisk (norsk). */
-export function listFolders(db: Db = getDb()): Result<FolderSummary[]> {
-  const folders = listFolderRows(db).sort(
+/** Brukerens mapper med antall oppskrifter, sortert alfabetisk (norsk). Alle mappefunksjoner gjelder bare brukerens egne mapper og oppskrifter (Story 5.13); andres gir `not_found`. */
+export function listFolders(userId: number, db: Db = getDb()): Result<FolderSummary[]> {
+  const folders = listFolderRows(db, userId).sort(
     (a, b) => collator.compare(a.name, b.name) || a.id - b.id,
   );
   return ok(folders);
@@ -82,13 +90,14 @@ export function listFolders(db: Db = getDb()): Result<FolderSummary[]> {
 
 /** Mappen med oppskriftene i den (sist lagret først). Ukjent id gir `not_found`. */
 export function getFolderWithRecipes(
+  userId: number,
   id: number,
   db: Db = getDb(),
 ): Result<{ folder: Folder; recipes: RecipeSummary[] }> {
   if (!isId(id)) return err(appError("not_found"));
-  const folder = findFolderById(db, id);
+  const folder = findFolderById(db, userId, id);
   if (!folder) return err(appError("not_found"));
-  return ok({ folder, recipes: listRecipesInFolder(db, id) });
+  return ok({ folder, recipes: listRecipesInFolder(db, userId, id) });
 }
 
 /**
@@ -96,6 +105,7 @@ export function getFolderWithRecipes(
  * mappe, ukjent oppskrift og oppskrift som ikke er i samlingen gir `not_found`.
  */
 export function moveRecipeToFolder(
+  userId: number,
   recipeId: number,
   folderId: number | null,
   db: Db = getDb(),
@@ -104,10 +114,12 @@ export function moveRecipeToFolder(
   let folder: Folder | null = null;
   if (folderId !== null) {
     if (!isId(folderId)) return err(appError("not_found"));
-    folder = findFolderById(db, folderId);
+    folder = findFolderById(db, userId, folderId);
     if (!folder) return err(appError("not_found"));
   }
-  return assignRecipeToFolder(db, recipeId, folderId) ? ok({ folder }) : err(appError("not_found"));
+  return assignRecipeToFolder(db, userId, recipeId, folderId)
+    ? ok({ folder })
+    : err(appError("not_found"));
 }
 
 /**
@@ -115,16 +127,18 @@ export function moveRecipeToFolder(
  * som i `createFolder`; er oppskriften ukjent eller ikke lagret, opprettes ingen mappe.
  */
 export function moveRecipeToNewFolder(
+  userId: number,
   recipeId: number,
   name: string,
   db: Db = getDb(),
 ): Result<{ folder: Folder }> {
   if (!isId(recipeId)) return err(appError("not_found"));
-  const checked = checkName(db, name);
+  const checked = checkName(db, userId, name);
   if (!checked.ok) return checked;
   const id = assignRecipeToNewFolder(db, recipeId, {
     ...checked.value,
     createdAt: new Date().toISOString(),
+    userId,
   });
   return id === null
     ? err(appError("not_found"))

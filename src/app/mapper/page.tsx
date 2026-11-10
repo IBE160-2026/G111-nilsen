@@ -3,7 +3,9 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import FolderManager from "@/components/FolderManager";
 import { folderMessages } from "@/lib/messages";
+import LoginRequired from "@/components/LoginRequired";
 import { listFolders } from "@/server/services/folder-service";
+import { currentUserId } from "@/server/session";
 import styles from "../list-page.module.css";
 import { createFolder, deleteFolder, renameFolder } from "./actions";
 
@@ -26,8 +28,10 @@ export default function MapperPage() {
 
 async function FolderLoader() {
   await connection();
+  const userId = await currentUserId();
+  if (userId === null) return <LoginRequired next="/mapper" />;
 
-  const result = listFolders();
+  const result = listFolders(userId);
   // Feil vises av error.tsx; en tom liste skal aldri skjule en databasefeil.
   if (!result.ok) throw new Error(`${folderMessages.loadFailed} (${result.error.kind})`);
 

@@ -45,6 +45,10 @@ export const errorMessages: Record<ErrorKind, ErrorMessage> = {
     title: "Fikk ikke laget forslag akkurat nå.",
     body: "Prøv igjen senere.",
   },
+  login_required: {
+    title: "Du må logge inn.",
+    body: "Logg inn eller lag en konto for å lagre oppskrifter.",
+  },
   unknown: fallbackMessage,
 };
 
@@ -200,6 +204,38 @@ export const unitMessages = {
   dl: "Volum (dl)",
   gram: "Vekt (gram)",
   hint: "Kopper, unser og pund regnes om til norske mål. Mel, sukker, smør, melk og andre vanlige varer regnes mellom dl og gram (ca.).",
+} as const;
+
+/** Kontoer og innlogging (Story 5.13). */
+export const accountMessages = {
+  login: "Logg inn",
+  logout: "Logg ut",
+  register: "Lag konto",
+  loginHeading: "Logg inn",
+  loginLead: "Logg inn for å se og lagre oppskriftene dine.",
+  registerHeading: "Lag en konto",
+  registerLead:
+    "Med en konto lagres oppskrifter, mapper, favoritter, handleliste og «Har hjemme» på kontoen din.",
+  email: "E-post",
+  password: "Passord",
+  passwordHint: "Minst 8 tegn.",
+  loginPending: "Logger inn …",
+  registerPending: "Lager konto …",
+  noAccount: "Har du ikke konto?",
+  haveAccount: "Har du allerede konto?",
+  signedInAs: (email: string) => `Logget inn som ${email}`,
+  accountMenu: "Konto",
+  requiredTitle: "Logg inn for å se dette",
+  requiredBody:
+    "Oppskrifter, mapper, favoritter og handleliste lagres på kontoen din. Du kan hente og se oppskrifter uten konto.",
+  saveNeedsLogin: "Logg inn for å lagre",
+  fieldErrors: {
+    email_invalid: "Skriv en gyldig e-postadresse, for eksempel navn@eksempel.no.",
+    email_taken: "Det finnes allerede en konto med denne e-posten. Logg inn i stedet.",
+    password_too_short: "Passordet må ha minst 8 tegn.",
+    password_too_long: "Passordet kan ha maks 200 tegn.",
+    wrong_credentials: "Feil e-post eller passord.",
+  },
 } as const;
 
 /** Forslag som er tatt i bruk, vist i ingredienslisten og stegene (Story 5.11). */

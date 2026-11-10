@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { parseLine } from "@/domain";
-import { createTestDb } from "../db/client";
+import { createTestDb, TEST_USER_ID } from "../db/client";
 import { insertRecipe } from "../db/repositories/recipe-repository";
 import {
+  canAccessRecipe,
   createManualRecipe,
+  listShoppingRecipes,
+  getRecipeFor,
   deleteRecipe,
   getRecipe,
   listCollection,
@@ -30,7 +33,7 @@ function count(db: ReturnType<typeof createTestDb>, table: string): number {
 
 function saveAndRead(values: Partial<ManualRecipeInput>) {
   const db = createTestDb();
-  const created = createManualRecipe({ ...input, ...values }, db);
+  const created = createManualRecipe(TEST_USER_ID, { ...input, ...values }, db);
   if (!created.ok) throw new Error(`forventet ok, fikk ${created.error.kind}`);
   const read = getRecipe(created.value.id, db);
   if (!read.ok) throw new Error("fant ikke oppskriften");
@@ -94,15 +97,15 @@ describe("recipe-service", () => {
 
   it("avviser input uten tittel eller ingredienser, og lagrer ingenting", () => {
     const db = createTestDb();
-    expect(createManualRecipe({ ...input, title: "  " }, db)).toEqual({
+    expect(createManualRecipe(TEST_USER_ID, { ...input, title: "  " }, db)).toEqual({
       ok: false,
       error: { kind: "validation", detail: "title" },
     });
-    expect(createManualRecipe({ ...input, ingredients: [" "] }, db)).toEqual({
+    expect(createManualRecipe(TEST_USER_ID, { ...input, ingredients: [" "] }, db)).toEqual({
       ok: false,
       error: { kind: "validation", detail: "ingredients" },
     });
-    expect(createManualRecipe({ ...input, servings: 0 }, db).ok).toBe(false);
+    expect(createManualRecipe(TEST_USER_ID, { ...input, servings: 0 }, db).ok).toBe(false);
     expect(count(db, "recipes")).toBe(0);
   });
 
@@ -121,7 +124,7 @@ describe("recipe-service", () => {
     ],
   ])("håndhever grensene: %s gir validation med feltnavn", (_, change, field) => {
     const db = createTestDb();
-    expect(createManualRecipe({ ...input, ...change }, db)).toEqual({
+    expect(createManualRecipe(TEST_USER_ID, { ...input, ...change }, db)).toEqual({
       ok: false,
       error: { kind: "validation", detail: field },
     });
@@ -131,6 +134,7 @@ describe("recipe-service", () => {
   it("godtar verdiene akkurat på grensene", () => {
     const db = createTestDb();
     const result = createManualRecipe(
+      TEST_USER_ID,
       {
         title: "a".repeat(200),
         servings: 50,
@@ -157,6 +161,7 @@ describe("updateManualRecipe", () => {
   function created(values: Partial<ManualRecipeInput> = {}) {
     const db = createTestDb();
     const result = createManualRecipe(
+      TEST_USER_ID,
       { ...input, ingredients: ["0,5 ts salt", "3 egg"], ...values },
       db,
     );
@@ -332,16 +337,16 @@ describe("updateManualRecipe", () => {
 
 describe("listCollection", () => {
   it("er tom for en tom database", () => {
-    expect(listCollection(createTestDb())).toEqual({ ok: true, value: [] });
+    expect(listCollection(TEST_USER_ID, createTestDb())).toEqual({ ok: true, value: [] });
   });
 
   it("viser nye manuelle oppskrifter, sist lagret først", () => {
     const db = createTestDb();
-    const first = createManualRecipe({ ...input, title: "Først" }, db);
-    const second = createManualRecipe({ ...input, title: "Sist" }, db);
+    const first = createManualRecipe(TEST_USER_ID, { ...input, title: "Først" }, db);
+    const second = createManualRecipe(TEST_USER_ID, { ...input, title: "Sist" }, db);
     if (!first.ok || !second.ok) throw new Error("kunne ikke lagre");
 
-    const result = listCollection(db);
+    const result = listCollection(TEST_USER_ID, db);
     if (!result.ok) throw new Error("forventet ok");
     expect(result.value.map((r) => r.id)).toEqual([second.value.id, first.value.id]);
     expect(result.value[0]).toMatchObject({ title: "Sist", sourceName: null, sourceUrl: null });
@@ -349,14 +354,14 @@ describe("listCollection", () => {
 
   it("endrer ikke savedAt eller plassering når en oppskrift redigeres", () => {
     const db = createTestDb();
-    const first = createManualRecipe({ ...input, title: "Først" }, db);
-    const second = createManualRecipe({ ...input, title: "Sist" }, db);
+    const first = createManualRecipe(TEST_USER_ID, { ...input, title: "Først" }, db);
+    const second = createManualRecipe(TEST_USER_ID, { ...input, title: "Sist" }, db);
     if (!first.ok || !second.ok) throw new Error("kunne ikke lagre");
-    const before = listCollection(db);
+    const before = listCollection(TEST_USER_ID, db);
 
     updateManualRecipe(first.value.id, { ...input, title: "Endret" }, db);
 
-    const after = listCollection(db);
+    const after = listCollection(TEST_USER_ID, db);
     if (!before.ok || !after.ok) throw new Error("forventet ok");
     expect(after.value.map((r) => [r.id, r.savedAt])).toEqual(
       before.value.map((r) => [r.id, r.savedAt]),
@@ -369,13 +374,18 @@ describe("listCollection: søketekst (Story 5.2)", () => {
   it("har tittel og ingrediensnavn i små bokstaver, for hver oppskrift", () => {
     const db = createTestDb();
     const a = createManualRecipe(
+      TEST_USER_ID,
       { ...input, title: "Blåbærsuppe", ingredients: ["2 dl Blåbær", "1 ss sukker"] },
       db,
     );
-    const b = createManualRecipe({ ...input, title: "Vafler", ingredients: ["3 egg"] }, db);
+    const b = createManualRecipe(
+      TEST_USER_ID,
+      { ...input, title: "Vafler", ingredients: ["3 egg"] },
+      db,
+    );
     if (!a.ok || !b.ok) throw new Error("kunne ikke lagre");
 
-    const result = listCollection(db);
+    const result = listCollection(TEST_USER_ID, db);
     if (!result.ok) throw new Error("forventet ok");
     const byId = new Map(result.value.map((r) => [r.id, r.searchText]));
     expect(byId.get(a.value.id)).toContain("blåbærsuppe");
@@ -399,7 +409,7 @@ describe("listCollection: søketekst (Story 5.2)", () => {
       ingredients: [],
       steps: [],
     });
-    expect(listCollection(db)).toEqual({ ok: true, value: [] });
+    expect(listCollection(TEST_USER_ID, db)).toEqual({ ok: true, value: [] });
   });
 });
 
@@ -418,6 +428,7 @@ describe("lagre, slette og rydde (Story 3.2)", () => {
       savedAt,
       createdAt: createdAt ?? "2026-11-09T10:00:00.000Z",
       updatedAt: "2026-11-09T10:00:00.000Z",
+      userId: TEST_USER_ID,
       ingredients: [{ position: 0, section: null, ...parseLine("2 egg") }],
       steps: [{ position: 0, section: null, text: "Rør." }],
     });
@@ -433,23 +444,23 @@ describe("lagre, slette og rydde (Story 3.2)", () => {
       const db = createTestDb();
       const id = stored(db, null);
       const before = read(db, id);
-      expect(saveRecipeToCollection(id, db)).toEqual({ ok: true, value: { id } });
+      expect(saveRecipeToCollection(TEST_USER_ID, id, db)).toEqual({ ok: true, value: { id } });
       const after = read(db, id);
       expect(after.savedAt).not.toBeNull();
       expect(after.updatedAt).toBe(before.updatedAt);
-      const list = listCollection(db);
+      const list = listCollection(TEST_USER_ID, db);
       expect(list.ok && list.value.map((r) => r.id)).toEqual([id]);
     });
 
     it("beholder tidspunktet når oppskriften allerede er lagret", () => {
       const db = createTestDb();
       const id = stored(db, "2026-11-09T11:00:00.000Z");
-      expect(saveRecipeToCollection(id, db).ok).toBe(true);
+      expect(saveRecipeToCollection(TEST_USER_ID, id, db).ok).toBe(true);
       expect(read(db, id).savedAt).toBe("2026-11-09T11:00:00.000Z");
     });
 
     it.each([999, ...BAD_IDS])("id %s gir not_found", (id) => {
-      expect(saveRecipeToCollection(id, createTestDb())).toEqual({
+      expect(saveRecipeToCollection(TEST_USER_ID, id, createTestDb())).toEqual({
         ok: false,
         error: { kind: "not_found" },
       });
@@ -574,7 +585,7 @@ describe("lagre, slette og rydde (Story 3.2)", () => {
 describe("favoritter (Story 3.4)", () => {
   function seed() {
     const db = createTestDb();
-    const created = createManualRecipe(input, db);
+    const created = createManualRecipe(TEST_USER_ID, input, db);
     if (!created.ok) throw new Error("kunne ikke lagre");
     return { db, id: created.value.id };
   }
@@ -625,15 +636,15 @@ describe("favoritter (Story 3.4)", () => {
 
   it("listFavorites gir favorittene sist lagret først, og tom liste uten favoritter", () => {
     const db = createTestDb();
-    expect(listFavorites(db)).toEqual({ ok: true, value: [] });
-    const a = createManualRecipe({ ...input, title: "A" }, db);
-    const b = createManualRecipe({ ...input, title: "B" }, db);
-    createManualRecipe({ ...input, title: "C" }, db);
+    expect(listFavorites(TEST_USER_ID, db)).toEqual({ ok: true, value: [] });
+    const a = createManualRecipe(TEST_USER_ID, { ...input, title: "A" }, db);
+    const b = createManualRecipe(TEST_USER_ID, { ...input, title: "B" }, db);
+    createManualRecipe(TEST_USER_ID, { ...input, title: "C" }, db);
     if (!a.ok || !b.ok) throw new Error("kunne ikke lagre");
     // Lik savedAt avgjøres av høyest id, så rekkefølgen er B før A.
     setFavorite(a.value.id, true, db);
     setFavorite(b.value.id, true, db);
-    const result = listFavorites(db);
+    const result = listFavorites(TEST_USER_ID, db);
     expect(result.ok && result.value.map((r) => r.title)).toEqual(["B", "A"]);
     expect(result.ok && result.value.every((r) => r.isFavorite)).toBe(true);
   });
@@ -644,7 +655,7 @@ describe("favoritter (Story 3.4)", () => {
     expect(updateManualRecipe(id, { ...input, title: "Nytt navn" }, db).ok).toBe(true);
     expect(recipeOf(db, id)).toMatchObject({ title: "Nytt navn", isFavorite: true });
     deleteRecipe(id, db);
-    expect(listFavorites(db)).toEqual({ ok: true, value: [] });
+    expect(listFavorites(TEST_USER_ID, db)).toEqual({ ok: true, value: [] });
   });
 });
 
@@ -654,12 +665,13 @@ describe("listShoppingRecipes med forslag (Story 5.11)", () => {
     const { listShoppingRecipes } = await import("./recipe-service");
     const db = createTestDb();
     const created = createManualRecipe(
+      TEST_USER_ID,
       { title: "Pannekaker", servings: 4, ingredients: ["3 dl melk"], steps: ["Stek."] },
       db,
     );
     if (!created.ok) throw new Error("feil");
     const id = created.value.id;
-    saveRecipeToCollection(id, db);
+    saveRecipeToCollection(TEST_USER_ID, id, db);
     for (const suggestion of [
       {
         text: "Ha en teskje vaniljesukker eller kardemomme i røren.",
@@ -675,11 +687,75 @@ describe("listShoppingRecipes med forslag (Story 5.11)", () => {
     ]) {
       expect(applySuggestion(id, suggestion, db).ok).toBe(true);
     }
-    const result = listShoppingRecipes(db);
+    const result = listShoppingRecipes(TEST_USER_ID, db);
     if (!result.ok) throw new Error("feil");
     expect(result.value[0].ingredients.map((line) => line.original)).toEqual([
       "3 dl melk",
       "1 ts vaniljesukker eller kardemomme",
     ]);
+  });
+});
+
+describe("eierskap (Story 5.13)", () => {
+  function secondUser(db: ReturnType<typeof createTestDb>): number {
+    return Number(
+      db.$client
+        .prepare("insert into users (email, password_hash, created_at) values ('b@b.no', 'x', 'x')")
+        .run().lastInsertRowid,
+    );
+  }
+
+  it("canAccessRecipe: eieren og alle for en import uten eier; ikke andre", () => {
+    const db = createTestDb();
+    const other = secondUser(db);
+    const created = createManualRecipe(TEST_USER_ID, input, db);
+    if (!created.ok) throw new Error("feil");
+    const mine = created.value.id;
+    expect(canAccessRecipe(TEST_USER_ID, mine, db)).toBe(true);
+    expect(canAccessRecipe(other, mine, db)).toBe(false);
+    expect(canAccessRecipe(null, mine, db)).toBe(false);
+    const anonymous = insertRecipe(db, {
+      title: "Uten eier",
+      sourceUrl: null,
+      sourceName: null,
+      originalServings: 4,
+      selectedServings: null,
+      savedAt: null,
+      createdAt: "2026-11-09T10:00:00.000Z",
+      updatedAt: "2026-11-09T10:00:00.000Z",
+      ingredients: [],
+      steps: [],
+    });
+    expect(canAccessRecipe(null, anonymous, db)).toBe(true);
+    expect(canAccessRecipe(other, anonymous, db)).toBe(true);
+    expect(canAccessRecipe(TEST_USER_ID, 999, db)).toBe(false);
+    expect(canAccessRecipe(TEST_USER_ID, 0, db)).toBe(false);
+  });
+
+  it("getRecipeFor gir not_found for en annens oppskrift", () => {
+    const db = createTestDb();
+    const other = secondUser(db);
+    const created = createManualRecipe(TEST_USER_ID, input, db);
+    if (!created.ok) throw new Error("feil");
+    expect(getRecipeFor(TEST_USER_ID, created.value.id, db).ok).toBe(true);
+    expect(getRecipeFor(other, created.value.id, db)).toEqual({
+      ok: false,
+      error: { kind: "not_found" },
+    });
+  });
+
+  it("samlingen, favoritter og handlelisten viser bare brukerens egne", () => {
+    const db = createTestDb();
+    const other = secondUser(db);
+    createManualRecipe(TEST_USER_ID, input, db);
+    createManualRecipe(other, { ...input, title: "Deres" }, db);
+    const titles = (userId: number) => {
+      const result = listCollection(userId, db);
+      return result.ok ? result.value.map((r) => r.title) : [];
+    };
+    expect(titles(TEST_USER_ID)).toEqual([input.title.trim()]);
+    expect(titles(other)).toEqual(["Deres"]);
+    const shopping = listShoppingRecipes(other, db);
+    expect(shopping.ok && shopping.value.map((r) => r.title)).toEqual(["Deres"]);
   });
 });

@@ -3,9 +3,16 @@ import { initialImportState } from "@/app/_shared/import-form";
 import { fallbackMessage, messageFor } from "@/lib/messages";
 import { appError, err, ok } from "@/lib/result";
 import { createFixtureFetcher } from "@/server/adapters/fixture-fetcher";
-import { createTestDb, type Db } from "@/server/db/client";
+import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import type { RecipeSourceFetcher } from "@/server/ports/recipe-source-fetcher";
 import { saveRecipeToCollection } from "@/server/services/recipe-service";
+
+const session = vi.hoisted(() => ({ userId: 1 as number | null }));
+vi.mock("@/server/session", () => ({
+  currentUserId: async () => session.userId,
+  currentUser: async () =>
+    session.userId === null ? null : { id: session.userId, email: "test@example.com" },
+}));
 
 const state = vi.hoisted(() => ({
   db: null as Db | null,
@@ -97,7 +104,7 @@ describe("importFromUrl", () => {
 
   it("duplicate gir recipeId til lenken «Åpne oppskriften»", async () => {
     await expect(importFromUrl(MATPRAT)).rejects.toBeInstanceOf(RedirectError);
-    expect(saveRecipeToCollection(1, state.db!).ok).toBe(true);
+    expect(saveRecipeToCollection(TEST_USER_ID, 1, state.db!).ok).toBe(true);
     const spy = vi.fn();
     state.fetcher = { fetch: spy };
     const result = await importFromUrl(`${MATPRAT}?utm_source=x#del`);

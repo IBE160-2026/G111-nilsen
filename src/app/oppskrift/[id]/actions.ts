@@ -14,7 +14,9 @@ import { folderFailure, folderIdSchema, parseFolderName } from "@/app/_shared/fo
 import { parseRecipeId } from "@/lib/recipe-id";
 import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import { moveRecipeToFolder, moveRecipeToNewFolder } from "@/server/services/folder-service";
+import { currentUserId } from "@/server/session";
 import {
+  canAccessRecipe,
   deleteRecipe,
   saveRecipeToCollection,
   setFavorite as setFavoriteForRecipe,
@@ -35,15 +37,25 @@ const servingsSchema = z.number().int().min(LIMITS.servingsMin).max(LIMITS.servi
 const selectedServingsSchema = z.number().refine(isSelectedServings);
 
 /**
+ * Om den innloggede brukeren (eller en uten innlogging) kan endre oppskriften (Story 5.13). En
+ * annens oppskrift behandles som ukjent, så man ikke kan se at den finnes.
+ */
+async function mayChange(id: number): Promise<boolean> {
+  return canAccessRecipe(await currentUserId(), id);
+}
+
+/**
  * Legger oppskriften i samlingen (Story 3.2). Oppskriftssiden revalideres, så lagre-linjen
  * bytter fra «Lagre» til «Slett». `servings` er antallet brukeren har valgt (valgfritt, issue 009).
  * Feil gir en norsk melding og endrer ingenting.
  */
 export async function saveRecipe(id: number, servings?: number): Promise<ActionResult> {
   if (!idSchema.safeParse(id).success) return actionFailure("not_found");
+  const userId = await currentUserId();
+  if (userId === null) return actionFailure("login_required");
 
   try {
-    const result = saveRecipeToCollection(id);
+    const result = saveRecipeToCollection(userId, id);
     if (!result.ok) return actionFailure(result.error.kind);
     // Antallet brukeren valgte før lagring huskes nå (issue 009). Feil her stopper ikke lagringen.
     if (servings !== undefined && selectedServingsSchema.safeParse(servings).success) {
@@ -66,8 +78,8 @@ export async function saveRecipe(id: number, servings?: number): Promise<ActionR
  */
 export async function removeRecipe(id: number): Promise<ActionResult> {
   if (!idSchema.safeParse(id).success) return actionFailure("not_found");
-
   try {
+    if (!(await mayChange(id))) return actionFailure("not_found");
     const result = deleteRecipe(id);
     if (!result.ok) return actionFailure(result.error.kind);
     revalidatePath("/", "layout");
@@ -87,8 +99,8 @@ export async function removeRecipe(id: number): Promise<ActionResult> {
 export async function rememberServings(id: number, servings: number): Promise<ActionResult> {
   if (!idSchema.safeParse(id).success) return actionFailure("not_found");
   if (!selectedServingsSchema.safeParse(servings).success) return actionFailure("validation");
-
   try {
+    if (!(await mayChange(id))) return actionFailure("not_found");
     const result = setSelectedServings(id, servings);
     if (!result.ok) return actionFailure(result.error.kind);
     return { ok: true };
@@ -105,8 +117,8 @@ export async function rememberServings(id: number, servings: number): Promise<Ac
 export async function changeOriginalServings(id: number, servings: number): Promise<ActionResult> {
   if (!idSchema.safeParse(id).success) return actionFailure("not_found");
   if (!servingsSchema.safeParse(servings).success) return actionFailure("validation");
-
   try {
+    if (!(await mayChange(id))) return actionFailure("not_found");
     const result = setOriginalServings(id, servings);
     if (!result.ok) return actionFailure(result.error.kind);
     revalidatePath("/", "layout");
@@ -130,9 +142,11 @@ export async function moveToFolder(
   if (folderId !== null && !folderIdSchema.safeParse(folderId).success) {
     return actionFailure("not_found");
   }
+  const userId = await currentUserId();
+  if (userId === null) return actionFailure("login_required");
 
   try {
-    const result = moveRecipeToFolder(recipeId, folderId);
+    const result = moveRecipeToFolder(userId, recipeId, folderId);
     if (!result.ok) return folderFailure(result.error);
     revalidatePath("/", "layout");
     return { ok: true, folderName: result.value.folder?.name ?? null };
@@ -153,9 +167,11 @@ export async function moveToNewFolder(
   if (!idSchema.safeParse(recipeId).success) return actionFailure("not_found");
   const parsed = parseFolderName(name);
   if (!parsed.ok) return parsed.result;
+  const userId = await currentUserId();
+  if (userId === null) return actionFailure("login_required");
 
   try {
-    const result = moveRecipeToNewFolder(recipeId, parsed.name);
+    const result = moveRecipeToNewFolder(userId, recipeId, parsed.name);
     if (!result.ok) return folderFailure(result.error);
     revalidatePath("/", "layout");
     return { ok: true, folderName: result.value.folder.name };
@@ -175,7 +191,10 @@ export async function setFavorite(recipeId: number, isFavorite: boolean): Promis
   if (!idSchema.safeParse(recipeId).success) return actionFailure("not_found");
   if (!z.boolean().safeParse(isFavorite).success) return actionFailure("validation");
   try {
-    const result = setFavoriteForRecipe(recipeId, isFavorite);
+    // En annens oppskrift behandles som en ukjent (slettet) oppskrift.
+    const result = (await mayChange(recipeId))
+      ? setFavoriteForRecipe(recipeId, isFavorite)
+      : ({ ok: false, error: { kind: "not_found" } } as const);
     if (!result.ok) {
       // Oppskriften er borte (for eksempel slettet i en annen fane): oppdater sidene så kortet forsvinner.
       if (result.error.kind === "not_found") revalidatePath("/", "layout");
@@ -198,6 +217,7 @@ export async function requestSuggestions(id: number): Promise<SuggestionsActionR
   if (!idSchema.safeParse(id).success) return { ok: false };
 
   try {
+    if (!(await mayChange(id))) return { ok: false };
     const result = await getSuggestions(id);
     if (!result.ok) return { ok: false };
     return { ok: true, ...result.value };
@@ -218,8 +238,8 @@ export async function applySuggestion(
   suggestion: unknown,
 ): Promise<ApplySuggestionActionResult> {
   if (!idSchema.safeParse(recipeId).success) return actionFailure("not_found");
-
   try {
+    if (!(await mayChange(recipeId))) return actionFailure("not_found");
     const result = applySuggestionToRecipe(recipeId, suggestion);
     if (!result.ok) return actionFailure(result.error.kind);
     revalidatePath("/", "layout");
@@ -237,9 +257,10 @@ export async function removeSuggestion(
 ): Promise<ActionResult> {
   if (!idSchema.safeParse(recipeId).success) return actionFailure("not_found");
   if (!idSchema.safeParse(suggestionId).success) return actionFailure("not_found");
-
   try {
-    const result = removeAppliedSuggestion(recipeId, suggestionId);
+    const result = (await mayChange(recipeId))
+      ? removeAppliedSuggestion(recipeId, suggestionId)
+      : ({ ok: false, error: { kind: "not_found" } } as const);
     if (!result.ok) {
       // Forslaget er borte (for eksempel fjernet i en annen fane): oppdater sidene.
       if (result.error.kind === "not_found") revalidatePath("/", "layout");

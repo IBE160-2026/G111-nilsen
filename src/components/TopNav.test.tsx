@@ -77,3 +77,14 @@ describe("isActive", () => {
     expect(isActive("/mapper", "/mapperx")).toBe(false);
   });
 });
+
+describe("TopNav med konto (Story 5.13)", () => {
+  it("viser kontodelen ved siden av logoen, utenfor hovedmenyen", () => {
+    render(<TopNavView pathname="/" account={<a href="/logg-inn">Logg inn</a>} />);
+    const link = screen.getByRole("link", { name: "Logg inn" });
+    expect(
+      within(screen.getByRole("navigation")).queryByRole("link", { name: "Logg inn" }),
+    ).toBeNull();
+    expect(screen.getByRole("banner")).toContainElement(link);
+  });
+});

@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import EmptyState from "@/components/EmptyState";
+import LoginRequired from "@/components/LoginRequired";
 import FavoriteFeedback from "@/components/FavoriteFeedback";
 import RecipeCard from "@/components/RecipeCard";
 import { favoriteMessages } from "@/lib/messages";
 import { listFavorites } from "@/server/services/recipe-service";
+import { currentUserId } from "@/server/session";
 import styles from "../list-page.module.css";
 
 export const metadata: Metadata = { title: favoriteMessages.heading };
@@ -35,8 +37,10 @@ export default function FavoritterPage() {
 
 async function FavoritesLoader() {
   await connection();
+  const userId = await currentUserId();
+  if (userId === null) return <LoginRequired next="/favoritter" />;
 
-  const result = listFavorites();
+  const result = listFavorites(userId);
   // Feil vises av error.tsx; en tom liste skal aldri skjule en databasefeil.
   if (!result.ok) throw new Error(`${favoriteMessages.loadFailed} (${result.error.kind})`);
 

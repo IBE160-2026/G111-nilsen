@@ -1,7 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { messageFor } from "@/lib/messages";
-import { createTestDb, type Db } from "@/server/db/client";
+import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import { listFolders } from "@/server/services/folder-service";
+
+const session = vi.hoisted(() => ({ userId: 1 as number | null }));
+vi.mock("@/server/session", () => ({
+  currentUserId: async () => session.userId,
+  currentUser: async () =>
+    session.userId === null ? null : { id: session.userId, email: "test@example.com" },
+}));
 
 const state = vi.hoisted(() => ({ db: null as Db | null }));
 
@@ -22,7 +29,7 @@ const failure = (kind: string | undefined) => {
 const nameError = (message: string) => ({ ok: false, field: "name", message });
 
 function folders() {
-  const result = listFolders(state.db!);
+  const result = listFolders(TEST_USER_ID, state.db!);
   if (!result.ok) throw new Error("kunne ikke liste mapper");
   return result.value;
 }

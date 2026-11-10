@@ -5,7 +5,8 @@ import { expect, test, type Page } from "@playwright/test";
  * lagrede oppskriftssider (`IMPORT_SOURCE=fixtures`), eksempelforslag og en tom midlertidig
  * database. Ingen nettverkskall (NFR-2, AD-11, SM-6).
  *
- * Alle prosjektene deler databasen, så hvert prosjekt bruker egne oppskrifter og mapper.
+ * Alle prosjektene deler databasen, så hvert prosjekt bruker egne oppskrifter og mapper og sin
+ * egen konto (Story 5.13). Hver test logger inn først, bortsett fra testen av innlogging.
  * `mobil-360` følger PRD-eksemplene nærmest (4 til 5 personer).
  */
 const DATA = {
@@ -74,7 +75,95 @@ async function saveInNewFolder(page: Page, folder: string) {
   await expect(page.getByRole("button", { name: `${folder}, bytt mappe` })).toBeVisible();
 }
 
+const PASSWORD = "e2e-passord-123";
+
+/**
+ * Feltet med denne etiketten på siden som vises. Forrige side kan ligge skjult i DOM-en (Next
+ * beholder den med Activity), med et skjema med samme etiketter.
+ */
+function field(page: Page, label: string) {
+  return page.getByLabel(label, { exact: true }).filter({ visible: true });
+}
+
+/** E-posten til prosjektets testkonto. */
+function accountFor(project: string): string {
+  return `${project}@e2e.recipemate.no`;
+}
+
+/**
+ * Logger inn med prosjektets konto; finnes den ikke ennå, lages den (Story 5.13). Ender på
+ * forsiden med «Logg ut» i toppmenyen.
+ */
+async function signIn(page: Page, project: string) {
+  const email = accountFor(project);
+  await page.goto("/ny-konto");
+  await field(page, "E-post").fill(email);
+  await field(page, "Passord").fill(PASSWORD);
+  await page.getByRole("button", { name: "Lag konto" }).click();
+  const taken = page.getByText("Det finnes allerede en konto med denne e-posten.", {
+    exact: false,
+  });
+  const signedIn = page.getByRole("button", { name: "Logg ut" });
+  await expect(taken.or(signedIn)).toBeVisible();
+  if (await taken.isVisible()) {
+    await page.goto("/logg-inn");
+    await field(page, "E-post").fill(email);
+    await field(page, "Passord").fill(PASSWORD);
+    await page.getByRole("button", { name: "Logg inn" }).click();
+    await expect(signedIn).toBeVisible();
+  }
+}
+
 test.describe.configure({ mode: "serial" });
+
+test.beforeEach(async ({ page }, testInfo) => {
+  if (testInfo.title.startsWith("Versjon 2: innlogging")) return;
+  await signIn(page, testInfo.project.name);
+});
+
+test("Versjon 2: innlogging – hent uten konto, logg inn for å lagre, andre ser den ikke", async ({
+  page,
+  browser,
+}, testInfo) => {
+  const data = DATA[testInfo.project.name as keyof typeof DATA];
+  // En egen oppskrift for denne testen, så de andre testene ikke påvirkes.
+  const { uj2 } = data;
+
+  // Uten konto: oppskrifter krever innlogging, men henting og visning virker.
+  await page.goto("/oppskrifter");
+  await expect(page.getByRole("heading", { name: "Logg inn for å se dette" })).toBeVisible();
+  await importRecipe(page, uj2.url, uj2.title);
+  await page.getByRole("link", { name: "Logg inn for å lagre" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Logg inn" })).toBeVisible();
+
+  // Ny konto for testen; etterpå tilbake til oppskriften, og nå kan den lagres.
+  const email = `innlogging-${testInfo.project.name}@e2e.recipemate.no`;
+  await page.getByRole("link", { name: "Lag konto" }).click();
+  await field(page, "E-post").fill(email);
+  await field(page, "Passord").fill("kort");
+  await page.getByRole("button", { name: "Lag konto" }).click();
+  await expect(page.getByText("Passordet må ha minst 8 tegn.")).toBeVisible();
+  await field(page, "Passord").fill(PASSWORD);
+  await page.getByRole("button", { name: "Lag konto" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: uj2.title })).toBeVisible();
+  await page.getByRole("button", { name: "Lagre", exact: true }).click();
+  await expect(page.getByRole("button", { name: `Slett ${uj2.title}` })).toBeVisible();
+  const recipeUrl = page.url();
+
+  // En annen bruker (ny nettleserkontekst uten cookie) finner ikke oppskriften.
+  const other = await browser.newPage();
+  await other.goto(recipeUrl);
+  await expect(
+    other.getByRole("heading", { level: 1, name: "Fant ikke oppskriften" }),
+  ).toBeVisible();
+  await other.close();
+
+  // Logg ut: Oppskrifter krever innlogging igjen.
+  await page.getByRole("button", { name: "Logg ut" }).click();
+  await expect(page.getByRole("link", { name: "Logg inn" }).first()).toBeVisible();
+  await page.goto("/oppskrifter");
+  await expect(page.getByRole("heading", { name: "Logg inn for å se dette" })).toBeVisible();
+});
 
 test("UJ-1: importer, skaler til ett flere, lagre i mappe og gjør til favoritt", async ({
   page,

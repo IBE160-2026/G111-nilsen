@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
+import AccountLink from "@/components/AccountLink";
 import TopNav, { TopNavView } from "@/components/TopNav";
 import "./globals.css";
 
@@ -26,7 +27,14 @@ export default function RootLayout({
       <body>
         {/* Suspense: usePathname kan suspendere på dynamiske ruter når cacheComponents er på. */}
         <Suspense fallback={<TopNavView pathname={null} />}>
-          <TopNav />
+          <TopNav
+            account={
+              // Leser innloggingscookien, så den har sin egen grense (Story 5.13).
+              <Suspense fallback={null}>
+                <AccountLink />
+              </Suspense>
+            }
+          />
         </Suspense>
         <main className="page">{children}</main>
       </body>

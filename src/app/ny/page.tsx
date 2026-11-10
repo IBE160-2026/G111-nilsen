@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
+import { Suspense } from "react";
+import LoginRequired from "@/components/LoginRequired";
 import ManualRecipeForm from "@/components/ManualRecipeForm";
+import { currentUserId } from "@/server/session";
 import { saveManualRecipe } from "./actions";
 import styles from "./page.module.css";
 
@@ -15,7 +19,16 @@ export default function NewRecipePage() {
           format.
         </p>
       </header>
-      <ManualRecipeForm action={saveManualRecipe} />
+      <Suspense>
+        <FormOrLogin />
+      </Suspense>
     </div>
   );
+}
+
+/** Oppskriften lagres rett i samlingen, så skjemaet krever innlogging (Story 5.13). */
+async function FormOrLogin() {
+  await connection();
+  if ((await currentUserId()) === null) return <LoginRequired next="/ny" />;
+  return <ManualRecipeForm action={saveManualRecipe} />;
 }

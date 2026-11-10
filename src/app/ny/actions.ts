@@ -1,7 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { messageFor } from "@/lib/messages";
 import { createManualRecipe } from "@/server/services/recipe-service";
+import { currentUserId } from "@/server/session";
 import { formStateForError, formStateForUnexpectedError } from "@/app/_shared/form-errors";
 import type { ManualRecipeFormState } from "@/app/_shared/form-fields";
 import { validateManualRecipe, valuesFromFormData } from "@/app/_shared/manual-recipe-schema";
@@ -18,10 +20,15 @@ export async function saveManualRecipe(
   const values = valuesFromFormData(formData);
   const validated = validateManualRecipe(values);
   if (!validated.ok) return { fieldErrors: validated.fieldErrors, values };
+  const userId = await currentUserId();
+  if (userId === null) {
+    const message = messageFor("login_required");
+    return { fieldErrors: {}, values, formError: `${message.title} ${message.body}` };
+  }
 
   let id: number;
   try {
-    const result = createManualRecipe({
+    const result = createManualRecipe(userId, {
       title: validated.data.title,
       servings: validated.data.servings,
       ingredients: validated.data.ingredients,

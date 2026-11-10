@@ -2,9 +2,16 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createTestDb, type Db } from "@/server/db/client";
+import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import { createFolder, moveRecipeToFolder } from "@/server/services/folder-service";
 import { createManualRecipe } from "@/server/services/recipe-service";
+
+const session = vi.hoisted(() => ({ userId: 1 as number | null }));
+vi.mock("@/server/session", () => ({
+  currentUserId: async () => session.userId,
+  currentUser: async () =>
+    session.userId === null ? null : { id: session.userId, email: "test@example.com" },
+}));
 
 const state = vi.hoisted(() => ({ db: null as Db | null, forcedErrorKind: null as string | null }));
 
@@ -25,10 +32,10 @@ vi.mock("@/server/services/recipe-service", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/server/services/recipe-service")>();
   return {
     ...actual,
-    getRecipe: (...args: Parameters<typeof actual.getRecipe>) =>
+    getRecipeFor: (...args: Parameters<typeof actual.getRecipeFor>) =>
       state.forcedErrorKind
         ? { ok: false, error: { kind: state.forcedErrorKind } }
-        : actual.getRecipe(...args),
+        : actual.getRecipeFor(...args),
   };
 });
 
@@ -56,6 +63,7 @@ async function renderPage(id: string): Promise<ReactElement> {
 describe("/oppskrift/[id]", () => {
   it("viser en lagret oppskrift", async () => {
     const created = createManualRecipe(
+      TEST_USER_ID,
       { title: "Pannekaker", servings: 4, ingredients: ["3 egg"], steps: [] },
       state.db!,
     );
@@ -71,6 +79,7 @@ describe("/oppskrift/[id]", () => {
 
   it("setter oppskriftens tittel som fanetittel", async () => {
     const created = createManualRecipe(
+      TEST_USER_ID,
       { title: "Pannekaker", servings: 4, ingredients: ["3 egg"], steps: [] },
       state.db!,
     );
@@ -96,15 +105,60 @@ describe("/oppskrift/[id]", () => {
 
   it("sender mappene og oppskriftens mappe til lagre-linjen", async () => {
     const created = createManualRecipe(
+      TEST_USER_ID,
       { title: "Pannekaker", servings: 4, ingredients: ["3 egg"], steps: [] },
       state.db!,
     );
     if (!created.ok) throw new Error("kunne ikke lagre");
-    createFolder("Hverdag", state.db!);
-    createFolder("Helg", state.db!);
-    moveRecipeToFolder(created.value.id, 2, state.db!);
+    createFolder(TEST_USER_ID, "Hverdag", state.db!);
+    createFolder(TEST_USER_ID, "Helg", state.db!);
+    moveRecipeToFolder(TEST_USER_ID, created.value.id, 2, state.db!);
 
     render(await renderPage(String(created.value.id)));
     expect(screen.getByRole("button", { name: "Helg, bytt mappe" })).toBeInTheDocument();
+  });
+});
+
+describe("innlogging og eierskap (Story 5.13)", () => {
+  function create(): number {
+    const created = createManualRecipe(
+      TEST_USER_ID,
+      { title: "Pannekaker", servings: 4, ingredients: ["3 egg"], steps: [] },
+      state.db!,
+    );
+    if (!created.ok) throw new Error("kunne ikke lagre");
+    return created.value.id;
+  }
+
+  it("en annens oppskrift gir ikke funnet", async () => {
+    const id = String(create());
+    session.userId = Number(
+      state
+        .db!.$client.prepare(
+          "insert into users (email, password_hash, created_at) values ('b@b.no', 'x', 'x')",
+        )
+        .run().lastInsertRowid,
+    );
+    try {
+      await expect(renderPage(id)).rejects.toBeInstanceOf(NotFoundError);
+    } finally {
+      session.userId = 1;
+    }
+  });
+
+  it("en import uten eier vises uten innlogging, med «Logg inn for å lagre»", async () => {
+    const id = create();
+    state.db!.$client.prepare("update recipes set user_id = null, saved_at = null").run();
+    session.userId = null;
+    try {
+      render(await renderPage(String(id)));
+      expect(screen.getByRole("heading", { level: 1, name: "Pannekaker" })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Logg inn for å lagre" })).toHaveAttribute(
+        "href",
+        `/logg-inn?neste=%2Foppskrift%2F${id}`,
+      );
+    } finally {
+      session.userId = 1;
+    }
   });
 });

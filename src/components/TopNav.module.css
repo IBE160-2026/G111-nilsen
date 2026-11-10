@@ -11,6 +11,19 @@
   flex-direction: column;
 }
 
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
 .logo {
   align-self: flex-start;
   font-family: var(--font-serif);
@@ -70,6 +83,15 @@
     align-items: center;
     justify-content: space-between;
     padding-top: 0;
+  }
+
+  /* På desktop står logo, meny og konto på én rad: kontoen sist. */
+  .top {
+    display: contents;
+  }
+
+  .account {
+    order: 3;
   }
 
   .logo {

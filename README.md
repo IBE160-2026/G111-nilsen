@@ -20,10 +20,10 @@ Repoet inneholder applikasjonen og dokumentasjon av utvikling, testing og kvalit
 
 - Importerer en oppskrift fra en lenke (JSON-LD på siden), eller du skriver den inn selv.
 - Viser den i fast format og regner om alle mengder når du velger antall personer.
-- Lagrer oppskriftene lokalt, i mapper og som favoritter, og du kan krysse av under matlaging.
+- Lagrer oppskriftene på kontoen din (e-post og passord), i mapper og som favoritter, og du kan krysse av under matlaging.
 - Gir 1–3 forslag til hvordan retten kan bli bedre. Uten nøkkel er det enkle forslag laget av regler ut fra ingrediensene og stegene (merket «Enkle forslag»); med nøkkel lager en språkmodell forslag til akkurat denne oppskriften. Forslag du tar i bruk lagres med oppskriften og vises i ingredienslisten eller ved riktig steg, merket «Forslag» (også i kokemodus og handlelisten); originalen endres ikke, og «Fjern» tar dem bort igjen.
 
-Alt unntatt språkmodellen virker uten konto, nøkkel eller nett (importen kan kjøres mot lagrede sider, se «Importere fra lenke»). Status: Epic 1–4 er bygget (Story 1.1–4.4). Åpne saker står i [`issues/`](issues/README.md) og i `_bmad-output/implementation-artifacts/deferred-work.md`.
+Å hente, vise og skalere oppskrifter virker uten konto; å lagre, mapper, favoritter og handleliste krever innlogging (se «Kontoer»). Ingenting krever nøkkel eller nett unntatt språkmodellen (importen kan kjøres mot lagrede sider, se «Importere fra lenke»). Status: Epic 1–4 er bygget (Story 1.1–4.4). Åpne saker står i [`issues/`](issues/README.md) og i `_bmad-output/implementation-artifacts/deferred-work.md`.
 
 ## Hva Epic 1 (og Story 3.5) inneholder
 
@@ -72,6 +72,16 @@ npm run dev      # utviklingsserver på http://localhost:3000
 npm run build    # produksjonsbygg
 npm start        # kjør produksjonsbygget
 ```
+
+## Kontoer
+
+Man lager en konto med e-post og passord (`/ny-konto`) og logger inn på `/logg-inn`; «Logg inn» og «Logg ut» står øverst til høyre. Hver konto har sine egne oppskrifter, mapper, favoritter og «Har hjemme».
+
+- **Uten konto** kan man hente en oppskrift fra en lenke, skalere den, bruke kokemodus og få forslag. «Lagre» blir «Logg inn for å lagre», og etter innlogging kommer man tilbake til oppskriften. Oppskrifter, Mapper, Favoritter, Handleliste og «Legg inn selv» viser «Logg inn for å se dette».
+- **Eierskap:** en lagret oppskrift har alltid en eier, og bare eieren ser og endrer den (andre får «Fant ikke oppskriften»). En import uten innlogging har ingen eier og kan åpnes av alle med lenken til den blir lagret; slike ryddes bort etter et døgn som før.
+- **Første konto:** den første kontoen som lages overtar alt som allerede lå i databasen (lagrede oppskrifter, mapper og «Har hjemme»), så ingenting forsvinner når innlogging tas i bruk.
+- **Sikkerhet:** passord lagres som scrypt-hash med eget salt, aldri i klartekst. Innloggingen er en tilfeldig nøkkel i en `httpOnly`-cookie (SameSite=Lax, Secure over https) som varer i 30 dager; databasen har bare en hash av nøkkelen. Feil e-post og feil passord gir samme melding. Det finnes ikke «glemt passord» (det krever e-postutsending).
+- Koden ligger i `src/server/services/auth-service.ts`, `src/server/session.ts`, `src/app/account-actions.ts`, `src/app/logg-inn/`, `src/app/ny-konto/`, `AccountForm.tsx`, `AccountLink.tsx` og `LoginRequired.tsx`. Tabellene `users` og `sessions` og eierkolonnene kommer fra migrasjonen `drizzle/0006_accounts.sql`, som kjøres automatisk.
 
 ## Oppskrifter (samlingen)
 
@@ -218,8 +228,9 @@ npm run test:e2e
 
 `npm run test:e2e` bygger appen og starter den på port 3100 med en midlertidig database (`.e2e/`, slettes ved hver kjøring), lagrede oppskriftssider i stedet for nettet (`IMPORT_SOURCE=fixtures`) og uten språkmodellnøkkel (eksempelforslag). Ingen test bruker nettverket. Stopp `npm run dev` først, siden bygget bruker samme `.next`-mappe.
 
-`e2e/kjerneflyt.spec.ts` kjører hver gang ved 360 px og 1280 px (12 tester):
+`e2e/kjerneflyt.spec.ts` kjører hver gang ved 360 px og 1280 px (18 tester). Hver test logger inn med en egen testkonto per skjermbredde (kontoen lages første gang):
 
+- **Innlogging:** hent en oppskrift uten konto, «Logg inn for å lagre», lag konto (med feil passord først), lagre, se at en annen nettleser ikke finner oppskriften, og logg ut.
 - **UJ-1:** importer en oppskrift, velg ett flere personer, lagre i en ny mappe og gjør den til favoritt.
 - **UJ-2:** velg 5 personer, få forslag, ta i bruk ett og hopp over resten, lagre i mappe og se at forslaget huskes etter at siden lastes på nytt. Kanttilfelle: en oversiktsside gir «Fant ingen oppskrift på siden».
 - **UJ-3:** finn oppskriften igjen under Favoritter, se at antallet huskes, og endre det.

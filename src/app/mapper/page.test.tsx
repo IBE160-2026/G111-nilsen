@@ -2,9 +2,16 @@
 import { cleanup, render, screen, within } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createTestDb, type Db } from "@/server/db/client";
+import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import { insertRecipe } from "@/server/db/repositories/recipe-repository";
 import { createFolder, moveRecipeToFolder } from "@/server/services/folder-service";
+
+const session = vi.hoisted(() => ({ userId: 1 as number | null }));
+vi.mock("@/server/session", () => ({
+  currentUserId: async () => session.userId,
+  currentUser: async () =>
+    session.userId === null ? null : { id: session.userId, email: "test@example.com" },
+}));
 
 const state = vi.hoisted(() => ({
   db: null as Db | null,
@@ -107,9 +114,9 @@ describe("/mapper", () => {
   });
 
   it("viser mappene alfabetisk med antall oppskrifter og lenke til mappesiden", async () => {
-    createFolder("Hverdag", state.db!);
-    createFolder("Helg", state.db!);
-    createFolder("Tom", state.db!);
+    createFolder(TEST_USER_ID, "Hverdag", state.db!);
+    createFolder(TEST_USER_ID, "Helg", state.db!);
+    createFolder(TEST_USER_ID, "Tom", state.db!);
     for (const title of ["A", "B"]) {
       const id = insertRecipe(state.db!, {
         title,
@@ -120,10 +127,11 @@ describe("/mapper", () => {
         savedAt: "2026-11-09T10:00:00.000Z",
         createdAt: "2026-11-09T10:00:00.000Z",
         updatedAt: "2026-11-09T10:00:00.000Z",
+        userId: TEST_USER_ID,
         ingredients: [],
         steps: [],
       });
-      moveRecipeToFolder(id, 1, state.db!);
+      moveRecipeToFolder(TEST_USER_ID, id, 1, state.db!);
     }
     await show();
 
@@ -144,5 +152,21 @@ describe("/mapper", () => {
   it("kaster en feil til error.tsx når lesingen feiler", async () => {
     state.forcedErrorKind = "unknown";
     await expect(renderPage()).rejects.toThrow(/Kunne ikke hente mappene \(unknown\)/);
+  });
+});
+
+describe("uten innlogging (Story 5.13)", () => {
+  it("viser «Logg inn for å se dette» i stedet for innholdet", async () => {
+    session.userId = null;
+    try {
+      await show();
+      expect(screen.getByRole("heading", { name: "Logg inn for å se dette" })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Logg inn" })).toHaveAttribute(
+        "href",
+        "/logg-inn?neste=%2Fmapper",
+      );
+    } finally {
+      session.userId = 1;
+    }
   });
 });

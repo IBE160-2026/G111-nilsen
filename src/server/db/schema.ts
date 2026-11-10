@@ -10,6 +10,34 @@ import { index, integer, real, sqliteTable, text, uniqueIndex } from "drizzle-or
  */
 
 /**
+ * Kontoer (Story 5.13). `email` er normalisert (trimmet, små bokstaver) og unik. `passwordHash` er
+ * scrypt med eget salt per bruker (`scrypt$<salt>$<hash>`), aldri passordet selv.
+ */
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
+/**
+ * Innloggingsøkter (Story 5.13). Nettleseren har et tilfeldig token i en httpOnly-cookie; her
+ * lagres bare SHA-256 av tokenet, så en lekket database ikke gir innlogging.
+ */
+export const sessions = sqliteTable(
+  "sessions",
+  {
+    tokenHash: text("token_hash").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expiresAt: text("expires_at").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [index("sessions_user_idx").on(table.userId)],
+);
+
+/**
  * Mapper (Story 3.3). `name` er navnet slik brukeren skrev det (trimmet); `nameKey` er det
  * normaliserte navnet som sammenlignes (NFC + små bokstaver), og er unikt.
  */
@@ -20,8 +48,10 @@ export const folders = sqliteTable(
     name: text("name").notNull(),
     nameKey: text("name_key").notNull(),
     createdAt: text("created_at").notNull(),
+    /** Eieren (Story 5.13). Navnet er unikt per bruker. */
+    userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
   },
-  (table) => [uniqueIndex("folders_name_key_unique").on(table.nameKey)],
+  (table) => [uniqueIndex("folders_user_name_key_unique").on(table.userId, table.nameKey)],
 );
 
 export const recipes = sqliteTable("recipes", {
@@ -39,6 +69,11 @@ export const recipes = sqliteTable("recipes", {
   isFavorite: integer("is_favorite", { mode: "boolean" }).notNull().default(false),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
+  /**
+   * Eieren (Story 5.13). `null` = importert uten innlogging (ulagret, synlig for alle med lenken).
+   * En lagret oppskrift har alltid eier, og bare eieren ser og endrer den.
+   */
+  userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
 });
 
 export const ingredientLines = sqliteTable(
@@ -105,6 +140,8 @@ export const pantryItems = sqliteTable(
     name: text("name").notNull(),
     nameKey: text("name_key").notNull(),
     createdAt: text("created_at").notNull(),
+    /** Eieren (Story 5.13). Navnet er unikt per bruker. */
+    userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
   },
-  (table) => [uniqueIndex("pantry_items_name_key_unique").on(table.nameKey)],
+  (table) => [uniqueIndex("pantry_items_user_name_key_unique").on(table.userId, table.nameKey)],
 );

@@ -1,6 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createTestDb, type Db } from "@/server/db/client";
+import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import { listPantry } from "@/server/services/pantry-service";
+
+const session = vi.hoisted(() => ({ userId: 1 as number | null }));
+vi.mock("@/server/session", () => ({
+  currentUserId: async () => session.userId,
+  currentUser: async () =>
+    session.userId === null ? null : { id: session.userId, email: "test@example.com" },
+}));
 
 const state = vi.hoisted(() => ({ db: null as Db | null }));
 
@@ -16,7 +23,7 @@ beforeEach(() => {
 });
 
 const stored = () => {
-  const result = listPantry(state.db!);
+  const result = listPantry(TEST_USER_ID, state.db!);
   return result.ok ? result.value.map((item) => item.name) : [];
 };
 

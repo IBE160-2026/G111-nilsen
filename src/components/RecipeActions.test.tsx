@@ -587,3 +587,14 @@ describe("RecipeActions: valgt antall følger med «Lagre» (issue 009)", () => 
     expect(onSave).toHaveBeenCalledExactlyOnceWith(undefined);
   });
 });
+
+describe("RecipeActions: uten innlogging (Story 5.13)", () => {
+  it("viser «Logg inn for å lagre» som lenke i stedet for «Lagre»", () => {
+    setup({ loginHref: "/logg-inn?neste=%2Foppskrift%2F4" });
+    expect(screen.getByRole("link", { name: "Logg inn for å lagre" })).toHaveAttribute(
+      "href",
+      "/logg-inn?neste=%2Foppskrift%2F4",
+    );
+    expect(screen.queryByRole("button", { name: "Lagre" })).not.toBeInTheDocument();
+  });
+});

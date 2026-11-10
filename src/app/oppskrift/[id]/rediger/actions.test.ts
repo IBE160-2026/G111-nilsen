@@ -1,8 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { initialManualRecipeState } from "@/components/ManualRecipeForm";
 import { manualRecipeFieldMessages as m, messageFor } from "@/lib/messages";
-import { createTestDb, type Db } from "@/server/db/client";
+import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import { createManualRecipe, getRecipe } from "@/server/services/recipe-service";
+
+const session = vi.hoisted(() => ({ userId: 1 as number | null }));
+vi.mock("@/server/session", () => ({
+  currentUserId: async () => session.userId,
+  currentUser: async () =>
+    session.userId === null ? null : { id: session.userId, email: "test@example.com" },
+}));
 
 const state = vi.hoisted(() => ({ db: null as Db | null }));
 const revalidatePath = vi.hoisted(() => vi.fn());
@@ -52,6 +59,7 @@ function stored() {
 beforeEach(() => {
   state.db = createTestDb();
   const created = createManualRecipe(
+    TEST_USER_ID,
     {
       title: "Pannekaker",
       servings: 4,

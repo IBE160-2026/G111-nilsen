@@ -8,6 +8,7 @@ import { messageFor } from "@/lib/messages";
 import { parseRecipeId } from "@/lib/recipe-id";
 import { appError, type AppError } from "@/lib/result";
 import { importRecipe } from "@/server/services/import-service";
+import { currentUserId } from "@/server/session";
 
 // Server Actions er offentlige endepunkter: inputen valideres på nytt. Grensen er romslig nok til
 // at `validateUrl` kan trimme og gi sin egen melding; selve lenken kan maks være 2048 tegn.
@@ -36,7 +37,8 @@ export async function importFromUrl(url: string): Promise<ImportFailure> {
 
   let id: number;
   try {
-    const result = await importRecipe(parsed.data);
+    // Innlogget: importen blir brukerens. Uten innlogging har den ingen eier (Story 5.13).
+    const result = await importRecipe(parsed.data, { userId: await currentUserId() });
     if (!result.ok) return failure(result.error);
     id = result.value.id;
   } catch (error) {

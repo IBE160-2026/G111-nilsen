@@ -3,10 +3,17 @@ import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createTestDb, type Db } from "@/server/db/client";
+import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import { insertRecipe, type NewRecipe } from "@/server/db/repositories/recipe-repository";
 import { createFolder, moveRecipeToFolder } from "@/server/services/folder-service";
 import { setFavorite } from "@/server/services/recipe-service";
+
+const session = vi.hoisted(() => ({ userId: 1 as number | null }));
+vi.mock("@/server/session", () => ({
+  currentUserId: async () => session.userId,
+  currentUser: async () =>
+    session.userId === null ? null : { id: session.userId, email: "test@example.com" },
+}));
 
 const state = vi.hoisted(() => ({
   db: null as Db | null,
@@ -59,6 +66,7 @@ const recipe = (title: string, savedAt: string | null, extra: Partial<NewRecipe>
   savedAt,
   createdAt: "2026-11-09T10:00:00.000Z",
   updatedAt: "2026-11-09T10:00:00.000Z",
+  userId: TEST_USER_ID,
   ingredients: [],
   steps: [],
   ...extra,
@@ -172,9 +180,9 @@ describe("/favoritter", () => {
   });
 
   it("viser kilde og mappenavn i meta: «Matprat · Hverdag»", async () => {
-    createFolder("Hverdag", state.db!);
+    createFolder(TEST_USER_ID, "Hverdag", state.db!);
     const id = favorite("I mappe", "2026-11-09T11:00:00.000Z", { sourceName: "Matprat" });
-    moveRecipeToFolder(id, 1, state.db!);
+    moveRecipeToFolder(TEST_USER_ID, id, 1, state.db!);
     await show();
     expect(screen.getByRole("link")).toHaveAccessibleName("I mappe Matprat · Hverdag");
   });
@@ -237,5 +245,21 @@ describe("/favoritter", () => {
   it("kaster en feil til error.tsx når lesingen feiler, i stedet for å vise tom-tilstand", async () => {
     state.forcedErrorKind = "unknown";
     await expect(renderPage()).rejects.toThrow(/Kunne ikke hente favorittene \(unknown\)/);
+  });
+});
+
+describe("uten innlogging (Story 5.13)", () => {
+  it("viser «Logg inn for å se dette» i stedet for innholdet", async () => {
+    session.userId = null;
+    try {
+      await show();
+      expect(screen.getByRole("heading", { name: "Logg inn for å se dette" })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Logg inn" })).toHaveAttribute(
+        "href",
+        "/logg-inn?neste=%2Ffavoritter",
+      );
+    } finally {
+      session.userId = 1;
+    }
   });
 });

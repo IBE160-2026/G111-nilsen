@@ -1,3 +1,4 @@
+import { TEST_USER_ID } from "@/server/db/client";
 import { describe, expect, it } from "vitest";
 import { createTestDb } from "../client";
 import { assignRecipeToFolder, insertFolder } from "./folder-repository";
@@ -5,10 +6,12 @@ import {
   deleteRecipeById,
   deleteStaleUnsavedRecipes,
   findRecipeById,
+  findRecipeOwner,
   findRecipeBySourceUrl,
   insertImportedRecipe,
   insertRecipe,
   listFavoriteRecipes,
+  listSavedIngredientNames,
   listSavedRecipes,
   markRecipeSaved,
   setRecipeFavorite,
@@ -28,6 +31,7 @@ const base: NewRecipe = {
   savedAt: null,
   createdAt: "2026-11-09T10:00:00.000Z",
   updatedAt: "2026-11-09T10:00:00.000Z",
+  userId: TEST_USER_ID,
   ingredients: [
     {
       position: 1,
@@ -256,14 +260,14 @@ describe("listSavedRecipes", () => {
   });
 
   it("er tom når ingen oppskrifter finnes", () => {
-    expect(listSavedRecipes(createTestDb())).toEqual([]);
+    expect(listSavedRecipes(createTestDb(), TEST_USER_ID)).toEqual([]);
   });
 
   it("utelater oppskrifter uten savedAt", () => {
     const db = createTestDb();
     insertRecipe(db, at(null, "Ikke i samlingen", { sourceUrl: "https://a.no/x" }));
     const saved = insertRecipe(db, at("2026-11-09T10:00:00.000Z", "I samlingen"));
-    expect(listSavedRecipes(db).map((r) => r.id)).toEqual([saved]);
+    expect(listSavedRecipes(db, TEST_USER_ID).map((r) => r.id)).toEqual([saved]);
   });
 
   it("sorterer på savedAt synkende, og på id synkende ved likt tidspunkt", () => {
@@ -272,7 +276,12 @@ describe("listSavedRecipes", () => {
     const tieA = insertRecipe(db, at("2026-11-09T11:00:00.000Z", "Lik A"));
     const newest = insertRecipe(db, at("2026-11-09T12:00:00.000Z", "Nyest"));
     const tieB = insertRecipe(db, at("2026-11-09T11:00:00.000Z", "Lik B"));
-    expect(listSavedRecipes(db).map((r) => r.id)).toEqual([newest, tieB, tieA, oldest]);
+    expect(listSavedRecipes(db, TEST_USER_ID).map((r) => r.id)).toEqual([
+      newest,
+      tieB,
+      tieA,
+      oldest,
+    ]);
   });
 
   it("returnerer bare oppsummeringen, uten ingredienser og steg", () => {
@@ -284,7 +293,7 @@ describe("listSavedRecipes", () => {
         sourceUrl: "https://www.matprat.no/x",
       }),
     );
-    expect(listSavedRecipes(db)).toEqual([
+    expect(listSavedRecipes(db, TEST_USER_ID)).toEqual([
       {
         id,
         title: "Pannekaker",
@@ -305,7 +314,7 @@ describe("lagre, slette og rydde (Story 3.2)", () => {
     it("setter savedAt på en ulagret oppskrift uten å røre updatedAt", () => {
       const db = createTestDb();
       const id = insertRecipe(db, base);
-      expect(markRecipeSaved(db, id, SAVED)).toBe(true);
+      expect(markRecipeSaved(db, id, SAVED, TEST_USER_ID)).toBe(true);
       expect(findRecipeById(db, id)).toMatchObject({
         savedAt: SAVED,
         updatedAt: base.updatedAt,
@@ -316,12 +325,12 @@ describe("lagre, slette og rydde (Story 3.2)", () => {
     it("beholder savedAt når oppskriften allerede er lagret", () => {
       const db = createTestDb();
       const id = insertRecipe(db, { ...base, savedAt: "2026-11-09T11:00:00.000Z" });
-      expect(markRecipeSaved(db, id, SAVED)).toBe(true);
+      expect(markRecipeSaved(db, id, SAVED, TEST_USER_ID)).toBe(true);
       expect(findRecipeById(db, id)?.savedAt).toBe("2026-11-09T11:00:00.000Z");
     });
 
     it("returnerer false for ukjent id", () => {
-      expect(markRecipeSaved(createTestDb(), 999, SAVED)).toBe(false);
+      expect(markRecipeSaved(createTestDb(), 999, SAVED, TEST_USER_ID)).toBe(false);
     });
   });
 
@@ -453,7 +462,7 @@ describe("favoritter (Story 3.4)", () => {
     const db = createTestDb();
     const id = insertRecipe(db, saved("A", T0));
     expect(findRecipeById(db, id)?.isFavorite).toBe(false);
-    expect(listSavedRecipes(db)[0].isFavorite).toBe(false);
+    expect(listSavedRecipes(db, TEST_USER_ID)[0].isFavorite).toBe(false);
   });
 
   it("setRecipeFavorite markerer og avmarkerer, og returnerer true", () => {
@@ -461,7 +470,7 @@ describe("favoritter (Story 3.4)", () => {
     const id = insertRecipe(db, saved("A", T0));
     expect(setRecipeFavorite(db, id, true)).toBe(true);
     expect(findRecipeById(db, id)?.isFavorite).toBe(true);
-    expect(listSavedRecipes(db)[0].isFavorite).toBe(true);
+    expect(listSavedRecipes(db, TEST_USER_ID)[0].isFavorite).toBe(true);
     expect(setRecipeFavorite(db, id, false)).toBe(true);
     expect(findRecipeById(db, id)?.isFavorite).toBe(false);
   });
@@ -487,9 +496,14 @@ describe("favoritter (Story 3.4)", () => {
 
   it("rører aldri updated_at, saved_at eller mappe", () => {
     const db = createTestDb();
-    const folderId = insertFolder(db, { name: "Hverdag", nameKey: "hverdag", createdAt: T0 });
+    const folderId = insertFolder(db, {
+      name: "Hverdag",
+      nameKey: "hverdag",
+      createdAt: T0,
+      userId: TEST_USER_ID,
+    });
     const id = insertRecipe(db, saved("A", T0, { updatedAt: "2026-11-09T09:00:00.000Z" }));
-    assignRecipeToFolder(db, id, folderId);
+    assignRecipeToFolder(db, TEST_USER_ID, id, folderId);
     const before = row(db, id);
     setRecipeFavorite(db, id, true);
     setRecipeFavorite(db, id, false);
@@ -508,7 +522,7 @@ describe("favoritter (Story 3.4)", () => {
     // En ulagret oppskrift kan ikke være favoritt, selv om kolonnen skulle være satt.
     setRecipeFavorite(db, unsaved, true);
 
-    const favorites = listFavoriteRecipes(db);
+    const favorites = listFavoriteRecipes(db, TEST_USER_ID);
     expect(favorites.map((r) => r.title)).toEqual(["Samme 2", "Samme 1", "Eldst"]);
     expect(favorites.every((r) => r.isFavorite)).toBe(true);
     expect(favorites[2]).toEqual({
@@ -524,12 +538,17 @@ describe("favoritter (Story 3.4)", () => {
 
   it("listFavoriteRecipes er tom uten favoritter, og har mappenavnet", () => {
     const db = createTestDb();
-    expect(listFavoriteRecipes(db)).toEqual([]);
-    const folderId = insertFolder(db, { name: "Hverdag", nameKey: "hverdag", createdAt: T0 });
+    expect(listFavoriteRecipes(db, TEST_USER_ID)).toEqual([]);
+    const folderId = insertFolder(db, {
+      name: "Hverdag",
+      nameKey: "hverdag",
+      createdAt: T0,
+      userId: TEST_USER_ID,
+    });
     const id = insertRecipe(db, saved("A", T0));
-    assignRecipeToFolder(db, id, folderId);
+    assignRecipeToFolder(db, TEST_USER_ID, id, folderId);
     setRecipeFavorite(db, id, true);
-    expect(listFavoriteRecipes(db).map((r) => r.folderName)).toEqual(["Hverdag"]);
+    expect(listFavoriteRecipes(db, TEST_USER_ID).map((r) => r.folderName)).toEqual(["Hverdag"]);
   });
 
   it("redigering (updateRecipe) og markRecipeSaved beholder favoritten", () => {
@@ -543,20 +562,25 @@ describe("favoritter (Story 3.4)", () => {
       ingredients: [],
       steps: [],
     });
-    markRecipeSaved(db, id, "2026-11-11T10:00:00.000Z");
+    markRecipeSaved(db, id, "2026-11-11T10:00:00.000Z", TEST_USER_ID);
     expect(findRecipeById(db, id)).toMatchObject({ isFavorite: true, title: "Ny tittel" });
   });
 
   it("mappehandlinger og sletting av mappen beholder favoritten", () => {
     const db = createTestDb();
-    const folderId = insertFolder(db, { name: "Hverdag", nameKey: "hverdag", createdAt: T0 });
+    const folderId = insertFolder(db, {
+      name: "Hverdag",
+      nameKey: "hverdag",
+      createdAt: T0,
+      userId: TEST_USER_ID,
+    });
     const id = insertRecipe(db, saved("A", T0));
     setRecipeFavorite(db, id, true);
-    assignRecipeToFolder(db, id, folderId);
+    assignRecipeToFolder(db, TEST_USER_ID, id, folderId);
     expect(findRecipeById(db, id)?.isFavorite).toBe(true);
     db.$client.prepare("delete from folders where id = ?").run(folderId);
     expect(findRecipeById(db, id)).toMatchObject({ isFavorite: true, folderId: null });
-    assignRecipeToFolder(db, id, null);
+    assignRecipeToFolder(db, TEST_USER_ID, id, null);
     expect(findRecipeById(db, id)?.isFavorite).toBe(true);
   });
 
@@ -565,7 +589,7 @@ describe("favoritter (Story 3.4)", () => {
     const id = insertRecipe(db, saved("A", T0));
     setRecipeFavorite(db, id, true);
     deleteRecipeById(db, id);
-    expect(listFavoriteRecipes(db)).toEqual([]);
+    expect(listFavoriteRecipes(db, TEST_USER_ID)).toEqual([]);
   });
 });
 
@@ -576,21 +600,23 @@ describe("findRecipeBySourceUrl og insertImportedRecipe (Story 2.2)", () => {
   it("finner ingenting for ukjent adresse, og sammenligner nøyaktig", () => {
     const db = createTestDb();
     insertRecipe(db, imported);
-    expect(findRecipeBySourceUrl(db, "https://www.matprat.no/oppskrifter/y/")).toBeNull();
+    expect(
+      findRecipeBySourceUrl(db, "https://www.matprat.no/oppskrifter/y/", TEST_USER_ID),
+    ).toBeNull();
     expect(findRecipeBySourceUrl(db, url.toUpperCase())).toBeNull();
     expect(findRecipeBySourceUrl(db, url.slice(0, -1))).toBeNull();
-    expect(findRecipeBySourceUrl(db, url)).toEqual({ id: 1, saved: false });
+    expect(findRecipeBySourceUrl(db, url, TEST_USER_ID)).toEqual({ id: 1, saved: false });
   });
 
   it("en lagret oppskrift går foran en ulagret, uansett id", () => {
     const db = createTestDb();
     const saved = insertRecipe(db, { ...imported, savedAt: "2026-11-09T11:00:00.000Z" });
     insertRecipe(db, imported);
-    expect(findRecipeBySourceUrl(db, url)).toEqual({ id: saved, saved: true });
+    expect(findRecipeBySourceUrl(db, url, TEST_USER_ID)).toEqual({ id: saved, saved: true });
     const db2 = createTestDb();
     insertRecipe(db2, imported);
     const later = insertRecipe(db2, { ...imported, savedAt: "2026-11-09T11:00:00.000Z" });
-    expect(findRecipeBySourceUrl(db2, url)).toEqual({ id: later, saved: true });
+    expect(findRecipeBySourceUrl(db2, url, TEST_USER_ID)).toEqual({ id: later, saved: true });
   });
 
   it("insertImportedRecipe setter inn når adressen er ny", () => {
@@ -632,5 +658,49 @@ describe("findRecipeBySourceUrl og insertImportedRecipe (Story 2.2)", () => {
     expect(() => insertImportedRecipe(db, broken)).toThrow();
     expect(count(db, "recipes")).toBe(0);
     expect(count(db, "ingredient_lines")).toBe(0);
+  });
+});
+
+describe("eierskap (Story 5.13)", () => {
+  const SAVED = "2026-11-10T08:00:00.000Z";
+  function secondUser(db: ReturnType<typeof createTestDb>): number {
+    return Number(
+      db.$client
+        .prepare("insert into users (email, password_hash, created_at) values ('b@b.no', 'x', 'x')")
+        .run().lastInsertRowid,
+    );
+  }
+
+  it("lister bare brukerens egne lagrede oppskrifter, ingredienser og favoritter", () => {
+    const db = createTestDb();
+    const other = secondUser(db);
+    const mine = insertRecipe(db, { ...base, title: "Min", savedAt: SAVED });
+    const theirs = insertRecipe(db, { ...base, title: "Deres", savedAt: SAVED, userId: other });
+    setRecipeFavorite(db, mine, true);
+    setRecipeFavorite(db, theirs, true);
+    expect(listSavedRecipes(db, TEST_USER_ID).map((r) => r.title)).toEqual(["Min"]);
+    expect(listSavedRecipes(db, other).map((r) => r.title)).toEqual(["Deres"]);
+    expect([...listSavedIngredientNames(db, TEST_USER_ID).keys()]).toEqual([mine]);
+    expect(listFavoriteRecipes(db, other).map((r) => r.title)).toEqual(["Deres"]);
+  });
+
+  it("markRecipeSaved gir eier til en import uten eier, men tar ikke en annens", () => {
+    const db = createTestDb();
+    const other = secondUser(db);
+    const anonymous = insertRecipe(db, { ...base, userId: null });
+    expect(markRecipeSaved(db, anonymous, SAVED, TEST_USER_ID)).toBe(true);
+    expect(findRecipeOwner(db, anonymous)).toEqual({ userId: TEST_USER_ID });
+    const theirs = insertRecipe(db, { ...base, userId: other });
+    expect(markRecipeSaved(db, theirs, SAVED, TEST_USER_ID)).toBe(false);
+    expect(findRecipeById(db, theirs)?.savedAt).toBeNull();
+    expect(findRecipeOwner(db, 999)).toBeNull();
+  });
+
+  it("findRecipeBySourceUrl ser bare på samme eier", () => {
+    const db = createTestDb();
+    const url = "https://eksempel.no/a";
+    const id = insertRecipe(db, { ...base, sourceUrl: url, userId: null });
+    expect(findRecipeBySourceUrl(db, url, null)).toEqual({ id, saved: false });
+    expect(findRecipeBySourceUrl(db, url, TEST_USER_ID)).toBeNull();
   });
 });

@@ -43,6 +43,13 @@
       "when": 1794315811851,
       "tag": "0005_pantry",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1794320435476,
+      "tag": "0006_accounts",
+      "breakpoints": true
     }
   ]
 }

@@ -5,7 +5,8 @@ import { cache, Suspense } from "react";
 import ManualRecipeForm from "@/components/ManualRecipeForm";
 import { editRecipeMessages } from "@/lib/messages";
 import { parseRecipeId } from "@/lib/recipe-id";
-import { getRecipe } from "@/server/services/recipe-service";
+import { getRecipeFor } from "@/server/services/recipe-service";
+import { currentUserId } from "@/server/session";
 import { saveRecipeEdits } from "./actions";
 import { initialValuesOf } from "./initial-values";
 import styles from "./page.module.css";
@@ -13,16 +14,17 @@ import styles from "./page.module.css";
 type Params = Promise<{ id: string }>;
 
 /** Leser oppskriften én gang per forespørsel, selv om både metadata og side trenger den. */
-const loadRecipe = cache((rawId: string) => {
+const loadRecipe = cache(async (rawId: string) => {
   const id = parseRecipeId(rawId);
-  return id === null ? null : getRecipe(id);
+  // En annens oppskrift gir `not_found` (Story 5.13).
+  return id === null ? null : getRecipeFor(await currentUserId(), id);
 });
 
 /** Fanetittel «Rediger · <tittel> · RecipeMate» (malen ligger i rotlayouten). */
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { id } = await params;
   await connection();
-  const result = loadRecipe(id);
+  const result = await loadRecipe(id);
   return {
     title: result?.ok
       ? `${editRecipeMessages.tabTitle} · ${result.value.title}`
@@ -46,7 +48,7 @@ async function EditRecipeLoader({ params }: { params: Params }) {
   const { id: rawId } = await params;
   await connection();
 
-  const result = loadRecipe(rawId);
+  const result = await loadRecipe(rawId);
   if (result === null) notFound();
   if (!result.ok) {
     if (result.error.kind === "not_found") notFound();

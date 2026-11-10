@@ -6,6 +6,8 @@ import ShoppingList from "@/components/ShoppingList";
 import { shoppingMessages } from "@/lib/messages";
 import { listPantry } from "@/server/services/pantry-service";
 import { listShoppingRecipes } from "@/server/services/recipe-service";
+import { currentUserId } from "@/server/session";
+import LoginRequired from "@/components/LoginRequired";
 import { addToPantry, removeFromPantry } from "./actions";
 import listStyles from "../list-page.module.css";
 
@@ -28,12 +30,14 @@ export default function HandlelistePage() {
 
 async function ShoppingLoader() {
   await connection();
+  const userId = await currentUserId();
+  if (userId === null) return <LoginRequired next="/handleliste" />;
 
-  const result = listShoppingRecipes();
+  const result = listShoppingRecipes(userId);
   // Feil vises av error.tsx; en tom liste skal aldri skjule en databasefeil.
   if (!result.ok) throw new Error(`${shoppingMessages.loadFailed} (${result.error.kind})`);
 
-  const pantry = listPantry();
+  const pantry = listPantry(userId);
   if (!pantry.ok) throw new Error(`${shoppingMessages.loadFailed} (${pantry.error.kind})`);
 
   if (result.value.length === 0) {

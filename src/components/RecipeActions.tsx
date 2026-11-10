@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ActionResult, FolderActionResult } from "@/app/_shared/action-result";
 import type { Folder } from "@/domain";
 import {
+  accountMessages,
   deleteDialogMessages,
   fallbackMessage,
   favoriteMessages,
@@ -20,6 +22,11 @@ import { useGetSelectedServings } from "./SelectedServings";
 export const SAVED_MESSAGE_MS = STATUS_MESSAGE_MS;
 
 type Props = {
+  /**
+   * Satt uten innlogging (Story 5.13): «Lagre» byttes med en lenke til innlogging, som sender
+   * brukeren tilbake hit etterpå.
+   */
+  loginHref?: string;
   title: string;
   /** `true` når oppskriften er i samlingen (`savedAt` satt). */
   saved: boolean;
@@ -72,6 +79,7 @@ export default function RecipeActions({
   onMoveToNewFolder,
   isFavorite,
   onSetFavorite,
+  loginHref,
 }: Props) {
   const getSelectedServings = useGetSelectedServings();
   const [saving, setSaving] = useState(false);
@@ -225,6 +233,10 @@ export default function RecipeActions({
               {recipeActionMessages.delete}
             </button>
           </>
+        ) : loginHref ? (
+          <Link href={loginHref} className={styles.primary}>
+            {accountMessages.saveNeedsLogin}
+          </Link>
         ) : (
           <button
             ref={saveButton}

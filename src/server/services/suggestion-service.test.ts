@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { appError, err, ok } from "@/lib/result";
-import { createTestDb, type Db } from "../db/client";
+import { createTestDb, type Db, TEST_USER_ID } from "../db/client";
 import type { SuggestionProvider } from "../ports/suggestion-provider";
 import { createManualRecipe } from "./recipe-service";
 import { getRecipe } from "./recipe-service";
@@ -23,6 +23,7 @@ function providerReturning(value: unknown, isExample: unknown = false): Suggesti
 beforeEach(() => {
   db = createTestDb();
   const created = createManualRecipe(
+    TEST_USER_ID,
     { title: "Pannekaker", servings: 4, ingredients: ["3 egg"], steps: ["Visp."] },
     db,
   );

@@ -2,9 +2,16 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createTestDb, type Db } from "@/server/db/client";
+import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import { insertRecipe, type NewRecipe } from "@/server/db/repositories/recipe-repository";
 import { addPantryItem } from "@/server/services/pantry-service";
+
+const session = vi.hoisted(() => ({ userId: 1 as number | null }));
+vi.mock("@/server/session", () => ({
+  currentUserId: async () => session.userId,
+  currentUser: async () =>
+    session.userId === null ? null : { id: session.userId, email: "test@example.com" },
+}));
 
 const state = vi.hoisted(() => ({ db: null as Db | null, calls: [] as string[] }));
 
@@ -52,6 +59,7 @@ const recipe = (title: string, savedAt: string | null): NewRecipe => ({
   savedAt,
   createdAt: "2026-11-09T10:00:00.000Z",
   updatedAt: "2026-11-09T10:00:00.000Z",
+  userId: TEST_USER_ID,
   ingredients: [
     {
       position: 1,
@@ -102,8 +110,8 @@ describe("/handleliste", () => {
 
   it("viser det som er lagret som «Har hjemme», og skjuler det fra listen", async () => {
     insertRecipe(state.db!, recipe("Pannekaker", "2026-11-09T10:00:00.000Z"));
-    addPantryItem("Melk", state.db!);
-    addPantryItem("Salt", state.db!);
+    addPantryItem(TEST_USER_ID, "Melk", state.db!);
+    addPantryItem(TEST_USER_ID, "Salt", state.db!);
     const { content } = await renderPage();
     render(content);
     const section = screen
@@ -111,5 +119,21 @@ describe("/handleliste", () => {
       .closest("section")!;
     expect(section).toHaveTextContent("Melk");
     expect(section).toHaveTextContent("Salt");
+  });
+});
+
+describe("uten innlogging (Story 5.13)", () => {
+  it("viser «Logg inn for å se dette» i stedet for innholdet", async () => {
+    session.userId = null;
+    try {
+      render((await renderPage()).content);
+      expect(screen.getByRole("heading", { name: "Logg inn for å se dette" })).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "Logg inn" })).toHaveAttribute(
+        "href",
+        "/logg-inn?neste=%2Fhandleliste",
+      );
+    } finally {
+      session.userId = 1;
+    }
   });
 });

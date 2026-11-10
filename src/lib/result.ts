@@ -12,6 +12,8 @@ export const ERROR_KINDS = [
   "validation",
   "not_found",
   "suggestion_failed",
+  /** Handlingen krever innlogging (Story 5.13). */
+  "login_required",
   /** Uventet feil (for eksempel databasen). Brukeren får reservemeldingen. */
   "unknown",
 ] as const;
