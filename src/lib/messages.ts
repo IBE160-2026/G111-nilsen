@@ -167,6 +167,7 @@ export const cookingModeMessages = {
   next: "Neste",
   done: "Ferdig",
   progress: (current: number, total: number) => `Steg ${current} av ${total}`,
+  inThisStep: "I dette steget",
   ingredients: "Ingredienser",
   ingredientsFor: (servings: string) => `Ingredienser for ${servings}`,
 } as const;

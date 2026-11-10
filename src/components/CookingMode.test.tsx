@@ -127,8 +127,8 @@ describe("CookingMode", () => {
     await user.click(openButton());
     const d = within(dialog());
     expect(d.getByText("Ingredienser for 8 personer")).toBeInTheDocument();
-    expect(d.getByText("800 g mel")).toBeInTheDocument();
-    expect(d.getByText("4 egg")).toBeInTheDocument();
+    expect(d.getAllByText("800 g mel").length).toBeGreaterThan(0);
+    expect(d.getAllByText("4 egg").length).toBeGreaterThan(0);
   });
 
   it("bruker antallet som er valgt på siden akkurat nå, også halve", async () => {
@@ -149,7 +149,7 @@ describe("CookingMode", () => {
     await user.click(openButton());
     const d = within(dialog());
     expect(d.getByText("Ingredienser for 4,5 personer")).toBeInTheDocument();
-    expect(d.getByText("450 g mel")).toBeInTheDocument();
+    expect(d.getAllByText("450 g mel").length).toBeGreaterThan(0);
   });
 
   it("uten gyldig opprinnelig antall vises uskalerte mengder uten antall", async () => {
@@ -158,7 +158,7 @@ describe("CookingMode", () => {
     await user.click(openButton());
     const d = within(dialog());
     expect(d.getByText("Ingredienser")).toBeInTheDocument();
-    expect(d.getByText("400 g mel")).toBeInTheDocument();
+    expect(d.getAllByText("400 g mel").length).toBeGreaterThan(0);
   });
 
   it("virker uten Wake Lock, og når Wake Lock avvises", async () => {
@@ -213,5 +213,23 @@ describe("CookingMode", () => {
     await user.click(openButton());
     expect(within(dialog()).getByText("4,8 dl flour (ca.)")).toBeInTheDocument();
     expect(within(dialog()).getByText("1 ss salt")).toBeInTheDocument();
+  });
+
+  it("viser ingrediensene som brukes i steget, med mengde i valgt antall", async () => {
+    const user = userEvent.setup();
+    renderCooking({
+      selectedServings: 8,
+      steps: [
+        { id: 1, position: 1, section: null, text: "Visp mel og egg sammen." },
+        { id: 2, position: 2, section: null, text: "Stek i panne." },
+      ],
+    });
+    await user.click(openButton());
+    const d = within(dialog());
+    const section = d.getByRole("region", { name: "I dette steget" });
+    expect(within(section).getByText("800 g mel")).toBeInTheDocument();
+    expect(within(section).getByText("4 egg")).toBeInTheDocument();
+    await user.click(d.getByRole("button", { name: "Neste" }));
+    expect(d.queryByRole("region", { name: "I dette steget" })).not.toBeInTheDocument();
   });
 });

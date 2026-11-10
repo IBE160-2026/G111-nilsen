@@ -99,8 +99,14 @@
   accent-color: var(--color-accent);
 }
 
-.step {
+.stepArea {
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.step {
   margin: 0;
   font-size: clamp(1.5rem, 5vw, 2.25rem);
   line-height: 1.45;
@@ -136,4 +142,29 @@
   display: flex;
   gap: var(--space-3);
   padding-bottom: var(--space-2);
+}
+
+.stepIngredients {
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--color-accent);
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-sm);
+}
+
+.stepIngredientsTitle {
+  margin: 0 0 var(--space-2);
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+  font-weight: 600;
+}
+
+.stepLines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: clamp(1.25rem, 3.5vw, 1.5rem);
+  font-weight: 600;
 }

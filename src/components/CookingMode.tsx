@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import {
   convertLine,
   formatLine,
+  ingredientsForStep,
   scaleLine,
   type RecipeLine,
   type Step,
@@ -176,6 +177,7 @@ function Session({
   const [index, setIndex] = useState(0);
   const last = index === sorted.length - 1;
   const lines = [...ingredients].sort((a, b) => a.position - b.position);
+  const stepLines = ingredientsForStep(sorted[index].text, lines);
 
   function previous() {
     setIndex((i) => Math.max(0, i - 1));
@@ -213,9 +215,23 @@ function Session({
         aria-label={m.progress(index + 1, sorted.length)}
       />
 
-      <p className={styles.step} aria-live="polite">
-        {sorted[index].text}
-      </p>
+      <div className={styles.stepArea}>
+        <p className={styles.step} aria-live="polite">
+          {sorted[index].text}
+        </p>
+        {stepLines.length > 0 ? (
+          <section className={styles.stepIngredients} aria-labelledby="kokemodus-i-steget">
+            <h3 id="kokemodus-i-steget" className={styles.stepIngredientsTitle}>
+              {m.inThisStep}
+            </h3>
+            <ul role="list" className={styles.stepLines}>
+              {stepLines.map((line) => (
+                <li key={line.id}>{formatLine(convertLine(scaleLine(line, factor), units))}</li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+      </div>
 
       <details className={styles.ingredients}>
         <summary>

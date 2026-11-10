@@ -30,3 +30,4 @@ export {
   type CollectionFilter,
 } from "./filter-collection";
 export { convertLine, hasConvertibleUnit, type UnitSystem } from "./convert-units";
+export { ingredientsForStep } from "./step-ingredients";
