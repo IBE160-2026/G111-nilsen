@@ -119,7 +119,6 @@ test("UJ-2: forslag tas i bruk og huskes; oversiktsside gir melding", async ({
   expect(count).toBeGreaterThanOrEqual(1);
   expect(count).toBeLessThanOrEqual(3);
 
-  const ingredientsBefore = await ingredientsText(page);
   await page
     .getByRole("button", { name: /^Ta i bruk/ })
     .first()
@@ -133,12 +132,24 @@ test("UJ-2: forslag tas i bruk og huskes; oversiktsside gir melding", async ({
       .click();
   }
   await expect(page.getByText("Du har tatt stilling til alle forslagene.")).toBeVisible();
-  expect(await ingredientsText(page)).toBe(ingredientsBefore);
+  // Forslaget vises i ingredienslisten eller ved et steg, merket «Forslag» (Story 5.11). Teksten
+  // «Forslag» står ellers bare som overskriften på forslagsdelen.
+  const badges = page.locator("span").getByText("Forslag", { exact: true });
+  await expect(badges).toHaveCount(1);
+  expect(await ingredientsText(page)).not.toBe("");
 
   await saveInNewFolder(page, data.folders.uj2);
   await page.reload();
   await expect(page.getByRole("heading", { name: "Dine valgte forslag" })).toBeVisible();
   await expect(page.getByText("Tatt i bruk", { exact: true })).toBeVisible();
+  await expect(badges).toHaveCount(1);
+
+  // «Fjern» tar forslaget ut av oppskriften igjen.
+  await page
+    .getByRole("button", { name: /^Fjern: / })
+    .first()
+    .click();
+  await expect(badges).toHaveCount(0);
 
   // Kanttilfelle: lenken er en oversiktsside uten oppskrift.
   await page.goto("/");

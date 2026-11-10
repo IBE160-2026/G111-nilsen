@@ -210,7 +210,8 @@ export async function requestSuggestions(id: number): Promise<SuggestionsActionR
 /**
  * Tar et forslag i bruk og lagrer det med oppskriften (Story 4.2, FR-11). Id og forslag valideres
  * på nytt (endepunktet er offentlig). Sidene revalideres, så en ny åpning viser det lagrede.
- * Ingredienser og steg endres ikke. Feil gir en norsk melding og lagrer ingenting.
+ * Lagrede ingredienser og steg endres ikke; forslaget vises i listene, merket «Forslag» (Story 5.11).
+ * Feil gir en norsk melding og lagrer ingenting.
  */
 export async function applySuggestion(
   recipeId: number,

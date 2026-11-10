@@ -188,6 +188,41 @@ describe("RecipeView", () => {
     expect(screen.getByText("Tilsett sitron.")).toBeInTheDocument();
   });
 
+  it("viser forslag som er tatt i bruk i ingrediensene og stegene, merket «Forslag» (Story 5.11)", () => {
+    render(
+      <RecipeView
+        recipe={{
+          ...recipe,
+          id: 7,
+          suggestions: [
+            {
+              id: 5,
+              text: "Ha en teskje vaniljesukker eller kardemomme i røren.",
+              reason: "Duft.",
+              appliesTo: "ingredients",
+            },
+            { id: 6, text: "Smak til med salt.", reason: "Smak.", appliesTo: "steps" },
+            { id: 7, text: "Server med bær.", reason: "Friskt.", appliesTo: "recipe" },
+          ],
+        }}
+        folders={folders}
+      />,
+    );
+    const ingredientCard = screen
+      .getByRole("heading", { name: "Ingredienser" })
+      .closest("section")!;
+    expect(
+      within(ingredientCard).getByRole("checkbox", {
+        name: /vaniljesukker eller kardemomme Forslag/,
+      }),
+    ).toBeInTheDocument();
+    const stepCard = screen.getByRole("region", { name: "Slik gjør du" });
+    expect(
+      within(stepCard).getByRole("checkbox", { name: "Smak til med salt. Forslag" }),
+    ).toBeInTheDocument();
+    expect(within(stepCard).getByText("Server med bær.")).toBeInTheDocument();
+  });
+
   it("har en «Rediger»-lenke ved tittelen som peker til redigeringssiden", () => {
     render(<RecipeView recipe={{ ...recipe, id: 7 }} folders={folders} />);
     const link = screen.getByRole("link", { name: "Rediger Pannekaker" });

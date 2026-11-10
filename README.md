@@ -21,7 +21,7 @@ Repoet inneholder applikasjonen og dokumentasjon av utvikling, testing og kvalit
 - Importerer en oppskrift fra en lenke (JSON-LD på siden), eller du skriver den inn selv.
 - Viser den i fast format og regner om alle mengder når du velger antall personer.
 - Lagrer oppskriftene lokalt, i mapper og som favoritter, og du kan krysse av under matlaging.
-- Gir 1–3 forslag til hvordan retten kan bli bedre. Uten nøkkel er det enkle forslag laget av regler ut fra ingrediensene og stegene (merket «Enkle forslag»); med nøkkel lager en språkmodell forslag til akkurat denne oppskriften. Forslag du tar i bruk lagres med oppskriften og endrer aldri ingredienser eller steg.
+- Gir 1–3 forslag til hvordan retten kan bli bedre. Uten nøkkel er det enkle forslag laget av regler ut fra ingrediensene og stegene (merket «Enkle forslag»); med nøkkel lager en språkmodell forslag til akkurat denne oppskriften. Forslag du tar i bruk lagres med oppskriften og vises i ingredienslisten eller ved riktig steg, merket «Forslag» (også i kokemodus og handlelisten); originalen endres ikke, og «Fjern» tar dem bort igjen.
 
 Alt unntatt språkmodellen virker uten konto, nøkkel eller nett (importen kan kjøres mot lagrede sider, se «Importere fra lenke»). Status: Epic 1–4 er bygget (Story 1.1–4.4). Åpne saker står i [`issues/`](issues/README.md) og i `_bmad-output/implementation-artifacts/deferred-work.md`.
 

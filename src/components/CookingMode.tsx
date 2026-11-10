@@ -14,6 +14,7 @@ import { cookingModeMessages as m } from "@/lib/messages";
 import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import { useGetSelectedServings, useGetUnitSystem } from "./SelectedServings";
 import { servingsText } from "./ServingStepper";
+import SuggestedBadge from "./SuggestedBadge";
 import styles from "./CookingMode.module.css";
 
 type Props = {
@@ -218,6 +219,12 @@ function Session({
       <div className={styles.stepArea}>
         <p className={styles.step} aria-live="polite">
           {sorted[index].text}
+          {sorted[index].suggested ? (
+            <>
+              {" "}
+              <SuggestedBadge />
+            </>
+          ) : null}
         </p>
         {stepLines.length > 0 ? (
           <section className={styles.stepIngredients} aria-labelledby="kokemodus-i-steget">

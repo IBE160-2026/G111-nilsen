@@ -6,6 +6,7 @@ import {
   type Recipe,
   type RecipeSummary,
   type ShoppingRecipe,
+  withAppliedSuggestions,
 } from "@/domain";
 import { isSelectedServings, LIMITS, splitLines } from "@/lib/recipe-input";
 import { appError, err, ok, type Result } from "@/lib/result";
@@ -243,7 +244,7 @@ export function listCollection(db: Db = getDb()): Result<CollectionEntry[]> {
 
 /**
  * Lagrede oppskrifter med ingredienser, til handlelisten (Story 5.7). Sist lagret først, som i
- * samlingen.
+ * samlingen. Ingrediensforslag som er tatt i bruk og har mengde er med (Story 5.11).
  */
 export function listShoppingRecipes(db: Db = getDb()): Result<ShoppingRecipe[]> {
   const recipes: ShoppingRecipe[] = [];
@@ -255,7 +256,12 @@ export function listShoppingRecipes(db: Db = getDb()): Result<ShoppingRecipe[]> 
       title: recipe.title,
       originalServings: recipe.originalServings,
       selectedServings: recipe.selectedServings,
-      ingredients: recipe.ingredients,
+      // Ingrediensforslag som er tatt i bruk tas med når de har mengde (Story 5.11).
+      ingredients: withAppliedSuggestions(
+        recipe.ingredients,
+        recipe.steps,
+        recipe.suggestions,
+      ).ingredients.filter((line) => !line.suggested || (line.parseable && line.quantity !== null)),
     });
   }
   return ok(recipes);

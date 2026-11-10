@@ -202,6 +202,12 @@ export const unitMessages = {
   hint: "Kopper, unser og pund regnes om til norske mål. Mel, sukker, smør, melk og andre vanlige varer regnes mellom dl og gram (ca.).",
 } as const;
 
+/** Forslag som er tatt i bruk, vist i ingredienslisten og stegene (Story 5.11). */
+export const appliedSuggestionMessages = {
+  badge: "Forslag",
+  tipsHeading: "Forslag til retten",
+} as const;
+
 /** Kokemodus (Story 5.4). */
 export const cookingModeMessages = {
   open: "Kokemodus",

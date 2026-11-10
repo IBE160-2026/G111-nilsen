@@ -51,6 +51,8 @@ export type RecipeLine = ParsedLine & {
   id: number;
   position: number;
   section: string | null;
+  /** Satt for en linje som kommer fra et forslag brukeren har tatt i bruk (Story 5.11). */
+  suggested?: boolean;
 };
 
 /** Et steg i fremgangsmåten. */
@@ -59,6 +61,8 @@ export type Step = {
   position: number;
   section: string | null;
   text: string;
+  /** Satt for et steg som kommer fra et forslag brukeren har tatt i bruk (Story 5.11). */
+  suggested?: boolean;
 };
 
 /**

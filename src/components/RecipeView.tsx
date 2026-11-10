@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Folder, Recipe } from "@/domain";
+import { withAppliedSuggestions, type Folder, type Recipe } from "@/domain";
 import {
   applySuggestion,
   changeOriginalServings,
@@ -36,6 +36,8 @@ import styles from "./RecipeView.module.css";
  * `recipe.folderId`.
  */
 export default function RecipeView({ recipe, folders }: { recipe: Recipe; folders: Folder[] }) {
+  // Forslag som er tatt i bruk vises i listene, merket «Forslag» (Story 5.11); originalen endres ikke.
+  const shown = withAppliedSuggestions(recipe.ingredients, recipe.steps, recipe.suggestions);
   return (
     <SelectedServingsProvider>
       <article className={styles.root}>
@@ -44,8 +46,8 @@ export default function RecipeView({ recipe, folders }: { recipe: Recipe; folder
             <h1>{recipe.title}</h1>
             <CookingMode
               title={recipe.title}
-              steps={recipe.steps}
-              ingredients={recipe.ingredients}
+              steps={shown.steps}
+              ingredients={shown.ingredients}
               originalServings={recipe.originalServings}
               selectedServings={recipe.selectedServings}
             />
@@ -78,7 +80,7 @@ export default function RecipeView({ recipe, folders }: { recipe: Recipe; folder
           <div className={styles.ingredients}>
             <IngredientList
               key={`ingredienser-${recipe.id}-${recipe.updatedAt}`}
-              ingredients={recipe.ingredients}
+              ingredients={shown.ingredients}
               originalServings={recipe.originalServings}
               selectedServings={recipe.selectedServings}
               onOriginalServingsChange={changeOriginalServings.bind(null, recipe.id)}
@@ -90,9 +92,13 @@ export default function RecipeView({ recipe, folders }: { recipe: Recipe; folder
           </div>
 
           {/* Uten steg lages ingen tom rute, så rutenettet ikke får ekstra mellomrom. */}
-          {recipe.steps.length > 0 ? (
+          {shown.steps.length > 0 || shown.tips.length > 0 ? (
             <div className={styles.steps}>
-              <StepList key={`steg-${recipe.id}-${recipe.updatedAt}`} steps={recipe.steps} />
+              <StepList
+                key={`steg-${recipe.id}-${recipe.updatedAt}`}
+                steps={shown.steps}
+                tips={shown.tips}
+              />
             </div>
           ) : null}
 

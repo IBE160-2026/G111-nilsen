@@ -647,3 +647,39 @@ describe("favoritter (Story 3.4)", () => {
     expect(listFavorites(db)).toEqual({ ok: true, value: [] });
   });
 });
+
+describe("listShoppingRecipes med forslag (Story 5.11)", () => {
+  it("tar med ingrediensforslag som har mengde, men ikke tekstforslag eller steg", async () => {
+    const { applySuggestion } = await import("./suggestion-service");
+    const { listShoppingRecipes } = await import("./recipe-service");
+    const db = createTestDb();
+    const created = createManualRecipe(
+      { title: "Pannekaker", servings: 4, ingredients: ["3 dl melk"], steps: ["Stek."] },
+      db,
+    );
+    if (!created.ok) throw new Error("feil");
+    const id = created.value.id;
+    saveRecipeToCollection(id, db);
+    for (const suggestion of [
+      {
+        text: "Ha en teskje vaniljesukker eller kardemomme i røren.",
+        reason: "x",
+        appliesTo: "ingredients",
+      },
+      { text: "Bytt litt melk med kefir.", reason: "x", appliesTo: "ingredients" },
+      {
+        text: "La røren hvile i 20–30 minutter før du begynner å steke.",
+        reason: "x",
+        appliesTo: "steps",
+      },
+    ]) {
+      expect(applySuggestion(id, suggestion, db).ok).toBe(true);
+    }
+    const result = listShoppingRecipes(db);
+    if (!result.ok) throw new Error("feil");
+    expect(result.value[0].ingredients.map((line) => line.original)).toEqual([
+      "3 dl melk",
+      "1 ts vaniljesukker eller kardemomme",
+    ]);
+  });
+});

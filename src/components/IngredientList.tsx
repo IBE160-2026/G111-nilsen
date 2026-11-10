@@ -17,6 +17,7 @@ import CheckRow from "./CheckRow";
 import { useReportSelectedServings, useReportUnitSystem } from "./SelectedServings";
 import ServingsDialog, { DEFAULT_SERVINGS } from "./ServingsDialog";
 import ServingStepper from "./ServingStepper";
+import SuggestedBadge from "./SuggestedBadge";
 import UnitChoice from "./UnitChoice";
 import { useCheckedSet } from "./use-checked-set";
 import styles from "./IngredientList.module.css";
@@ -52,17 +53,28 @@ function Line({
   id,
   checked,
   onToggle,
+  suggested = false,
 }: {
   line: ScaledLine;
   id: number;
   checked: boolean;
   onToggle: (id: number) => void;
+  suggested?: boolean;
 }) {
   const toggle = () => onToggle(id);
+  const badge = suggested ? (
+    <>
+      {" "}
+      <SuggestedBadge />
+    </>
+  ) : null;
   if (!line.parseable || line.quantity === null) {
     return (
       <CheckRow className={styles.row} checked={checked} onToggle={toggle}>
-        <span className={styles.unparsed}>{line.original}</span>
+        <span className={styles.unparsed}>
+          {line.original}
+          {badge}
+        </span>
       </CheckRow>
     );
   }
@@ -79,9 +91,12 @@ function Line({
               {line.name ? <span>{line.name}</span> : null}
               {line.name && line.approximate ? " " : null}
               {line.approximate ? <span className={styles.approximate}>ca.</span> : null}
+              {badge}
             </span>
           </>
-        ) : null}
+        ) : (
+          badge
+        )}
       </span>
     </CheckRow>
   );
@@ -229,6 +244,7 @@ export default function IngredientList({
                     line={convertLine(scaleLine(line, factor), unitSystem)}
                     checked={isChecked(line.id)}
                     onToggle={toggle}
+                    suggested={line.suggested === true}
                   />
                 ))}
               </ul>

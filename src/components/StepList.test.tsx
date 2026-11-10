@@ -106,4 +106,25 @@ describe("StepList", () => {
     render(<StepList steps={steps} />);
     expect(box("Stek i panne.")).not.toBeChecked();
   });
+
+  it("merker steg fra forslag og viser forslag til retten under stegene (Story 5.11)", () => {
+    render(
+      <StepList
+        steps={[
+          ...steps,
+          { id: -4, position: 3, section: null, text: "Smak til.", suggested: true },
+        ]}
+        tips={["Server med bær."]}
+      />,
+    );
+    expect(box("Smak til. Forslag")).toBeInTheDocument();
+    expect(box("Stek i panne.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Forslag til retten" })).toBeInTheDocument();
+    expect(screen.getByText("Server med bær.")).toBeInTheDocument();
+  });
+
+  it("viser kortet med bare forslag til retten, uten steg", () => {
+    render(<StepList steps={[]} tips={["Server med bær."]} />);
+    expect(screen.getByRole("region", { name: "Slik gjør du" })).toBeInTheDocument();
+  });
 });
