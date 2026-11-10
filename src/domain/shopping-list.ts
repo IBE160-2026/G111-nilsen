@@ -18,9 +18,16 @@ export type ShoppingRecipe = {
 /** En valgt oppskrift og antallet personer den skal lages til. */
 export type ShoppingSelection = { recipe: ShoppingRecipe; servings: number | null };
 
+/** Noe brukeren har hjemme (Story 5.8). */
+export type PantryItem = { id: number; name: string };
+
 export type ShoppingItem = {
   /** Stabil nøkkel (navn og enhet), brukes til avkrysning. */
   key: string;
+  /** Navnet uten mengde («melk»), slik det vises ved «Har hjemme». */
+  name: string;
+  /** Normalisert navn; en vare skjules når dette er likt navnet på noe man har hjemme. */
+  nameKey: string;
   /** Ferdig tekst: «6 dl melk», «salt og pepper». */
   text: string;
   /** Titlene på oppskriftene linjen kommer fra, i valgt rekkefølge. */
@@ -83,7 +90,13 @@ export function buildShoppingList(
       } else {
         const text = scaled.original.trim();
         const key = `${normalizeSearch(text)}|`;
-        const item = plain.get(key) ?? { key, text, recipes: [] };
+        const item = plain.get(key) ?? {
+          key,
+          name: text,
+          nameKey: normalizeSearch(text),
+          text,
+          recipes: [],
+        };
         if (!item.recipes.includes(title)) item.recipes.push(title);
         plain.set(key, item);
       }
@@ -95,6 +108,8 @@ export function buildShoppingList(
       sortKey: normalizeSearch(sum.name),
       item: {
         key,
+        name: sum.name,
+        nameKey: normalizeSearch(sum.name),
         text: formatLine({
           original: sum.name,
           quantity:
@@ -114,4 +129,20 @@ export function buildShoppingList(
       (a, b) => a.sortKey.localeCompare(b.sortKey, "nb") || a.item.key.localeCompare(b.item.key),
     )
     .map(({ item }) => item);
+}
+
+/**
+ * Deler handlelisten i det som må kjøpes og det brukeren har hjemme (Story 5.8). En vare regnes
+ * som hjemme når det normaliserte navnet er helt likt navnet på noe i `pantry` (uavhengig av
+ * store og små bokstaver og av enhet). Rekkefølgen beholdes i begge listene.
+ */
+export function splitByPantry(
+  items: readonly ShoppingItem[],
+  pantry: readonly PantryItem[],
+): { toBuy: ShoppingItem[]; atHome: ShoppingItem[] } {
+  const home = new Set(pantry.map((entry) => normalizeSearch(entry.name)));
+  const toBuy: ShoppingItem[] = [];
+  const atHome: ShoppingItem[] = [];
+  for (const item of items) (home.has(item.nameKey) ? atHome : toBuy).push(item);
+  return { toBuy, atHome };
 }

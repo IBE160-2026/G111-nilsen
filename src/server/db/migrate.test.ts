@@ -142,6 +142,7 @@ describe("migrasjon 0001 (Story 3.1: manuelle oppskrifter i samlingen)", () => {
       "0002_folders",
       "0003_favorites",
       "0004_suggestions",
+      "0005_pantry",
     ]);
     expect(existsSync(join(migrationsFolder(), "meta", "0001_snapshot.json"))).toBe(true);
   });

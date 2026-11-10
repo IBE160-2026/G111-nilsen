@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseLine } from "./parse-line";
-import { buildShoppingList, type ShoppingRecipe } from "./shopping-list";
+import { buildShoppingList, splitByPantry, type ShoppingRecipe } from "./shopping-list";
 
 function recipe(
   id: number,
@@ -92,5 +92,37 @@ describe("buildShoppingList", () => {
       { recipe: recipe(2, "B", ["2 ss olje"]), servings: 4 },
     ]);
     expect(texts(list)).toEqual(["3–4 ss olje"]);
+  });
+});
+
+describe("splitByPantry", () => {
+  const list = buildShoppingList([
+    {
+      recipe: recipe(1, "A", ["4 dl melk", "3 egg", "2 ss olivenolje", "1 dl olivenolje"]),
+      servings: 4,
+    },
+  ]);
+
+  it("flytter varer med samme navn til «hjemme», uavhengig av enhet og store bokstaver", () => {
+    const { toBuy, atHome } = splitByPantry(list, [
+      { id: 1, name: "Olivenolje" },
+      { id: 2, name: "EGG" },
+    ]);
+    expect(texts(toBuy)).toEqual(["4 dl melk"]);
+    expect(texts(atHome)).toEqual(["3 egg", "1 dl olivenolje", "2 ss olivenolje"]);
+  });
+
+  it("gir alt i «å kjøpe» når ingenting er hjemme, og beholder rekkefølgen", () => {
+    const { toBuy, atHome } = splitByPantry(list, []);
+    expect(toBuy).toEqual(list);
+    expect(atHome).toEqual([]);
+  });
+
+  it("matcher bare helt like navn, ikke deler av navn", () => {
+    const { toBuy } = splitByPantry(list, [
+      { id: 1, name: "oli" },
+      { id: 2, name: "mel" },
+    ]);
+    expect(toBuy).toHaveLength(list.length);
   });
 });

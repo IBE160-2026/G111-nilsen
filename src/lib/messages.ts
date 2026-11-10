@@ -151,6 +151,27 @@ export const collectionMessages = {
   emptyImportAction: "Importer din første oppskrift",
 } as const;
 
+/** «Har hjemme» på handlelisten (Story 5.8). */
+export const pantryMessages = {
+  button: "Har hjemme",
+  buttonFor: (name: string) => `Har hjemme: ${name}`,
+  heading: "Har hjemme",
+  hint: "Det du har hjemme står ikke på handlelisten. Du kan også skrive inn noe selv, for eksempel salt eller olje.",
+  fieldLabel: "Legg til noe du har hjemme",
+  add: "Legg til",
+  nameRequired: "Skriv hva du har hjemme.",
+  nameTooLong: "Navnet kan være maks 60 tegn. Gjør det kortere.",
+  empty: "Ingenting ennå.",
+  putBack: "Legg tilbake",
+  putBackFor: (name: string) => `Legg tilbake på listen: ${name}`,
+  hidden: (n: number) =>
+    n === 1
+      ? "1 vare er skjult fordi du har den hjemme."
+      : `${n} varer er skjult fordi du har dem hjemme.`,
+  added: (name: string) => `${name} er lagt til i «Har hjemme».`,
+  removed: (name: string) => `${name} er lagt tilbake på listen.`,
+} as const;
+
 /** Handleliste (Story 5.7). */
 export const shoppingMessages = {
   heading: "Handleliste",

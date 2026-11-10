@@ -92,3 +92,19 @@ export const suggestions = sqliteTable(
   },
   (table) => [uniqueIndex("suggestions_recipe_text_unique").on(table.recipeId, table.text)],
 );
+
+/**
+ * Ingredienser brukeren har hjemme (Story 5.8). De vises ikke på handlelisten. `name` er navnet
+ * slik brukeren skrev det (trimmet); `nameKey` er det normaliserte navnet som sammenlignes
+ * (NFC + små bokstaver), og er unikt.
+ */
+export const pantryItems = sqliteTable(
+  "pantry_items",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    name: text("name").notNull(),
+    nameKey: text("name_key").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [uniqueIndex("pantry_items_name_key_unique").on(table.nameKey)],
+);

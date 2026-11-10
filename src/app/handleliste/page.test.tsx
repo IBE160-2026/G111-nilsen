@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, type Db } from "@/server/db/client";
 import { insertRecipe, type NewRecipe } from "@/server/db/repositories/recipe-repository";
+import { addPantryItem } from "@/server/services/pantry-service";
 
 const state = vi.hoisted(() => ({ db: null as Db | null, calls: [] as string[] }));
 
@@ -97,5 +98,18 @@ describe("/handleliste", () => {
     render(content);
     expect(screen.getByRole("checkbox", { name: "Pannekaker" })).toBeInTheDocument();
     expect(screen.queryByRole("checkbox", { name: "Ulagret" })).not.toBeInTheDocument();
+  });
+
+  it("viser det som er lagret som «Har hjemme», og skjuler det fra listen", async () => {
+    insertRecipe(state.db!, recipe("Pannekaker", "2026-11-09T10:00:00.000Z"));
+    addPantryItem("Melk", state.db!);
+    addPantryItem("Salt", state.db!);
+    const { content } = await renderPage();
+    render(content);
+    const section = screen
+      .getByRole("heading", { level: 2, name: "Har hjemme" })
+      .closest("section")!;
+    expect(section).toHaveTextContent("Melk");
+    expect(section).toHaveTextContent("Salt");
   });
 });

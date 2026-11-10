@@ -4,7 +4,9 @@ import { Suspense } from "react";
 import EmptyState from "@/components/EmptyState";
 import ShoppingList from "@/components/ShoppingList";
 import { shoppingMessages } from "@/lib/messages";
+import { listPantry } from "@/server/services/pantry-service";
 import { listShoppingRecipes } from "@/server/services/recipe-service";
+import { addToPantry, removeFromPantry } from "./actions";
 import listStyles from "../list-page.module.css";
 
 export const metadata: Metadata = { title: shoppingMessages.heading };
@@ -31,6 +33,9 @@ async function ShoppingLoader() {
   // Feil vises av error.tsx; en tom liste skal aldri skjule en databasefeil.
   if (!result.ok) throw new Error(`${shoppingMessages.loadFailed} (${result.error.kind})`);
 
+  const pantry = listPantry();
+  if (!pantry.ok) throw new Error(`${shoppingMessages.loadFailed} (${pantry.error.kind})`);
+
   if (result.value.length === 0) {
     return (
       <EmptyState
@@ -41,5 +46,12 @@ async function ShoppingLoader() {
     );
   }
 
-  return <ShoppingList recipes={result.value} />;
+  return (
+    <ShoppingList
+      recipes={result.value}
+      pantry={pantry.value}
+      onAddPantry={addToPantry}
+      onRemovePantry={removeFromPantry}
+    />
+  );
 }

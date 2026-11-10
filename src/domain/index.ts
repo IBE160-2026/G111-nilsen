@@ -33,6 +33,8 @@ export { convertLine, hasConvertibleUnit, type UnitSystem } from "./convert-unit
 export { ingredientsForStep } from "./step-ingredients";
 export {
   buildShoppingList,
+  splitByPantry,
+  type PantryItem,
   type ShoppingItem,
   type ShoppingRecipe,
   type ShoppingSelection,

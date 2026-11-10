@@ -106,3 +106,91 @@
   color: var(--color-ink-secondary);
   font-size: var(--type-meta-size);
 }
+
+/* Raden med «Har hjemme»-knapp: boksen og teksten til venstre, knappen til høyre. */
+.items > li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.items > li > label {
+  flex: 1;
+  min-width: 0;
+}
+
+.home {
+  flex: none;
+  min-height: var(--tap-target-min);
+  padding: 0 var(--space-3);
+  border: none;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  font-size: var(--type-meta-size);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.home[aria-disabled="true"] {
+  color: var(--color-ink-secondary);
+  cursor: not-allowed;
+}
+
+.pantryForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pantryLabel {
+  font-weight: var(--type-label-weight);
+}
+
+.pantryRow {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.pantryInput {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tap-target-min);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-base);
+  color: var(--color-ink-primary);
+  font: inherit;
+}
+
+.pantryInput[aria-invalid="true"] {
+  border-color: var(--color-accent);
+  border-width: 2px;
+}
+
+.error {
+  margin: 0;
+  color: var(--color-accent);
+  font-size: var(--type-meta-size);
+  font-weight: var(--type-label-weight);
+}
+
+.pantryList {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pantryItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: var(--tap-target-min);
+  overflow-wrap: anywhere;
+}

@@ -13,6 +13,8 @@ type Props = {
    * er med på trykkflaten, og er skjult for skjermlesere (listen har allerede rekkefølgen).
    */
   marker?: ReactNode;
+  /** En knapp ved siden av raden (for eksempel «Har hjemme»); står utenfor labelen, så den ikke veksler boksen. */
+  action?: ReactNode;
 };
 
 /**
@@ -21,7 +23,14 @@ type Props = {
  * boksen har fokus. Avkrysset vises med fylt boks, hake og gjennomstreking, ikke med farge alene.
  * Komponenten har ingen egen tilstand; forelderen eier avkrysningen.
  */
-export default function CheckRow({ checked, onToggle, children, className, marker }: Props) {
+export default function CheckRow({
+  checked,
+  onToggle,
+  children,
+  className,
+  marker,
+  action,
+}: Props) {
   return (
     <li className={className ? `${styles.row} ${className}` : styles.row}>
       <label className={styles.label}>
@@ -33,6 +42,7 @@ export default function CheckRow({ checked, onToggle, children, className, marke
         <input type="checkbox" className={styles.input} checked={checked} onChange={onToggle} />
         <span className={styles.content}>{children}</span>
       </label>
+      {action}
     </li>
   );
 }

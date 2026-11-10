@@ -23,3 +23,10 @@ export type SuggestionsActionResult = ({ ok: true } & SuggestionSet) | { ok: fal
 /** Svaret fra «Ta i bruk» (Story 4.2): det lagrede forslaget, eller en norsk melding. */
 export type ApplySuggestionActionResult =
   { ok: true; suggestion: AppliedSuggestion } | { ok: false; message: string };
+
+/**
+ * Svaret fra «Har hjemme» (Story 5.8): det lagrede, eller en norsk melding. `field: "name"`
+ * betyr at meldingen hører under navnefeltet.
+ */
+export type PantryActionResult =
+  { ok: true; item: { id: number; name: string } } | { ok: false; field?: "name"; message: string };

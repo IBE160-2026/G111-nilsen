@@ -219,6 +219,27 @@ test("Versjon 2: handleliste fra lagret oppskrift", async ({ page }, testInfo) =
     .locator("xpath=ancestor::section");
   await expect(list.getByRole("listitem").first()).toBeVisible();
   await expect(list.getByText(`Til ${uj1.title}`).first()).toBeVisible();
+
+  // «Har hjemme»: varen forsvinner fra listen, og valget huskes etter at siden er lastet på nytt.
+  const before = await list.getByRole("listitem").count();
+  const homeButton = list.getByRole("button", { name: /^Har hjemme: / }).first();
+  const label = (await homeButton.getAttribute("aria-label")) ?? "";
+  const name = label.replace("Har hjemme: ", "");
+  await homeButton.click();
+  const pantry = page
+    .getByRole("heading", { level: 2, name: "Har hjemme" })
+    .locator("xpath=ancestor::section");
+  await expect(pantry.getByText(name, { exact: true })).toBeVisible();
+  await expect(list.getByRole("listitem")).toHaveCount(before - 1);
+  await page.reload();
+  await expect(pantry.getByText(name, { exact: true })).toBeVisible();
+  await page.getByRole("checkbox", { name: uj1.title }).check();
+  await expect(page.getByText(/skjult fordi du har/)).toBeVisible();
+
+  // Legger tilbake, så andre tester starter med en tom «Har hjemme».
+  await pantry.getByRole("button", { name: `Legg tilbake på listen: ${name}` }).click();
+  await expect(pantry.getByText("Ingenting ennå.")).toBeVisible();
+  await expect(list.getByRole("listitem")).toHaveCount(before);
 });
 
 for (const scheme of ["light", "dark"] as const) {

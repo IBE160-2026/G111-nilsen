@@ -75,3 +75,4 @@
 - [ ] 2026-11-10 [story 5.5](970-2026-11-10-15-30-00-story-5-5-metriske-mal.md) — Maja: npm test (2400), e2e, prøv engelsk oppskrift med cups og pund, push
 - [ ] 2026-11-10 [story 5.6](969-2026-11-10-16-00-00-story-5-6-ingredienser-per-steg.md) — Maja: npm test (2410), e2e, prøv kokemodus og send steg som bommer, push
 - [ ] 2026-11-10 [story 5.7](968-2026-11-10-17-00-00-story-5-7-handleliste.md) — Maja: npm test (2432), e2e (16), prøv handlelisten med to oppskrifter og kopier listen, push
+- [ ] 2026-11-10 [story 5.8](967-2026-11-10-17-45-00-story-5-8-har-hjemme.md) — Maja: npm test (2458), e2e (16), prøv «Har hjemme» og last siden på nytt, push
