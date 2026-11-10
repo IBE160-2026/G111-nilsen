@@ -218,6 +218,37 @@ export const unitMessages = {
   hint: "Kopper, unser og pund regnes om til norske mål. Mel, sukker, smør, melk og andre vanlige varer regnes mellom dl og gram (ca.).",
 } as const;
 
+/** Ukemeny (Story 6.4). */
+export const weekMessages = {
+  heading: "Ukemeny",
+  link: "Ukemeny",
+  loading: "Henter ukemenyen …",
+  loadFailed: "Kunne ikke hente ukemenyen",
+  previous: "Forrige uke",
+  next: "Neste uke",
+  thisWeek: "Denne uka",
+  today: "i dag",
+  emptyDay: "Ingenting planlagt.",
+  addLabel: (day: string) => `Legg til på ${day}`,
+  recipeLabel: "Oppskrift",
+  choose: "Velg oppskrift",
+  servingsLabel: "Personer",
+  add: "Legg til",
+  adding: "Legger til …",
+  remove: "Fjern",
+  removeFor: (title: string, day: string) => `Fjern ${title} fra ${day}`,
+  persons: (n: string) => `${n} pers.`,
+  added: (title: string, day: string) => `${title} er lagt på ${day}.`,
+  removed: (title: string, day: string) => `${title} er fjernet fra ${day}.`,
+  pickRecipe: "Velg en oppskrift først.",
+  invalidServings: "Velg mellom 0,5 og 50 personer.",
+  shopping: "Lag handleliste for uka",
+  noRecipesTitle: "Du har ingen lagrede oppskrifter ennå.",
+  noRecipesDescription: "Lagre oppskrifter først, så kan du legge dem på dagene i uka.",
+  noRecipesAction: "Se oppskrifter",
+  fromWeek: (week: string) => `Valgt fra ukemenyen: ${week}.`,
+} as const;
+
 /** Notater og «sist laget» (Story 6.3). */
 export const notesMessages = {
   heading: "Notater",

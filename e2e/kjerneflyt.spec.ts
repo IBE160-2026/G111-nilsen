@@ -139,6 +139,9 @@ test("Versjon 2: innlogging – hent uten konto, logg inn for å lagre, andre se
   // Ny konto for testen; etterpå tilbake til oppskriften, og nå kan den lagres.
   const email = `innlogging-${testInfo.project.name}@e2e.recipemate.no`;
   await page.getByRole("link", { name: "Lag konto" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Lag en konto" })).toBeVisible();
+  // Vent til skjemaet er klart, ellers kan det som fylles ut før hydrering bli nullstilt.
+  await page.waitForLoadState("networkidle");
   await field(page, "E-post").fill(email);
   await field(page, "Passord").fill("kort");
   await page.getByRole("button", { name: "Lag konto" }).click();
@@ -359,6 +362,43 @@ test("Versjon 2: handleliste fra lagret oppskrift", async ({ page }, testInfo) =
   await pantry.getByRole("button", { name: `Legg tilbake på listen: ${name}` }).click();
   await expect(pantry.getByText("Ingenting ennå.")).toBeVisible();
   await expect(list.getByRole("listitem")).toHaveCount(before);
+});
+
+test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
+  await page.goto("/oppskrifter");
+  await page.getByRole("link", { name: "Ukemeny", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Ukemeny" })).toBeVisible();
+  await expect(page.getByText(/^Uke \d+ · /)).toBeVisible();
+
+  // Første dag i uka: velg oppskriften med 3 personer.
+  const form = page.getByRole("form", { name: /^Legg til på mandag/ });
+  // Den første lagrede oppskriften i valget (hvilke som er lagret avhenger av tidligere tester).
+  const select = form.getByLabel("Oppskrift");
+  const title = ((await select.locator("option").nth(1).textContent()) ?? "").trim();
+  expect(title).not.toBe("");
+  await select.selectOption({ label: title });
+  await form.getByLabel("Personer").fill("3");
+  await form.getByRole("button", { name: "Legg til" }).click();
+  const monday = page.locator("li", {
+    has: page.getByRole("heading", { level: 2, name: /^mandag/i }),
+  });
+  await expect(monday.getByRole("link", { name: title })).toBeVisible();
+  await expect(monday.getByText("3 pers.")).toBeVisible();
+
+  // Lagret: står der etter ny innlasting.
+  await page.reload();
+  await expect(monday.getByRole("link", { name: title })).toBeVisible();
+
+  await page.getByRole("link", { name: "Lag handleliste for uka" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Handleliste" })).toBeVisible();
+  await expect(page.getByText(/^Valgt fra ukemenyen: Uke \d+/)).toBeVisible();
+  await expect(page.getByRole("checkbox", { name: title, exact: true })).toBeChecked();
+  await expect(page.getByLabel(`Antall personer for ${title}`)).toHaveValue("3");
+
+  // Rydder, så andre kjøringer starter med en tom uke.
+  await page.getByRole("link", { name: "Ukemeny", exact: true }).click();
+  await monday.getByRole("button", { name: new RegExp(`^Fjern ${title}`) }).click();
+  await expect(monday.getByText("Ingenting planlagt.")).toBeVisible();
 });
 
 for (const scheme of ["light", "dark"] as const) {

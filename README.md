@@ -75,6 +75,15 @@ Versjon 2 (Epic 5) kom etter at v1 var levert. Endringene i planen står i [`spr
 - **Forslag i oppskriften (5.11, 5.12):** et forslag du tar i bruk, står i ingredienslisten og inne i riktig steg, merket og uthevet. Originalen endres ikke.
 - **Kontoer (5.13):** e-post og passord, egne oppskrifter per konto (se «Kontoer»).
 
+### Epic 6: Videre utvikling
+
+Kravene står i PRD §4.7 (FR-28–FR-39), og hver story har en spec i `_bmad-output/implementation-artifacts/spec-6-N-*.md`. Epic 6 bygges videre; listen under viser det som er ferdig.
+
+- **Ingrediensforslag i listen (6.1):** et forslag som innfører en ingrediens, gir også en linje i ingredienslisten.
+- **Tid (6.2):** total tid hentes fra kilden eller skrives inn selv, og vises ved hjertet og på kortene. «Hent tid fra kilden» for eldre importer.
+- **Notater og sist laget (6.3):** egne notater på oppskriften, «Laget i dag» og «Sist laget … · laget N ganger».
+- **Ukemeny (6.4):** legg lagrede oppskrifter på dagene i uka med antall personer, bla mellom uker og lag én handleliste for hele uka (lenke fra Oppskrifter).
+
 ## Kryss av under matlaging
 
 På oppskriftssiden er hver ingredienslinje og hvert steg en avkrysningsboks. Trykk hvor som helst på raden, eller sett fokus på boksen med Tab og trykk mellomrom. Avkrysset rad har fylt boks med hake, gjennomstreket og dempet tekst, og nummeret på steget står igjen. Det gjelder også linjer som appen ikke kan tolke, som «salt og pepper».
@@ -114,7 +123,7 @@ npm start        # kjør produksjonsbygget
 
 Man lager en konto med e-post og passord (`/ny-konto`) og logger inn på `/logg-inn`; «Logg inn» og «Logg ut» står øverst til høyre. Hver konto har sine egne oppskrifter, mapper, favoritter og «Har hjemme».
 
-- **Uten konto** kan man hente en oppskrift fra en lenke, skalere den, bruke kokemodus og få forslag. «Lagre» blir «Logg inn for å lagre», og etter innlogging kommer man tilbake til oppskriften. Oppskrifter, Mapper, Favoritter, Handleliste og «Legg inn selv» viser «Logg inn for å se dette».
+- **Uten konto** kan man hente en oppskrift fra en lenke, skalere den, bruke kokemodus og få forslag. «Lagre» blir «Logg inn for å lagre», og etter innlogging kommer man tilbake til oppskriften. Oppskrifter, Mapper, Favoritter, Handleliste, Ukemeny og «Legg inn selv» viser «Logg inn for å se dette».
 - **Eierskap:** en lagret oppskrift har alltid en eier, og bare eieren ser og endrer den (andre får «Fant ikke oppskriften»). En import uten innlogging har ingen eier og kan åpnes av alle med lenken til den blir lagret; slike ryddes bort etter et døgn som før.
 - **Første konto:** den første kontoen som lages overtar alt som allerede lå i databasen (lagrede oppskrifter, mapper og «Har hjemme»), så ingenting forsvinner når innlogging tas i bruk.
 - **Sikkerhet:** passord lagres som scrypt-hash med eget salt, aldri i klartekst. Innloggingen er en tilfeldig nøkkel i en `httpOnly`-cookie (SameSite=Lax, Secure over https) som varer i 30 dager; databasen har bare en hash av nøkkelen. Feil e-post og feil passord gir samme melding. Det finnes ikke «glemt passord» (det krever e-postutsending).
@@ -265,12 +274,13 @@ npm run test:e2e
 
 `npm run test:e2e` bygger appen og starter den på port 3100 med en midlertidig database (`.e2e/`, slettes ved hver kjøring), lagrede oppskriftssider i stedet for nettet (`IMPORT_SOURCE=fixtures`) og uten språkmodellnøkkel (eksempelforslag). Ingen test bruker nettverket. Stopp `npm run dev` først, siden bygget bruker samme `.next`-mappe.
 
-`e2e/kjerneflyt.spec.ts` kjører hver gang ved 360 px og 1280 px (18 tester). Hver test logger inn med en egen testkonto per skjermbredde (kontoen lages første gang):
+`e2e/kjerneflyt.spec.ts` kjører hver gang ved 360 px og 1280 px (20 tester). Hver test logger inn med en egen testkonto per skjermbredde (kontoen lages første gang):
 
 - **Innlogging:** hent en oppskrift uten konto, «Logg inn for å lagre», lag konto (med feil passord først), lagre, se at en annen nettleser ikke finner oppskriften, og logg ut.
 - **UJ-1:** importer en oppskrift, velg ett flere personer, lagre i en ny mappe og gjør den til favoritt.
 - **UJ-2:** velg 5 personer, få forslag, ta i bruk ett og hopp over resten, lagre i mappe og se at forslaget huskes etter at siden lastes på nytt. Kanttilfelle: en oversiktsside gir «Fant ingen oppskrift på siden».
 - **UJ-3:** finn oppskriften igjen under Favoritter, se at antallet huskes, og endre det.
+- **Ukemeny:** legg en oppskrift på mandag med 3 personer, se at den står der etter ny innlasting, lag handleliste for uka (oppskriften er valgt med 3 personer) og fjern den igjen.
 - **Gammel adresse:** `/samlingen` sendes videre til `/oppskrifter`.
 - **Tastatur:** Tab når «Færre personer», «Flere personer» og «Få forslag», og fokus er synlig overalt, i lys og mørk modus.
 
@@ -278,7 +288,7 @@ Playwright-versjonen er låst i `package-lock.json`. Ligger nettleseren et annet
 
 ### Hva testene dekker
 
-`npm test` kjører Vitest én gang og gir i dag 100 testfiler og 2626 tester (ende-til-ende-testene kommer i tillegg, se over). Ingen test bruker nettverket (bare lokale 127.0.0.1-tjenere) eller en ekte API-nøkkel.
+`npm test` kjører Vitest én gang og gir i dag 107 testfiler og 2751 tester (ende-til-ende-testene kommer i tillegg, se over). Ingen test bruker nettverket (bare lokale 127.0.0.1-tjenere) eller en ekte API-nøkkel.
 
 - **Domenet** (`src/domain/`): tolking av mengder og ingredienslinjer og skalering og formatering, med fasittabellen fra Epic 1 (400 g mel for 6 gir 600 g, «1 egg (ca.)», og så videre) som egne tester, og lesing av oppskriftsdata fra lagrede HTML-sider (JSON-LD, normalisering, tekstrensing, ytelse for 2 MB og aldri-kaster-egenskap).
 - **Server** (`src/server/`): repositorier og tjenester mot en ekte SQLite-database i minnet, blant annet tilbakerulling ved feil, redigering, samlingen, lagring, sletting og opprydding, og datamigrasjonen (en database med bare den første migrasjonen oppgraderes).

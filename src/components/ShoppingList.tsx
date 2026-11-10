@@ -36,6 +36,8 @@ type Props = {
   onAddPantry?: (name: string) => Promise<PantryActionResult>;
   /** Tar noe ut av «Har hjemme» (Server Action). */
   onRemovePantry?: (id: number) => Promise<ActionResult>;
+  /** Oppskrifter som er valgt fra start, med antall personer (fra ukemenyen, Story 6.4). */
+  initialSelection?: Readonly<Record<number, number>>;
 };
 
 export default function ShoppingList({
@@ -43,11 +45,19 @@ export default function ShoppingList({
   pantry: initialPantry = [],
   onAddPantry,
   onRemovePantry,
+  initialSelection = {},
 }: Props) {
   const id = useId();
-  const [picked, setPicked] = useState<ReadonlySet<number>>(() => new Set());
+  const [picked, setPicked] = useState<ReadonlySet<number>>(
+    () => new Set(recipes.filter((recipe) => recipe.id in initialSelection).map((r) => r.id)),
+  );
   const [servings, setServings] = useState<Record<number, number | null>>(() =>
-    Object.fromEntries(recipes.map((recipe) => [recipe.id, startServings(recipe)])),
+    Object.fromEntries(
+      recipes.map((recipe) => {
+        const chosen = initialSelection[recipe.id];
+        return [recipe.id, isSelectedServings(chosen) ? chosen : startServings(recipe)];
+      }),
+    ),
   );
   const [system, setSystem] = useState<UnitSystem>("original");
   const [checked, setChecked] = useState<ReadonlySet<string>>(() => new Set());

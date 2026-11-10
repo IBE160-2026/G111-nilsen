@@ -99,6 +99,11 @@ async function show() {
 }
 
 describe("/oppskrifter", () => {
+  it("har en lenke til ukemenyen ved overskriften (Story 6.4)", async () => {
+    render((await renderPage()).heading);
+    expect(screen.getByRole("link", { name: "Ukemeny" })).toHaveAttribute("href", "/ukemeny");
+  });
+
   it("har en lenke til handlelisten ved overskriften", async () => {
     render((await renderPage()).heading);
     expect(screen.getByRole("link", { name: "Lag handleliste" })).toHaveAttribute(
@@ -127,7 +132,7 @@ describe("/oppskrifter", () => {
     ).toBeInTheDocument();
     const links = screen
       .getAllByRole("link")
-      .filter((a) => a.getAttribute("href") !== "/handleliste");
+      .filter((a) => !["/handleliste", "/ukemeny"].includes(a.getAttribute("href") ?? ""));
     expect(links.map((a) => [a.textContent, a.getAttribute("href")])).toEqual([
       ["Legg inn selv", "/ny"],
       ["Importer din første oppskrift", "/"],
@@ -175,7 +180,7 @@ describe("/oppskrifter", () => {
     await show();
     const links = screen
       .getAllByRole("link")
-      .filter((a) => a.getAttribute("href") !== "/handleliste");
+      .filter((a) => !["/handleliste", "/ukemeny"].includes(a.getAttribute("href") ?? ""));
     expect(links.map((a) => a.textContent)).toEqual([
       "I mappeMatprat · Hverdag",
       "Uten mappeMatprat",

@@ -64,6 +64,13 @@
       "when": 1794346109320,
       "tag": "0008_notes_and_cooked",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1794346896727,
+      "tag": "0009_meal_plan",
+      "breakpoints": true
     }
   ]
 }

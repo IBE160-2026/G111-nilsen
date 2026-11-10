@@ -1,0 +1,33 @@
+.weekNav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  max-width: var(--content-max-width);
+}
+
+/* Smal skjerm: uka øverst, forrige/neste på én rad under. */
+.week {
+  order: -1;
+  flex-basis: 100%;
+  margin: 0;
+  font-weight: 600;
+}
+
+@media (min-width: 600px) {
+  .week {
+    order: 0;
+    flex-basis: auto;
+  }
+}
+
+/* Tekstlenker, ikke primærhandling; minst 44 px høye. */
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: var(--tap-target-min);
+  color: var(--color-accent);
+  font-weight: 600;
+}

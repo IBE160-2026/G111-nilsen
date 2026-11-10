@@ -4,7 +4,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import EmptyState from "@/components/EmptyState";
 import CollectionBrowser from "@/components/CollectionBrowser";
-import { collectionMessages, shoppingMessages } from "@/lib/messages";
+import { collectionMessages, shoppingMessages, weekMessages } from "@/lib/messages";
 import LoginRequired from "@/components/LoginRequired";
 import { listCollection } from "@/server/services/recipe-service";
 import { currentUserId } from "@/server/session";
@@ -22,9 +22,14 @@ export default function SamlingenPage() {
     <div className={listStyles.root}>
       <div className={styles.titleRow}>
         <h1>{collectionMessages.heading}</h1>
-        <Link href="/handleliste" className={styles.titleLink}>
-          {shoppingMessages.link}
-        </Link>
+        <div className={styles.titleLinks}>
+          <Link href="/ukemeny" className={styles.titleLink}>
+            {weekMessages.link}
+          </Link>
+          <Link href="/handleliste" className={styles.titleLink}>
+            {shoppingMessages.link}
+          </Link>
+        </div>
       </div>
       <Suspense fallback={<p className={listStyles.loading}>{collectionMessages.loading}</p>}>
         <CollectionLoader />

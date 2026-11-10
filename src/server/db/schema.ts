@@ -153,3 +153,26 @@ export const pantryItems = sqliteTable(
   },
   (table) => [uniqueIndex("pantry_items_user_name_key_unique").on(table.userId, table.nameKey)],
 );
+
+/**
+ * Ukemenyen (Story 6.4): en oppskrift på en dag, for et antall personer. Slettes med brukeren og
+ * med oppskriften.
+ */
+export const mealPlanEntries = sqliteTable(
+  "meal_plan_entries",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    recipeId: integer("recipe_id")
+      .notNull()
+      .references(() => recipes.id, { onDelete: "cascade" }),
+    /** Dato «YYYY-MM-DD». */
+    day: text("day").notNull(),
+    /** Antall personer, hele og halve (som valgt antall). Lagres som tall i SQLite. */
+    servings: real("servings").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [index("meal_plan_user_day_idx").on(table.userId, table.day)],
+);

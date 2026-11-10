@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import { insertRecipe, type NewRecipe } from "@/server/db/repositories/recipe-repository";
+import { addToWeek } from "@/server/services/meal-plan-service";
 import { addPantryItem } from "@/server/services/pantry-service";
 
 const session = vi.hoisted(() => ({ userId: 1 as number | null }));
@@ -36,8 +37,10 @@ beforeEach(() => {
 
 type AsyncComponent = (props: unknown) => Promise<ReactElement>;
 
-async function renderPage() {
-  const page = HandlelistePage() as ReactElement<{ children: ReactElement[] }>;
+async function renderPage(uke?: string) {
+  const page = HandlelistePage({ searchParams: Promise.resolve({ uke }) }) as ReactElement<{
+    children: ReactElement[];
+  }>;
   const [heading, suspense] = page.props.children as [
     ReactElement,
     ReactElement<{ children: ReactElement; fallback: ReactElement }>,
@@ -119,6 +122,51 @@ describe("/handleliste", () => {
       .closest("section")!;
     expect(section).toHaveTextContent("Melk");
     expect(section).toHaveTextContent("Salt");
+  });
+});
+
+describe("fra ukemenyen, ?uke= (Story 6.4)", () => {
+  it("velger ukas oppskrifter med antall personer lagt sammen, og ikke de andre", async () => {
+    const pancakes = insertRecipe(state.db!, recipe("Pannekaker", "2026-11-09T10:00:00.000Z"));
+    insertRecipe(state.db!, recipe("Vafler", "2026-11-09T10:00:00.000Z"));
+    const outside = insertRecipe(state.db!, recipe("Taco", "2026-11-09T10:00:00.000Z"));
+    addToWeek(TEST_USER_ID, pancakes, "2026-11-09", 2, state.db!);
+    addToWeek(TEST_USER_ID, pancakes, "2026-11-12", 3, state.db!);
+    addToWeek(TEST_USER_ID, outside, "2026-11-16", 4, state.db!);
+    render((await renderPage("2026-11-11")).content);
+    expect(screen.getByText(/Valgt fra ukemenyen: Uke 46/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ukemeny" })).toHaveAttribute(
+      "href",
+      "/ukemeny?uke=2026-11-09",
+    );
+    expect(screen.getByRole("checkbox", { name: "Pannekaker" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Vafler" })).not.toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Taco" })).not.toBeChecked();
+    expect(screen.getByRole("spinbutton", { name: "Antall personer for Pannekaker" })).toHaveValue(
+      5,
+    );
+    // 4 dl melk for 4 personer → 5 dl for 5.
+    expect(screen.getByText("5 dl melk")).toBeInTheDocument();
+  });
+
+  it("ignorerer en ugyldig uke og velger ingenting", async () => {
+    insertRecipe(state.db!, recipe("Pannekaker", "2026-11-09T10:00:00.000Z"));
+    render((await renderPage("i-morgen")).content);
+    expect(screen.queryByText(/Valgt fra ukemenyen/)).not.toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Pannekaker" })).not.toBeChecked();
+  });
+
+  it("sender tilbake til samme uke etter innlogging", async () => {
+    session.userId = null;
+    try {
+      render((await renderPage("2026-11-09")).content);
+      expect(screen.getByRole("link", { name: "Logg inn" })).toHaveAttribute(
+        "href",
+        "/logg-inn?neste=%2Fhandleliste%3Fuke%3D2026-11-09",
+      );
+    } finally {
+      session.userId = 1;
+    }
   });
 });
 

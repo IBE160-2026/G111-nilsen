@@ -88,3 +88,4 @@
 - [ ] 2026-11-10 [story 6.2](957-2026-11-10-23-55-00-story-6-2-tid.md) — Maja: npm test (2679), prøv tid på importert og egen oppskrift, push
 - [ ] 2026-11-10 [story 6.2 oppfølging](956-2026-11-11-00-20-00-story-6-2-tid-fra-kilden.md) — Maja: push, trykk «Hent tid fra kilden» på gamle importer
 - [ ] 2026-11-10 [story 6.3](955-2026-11-11-01-00-00-story-6-3-notater.md) — Maja: push, start appen på nytt (migrasjon 0008), prøv notater og «Laget i dag»
+- [ ] 2026-11-10 [story 6.4](954-2026-11-11-02-30-00-story-6-4-ukemeny.md) — Maja: push, start appen på nytt (migrasjon 0009), prøv ukemenyen og handleliste for uka

@@ -1,0 +1,193 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: var(--content-max-width);
+}
+
+/* role="list" i markupen: list-style: none fjerner ellers listesemantikken i Safari. */
+.days,
+.entries {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.days {
+  gap: var(--space-3);
+}
+
+.day {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-md);
+}
+
+.dayHeading {
+  margin: 0;
+  font-size: var(--type-body-size);
+  font-weight: 700;
+}
+
+.dayHeading::first-letter {
+  text-transform: uppercase;
+}
+
+.today {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.empty,
+.status {
+  margin: 0;
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}
+
+.status {
+  min-height: 1.25rem;
+}
+
+.entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-3);
+  min-height: var(--tap-target-min);
+  overflow-wrap: anywhere;
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  color: var(--color-ink-primary);
+  font-weight: 600;
+}
+
+.servings {
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}
+
+.remove {
+  min-height: var(--tap-target-min);
+  padding: 0 var(--space-2);
+  border: none;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  font-size: var(--type-meta-size);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5rem;
+  grid-template-areas:
+    "recipeLabel servingsLabel"
+    "recipe servings"
+    "add add"
+    "error error";
+  gap: var(--space-1) var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border-hairline);
+}
+
+.label {
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}
+
+.label:first-of-type {
+  grid-area: recipeLabel;
+}
+
+.label:last-of-type {
+  grid-area: servingsLabel;
+}
+
+.select,
+.number {
+  min-width: 0;
+  min-height: var(--tap-target-min);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-base);
+  color: var(--color-ink-primary);
+  font: inherit;
+}
+
+.select {
+  grid-area: recipe;
+}
+
+.select[aria-invalid="true"] {
+  border-color: var(--color-accent);
+  border-width: 2px;
+}
+
+.number {
+  grid-area: servings;
+  text-align: center;
+}
+
+.add,
+.shopping {
+  justify-self: start;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-target-min);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-raised);
+  color: var(--color-accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.add {
+  grid-area: add;
+}
+
+.add[aria-disabled="true"] {
+  color: var(--color-ink-secondary);
+  border-color: var(--color-control-border);
+  cursor: not-allowed;
+}
+
+.shopping {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  text-decoration: none;
+}
+
+.error {
+  grid-area: error;
+  margin: 0;
+  color: var(--color-accent);
+  font-size: var(--type-meta-size);
+  font-weight: var(--type-label-weight);
+}
+
+@media (min-width: 768px) {
+  .form {
+    grid-template-columns: minmax(0, 1fr) 5rem auto;
+    grid-template-areas:
+      "recipeLabel servingsLabel ."
+      "recipe servings add"
+      "error error error";
+  }
+}

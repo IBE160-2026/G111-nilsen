@@ -866,3 +866,22 @@ slik at jeg husker justeringene mine og hva vi har spist nylig.
 **Når** jeg trykker «Laget i dag»
 **Så** står «Sist laget <dato> · laget N ganger», og antallet kan brukes til sortering senere (6.9)
 
+### Story 6.4: Ukemeny
+
+Som Ida,
+vil jeg legge lagrede oppskrifter på dagene i uka og lage én handleliste for hele uka,
+slik at jeg planlegger middagene og handler alt på én gang.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg er logget inn og har lagrede oppskrifter
+**Når** jeg åpner «Ukemeny» og velger oppskrift og antall personer på en dag
+**Så** står oppskriften på dagen, også etter ny innlasting, og kan fjernes igjen
+
+**Gitt** en uke med oppskrifter
+**Når** jeg trykker «Lag handleliste for uka»
+**Så** åpnes handlelisten med ukas oppskrifter valgt, og antall personer for samme oppskrift flere dager er lagt sammen
+
+**Gitt** ukemenyen
+**Når** jeg trykker «Forrige uke» eller «Neste uke»
+**Så** vises den uka (mandag–søndag, norsk tid), og uten innlogging bes jeg logge inn og kommer tilbake til samme uke
