@@ -52,6 +52,18 @@
   border-bottom-color: var(--color-accent);
 }
 
+/* Fem menypunkter skal få plass på én linje fra 360 px. På smalere skjermer eller ved stor tekst brytes de til neste linje (flex-wrap). */
+@media (max-width: 479px) {
+  .list {
+    column-gap: 4px;
+  }
+
+  .link {
+    padding-inline: 2px;
+    font-size: 0.78rem;
+  }
+}
+
 @media (min-width: 768px) {
   .inner {
     flex-direction: row;
