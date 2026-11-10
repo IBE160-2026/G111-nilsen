@@ -62,3 +62,6 @@
 - [ ] 2026-11-10 [story-4-3](977-2026-11-10-10-45-00-story-4-3-forslag-fra-sprakmodell.md) — Maja: lag Anthropic-nøkkel, sett LLM_API_KEY i .env.local og prøv 3–5 oppskrifter (konkrete og trygge forslag?); si fra om du vil ha annen leverandør/modell
 - [ ] 2026-11-10 [story-4-3](977-2026-11-10-10-45-00-story-4-3-forslag-fra-sprakmodell.md) — test «Få forslag» i nettleseren uten og med nøkkel; kjør npm test (2303 grønne)
 - [ ] 2026-11-10 [story-4-3](977-2026-11-10-10-45-00-story-4-3-forslag-fra-sprakmodell.md) — utsatt: ikke prøvd mot ekte API, kallgrensen er i minnet, ingen uavhengige reviews (deferred-work.md, spec-4-3)
+- [ ] 2026-11-10 [story-4-4](976-2026-11-10-11-00-00-story-4-4-test-kjerneflyt-og-readme.md) — Maja: npm install, npx playwright install chromium, stopp npm run dev, kjør npm run test:e2e (10 grønne) og npm test (2303)
+- [ ] 2026-11-10 [story-4-4](976-2026-11-10-11-00-00-story-4-4-test-kjerneflyt-og-readme.md) — beslutning: rette issue 009 (valgt antall før Lagre huskes ikke) eller justere PRD UJ-1/UJ-3
+- [ ] 2026-11-10 [story-4-4](976-2026-11-10-11-00-00-story-4-4-test-kjerneflyt-og-readme.md) — manuell kontroll av kontrast og 200 % zoom (NFR-5, UX-DR16); ikke automatisert, bare Chromium testet
