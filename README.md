@@ -21,7 +21,7 @@ Repoet inneholder applikasjonen og dokumentasjon av utvikling, testing og kvalit
 - Importerer en oppskrift fra en lenke (JSON-LD på siden), eller du skriver den inn selv.
 - Viser den i fast format og regner om alle mengder når du velger antall personer.
 - Lagrer oppskriftene lokalt, i mapper og som favoritter, og du kan krysse av under matlaging.
-- Gir 1–3 forslag til hvordan retten kan bli bedre. Uten nøkkel er det eksempelforslag; med nøkkel lager en språkmodell forslag til akkurat denne oppskriften. Forslag du tar i bruk lagres med oppskriften og endrer aldri ingredienser eller steg.
+- Gir 1–3 forslag til hvordan retten kan bli bedre. Uten nøkkel er det enkle forslag laget av regler ut fra ingrediensene og stegene (merket «Enkle forslag»); med nøkkel lager en språkmodell forslag til akkurat denne oppskriften. Forslag du tar i bruk lagres med oppskriften og endrer aldri ingredienser eller steg.
 
 Alt unntatt språkmodellen virker uten konto, nøkkel eller nett (importen kan kjøres mot lagrede sider, se «Importere fra lenke»). Status: Epic 1–4 er bygget (Story 1.1–4.4). Åpne saker står i [`issues/`](issues/README.md) og i `_bmad-output/implementation-artifacts/deferred-work.md`.
 
@@ -72,8 +72,6 @@ npm run dev      # utviklingsserver på http://localhost:3000
 npm run build    # produksjonsbygg
 npm start        # kjør produksjonsbygget
 ```
-
-Feiler `npm run build` med «Failed to type check» etter at en rute er omdøpt eller fjernet, ligger det gamle typer i `.next/`. Slett mappen (`rm -rf .next`) og bygg på nytt.
 
 ## Oppskrifter (samlingen)
 
@@ -160,7 +158,7 @@ Story 2.2 binder import sammen. På Importer-siden (`/`) limer du inn en lenke o
 
 «Få forslag» på en oppskrift gir 1–3 forslag med begrunnelse. Forslag du tar i bruk lagres med oppskriften; resten forsvinner.
 
-- **Uten nøkkel (standard):** appen viser lagrede eksempelforslag fra `test/fixtures/suggestions/`, merket «Eksempelforslag». Ingen konto og ingen nettverk trengs.
+- **Uten nøkkel (standard):** appen lager enkle forslag med faste regler (`src/domain/suggest-for-recipe.ts`) ut fra hva oppskriften inneholder, for eksempel hvile røren for pannekaker, grovt mel i gjærbakst eller sitron til fisk, merket «Enkle forslag». Passer ingen regel, vises et generelt eksempelsett fra `test/fixtures/suggestions/`. Ingen konto og ingen nettverk trengs.
 - **Med nøkkel:** lag en API-nøkkel hos [Anthropic](https://console.anthropic.com/), kopier `.env.example` til `.env.local` og sett `LLM_API_KEY=<nøkkelen din>`. Start `npm run dev` på nytt. Forslagene lages da for akkurat den oppskriften (tittel, ingredienslinjer og steg sendes til API-et) og har ikke eksempelmerket. `LLM_MODEL` kan settes for å bruke en annen modell; standard er `claude-haiku-5-5`.
 - Skriv aldri nøkkelen i koden eller i `.env.example`. `.env.local` ligger utenfor git.
 - Svaret kontrolleres mot samme skjema som eksempelforslagene. Feil, tidsavbrudd (20 s) eller ugyldig svar gir «Fikk ikke laget forslag akkurat nå. Prøv igjen senere.», og resten av siden virker. Appen stopper etter 10 kall i minuttet for å holde kostnaden nede.

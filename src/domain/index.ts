@@ -39,3 +39,4 @@ export {
   type ShoppingRecipe,
   type ShoppingSelection,
 } from "./shopping-list";
+export { suggestForRecipe, type SuggestInput } from "./suggest-for-recipe";

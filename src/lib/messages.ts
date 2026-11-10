@@ -350,8 +350,9 @@ export const suggestionMessages = {
   pending: "Lager forslag …",
   /** Overskrift over forslagene når de er hentet. */
   resultsHeading: "Forslag til retten",
-  exampleLabel: "Eksempelforslag",
-  exampleNote: "Koble til en språkmodell for forslag til akkurat denne oppskriften.",
+  exampleLabel: "Enkle forslag",
+  exampleNote:
+    "Laget ut fra ingrediensene og stegene i oppskriften. Koble til en språkmodell for forslag som er skrevet spesielt for oppskriften.",
   /** Overskrift over forslagene brukeren har tatt i bruk (Story 4.2). */
   chosenHeading: "Dine valgte forslag",
   /** Merket på et valgt forslag. */

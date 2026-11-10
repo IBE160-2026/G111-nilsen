@@ -29,7 +29,7 @@ type Props = {
 
 /**
  * Forslagsdelen på oppskriftssiden (FR-10, FR-11, FR-12, UX-DR7). «Få forslag» henter 1–3
- * forslag med begrunnelse; eksempelforslag merkes «Eksempelforslag». «Ta i bruk» flytter et
+ * forslag med begrunnelse; enkle forslag uten språkmodell merkes «Enkle forslag». «Ta i bruk» flytter et
  * forslag til «Dine valgte forslag» (lagres med oppskriften), «Hopp over» skjuler det (lagres
  * ikke), «Fjern» sletter et valgt forslag. Ingredienser og steg endres aldri. Delen eier listen
  * over valgte forslag (startverdi fra siden) og oppdaterer den fra svarene, så den ikke hopper

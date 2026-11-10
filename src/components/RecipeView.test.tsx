@@ -153,7 +153,7 @@ describe("RecipeView", () => {
     await user.click(within(suggestions).getByRole("button", { name: "Få forslag" }));
 
     expect(actions.requestSuggestions).toHaveBeenCalledExactlyOnceWith(7);
-    expect(await screen.findByText("Eksempelforslag")).toBeInTheDocument();
+    expect(await screen.findByText("Enkle forslag")).toBeInTheDocument();
     expect(screen.getByText("Tilsett sitron.")).toBeInTheDocument();
   });
 

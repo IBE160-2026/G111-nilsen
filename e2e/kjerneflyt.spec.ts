@@ -112,7 +112,7 @@ test("UJ-2: forslag tas i bruk og huskes; oversiktsside gir melding", async ({
   await setServings(page, 5);
 
   await page.getByRole("button", { name: "Få forslag" }).click();
-  await expect(page.getByText("Eksempelforslag", { exact: true })).toBeVisible();
+  await expect(page.getByText("Enkle forslag", { exact: true })).toBeVisible();
   const group = page.getByRole("group");
   await expect(group.first()).toBeVisible();
   const count = await group.count();

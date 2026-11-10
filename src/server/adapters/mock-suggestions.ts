@@ -1,6 +1,7 @@
 import "server-only";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { suggestForRecipe } from "@/domain";
 import { appError, err, ok } from "@/lib/result";
 import type { SuggestionProvider } from "../ports/suggestion-provider";
 
@@ -8,16 +9,20 @@ import type { SuggestionProvider } from "../ports/suggestion-provider";
 export const DEFAULT_SUGGESTION_FIXTURE_DIR = join("test", "fixtures", "suggestions");
 
 /**
- * Mock-leverandøren (AD-5, AD-11): leser eksempelsvar fra `test/fixtures/suggestions/*.json`
- * og velger ett sett ut fra oppskriftens id (sortert filnavn, id modulo antall filer), så samme
- * oppskrift gir samme forslag. Svaret er alltid merket som eksempel. Ingen nettverk.
- * Manglende mappe, tom mappe eller uleselig fil gir `suggestion_failed`.
+ * Leverandøren uten nøkkel (AD-5, AD-11): enkle regler ut fra ingrediensene og stegene
+ * (`suggestForRecipe`, Story 5.10), så forslagene passer retten. Passer ingen regel, velges et
+ * generelt eksempelsett fra `test/fixtures/suggestions/*.json` ut fra oppskriftens id (sortert
+ * filnavn, id modulo antall filer). Svaret er alltid merket som eksempel. Ingen nettverk.
+ * Manglende mappe, tom mappe eller uleselig fil gir `suggestion_failed` (bare når reglene
+ * ikke ga noe).
  */
 export function createMockSuggestionProvider(
   fixtureDir: string = join(process.cwd(), DEFAULT_SUGGESTION_FIXTURE_DIR),
 ): SuggestionProvider {
   return {
     async suggest(recipe) {
+      const tailored = suggestForRecipe(recipe);
+      if (tailored.length > 0) return ok({ suggestions: tailored, isExample: true });
       try {
         const files = (await readdir(/* turbopackIgnore: true */ fixtureDir))
           .filter((name) => name.endsWith(".json"))

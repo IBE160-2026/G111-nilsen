@@ -2,14 +2,14 @@ import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSyn
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { Recipe } from "@/domain";
+import { parseLine, type Recipe } from "@/domain";
 import { suggestionsSchema } from "../ports/suggestion-provider";
 import { createMockSuggestionProvider, DEFAULT_SUGGESTION_FIXTURE_DIR } from "./mock-suggestions";
 
 function recipe(id: number): Recipe {
   return {
     id,
-    title: "Pannekaker",
+    title: "Testrett",
     sourceUrl: null,
     sourceName: null,
     originalServings: 4,
@@ -37,6 +37,35 @@ describe("fixture-filene (prosjektets egne eksempelsvar)", () => {
       readFileSync(join(DEFAULT_SUGGESTION_FIXTURE_DIR, file), "utf8"),
     );
     expect(suggestionsSchema.safeParse(parsed).success).toBe(true);
+  });
+});
+
+describe("createMockSuggestionProvider (regler ut fra oppskriften)", () => {
+  const provider = createMockSuggestionProvider();
+
+  it("gir forslag som passer oppskriften, merket som eksempel, og ikke de generelle", async () => {
+    const pancakes: Recipe = {
+      ...recipe(1),
+      title: "Grove pannekaker",
+      ingredients: [
+        { id: 1, position: 1, section: null, ...parseLine("3 dl melk") },
+        { id: 2, position: 2, section: null, ...parseLine("2 dl hvetemel") },
+        { id: 3, position: 3, section: null, ...parseLine("3 egg") },
+      ],
+    };
+    const result = await provider.suggest(pancakes);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.isExample).toBe(true);
+    expect(suggestionsSchema.safeParse(result.value.suggestions).success).toBe(true);
+    expect(JSON.stringify(result.value.suggestions)).toContain("røren hvile");
+    expect(JSON.stringify(result.value.suggestions)).not.toContain("La retten hvile");
+  });
+
+  it("virker også når mappen med eksempelsvar mangler", async () => {
+    const tailored = createMockSuggestionProvider(join(tmpdir(), "finnes-ikke-forslag"));
+    const result = await tailored.suggest({ ...recipe(1), title: "Kyllingsuppe" });
+    expect(result.ok).toBe(true);
   });
 });
 

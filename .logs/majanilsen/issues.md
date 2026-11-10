@@ -77,3 +77,4 @@
 - [ ] 2026-11-10 [story 5.7](968-2026-11-10-17-00-00-story-5-7-handleliste.md) — Maja: npm test (2432), e2e (16), prøv handlelisten med to oppskrifter og kopier listen, push
 - [ ] 2026-11-10 [story 5.8](967-2026-11-10-17-45-00-story-5-8-har-hjemme.md) — Maja: npm test (2458), e2e (16), prøv «Har hjemme» og last siden på nytt, push
 - [ ] 2026-11-10 [story 5.9](966-2026-11-10-18-30-00-story-5-9-mal-dl-og-gram.md) — Maja: npm test (2500), e2e (16), prøv dl/gram på oppskrift og handleliste, push
+- [ ] 2026-11-10 [story 5.10](965-2026-11-10-19-15-00-story-5-10-forslag-som-passer.md) — Maja: npm test (2518), e2e (16), prøv «Få forslag» på egne oppskrifter, push
