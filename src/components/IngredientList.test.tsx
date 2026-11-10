@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { Activity } from "react";
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { parseLine, type RecipeLine } from "@/domain";
@@ -62,13 +62,16 @@ describe("IngredientList", () => {
     }
   });
 
-  it("Minus til grense: fra 2 gir to trykk 1 og deaktivert −", async () => {
+  it("Minus til grense: fra 2 gir 1, så 0,5 og deaktivert −", async () => {
     const user = userEvent.setup();
     render(<IngredientList ingredients={lines("400 g mel")} originalServings={2} />);
     await user.click(minus());
     expect(field()).toHaveValue("1");
-    expect(minus()).toHaveAttribute("aria-disabled", "true");
     expect(shown()).toEqual(["200 g mel"]);
+    await user.click(minus());
+    expect(field()).toHaveValue("0,5");
+    expect(minus()).toHaveAttribute("aria-disabled", "true");
+    expect(shown()).toEqual(["100 g mel"]);
   });
 
   it("Skriv gyldig: 8 og forlat feltet gir mengder for 8 og «Tilbakestill til 4»", async () => {
@@ -241,7 +244,8 @@ describe("IngredientList", () => {
     it("Tastatur: Tab til en boks, mellomrom veksler, og fokus blir stående", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={basic} originalServings={4} />);
-      // Porsjonsvelgeren (−, felt, +, ½) kommer først i tabulatorrekkefølgen.
+      // Porsjonsvelgeren (−, felt, +, glidebryter, ½) kommer først i tabulatorrekkefølgen.
+      await user.tab();
       await user.tab();
       await user.tab();
       await user.tab();
@@ -476,6 +480,44 @@ describe("IngredientList", () => {
       expect(field()).toHaveValue("6,5");
       await user.click(screen.getByRole("button", { name: "Fjern den halve porsjonen" }));
       expect(onServingsChange).toHaveBeenLastCalledWith(6);
+    });
+  });
+
+  describe("glidebryter (Story 5.3)", () => {
+    const slider = () => screen.getByRole("slider", { name: "Skyv for å velge antall personer" });
+
+    it("går fra 0,5 til 50 i halve steg og viser valgt antall", () => {
+      render(<IngredientList ingredients={basic} originalServings={4} selectedServings={6.5} />);
+      expect(slider()).toHaveAttribute("min", "0.5");
+      expect(slider()).toHaveAttribute("max", "50");
+      expect(slider()).toHaveAttribute("step", "0.5");
+      expect(slider()).toHaveValue("6.5");
+      expect(slider()).toHaveAttribute("aria-valuetext", "6,5 personer");
+    });
+
+    it("endring på glidebryteren skalerer, oppdaterer feltet og husker antallet", () => {
+      const onServingsChange = vi.fn();
+      render(
+        <IngredientList
+          ingredients={lines("400 g mel")}
+          originalServings={4}
+          onServingsChange={onServingsChange}
+        />,
+      );
+      fireEvent.change(slider(), { target: { value: "2.5" } });
+      expect(field()).toHaveValue("2,5");
+      expect(shown()).toEqual(["250 g mel"]);
+      expect(onServingsChange).toHaveBeenLastCalledWith(2.5);
+      fireEvent.change(slider(), { target: { value: "0.5" } });
+      expect(field()).toHaveValue("0,5");
+      expect(shown()).toEqual(["50 g mel"]);
+    });
+
+    it("«+ ½» ved 0,5 gir 1", async () => {
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={basic} originalServings={4} selectedServings={0.5} />);
+      await user.click(screen.getByRole("button", { name: "Fjern den halve porsjonen" }));
+      expect(field()).toHaveValue("1");
     });
   });
 });

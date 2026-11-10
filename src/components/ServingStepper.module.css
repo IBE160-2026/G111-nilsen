@@ -129,3 +129,11 @@
   text-decoration: underline;
   cursor: pointer;
 }
+
+.slider {
+  width: 100%;
+  min-height: var(--tap-target-min);
+  margin: 0;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}

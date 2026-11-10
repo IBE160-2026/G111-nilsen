@@ -7,6 +7,7 @@ import styles from "./ServingStepper.module.css";
 
 const MIN = LIMITS.servingsMin;
 const MAX = LIMITS.servingsMax;
+const HALF_MIN = LIMITS.selectedServingsMin;
 
 /** «1 person» / «N personer» (halve tall med komma: «4,5 personer»). */
 export function servingsText(servings: number): string {
@@ -64,6 +65,8 @@ export default function ServingStepper({
   onEnter,
   allowHalf = false,
 }: Props) {
+  // Med halve porsjoner kan antallet gå ned til 0,5 (Story 5.3).
+  const lowest = allowHalf ? HALF_MIN : MIN;
   const id = useId();
   const inputId = `${id}-antall`;
   const errorId = `${id}-feil`;
@@ -130,9 +133,9 @@ export default function ServingStepper({
             className={styles.button}
             aria-label="Færre personer"
             aria-controls={inputId}
-            aria-disabled={value <= MIN ? true : undefined}
+            aria-disabled={value <= lowest ? true : undefined}
             onClick={() => {
-              if (value > MIN) change(Math.max(MIN, value - 1));
+              if (value > lowest) change(Math.max(lowest, value - 1));
             }}
           >
             <span aria-hidden="true">−</span>
@@ -166,6 +169,20 @@ export default function ServingStepper({
       </div>
 
       {allowHalf ? (
+        <input
+          type="range"
+          className={styles.slider}
+          min={HALF_MIN}
+          max={MAX}
+          step={0.5}
+          value={value}
+          aria-label={servingStepperMessages.sliderLabel}
+          aria-valuetext={servingsText(value)}
+          onChange={(event) => change(Number(event.target.value))}
+        />
+      ) : null}
+
+      {allowHalf ? (
         <button
           type="button"
           className={styles.half}
@@ -175,7 +192,7 @@ export default function ServingStepper({
           }
           aria-disabled={value % 1 === 0 && value >= MAX ? true : undefined}
           onClick={() => {
-            if (value % 1 !== 0) change(value - 0.5);
+            if (value % 1 !== 0 && value - 0.5 >= lowest) change(value - 0.5);
             else if (value < MAX) change(value + 0.5);
           }}
         >

@@ -6,13 +6,15 @@ export const LIMITS = {
   titleLength: 200,
   servingsMin: 1,
   servingsMax: 50,
+  /** Valgt antall kan gå ned til en halv porsjon (Story 5.3); oppr. antall er minst 1. */
+  selectedServingsMin: 0.5,
   linesPerField: 100,
   ingredientLineLength: 300,
   stepLength: 2000,
 } as const;
 
 /**
- * Gyldig valgt antall personer (Story 5.1): hele eller halve tall fra 1 til 50 (4, 4,5, 5 …).
+ * Gyldig valgt antall personer (Story 5.1, 5.3): hele eller halve tall fra 0,5 til 50 (4, 4,5, 5 …).
  * Antallet oppskriften er skrevet for (`originalServings`) er fortsatt bare hele tall.
  */
 export function isSelectedServings(value: unknown): value is number {
@@ -20,7 +22,7 @@ export function isSelectedServings(value: unknown): value is number {
     typeof value === "number" &&
     Number.isFinite(value) &&
     Number.isInteger(value * 2) &&
-    value >= LIMITS.servingsMin &&
+    value >= LIMITS.selectedServingsMin &&
     value <= LIMITS.servingsMax
   );
 }

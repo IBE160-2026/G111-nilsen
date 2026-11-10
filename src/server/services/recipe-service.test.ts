@@ -508,7 +508,7 @@ describe("lagre, slette og rydde (Story 3.2)", () => {
   });
 
   describe("setSelectedServings", () => {
-    it.each([1, 1.5, 4.5, 6, 49.5, 50])(
+    it.each([0.5, 1, 1.5, 4.5, 6, 49.5, 50])(
       "lagrer %s for en lagret oppskrift uten å endre updatedAt",
       (n) => {
         const db = createTestDb();

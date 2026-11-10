@@ -70,3 +70,4 @@
 - [ ] 2026-11-10 [opprydding](975-2026-11-10-12-30-00-opprydding-etter-epic-4.md) — Maja: prøv språkmodellen med egen nøkkel, manuell nettlesertest, avgjør draft → ferdig for PRD/UX/arkitektur, refleksjonsrapport og innlevering
 - [ ] 2026-11-10 [story 5.1](974-2026-11-10-13-00-00-story-5-1-halve-porsjoner.md) — Maja: npm test (2341), e2e, nettlesertest av halve porsjoner
 - [ ] 2026-11-10 [story 5.2](973-2026-11-10-13-30-00-story-5-2-sok-og-filter.md) — Maja: npm test (2361), e2e, nettlesertest av søk og filter, push
+- [ ] 2026-11-10 [story 5.3](972-2026-11-10-14-00-00-story-5-3-glidebryter.md) — Maja: npm test (2368), e2e (12), nettlesertest av glidebryteren, push

@@ -202,7 +202,9 @@ describe("ServingStepper", () => {
       ["1,5", 1.5],
       ["49,5", 49.5],
       ["50", 50],
-      ["0,5", null],
+      ["0,5", 0.5],
+      ["0,4", null],
+      ["0", null],
       ["50,5", null],
       ["4,3", null],
       ["4,55", null],
@@ -227,7 +229,7 @@ describe("ServingStepper", () => {
       expect(field()).toHaveValue("4");
     });
 
-    it("− og + beholder halvdelen og stopper på 1 og 50", async () => {
+    it("− og + beholder halvdelen og stopper på 0,5 og 50", async () => {
       const user = userEvent.setup();
       render(<HalfHarness start={4.5} original={4} />);
       await user.click(plus());
@@ -238,7 +240,7 @@ describe("ServingStepper", () => {
       await user.click(minus());
       expect(field()).toHaveValue("1,5");
       await user.click(minus());
-      expect(field()).toHaveValue("1");
+      expect(field()).toHaveValue("0,5");
       expect(minus()).toHaveAttribute("aria-disabled", "true");
     });
 
