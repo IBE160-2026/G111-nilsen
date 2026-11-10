@@ -59,3 +59,6 @@
 - [ ] 2026-11-10 [story-4-2](978-2026-11-10-10-15-54-story-4-2-ta-i-bruk-forslag.md) — test «Ta i bruk», «Hopp over», «Fjern» og at valgte forslag består etter ny åpning, i nettleseren på Macen (360 og 1280 px, lys og mørk, 200 % zoom); kjør npm test (2286 grønne)
 - [ ] 2026-11-10 [story-4-2](978-2026-11-10-10-15-54-story-4-2-ta-i-bruk-forslag.md) — utsatt: grense for antall valgte forslag, klienttilstand ved endring i annen fane, ingen uavhengige reviews (deferred-work.md, spec-4-2)
 - [ ] 2026-11-10 [story-4-2](978-2026-11-10-10-15-54-story-4-2-ta-i-bruk-forslag.md) — sporadisk testfeil: ManualRecipeForm «deaktiverer knappen mens skjemaet sendes» (fokus) feilet én gang på Macen; rett testen (deferred-work.md)
+- [ ] 2026-11-10 [story-4-3](977-2026-11-10-10-45-00-story-4-3-forslag-fra-sprakmodell.md) — Maja: lag Anthropic-nøkkel, sett LLM_API_KEY i .env.local og prøv 3–5 oppskrifter (konkrete og trygge forslag?); si fra om du vil ha annen leverandør/modell
+- [ ] 2026-11-10 [story-4-3](977-2026-11-10-10-45-00-story-4-3-forslag-fra-sprakmodell.md) — test «Få forslag» i nettleseren uten og med nøkkel; kjør npm test (2303 grønne)
+- [ ] 2026-11-10 [story-4-3](977-2026-11-10-10-45-00-story-4-3-forslag-fra-sprakmodell.md) — utsatt: ikke prøvd mot ekte API, kallgrensen er i minnet, ingen uavhengige reviews (deferred-work.md, spec-4-3)
