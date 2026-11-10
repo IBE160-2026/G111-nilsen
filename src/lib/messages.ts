@@ -151,6 +151,20 @@ export const collectionMessages = {
   emptyImportAction: "Importer din første oppskrift",
 } as const;
 
+/** Kokemodus (Story 5.4). */
+export const cookingModeMessages = {
+  open: "Kokemodus",
+  openLabel: "Åpne kokemodus",
+  exit: "Avslutt",
+  exitLabel: "Avslutt kokemodus",
+  previous: "Forrige",
+  next: "Neste",
+  done: "Ferdig",
+  progress: (current: number, total: number) => `Steg ${current} av ${total}`,
+  ingredients: "Ingredienser",
+  ingredientsFor: (servings: string) => `Ingredienser for ${servings}`,
+} as const;
+
 /** Søk og filtrering i Oppskrifter (Story 5.2). */
 export const collectionFilterMessages = {
   searchLabel: "Søk i oppskrifter",

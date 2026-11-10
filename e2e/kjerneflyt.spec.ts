@@ -175,6 +175,36 @@ test("UJ-3: finn igjen favoritten under Favoritter og endre antallet", async ({
   await expect(page.getByLabel("Antall personer", { exact: true })).toHaveValue("3");
 });
 
+test("Versjon 2: søk i Oppskrifter, halv porsjon og kokemodus", async ({ page }, testInfo) => {
+  const data = DATA[testInfo.project.name as keyof typeof DATA];
+  const { uj1 } = data;
+
+  await page.goto("/oppskrifter");
+  const search = page.getByLabel("Søk i oppskrifter");
+  await search.fill("zzzz finnes ikke");
+  await expect(page.getByText("Ingen oppskrifter passer.")).toBeVisible();
+  await page.getByRole("button", { name: "Nullstill søk" }).click();
+  await search.fill(uj1.title.split(" ")[0]);
+  await page
+    .getByRole("link", { name: new RegExp(uj1.title) })
+    .first()
+    .click();
+  await expect(page.getByRole("heading", { level: 1, name: uj1.title })).toBeVisible();
+
+  await setServings(page, 4);
+  await page.getByRole("button", { name: "Legg til en halv porsjon" }).click();
+  await expect(page.getByLabel("Antall personer", { exact: true })).toHaveValue("4,5");
+
+  await page.getByRole("button", { name: /^Åpne kokemodus/ }).click();
+  const cooking = page.getByRole("dialog", { name: /^Kokemodus/ });
+  await expect(cooking.getByText(/^Steg 1 av \d+$/)).toBeVisible();
+  await expect(cooking.getByText("Ingredienser for 4,5 personer")).toBeVisible();
+  await cooking.getByRole("button", { name: "Neste" }).click();
+  await expect(cooking.getByText(/^Steg 2 av \d+$/)).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(cooking).toBeHidden();
+});
+
 for (const scheme of ["light", "dark"] as const) {
   test.describe(`Tastatur i ${scheme === "light" ? "lys" : "mørk"} modus`, () => {
     test.use({ colorScheme: scheme });

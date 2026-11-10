@@ -71,3 +71,4 @@
 - [ ] 2026-11-10 [story 5.1](974-2026-11-10-13-00-00-story-5-1-halve-porsjoner.md) — Maja: npm test (2341), e2e, nettlesertest av halve porsjoner
 - [ ] 2026-11-10 [story 5.2](973-2026-11-10-13-30-00-story-5-2-sok-og-filter.md) — Maja: npm test (2361), e2e, nettlesertest av søk og filter, push
 - [ ] 2026-11-10 [story 5.3](972-2026-11-10-14-00-00-story-5-3-glidebryter.md) — Maja: npm test (2368), e2e (12), nettlesertest av glidebryteren, push
+- [ ] 2026-11-10 [story 5.4](971-2026-11-10-14-40-00-story-5-4-kokemodus.md) — Maja: npm test (2378), e2e (14), prøv kokemodus på mobil, push

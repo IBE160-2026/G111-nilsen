@@ -15,6 +15,7 @@ import {
 import { editRecipeMessages, sourceLinkMessages } from "@/lib/messages";
 import { sourceLabel } from "@/lib/source-label";
 import { isHttpUrl } from "@/lib/source-url";
+import CookingMode from "./CookingMode";
 import IngredientList from "./IngredientList";
 import RecipeActions from "./RecipeActions";
 import { SelectedServingsProvider } from "./SelectedServings";
@@ -41,6 +42,13 @@ export default function RecipeView({ recipe, folders }: { recipe: Recipe; folder
         <header className={styles.header}>
           <div className={styles.titleRow}>
             <h1>{recipe.title}</h1>
+            <CookingMode
+              title={recipe.title}
+              steps={recipe.steps}
+              ingredients={recipe.ingredients}
+              originalServings={recipe.originalServings}
+              selectedServings={recipe.selectedServings}
+            />
             <Link
               href={`/oppskrift/${recipe.id}/rediger`}
               className={styles.edit}
