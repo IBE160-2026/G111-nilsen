@@ -1,0 +1,17 @@
+[
+  {
+    "text": "La retten hvile noen minutter før servering.",
+    "reason": "Smakene setter seg, og retten blir jevnere i konsistensen.",
+    "appliesTo": "steps"
+  },
+  {
+    "text": "Bytt ut litt av saltet med en skvett sitronsaft eller eddik.",
+    "reason": "Syre fremhever smaken, så du trenger mindre salt.",
+    "appliesTo": "ingredients"
+  },
+  {
+    "text": "Server med en enkel salat eller råkost ved siden av.",
+    "reason": "Det gir kontrast i smak og tekstur og balanserer en rik rett.",
+    "appliesTo": "recipe"
+  }
+]

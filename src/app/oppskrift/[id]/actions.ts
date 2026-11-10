@@ -7,6 +7,7 @@ import {
   actionFailure,
   type ActionResult,
   type FolderActionResult,
+  type SuggestionsActionResult,
 } from "@/app/_shared/action-result";
 import { folderFailure, folderIdSchema, parseFolderName } from "@/app/_shared/folder-action";
 import { parseRecipeId } from "@/lib/recipe-id";
@@ -19,6 +20,7 @@ import {
   setOriginalServings,
   setSelectedServings,
 } from "@/server/services/recipe-service";
+import { getSuggestions } from "@/server/services/suggestion-service";
 
 // Id og antall er bundet fra siden, men Server Actions er offentlige endepunkter og
 // valideres på nytt (samme regler som `parseRecipeId` og porsjonsvelgeren).
@@ -171,5 +173,23 @@ export async function setFavorite(recipeId: number, isFavorite: boolean): Promis
   } catch (error) {
     console.error("Kunne ikke endre favorittmarkeringen", error);
     return actionFailure(undefined);
+  }
+}
+
+/**
+ * Henter 1–3 forslag til oppskriften (Story 4.1, FR-10). Leser bare; ingenting lagres og ingen
+ * sider revalideres. Feil (ukjent oppskrift, ugyldig svar, databasefeil) gir `ok: false`, og
+ * komponenten viser meldingen fra `messages.ts`, så resten av siden virker.
+ */
+export async function requestSuggestions(id: number): Promise<SuggestionsActionResult> {
+  if (!idSchema.safeParse(id).success) return { ok: false };
+
+  try {
+    const result = await getSuggestions(id);
+    if (!result.ok) return { ok: false };
+    return { ok: true, ...result.value };
+  } catch (error) {
+    console.error("Kunne ikke hente forslag", error);
+    return { ok: false };
   }
 }

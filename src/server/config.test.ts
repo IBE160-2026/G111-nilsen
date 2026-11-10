@@ -19,10 +19,18 @@ describe("loadConfig", () => {
     expect(config).toEqual({
       llmApiKey: "test-key",
       llmModel: "test-model",
+      suggestionMode: "llm",
       databasePath: "/tmp/test.db",
       importSource: "http",
       isProduction: false,
     });
+  });
+
+  it("velger mock for forslag uten nøkkel (også med tom eller blank nøkkel), ellers llm", () => {
+    expect(loadConfig({}).suggestionMode).toBe("mock");
+    expect(loadConfig({ LLM_API_KEY: "" }).suggestionMode).toBe("mock");
+    expect(loadConfig({ LLM_API_KEY: "   " }).suggestionMode).toBe("mock");
+    expect(loadConfig({ LLM_API_KEY: "test-key" }).suggestionMode).toBe("llm");
   });
 
   it("vet om den kjører i produksjon", () => {

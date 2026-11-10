@@ -47,18 +47,37 @@
   overflow-wrap: anywhere;
 }
 
-/* Én kolonne på mobil: porsjonsvelger, ingredienser, steg. */
+/* Én kolonne på mobil: porsjonsvelger, ingredienser, forslag, steg (UX). */
 .columns {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "ingredients"
+    "suggestions"
+    "steps";
   gap: var(--space-4);
   align-items: start;
 }
 
-/* Fra 768 px: porsjonsvelger og ingredienser til venstre, steg til høyre (UX-DR15). */
+.ingredients {
+  grid-area: ingredients;
+}
+
+.steps {
+  grid-area: steps;
+}
+
+.suggestions {
+  grid-area: suggestions;
+}
+
+/* Fra 768 px: porsjonsvelger og ingredienser til venstre, steg til høyre, forslag under (UX-DR15). */
 @media (min-width: 768px) {
   .columns {
     grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    grid-template-areas:
+      "ingredients steps"
+      "suggestions suggestions";
     gap: var(--space-5);
   }
 }

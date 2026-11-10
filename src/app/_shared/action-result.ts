@@ -1,3 +1,4 @@
+import type { SuggestionSet } from "@/domain";
 import { messageFor } from "@/lib/messages";
 
 /** Svaret fra en Server Action som ikke sender brukeren videre: ok, eller en norsk melding. */
@@ -15,3 +16,6 @@ export function actionFailure(kind: string | undefined): { ok: false; message: s
  */
 export type FolderActionResult<T extends object = object> =
   ({ ok: true } & T) | { ok: false; field?: "name"; message: string };
+
+/** Svaret fra «Få forslag» (Story 4.1): forslagene, eller `ok: false` (komponenten viser meldingen). */
+export type SuggestionsActionResult = ({ ok: true } & SuggestionSet) | { ok: false };

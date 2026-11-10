@@ -32,6 +32,7 @@ const {
   moveToNewFolder,
   removeRecipe,
   rememberServings,
+  requestSuggestions,
   saveRecipe,
   setFavorite,
 } = await import("./actions");
@@ -361,5 +362,45 @@ describe("setFavorite (Story 3.4)", () => {
     expect(await setFavorite(id, true)).toEqual(failure(undefined));
     expect(console.error).toHaveBeenCalled();
     expect(revalidatePath).not.toHaveBeenCalled();
+  });
+});
+
+describe("requestSuggestions (Story 4.1)", () => {
+  it("gir eksempelforslag uten nøkkel, uten å lagre eller revalidere", async () => {
+    const before = [count("recipes"), count("ingredient_lines"), count("steps")];
+    const result = await requestSuggestions(id);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.isExample).toBe(true);
+    expect(result.suggestions.length).toBeGreaterThanOrEqual(1);
+    expect(result.suggestions.length).toBeLessThanOrEqual(3);
+    for (const suggestion of result.suggestions) {
+      expect(suggestion.text).not.toBe("");
+      expect(suggestion.reason).not.toBe("");
+    }
+    expect([count("recipes"), count("ingredient_lines"), count("steps")]).toEqual(before);
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("virker også for en oppskrift som ikke er i samlingen", async () => {
+    unsave();
+    expect((await requestSuggestions(id)).ok).toBe(true);
+  });
+
+  it.each([0, -1, 1.5, NaN, Infinity, 2 ** 53, "1" as unknown as number])(
+    "ugyldig id %s: ok: false",
+    async (bad) => {
+      expect(await requestSuggestions(bad)).toEqual({ ok: false });
+    },
+  );
+
+  it("ukjent oppskrift: ok: false", async () => {
+    expect(await requestSuggestions(id + 100)).toEqual({ ok: false });
+  });
+
+  it("databasefeil: ok: false, og feilen logges", async () => {
+    breakDatabase();
+    expect(await requestSuggestions(id)).toEqual({ ok: false });
+    expect(console.error).toHaveBeenCalled();
   });
 });

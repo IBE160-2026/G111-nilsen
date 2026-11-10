@@ -100,3 +100,19 @@ export type Folder = { id: number; name: string };
 
 /** En mappe med antall oppskrifter i den. */
 export type FolderSummary = Folder & { recipeCount: number };
+
+/** Hvilken del av oppskriften et forslag gjelder: ingrediensene, stegene eller hele retten. */
+export type SuggestionTarget = "ingredients" | "steps" | "recipe";
+
+/** Ett forslag til å gjøre retten bedre (Story 4.1), med begrunnelse. Lagres ikke ennå. */
+export type Suggestion = {
+  text: string;
+  reason: string;
+  appliesTo: SuggestionTarget;
+};
+
+/** Forslag for en oppskrift. `isExample` er sant når de er eksempelforslag (demomodus). */
+export type SuggestionSet = {
+  suggestions: Suggestion[];
+  isExample: boolean;
+};

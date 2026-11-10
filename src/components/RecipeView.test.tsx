@@ -13,6 +13,7 @@ const actions = vi.hoisted(() => ({
   moveToNewFolder: vi.fn(),
   setFavorite: vi.fn(),
   changeOriginalServings: vi.fn(),
+  requestSuggestions: vi.fn(),
 }));
 vi.mock("@/app/oppskrift/[id]/actions", () => actions);
 
@@ -26,6 +27,11 @@ beforeEach(() => {
   actions.moveToNewFolder.mockReset().mockResolvedValue({ ok: true, folderName: "Ny" });
   actions.setFavorite.mockReset().mockResolvedValue({ ok: true });
   actions.changeOriginalServings.mockReset().mockResolvedValue({ ok: true });
+  actions.requestSuggestions.mockReset().mockResolvedValue({
+    ok: true,
+    isExample: true,
+    suggestions: [{ text: "Tilsett sitron.", reason: "Gir friskhet.", appliesTo: "recipe" }],
+  });
   HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
     this.setAttribute("open", "");
   };
@@ -127,6 +133,22 @@ describe("RecipeView", () => {
     expect(within(ingredients).getAllByRole("checkbox")).toHaveLength(3);
   });
 
+  it("har en forslagsdel under ingredienser og steg, bundet til oppskriftens id (Story 4.1)", async () => {
+    const user = userEvent.setup();
+    render(<RecipeView recipe={{ ...recipe, id: 7 }} folders={folders} />);
+    const steps = screen.getByRole("region", { name: "Slik gjør du" });
+    const suggestions = screen.getByRole("region", { name: "Forslag" });
+    expect(
+      steps.compareDocumentPosition(suggestions) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+
+    await user.click(within(suggestions).getByRole("button", { name: "Få forslag" }));
+
+    expect(actions.requestSuggestions).toHaveBeenCalledExactlyOnceWith(7);
+    expect(await screen.findByText("Eksempelforslag")).toBeInTheDocument();
+    expect(screen.getByText("Tilsett sitron.")).toBeInTheDocument();
+  });
+
   it("har en «Rediger»-lenke ved tittelen som peker til redigeringssiden", () => {
     render(<RecipeView recipe={{ ...recipe, id: 7 }} folders={folders} />);
     const link = screen.getByRole("link", { name: "Rediger Pannekaker" });
@@ -136,8 +158,9 @@ describe("RecipeView", () => {
     expect(screen.getByRole("article")).toContainElement(link);
   });
 
-  it("skjuler steg-kortet når oppskriften ikke har steg", () => {
+  it("skjuler steg-kortet når oppskriften ikke har steg, men viser forslagsdelen", () => {
     render(<RecipeView recipe={{ ...recipe, steps: [] }} folders={folders} />);
+    expect(screen.getByRole("region", { name: "Forslag" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Slik gjør du" })).not.toBeInTheDocument();
   });
 

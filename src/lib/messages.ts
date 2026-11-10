@@ -42,8 +42,8 @@ export const errorMessages: Record<ErrorKind, ErrorMessage> = {
     body: "Den kan være slettet, eller lenken kan være feil. Gå til Importer for å hente en oppskrift.",
   },
   suggestion_failed: {
-    title: "Vi fikk ikke laget forslag nå.",
-    body: "Prøv igjen om litt.",
+    title: "Fikk ikke laget forslag akkurat nå.",
+    body: "Prøv igjen senere.",
   },
   unknown: fallbackMessage,
 };
@@ -249,4 +249,17 @@ export const favoriteMessages = {
   labelPrefix: "Favoritt: ",
   added: "Lagt til i favoritter.",
   removed: "Fjernet fra favoritter.",
+} as const;
+
+/** Forslagsdelen på oppskriftssiden (Story 4.1). Feilmeldingen hentes fra `errorMessages`. */
+export const suggestionMessages = {
+  heading: "Forslag",
+  lead: "Få ett til tre forslag til hvordan retten kan bli enda bedre.",
+  request: "Få forslag",
+  retry: "Prøv igjen",
+  pending: "Lager forslag …",
+  /** Overskrift over forslagene når de er hentet. */
+  resultsHeading: "Forslag til retten",
+  exampleLabel: "Eksempelforslag",
+  exampleNote: "Koble til en språkmodell for forslag til akkurat denne oppskriften.",
 } as const;

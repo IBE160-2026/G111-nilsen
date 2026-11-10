@@ -1,0 +1,139 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-md);
+  padding: var(--space-5) var(--space-4);
+}
+
+.lead {
+  color: var(--color-ink-secondary);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+
+/* Primærknapp som i RecipeActions og EmptyState. */
+.primary {
+  min-height: var(--tap-target-min);
+  padding: var(--space-3) var(--space-4);
+  border: var(--button-border-width) solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.primary:focus-visible,
+.results:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-accent);
+  outline-offset: var(--focus-ring-width);
+}
+
+.pending {
+  color: var(--color-ink-secondary);
+}
+
+/* Tomt statusfelt tar ikke plass. */
+.pending:empty {
+  display: none;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.resultsHeading {
+  font-size: var(--type-card-title-size);
+  font-weight: 600;
+}
+
+.example {
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}
+
+/* Merket står som tekst, ikke bare som farge. */
+.exampleLabel {
+  color: var(--color-accent);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-letter-spacing);
+  text-transform: uppercase;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Forslagskort (DESIGN): tint bakgrunn, forslaget i halvfet, begrunnelsen i meta. */
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-surface-tint);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-md);
+  overflow-wrap: anywhere;
+}
+
+.text {
+  font-weight: 600;
+}
+
+.reason {
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}
+
+.placeholder {
+  min-height: 72px;
+}
+
+.bar,
+.barShort {
+  display: block;
+  height: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--color-border-strong);
+}
+
+.bar {
+  width: 85%;
+}
+
+.barShort {
+  width: 55%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .placeholder {
+    animation: puls 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes puls {
+  50% {
+    opacity: 0.55;
+  }
+}

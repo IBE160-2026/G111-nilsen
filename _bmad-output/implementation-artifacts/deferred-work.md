@@ -195,3 +195,13 @@
 - source_spec: `spec-2-2-importer-fra-lenke.md`
   summary: Fra kodegjennomgangen: adapteren begrenser ikke portnummer (bare offentlig adresse); `normalizeSourceUrl` normaliserer ikke store/små bokstaver i prosentkoding og behandler `ref` som sporingsparameter; omdirigeringer (alias-adresser) gir egne rader; `recipes.source_url` har ingen indeks; DNS-oppslaget har ikke eget tidsavbrudd; ingen samtidighetsgrense på importer.
   evidence: Ingen av dem gir sikkerhetshull (adressepolicyen kontrolleres per hopp). Vurder ved hosting.
+
+- source_spec: `spec-4-1-forslag-i-demomodus.md`
+  summary: Med `LLM_API_KEY` satt brukes fortsatt mock-leverandøren (`suggestionMode: "llm"` peker på mock) til språkmodell-adapteren kommer i Story 4.3.
+  evidence: Svaret er merket «Eksempelforslag», så merket er riktig. Bytt `llm` i `providers` i `suggestion-service.ts` i 4.3.
+- source_spec: `spec-4-1-forslag-i-demomodus.md`
+  summary: Hvert trykk på «Få forslag» er ett kall til leverandøren. Mock er gratis, men språkmodellen koster penger, og det finnes ingen grense mot gjentatte kall.
+  evidence: Vurder grense per oppskrift eller per minutt i 4.3 (samme tema som samtidighetsgrensen for import).
+- source_spec: `spec-4-1-forslag-i-demomodus.md`
+  summary: På smal skjerm står forslagene visuelt mellom ingredienser og steg (UX), men etter stegene i dokumentet, slik at tastaturrekkefølgen følger bredt oppsett.
+  evidence: Ikke testet med skjermleser. Vurder å flytte forslagene i dokumentet hvis det viser seg forvirrende.

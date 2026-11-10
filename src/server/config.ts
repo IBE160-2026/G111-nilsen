@@ -5,11 +5,16 @@
 
 export type ImportSource = "http" | "fixtures";
 
+/** Hvilken leverandør som lager forslag (AD-5): `mock` uten nøkkel, ellers `llm`. */
+export type SuggestionMode = "mock" | "llm";
+
 export type Config = {
   /** API-nøkkel for forslag (Epic 4). Valgfri – kjernefunksjonene virker uten. */
   llmApiKey: string | undefined;
   /** Modellnavn for forslag. Valgfri. */
   llmModel: string | undefined;
+  /** `mock` når `LLM_API_KEY` mangler, ellers `llm`. */
+  suggestionMode: SuggestionMode;
   /** Sti til SQLite-fila. */
   databasePath: string;
   /**
@@ -31,9 +36,11 @@ function optional(value: string | undefined): string | undefined {
 }
 
 export function loadConfig(env: Env = process.env): Config {
+  const llmApiKey = optional(env.LLM_API_KEY);
   return {
-    llmApiKey: optional(env.LLM_API_KEY),
+    llmApiKey,
     llmModel: optional(env.LLM_MODEL),
+    suggestionMode: llmApiKey ? "llm" : "mock",
     databasePath: optional(env.DATABASE_PATH) ?? DEFAULT_DATABASE_PATH,
     importSource: optional(env.IMPORT_SOURCE)?.toLowerCase() === "fixtures" ? "fixtures" : "http",
     isProduction: env.NODE_ENV === "production",

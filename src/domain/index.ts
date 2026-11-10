@@ -8,6 +8,9 @@ export type {
   RecipeSummary,
   ScaledLine,
   Step,
+  Suggestion,
+  SuggestionSet,
+  SuggestionTarget,
   UnitKey,
 } from "./types";
 export { normalizeUnit, UNIT_VARIANTS } from "./units";
