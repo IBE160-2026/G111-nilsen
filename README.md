@@ -23,9 +23,44 @@ Repoet inneholder applikasjonen og dokumentasjon av utvikling, testing og kvalit
 - Lagrer oppskriftene på kontoen din (e-post og passord), i mapper og som favoritter, og du kan krysse av under matlaging.
 - Gir 1–3 forslag til hvordan retten kan bli bedre. Uten nøkkel er det enkle forslag laget av regler ut fra ingrediensene og stegene (merket «Enkle forslag»); med nøkkel lager en språkmodell forslag til akkurat denne oppskriften. Forslag du tar i bruk lagres med oppskriften og vises i ingredienslisten eller ved riktig steg, merket «Forslag» (også i kokemodus og handlelisten); originalen endres ikke, og «Fjern» tar dem bort igjen.
 
-Å hente, vise og skalere oppskrifter virker uten konto; å lagre, mapper, favoritter og handleliste krever innlogging (se «Kontoer»). Ingenting krever nøkkel eller nett unntatt språkmodellen (importen kan kjøres mot lagrede sider, se «Importere fra lenke»). Status: versjon 1 (Epic 1–4, Story 1.1–4.4) og versjon 2 (Epic 5, Story 5.1–5.13) er bygget, se «Hva versjon 2 inneholder». Åpne saker står i [`issues/`](issues/README.md) og i `_bmad-output/implementation-artifacts/deferred-work.md`.
+Å hente, vise og skalere oppskrifter virker uten konto; å lagre, mapper, favoritter og handleliste krever innlogging (se «Kontoer»). Ingenting krever nøkkel eller nett unntatt språkmodellen (importen kan kjøres mot lagrede sider, se «Importere fra lenke»). Status: versjon 1 (Epic 1–4, Story 1.1–4.4) og versjon 2 (Epic 5, Story 5.1–5.13) er bygget, se «Hva appen inneholder». Åpne saker står i [`issues/`](issues/README.md) og i `_bmad-output/implementation-artifacts/deferred-work.md`.
 
-## Hva versjon 2 inneholder
+## Hva appen inneholder
+
+Appen er bygget i fem epics, én story om gangen. Hver story har en spec i `_bmad-output/implementation-artifacts/` og står i [`epics.md`](_bmad-output/planning-artifacts/epics.md).
+
+### Epic 1: Les og skaler en oppskrift
+
+- **Story 1.1, Start appen:** Next.js-prosjektet med toppmeny, visuell profil som designtokens i lys og mørk palett, felles feilmeldinger og testoppsett.
+- **Story 1.2, Tolk ingredienslinjer:** «400 g mel», «1 ½ dl melk» og «2–3 ss sukker» deles i mengde, enhet og navn. Linjer uten mengde («salt og pepper») vises som de står.
+- **Story 1.3, Skaler og formater mengder:** mengder regnes om med fast avrunding, brøktegn (½, ¼, ¾) og «ca.» for udelelige ting som egg og løk.
+- **Story 1.4, Legg inn en oppskrift manuelt:** tittel, antall personer, ingredienser og steg lagres i databasen. Ved feil lagres ingenting.
+- **Story 1.5, Se oppskriften og velg antall personer:** fast format med tittel, kilde, porsjonsvelger, ingredienser per seksjon og nummererte steg.
+- **Story 1.6, Kryss av under matlaging:** hver ingrediens og hvert steg kan krysses av (se «Kryss av under matlaging»).
+
+### Epic 2: Importer oppskrift fra lenke
+
+- **Story 2.1, Les oppskriftsdata:** oppskriftsdata (JSON-LD) leses fra lagrede oppskriftssider (se «Lese oppskriftsdata»).
+- **Story 2.2, Importer fra lenke:** lim inn en lenke og få oppskriften i fast format (se «Importere fra lenke»).
+- **Story 2.3, Forstå hvorfor en import feilet:** tydelig norsk melding og «Legg inn selv» når siden ikke har oppskriftsdata.
+- **Story 2.4, Oppgi porsjonsantall:** appen spør hvor mange oppskriften er laget for når kilden ikke sier det.
+
+### Epic 3: Ta vare på og finn igjen
+
+- **Story 3.1, Se samlingen:** se «Oppskrifter (samlingen)».
+- **Story 3.2, Lagre og slette en oppskrift:** se «Lagre, slette og rydde».
+- **Story 3.3, Sorter oppskrifter i mapper:** se «Mapper».
+- **Story 3.4, Marker favoritter:** se «Favoritter».
+- **Story 3.5, Rediger en oppskrift:** se «Redigere en oppskrift».
+
+### Epic 4: Forbedringsforslag
+
+- **Story 4.1, Forslag uten nøkkel:** «Få forslag» virker uten språkmodellnøkkel (se «Forslag»).
+- **Story 4.2, Ta i bruk forslag:** forslag kan tas i bruk eller hoppes over, og de valgte lagres med oppskriften.
+- **Story 4.3, Forslag fra språkmodell:** med egen nøkkel i `.env.local` lager en språkmodell forslag til akkurat denne oppskriften.
+- **Story 4.4, Test hele kjerneflyten:** ende-til-ende-tester for brukerreisene og ferdig README.
+
+### Epic 5: Versjon 2
 
 Versjon 2 (Epic 5) kom etter at v1 var levert. Endringene i planen står i [`sprint-change-proposal-2026-11-10.md`](_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-10.md), kravene i PRD §4.6 (FR-19–FR-27), og hver story har en spec i `_bmad-output/implementation-artifacts/spec-5-N-*.md`.
 
@@ -39,19 +74,6 @@ Versjon 2 (Epic 5) kom etter at v1 var levert. Endringene i planen står i [`spr
 - **Forslag som passer (5.10):** uten nøkkel lages forslagene av regler ut fra oppskriften («Enkle forslag»).
 - **Forslag i oppskriften (5.11, 5.12):** et forslag du tar i bruk, står i ingredienslisten og inne i riktig steg, merket og uthevet. Originalen endres ikke.
 - **Kontoer (5.13):** e-post og passord, egne oppskrifter per konto (se «Kontoer»).
-
-## Hva Epic 1 (og Story 3.5) inneholder
-
-- **Story 1.1, Start appen:** Next.js-prosjektet med toppmeny (Importer, Oppskrifter, Mapper, Favoritter), visuell profil som designtokens i lys og mørk palett, felles feilmeldinger og testoppsett.
-- **Story 1.2, Tolk ingredienslinjer:** «400 g mel», «1 ½ dl melk» og «2–3 ss sukker» deles i mengde, enhet og navn. Linjer uten mengde («salt og pepper») vises som de står.
-- **Story 1.3, Skaler og formater mengder:** mengder regnes om med fast avrunding, brøktegn (½, ¼, ¾) og «ca.» for udelelige ting som egg og løk.
-- **Story 1.4, Legg inn en oppskrift manuelt:** tittel, antall personer, ingredienser og steg lagres i databasen. Ved feil lagres ingenting.
-- **Story 1.5, Se oppskriften og velg antall personer:** fast format med tittel, kilde, porsjonsvelger (−/+ eller tall, 1–50, «Tilbakestill»), ingredienser per seksjon og nummererte steg.
-- **Story 1.6, Kryss av under matlaging:** hver ingrediens og hvert steg kan krysses av (se under). Porsjonsvelgerens −/+ beholder tastaturfokus ved 1 og 50.
-- **Story 3.5, Rediger en oppskrift:** se «Redigere en oppskrift» under.
-- **Story 3.1, Se samlingen:** se «Oppskrifter (samlingen)» under.
-- **Story 3.2, Lagre og slette en oppskrift:** se «Lagre, slette og rydde» under.
-- **Story 3.3, Sorter oppskrifter i mapper:** se «Mapper» under.
 
 ## Kryss av under matlaging
 
