@@ -7,7 +7,7 @@ En sensor skal kunne installere, kjøre og teste appen ved å følge README (NFR
 - `@playwright/test` 1.59.0 som devDependency (låst i `package-lock.json`); `npm run test:e2e` = `playwright test`. Nettleser installeres med `npx playwright install chromium` (ikke en del av `npm install`).
 - `playwright.config.ts`: `webServer` sletter `.e2e/`, bygger og starter `next start` på port 3100 med `DATABASE_PATH=.e2e/recipemate.db`, `IMPORT_SOURCE=fixtures`, tom `LLM_API_KEY`. Én arbeider, to prosjekter (360 px og 1280 px). `E2E_CHROMIUM_PATH` kan peke på en annen nettleser (bare for e2e, leses ikke av appen).
 - Prosjektene deler databasen, så hvert prosjekt bruker egne oppskrifter og mappenavn: `mobil-360` følger PRD-eksemplene nærmest (4 til 5 personer), `desktop-1280` bruker andre lagrede sider.
-- Testene følger appens faktiske oppførsel. UJ-1 velger antallet både før og etter «Lagre», fordi antall som velges før lagring ikke huskes ([issue 009](../../issues/009-valgt-antall-glemmes-ved-lagring.md)); saken er ført, ikke rettet her.
+- E2E fant at antall valgt før «Lagre» ikke ble husket ([issue 009](../../issues/009-valgt-antall-glemmes-ved-lagring.md)); rettet etter Story 4.4, og testen følger nå PRD (UJ-1: ett flere før lagring, UJ-3: antallet huskes).
 - Kontrastkravene (NFR-5) er ikke automatisert; tastaturtesten sjekker at hvert fokusert element har synlig fokus (outline eller skygge), i lys og mørk modus.
 - `.e2e/`, `test-results/` og `playwright-report/` ligger i `.gitignore`. Vitest tar bare `src/**/*.test.*`, så e2e-filene kjøres ikke av `npm test`.
 

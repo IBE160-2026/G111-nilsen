@@ -6,6 +6,7 @@ import { formatQuantity, scaleLine, type RecipeLine, type ScaledLine } from "@/d
 import { servingsDialogMessages } from "@/lib/messages";
 import { LIMITS } from "@/lib/recipe-input";
 import CheckRow from "./CheckRow";
+import { useReportSelectedServings } from "./SelectedServings";
 import ServingsDialog, { DEFAULT_SERVINGS } from "./ServingsDialog";
 import ServingStepper from "./ServingStepper";
 import { useCheckedSet } from "./use-checked-set";
@@ -148,8 +149,10 @@ export default function IngredientList({
     originalServings === null && onOriginalServingsChange !== undefined,
   );
 
+  const reportSelected = useReportSelectedServings();
   function change(servings: number) {
     setSelected(servings);
+    reportSelected(servings);
     if (onServingsChange) remember(onServingsChange, servings);
   }
   function originalSaved(servings: number) {

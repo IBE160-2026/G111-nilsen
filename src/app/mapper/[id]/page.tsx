@@ -61,7 +61,7 @@ async function FolderLoader({ params }: { params: Params }) {
         <EmptyState
           title={folderMessages.folderEmptyTitle}
           description={folderMessages.folderEmptyDescription}
-          action={{ href: "/samlingen", label: folderMessages.emptyAction }}
+          action={{ href: "/oppskrifter", label: folderMessages.emptyAction }}
         />
       ) : (
         <ul className={styles.list} role="list">

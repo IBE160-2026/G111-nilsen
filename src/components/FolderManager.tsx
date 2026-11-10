@@ -49,7 +49,7 @@ export default function FolderManager({ folders, onCreate, onRename, onDelete }:
         <EmptyState
           title={m.emptyTitle}
           description={m.emptyDescription}
-          action={{ href: "/samlingen", label: m.emptyAction }}
+          action={{ href: "/oppskrifter", label: m.emptyAction }}
         />
       ) : (
         <ul className={styles.list} role="list">

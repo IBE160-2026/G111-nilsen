@@ -36,7 +36,7 @@ describe("FolderManager", () => {
     expect(screen.getByRole("heading", { name: "Du har ingen mapper ennå." })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Gå til oppskriftene" })).toHaveAttribute(
       "href",
-      "/samlingen",
+      "/oppskrifter",
     );
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });

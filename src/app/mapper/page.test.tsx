@@ -101,7 +101,7 @@ describe("/mapper", () => {
     expect(screen.getByRole("button", { name: "Opprett mappe" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Gå til oppskriftene" })).toHaveAttribute(
       "href",
-      "/samlingen",
+      "/oppskrifter",
     );
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });

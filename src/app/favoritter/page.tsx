@@ -45,7 +45,7 @@ async function FavoritesLoader() {
       <EmptyState
         title={favoriteMessages.emptyTitle}
         description={favoriteMessages.emptyDescription}
-        action={{ href: "/samlingen", label: favoriteMessages.emptyAction }}
+        action={{ href: "/oppskrifter", label: favoriteMessages.emptyAction }}
       />
     );
   }

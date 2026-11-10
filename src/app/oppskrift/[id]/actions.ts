@@ -34,14 +34,20 @@ const servingsSchema = z.number().int().min(LIMITS.servingsMin).max(LIMITS.servi
 
 /**
  * Legger oppskriften i samlingen (Story 3.2). Oppskriftssiden revalideres, så lagre-linjen
- * bytter fra «Lagre» til «Slett». Feil gir en norsk melding og endrer ingenting.
+ * bytter fra «Lagre» til «Slett». `servings` er antallet brukeren har valgt (valgfritt, issue 009).
+ * Feil gir en norsk melding og endrer ingenting.
  */
-export async function saveRecipe(id: number): Promise<ActionResult> {
+export async function saveRecipe(id: number, servings?: number): Promise<ActionResult> {
   if (!idSchema.safeParse(id).success) return actionFailure("not_found");
 
   try {
     const result = saveRecipeToCollection(id);
     if (!result.ok) return actionFailure(result.error.kind);
+    // Antallet brukeren valgte før lagring huskes nå (issue 009). Feil her stopper ikke lagringen.
+    if (servings !== undefined && servingsSchema.safeParse(servings).success) {
+      const remembered = setSelectedServings(id, servings);
+      if (!remembered.ok) console.error("Kunne ikke lagre valgt antall ved lagring", remembered);
+    }
     // Mappenavn, kort og telling står på flere sider (og skjulte sider beholdes av Activity).
     revalidatePath("/", "layout");
     return { ok: true };
@@ -69,7 +75,7 @@ export async function removeRecipe(id: number): Promise<ActionResult> {
   }
 
   // redirect() kaster et kontrollflytunntak og må ligge utenfor try/catch.
-  redirect("/samlingen");
+  redirect("/oppskrifter");
 }
 
 /**

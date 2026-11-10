@@ -1,0 +1,40 @@
+# Kjører de samme kontrollene som README beskriver, på hver push og pull request til main.
+# Ingen hemmeligheter trengs: appen kjører uten språkmodellnøkkel, og testene bruker lagrede data.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  kontroll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run format:check
+      - run: npm test
+      - run: npm run build
+      - name: Ende-til-ende-tester
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:e2e
+      - name: Lagre e2e-resultater ved feil
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-resultater
+          path: .e2e/resultater
+          if-no-files-found: ignore

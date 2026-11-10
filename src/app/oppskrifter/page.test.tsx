@@ -90,7 +90,7 @@ async function show() {
   );
 }
 
-describe("/samlingen", () => {
+describe("/oppskrifter", () => {
   it("har overskriften utenfor Suspense og en reservetekst", async () => {
     const { heading, fallback } = await renderPage();
     render(heading);

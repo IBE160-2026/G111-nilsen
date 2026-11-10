@@ -14,6 +14,7 @@ import ConfirmDialog from "./ConfirmDialog";
 import FavoriteButton, { type FavoriteResult } from "./FavoriteButton";
 import FolderDialog from "./FolderDialog";
 import styles from "./RecipeActions.module.css";
+import { useGetSelectedServings } from "./SelectedServings";
 
 /** Hvor lenge «Lagret.», «Lagret i <navn>.» og «Fjernet fra mappen.» står, i millisekunder. */
 export const SAVED_MESSAGE_MS = STATUS_MESSAGE_MS;
@@ -23,7 +24,8 @@ type Props = {
   /** `true` når oppskriften er i samlingen (`savedAt` satt). */
   saved: boolean;
   /** Server Action bundet til oppskriften; ok eller en norsk melding. */
-  onSave: () => Promise<ActionResult>;
+  /** Lagrer oppskriften; `servings` er antallet brukeren har valgt, hvis noe er valgt (issue 009). */
+  onSave: (servings?: number) => Promise<ActionResult>;
   /** Server Action bundet til oppskriften; ved suksess sendes brukeren videre (redirect). */
   onDelete: () => Promise<ActionResult | void>;
   /** Mappene å velge mellom i «Lagre i mappe» (Story 3.3). */
@@ -71,6 +73,7 @@ export default function RecipeActions({
   isFavorite,
   onSetFavorite,
 }: Props) {
+  const getSelectedServings = useGetSelectedServings();
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -132,7 +135,7 @@ export default function RecipeActions({
     const hadFocus = document.activeElement === saveButton.current;
     setSaving(true);
     try {
-      const result = await onSave();
+      const result = await onSave(getSelectedServings());
       if (result.ok) {
         if (hadFocus) restoreFocus.current = "delete";
         flash(recipeActionMessages.saved);

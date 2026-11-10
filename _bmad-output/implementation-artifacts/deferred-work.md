@@ -222,3 +222,11 @@
 - source_spec: `spec-4-3-forslag-fra-sprakmodell.md`
   summary: Grensen på 10 kall i minuttet er per prosess og i minnet; den nullstilles ved omstart og deles av alle brukere. Oppskriftstekst fra nettet sendes til tredjepart (prompt-injeksjon mulig, men svaret valideres og vises bare som tekst).
   evidence: Greit for en lokal skoleapp. Vurder per-bruker-grense og innholdsfilter ved hosting.
+
+- source_spec: `oppryddingsøkt 2026-11-10`
+  summary: `npm audit` gir 11 moderate funn, alle i utviklingsverktøy: `esbuild` ≤ 0.24.2 via `drizzle-kit` → `@esbuild-kit` (utviklingsserveren til esbuild), og `minimatch` 7–11 via `eslint-config-next` → `@typescript-eslint` (DoS ved ugunstig mønster). `npm audit --omit=dev` gir 0.
+  evidence: Rettelse krever `npm audit fix --force` (hovedversjonsbytte av `drizzle-kit` og `eslint-config-next`). Ikke gjort for å unngå brudd like før innlevering; vurder når verktøyene uansett oppdateres.
+- source_spec: `oppryddingsøkt 2026-11-10`
+  summary: CI-arbeidsflyten `.github/workflows/ci.yml` er skrevet men ikke kjørt på GitHub. `npm ci` på ubuntu bygger `better-sqlite3` fra ferdig bygg (`gypfile: false`), og e2e installerer Chromium med `--with-deps`.
+  evidence: Se første kjøring under Actions og rett ved behov.
+

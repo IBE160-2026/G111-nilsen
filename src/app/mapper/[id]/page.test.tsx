@@ -117,7 +117,7 @@ describe("/mapper/[id]", () => {
     expect(screen.getByText("Legg oppskrifter i mappen fra oppskriftssiden.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Gå til oppskriftene" })).toHaveAttribute(
       "href",
-      "/samlingen",
+      "/oppskrifter",
     );
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });

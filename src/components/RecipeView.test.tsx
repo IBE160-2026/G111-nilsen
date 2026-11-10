@@ -381,7 +381,17 @@ describe("RecipeView", () => {
       expect(screen.getByRole("article")).toContainElement(save);
 
       await user.click(save);
-      expect(actions.saveRecipe).toHaveBeenCalledExactlyOnceWith(7);
+      expect(actions.saveRecipe).toHaveBeenCalledExactlyOnceWith(7, undefined);
+    });
+
+    it("ulagret oppskrift: antallet valgt før «Lagre» sendes med (issue 009)", async () => {
+      const user = userEvent.setup();
+      render(<RecipeView recipe={{ ...recipe, id: 7 }} folders={folders} />);
+      const input = screen.getByLabelText("Antall personer");
+      const original = Number((input as HTMLInputElement).value);
+      await user.click(screen.getByRole("button", { name: "Flere personer" }));
+      await user.click(screen.getByRole("button", { name: "Lagre" }));
+      expect(actions.saveRecipe).toHaveBeenCalledExactlyOnceWith(7, original + 1);
     });
 
     it("lagret oppskrift: «Slett» i stedet for «Lagre», og bekreftelse kaller removeRecipe med id", async () => {

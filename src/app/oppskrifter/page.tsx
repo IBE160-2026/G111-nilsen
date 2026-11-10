@@ -10,7 +10,7 @@ import listStyles from "../list-page.module.css";
 export const metadata: Metadata = { title: collectionMessages.heading };
 
 /**
- * Oppskrifter-siden, `/samlingen` (Story 3.1). Overskriften står utenfor Suspense; oppskriftene leses inne i
+ * Oppskrifter-siden, `/oppskrifter` (Story 3.1). Overskriften står utenfor Suspense; oppskriftene leses inne i
  * grensen, etter `connection()`, slik at databasen bare leses ved en faktisk forespørsel.
  */
 export default function SamlingenPage() {

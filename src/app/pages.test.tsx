@@ -8,7 +8,7 @@ import NotFound from "./not-found";
 
 afterEach(cleanup);
 
-describe("sider (spec 1.1, matrise: Start og Ukjent side; Samlingen, Mapper og Favoritter testes i samlingen/page.test.tsx, mapper/page.test.tsx og favoritter/page.test.tsx)", () => {
+describe("sider (spec 1.1, matrise: Start og Ukjent side; Samlingen, Mapper og Favoritter testes i oppskrifter/page.test.tsx, mapper/page.test.tsx og favoritter/page.test.tsx)", () => {
   it("Importer-siden viser overskriften «Hent en oppskrift»", () => {
     render(<ImporterPage />);
     expect(

@@ -75,20 +75,20 @@ npm start        # kjør produksjonsbygget
 
 ## Oppskrifter (samlingen)
 
-Menypunktet og overskriften heter «Oppskrifter». Adressen er fortsatt `/samlingen`, og koden og dokumentene kaller lagrede oppskrifter «samlingen».
+Menypunktet og overskriften heter «Oppskrifter». Adressen er fortsatt `/oppskrifter`, og koden og dokumentene kaller lagrede oppskrifter «samlingen».
 
-«Legg inn selv» lagrer oppskriften rett i samlingen: `savedAt` settes til lagringstidspunktet. Oppskrifter-siden (`/samlingen`) viser alle oppskrifter med `savedAt` satt som kort med tittel og kilde (kildenavn, ellers vertsnavnet fra lenken, ellers «Lagt inn selv»), sist lagret først. Hele kortet er én lenke til oppskriften. Er samlingen tom, vises en forklaring med knappene «Legg inn selv» og «Importer din første oppskrift».
+«Legg inn selv» lagrer oppskriften rett i samlingen: `savedAt` settes til lagringstidspunktet. Oppskrifter-siden (`/oppskrifter`) viser alle oppskrifter med `savedAt` satt som kort med tittel og kilde (kildenavn, ellers vertsnavnet fra lenken, ellers «Lagt inn selv»), sist lagret først. Hele kortet er én lenke til oppskriften. Er samlingen tom, vises en forklaring med knappene «Legg inn selv» og «Importer din første oppskrift».
 
 - En datamigrasjon (`drizzle/0001_move_manual_recipes_to_collection.sql`) legger manuelle oppskrifter som ble lagret før denne storyen (uten kilde-lenke) inn i samlingen. Den kjøres automatisk, endrer ikke skjemaet og er trygg å kjøre på nytt.
 - Rekkefølgen er «sist lagret først». Redigering endrer ikke `savedAt`, så plasseringen i listen er den samme. Sporing av «sist åpnet», sidedeling og søk er utsatt.
 - Siden leser databasen inne i `Suspense` etter `connection()`, og en databasefeil vises av `error.tsx` i stedet for en tom samling.
-- Koden ligger i `src/app/samlingen/`, `RecipeCard.tsx`, `listCollection` i `src/server/services/recipe-service.ts` og `listSavedRecipes` i `src/server/db/repositories/recipe-repository.ts`.
+- Koden ligger i `src/app/oppskrifter/`, `RecipeCard.tsx`, `listCollection` i `src/server/services/recipe-service.ts` og `listSavedRecipes` i `src/server/db/repositories/recipe-repository.ts`.
 
 ## Lagre, slette og rydde
 
 Nederst på oppskriftssiden står en lagre-linje som følger med når du ruller. Er oppskriften ikke i samlingen (`savedAt` er `null`), står det «Lagre». Etter lagring sier «Lagret.» fra i tre sekunder (skjermleseren leser det opp), og linjen viser «Slett». «Slett» åpner dialogen «Slette oppskriften?» med «Avbryt» som startfokus; bekrefter du, slettes oppskriften med ingredienser og steg, og du sendes til Samlingen. «Avbryt» eller Escape lukker dialogen uten å endre noe, og fokus går tilbake til «Slett».
 
-- **Sist valgte antall:** for en lagret oppskrift huskes antall personer ved hver endring (også «Tilbakestill»), og siden åpnes med sist valgte antall, også etter omstart. Skaleringen regner fortsatt fra originalmengdene. Valgt antall og lagring i samlingen endrer ikke `updatedAt`, så avkrysningen står. Avkrysning lagres fortsatt aldri.
+- **Sist valgte antall:** for en lagret oppskrift huskes antall personer ved hver endring (også «Tilbakestill»), og siden åpnes med sist valgte antall, også etter omstart. Skaleringen regner fortsatt fra originalmengdene. Et antall som velges før «Lagre» sendes med når oppskriften lagres (issue 009). Valgt antall og lagring i samlingen endrer ikke `updatedAt`, så avkrysningen står. Avkrysning lagres fortsatt aldri.
 - **Opprydding:** oppskrifter som aldri ble lagret i samlingen og er eldre enn et døgn slettes (med ingredienser og steg) når appen starter og deretter hver time mens den kjører (`src/instrumentation.ts`). Lagrede oppskrifter slettes aldri av dette, og rydding skjer ikke når en side vises.
 - Koden ligger i `src/app/oppskrift/[id]/actions.ts` (Server Actions), `RecipeActions.tsx` og `ConfirmDialog.tsx`, tjenestene `saveRecipeToCollection`, `deleteRecipe`, `setSelectedServings` og `purgeStaleUnsavedRecipes` i `src/server/services/recipe-service.ts` og tilsvarende funksjoner i `recipe-repository.ts`.
 - Testes med `npm test`: repository og tjenester mot en ekte SQLite-database i minnet (blant annet at sletting kaskaderer og at `updatedAt` er uendret), handlinger, dialog og lagre-linje (falske tidtakere for tresekundersregelen) og opprydding med falske tidtakere.
@@ -201,6 +201,14 @@ npm run test:e2e     # ende-til-ende-tester (Playwright), se under
 
 `npm run lint` og `npm test` skal være grønne før hver commit.
 
+### CI (GitHub Actions)
+
+`.github/workflows/ci.yml` kjører lint, typekontroll, formatsjekk, `npm test`, bygg og `npm run test:e2e` på hver push og pull request til `main` (Node 22, ingen hemmeligheter). Arbeidsflyten er ikke prøvd på GitHub ennå; første kjøring viser om den trenger justering.
+
+### Kjente funn i `npm audit`
+
+`npm audit` melder 11 funn med alvorlighet moderat. Alle ligger i utviklingsverktøy (`drizzle-kit` via `esbuild`, og `eslint-config-next` via `minimatch`); `npm audit --omit=dev` gir 0 funn i det som kjører i appen. Rettelsene (`npm audit fix --force`) krever hovedversjonsbytter av verktøyene og er ikke gjort; se `deferred-work.md`.
+
 ### Ende-til-ende-tester
 
 ```bash
@@ -210,20 +218,19 @@ npm run test:e2e
 
 `npm run test:e2e` bygger appen og starter den på port 3100 med en midlertidig database (`.e2e/`, slettes ved hver kjøring), lagrede oppskriftssider i stedet for nettet (`IMPORT_SOURCE=fixtures`) og uten språkmodellnøkkel (eksempelforslag). Ingen test bruker nettverket. Stopp `npm run dev` først, siden bygget bruker samme `.next`-mappe.
 
-`e2e/kjerneflyt.spec.ts` kjører hver gang ved 360 px og 1280 px:
+`e2e/kjerneflyt.spec.ts` kjører hver gang ved 360 px og 1280 px (12 tester):
 
 - **UJ-1:** importer en oppskrift, velg ett flere personer, lagre i en ny mappe og gjør den til favoritt.
 - **UJ-2:** velg 5 personer, få forslag, ta i bruk ett og hopp over resten, lagre i mappe og se at forslaget huskes etter at siden lastes på nytt. Kanttilfelle: en oversiktsside gir «Fant ingen oppskrift på siden».
 - **UJ-3:** finn oppskriften igjen under Favoritter, se at antallet huskes, og endre det.
+- **Gammel adresse:** `/samlingen` sendes videre til `/oppskrifter`.
 - **Tastatur:** Tab når «Færre personer», «Flere personer» og «Få forslag», og fokus er synlig overalt, i lys og mørk modus.
 
-Én kjent forskjell fra PRD: et antall som velges *før* «Lagre» huskes ikke, bare et valgt etter lagring (se [issue 009](issues/009-valgt-antall-glemmes-ved-lagring.md)); testen følger dagens oppførsel.
-
-Playwright-versjonen er låst i `package-lock.json`. Ligger nettleseren et annet sted enn Playwright forventer, sett `E2E_CHROMIUM_PATH` til stien til `chrome`.
+Playwright-versjonen er låst i `package-lock.json`. Ligger nettleseren et annet sted enn Playwright forventer, eller lar `npx playwright install chromium` seg ikke fullføre, sett `E2E_CHROMIUM_PATH` til en Chrome du har fra før. På en Mac: `E2E_CHROMIUM_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" npm run test:e2e`.
 
 ### Hva testene dekker
 
-`npm test` kjører Vitest én gang og gir i dag 79 testfiler og 2303 tester (ende-til-ende-testene kommer i tillegg, se over). Ingen test bruker nettverket (bare lokale 127.0.0.1-tjenere) eller en ekte API-nøkkel.
+`npm test` kjører Vitest én gang og gir i dag 79 testfiler og 2313 tester (ende-til-ende-testene kommer i tillegg, se over). Ingen test bruker nettverket (bare lokale 127.0.0.1-tjenere) eller en ekte API-nøkkel.
 
 - **Domenet** (`src/domain/`): tolking av mengder og ingredienslinjer og skalering og formatering, med fasittabellen fra Epic 1 (400 g mel for 6 gir 600 g, «1 egg (ca.)», og så videre) som egne tester, og lesing av oppskriftsdata fra lagrede HTML-sider (JSON-LD, normalisering, tekstrensing, ytelse for 2 MB og aldri-kaster-egenskap).
 - **Server** (`src/server/`): repositorier og tjenester mot en ekte SQLite-database i minnet, blant annet tilbakerulling ved feil, redigering, samlingen, lagring, sletting og opprydding, og datamigrasjonen (en database med bare den første migrasjonen oppgraderes).

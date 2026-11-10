@@ -139,7 +139,7 @@ describe("/favoritter", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Gå til oppskriftene" })).toHaveAttribute(
       "href",
-      "/samlingen",
+      "/oppskrifter",
     );
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
     expect(screen.queryByText("Ikke favoritt")).not.toBeInTheDocument();

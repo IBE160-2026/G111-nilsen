@@ -3,6 +3,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testi
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import RecipeActions from "./RecipeActions";
+import { SelectedServingsProvider, useReportSelectedServings } from "./SelectedServings";
 
 beforeEach(() => {
   HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
@@ -546,5 +547,43 @@ describe("RecipeActions: hjerte (Story 3.4)", () => {
     await user.click(heart());
     expect(screen.getByRole("button", { name: "Lagre i mappe" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Slett Pannekaker" })).toBeEnabled();
+  });
+});
+
+describe("RecipeActions: valgt antall følger med «Lagre» (issue 009)", () => {
+  function Picker() {
+    const report = useReportSelectedServings();
+    return (
+      <button type="button" onClick={() => report(5)}>
+        Velg 5
+      </button>
+    );
+  }
+
+  it("sender antallet porsjonsvelgeren har meldt, ellers ingenting", async () => {
+    const user = userEvent.setup();
+    const onSave = vi.fn().mockResolvedValue({ ok: true });
+    render(
+      <SelectedServingsProvider>
+        <Picker />
+        <RecipeActions
+          title="Pannekaker"
+          saved={false}
+          onSave={onSave}
+          onDelete={vi.fn()}
+          {...folderProps}
+        />
+      </SelectedServingsProvider>,
+    );
+    await user.click(screen.getByRole("button", { name: "Velg 5" }));
+    await user.click(screen.getByRole("button", { name: "Lagre" }));
+    expect(onSave).toHaveBeenCalledExactlyOnceWith(5);
+  });
+
+  it("uten valgt antall (eller uten leverandør) kalles onSave uten antall", async () => {
+    const user = userEvent.setup();
+    const { onSave } = setup();
+    await user.click(screen.getByRole("button", { name: "Lagre" }));
+    expect(onSave).toHaveBeenCalledExactlyOnceWith(undefined);
   });
 });

@@ -85,6 +85,29 @@ describe("saveRecipe", () => {
     expect(revalidatePath).toHaveBeenCalledExactlyOnceWith("/", "layout");
   });
 
+  it("husker antallet som ble valgt før lagring (issue 009)", async () => {
+    unsave();
+    expect(await saveRecipe(id, 6)).toEqual({ ok: true });
+    expect(stored().savedAt).not.toBeNull();
+    expect(stored().selectedServings).toBe(6);
+  });
+
+  it.each([0, 51, 1.5, NaN, "5" as unknown as number])(
+    "ugyldig antall %s: oppskriften lagres, antallet ignoreres",
+    async (bad) => {
+      unsave();
+      expect(await saveRecipe(id, bad)).toEqual({ ok: true });
+      expect(stored().savedAt).not.toBeNull();
+      expect(stored().selectedServings).toBeNull();
+    },
+  );
+
+  it("uten antall: selectedServings er uendret", async () => {
+    unsave();
+    expect(await saveRecipe(id)).toEqual({ ok: true });
+    expect(stored().selectedServings).toBeNull();
+  });
+
   it("allerede lagret: beholder tidspunktet", async () => {
     const before = stored().savedAt;
     expect(await saveRecipe(id)).toEqual({ ok: true });
@@ -110,10 +133,10 @@ describe("saveRecipe", () => {
 });
 
 describe("removeRecipe", () => {
-  it("sletter oppskriften med linjer og steg og sender brukeren til /samlingen", async () => {
+  it("sletter oppskriften med linjer og steg og sender brukeren til /oppskrifter", async () => {
     const error = await removeRecipe(id).catch((e) => e);
     expect(error).toBeInstanceOf(RedirectError);
-    expect((error as RedirectError).url).toBe("/samlingen");
+    expect((error as RedirectError).url).toBe("/oppskrifter");
     expect(getRecipe(id, state.db!).ok).toBe(false);
     expect(count("recipes")).toBe(0);
     expect(count("ingredient_lines")).toBe(0);

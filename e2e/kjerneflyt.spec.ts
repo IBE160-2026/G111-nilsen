@@ -100,13 +100,6 @@ test("UJ-1: importer, skaler til ett flere, lagre i mappe og gjør til favoritt"
     "aria-pressed",
     "true",
   );
-
-  // Valgt antall huskes bare for lagrede oppskrifter (issue 009): et nytt valg etter lagring lagres.
-  await page.getByRole("button", { name: "Flere personer" }).click();
-  await expect(page.getByLabel("Antall personer", { exact: true })).toHaveValue(
-    String(uj1.original + 2),
-  );
-  await page.waitForTimeout(500);
 });
 
 test("UJ-2: forslag tas i bruk og huskes; oversiktsside gir melding", async ({
@@ -173,9 +166,10 @@ test("UJ-3: finn igjen favoritten under Favoritter og endre antallet", async ({
     .click();
   await expect(page.getByRole("heading", { level: 1, name: uj1.title })).toBeVisible();
 
-  // Antallet fra forrige gang huskes: UJ-1 endte på to flere enn det oppskriften er laget for.
+  // Antallet fra forrige gang huskes: UJ-1 valgte ett flere enn det oppskriften er laget for,
+  // før den ble lagret (issue 009).
   await expect(page.getByLabel("Antall personer", { exact: true })).toHaveValue(
-    String(uj1.original + 2),
+    String(uj1.original + 1),
   );
   await setServings(page, 3);
   await expect(page.getByLabel("Antall personer", { exact: true })).toHaveValue("3");
@@ -222,3 +216,9 @@ for (const scheme of ["light", "dark"] as const) {
     });
   });
 }
+
+test("Den gamle adressen /samlingen sendes til /oppskrifter", async ({ page }) => {
+  await page.goto("/samlingen");
+  await expect(page).toHaveURL(/\/oppskrifter$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Oppskrifter" })).toBeVisible();
+});

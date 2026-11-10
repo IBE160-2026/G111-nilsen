@@ -33,7 +33,7 @@ describe("TopNav", () => {
     ]);
     expect(links.map((l) => l.getAttribute("href"))).toEqual([
       "/",
-      "/samlingen",
+      "/oppskrifter",
       "/mapper",
       "/favoritter",
     ]);
@@ -41,7 +41,7 @@ describe("TopNav", () => {
 
   it.each([
     ["/", "Importer"],
-    ["/samlingen", "Oppskrifter"],
+    ["/oppskrifter", "Oppskrifter"],
     ["/mapper", "Mapper"],
     ["/mapper/3", "Mapper"],
     ["/favoritter", "Favoritter"],
@@ -68,7 +68,7 @@ describe("TopNav", () => {
 describe("isActive", () => {
   it("Importer er bare aktiv på startsiden", () => {
     expect(isActive("/", "/")).toBe(true);
-    expect(isActive("/", "/samlingen")).toBe(false);
+    expect(isActive("/", "/oppskrifter")).toBe(false);
   });
 
   it("matcher ikke prefiks uten skråstrek", () => {
