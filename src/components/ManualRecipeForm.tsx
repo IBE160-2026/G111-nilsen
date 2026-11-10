@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useId, useRef } from "react";
 import {
   MANUAL_RECIPE_FIELDS,
   type ManualRecipeField,
@@ -45,6 +45,9 @@ export default function ManualRecipeForm({
       : initialManualRecipeState,
   );
   const formRef = useRef<HTMLFormElement>(null);
+  // Unike id-er: forrige side kan ligge skjult i DOM-en (Activity) med samme skjema (issue 010).
+  const uid = useId();
+  const idOf = (field: ManualRecipeField) => `${uid}-${field}`;
   const formErrorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,19 +58,19 @@ export default function ManualRecipeForm({
   }, [state]);
 
   const describedBy = (field: ManualRecipeField, hint?: boolean) =>
-    [hint ? `${field}-hint` : null, state.fieldErrors[field] ? `${field}-error` : null]
+    [hint ? `${idOf(field)}-hint` : null, state.fieldErrors[field] ? `${idOf(field)}-error` : null]
       .filter(Boolean)
       .join(" ") || undefined;
 
   const error = (field: ManualRecipeField) =>
     state.fieldErrors[field] ? (
-      <p id={`${field}-error`} className={styles.error}>
+      <p id={`${idOf(field)}-error`} className={styles.error}>
         {state.fieldErrors[field]}
       </p>
     ) : null;
 
   const fieldProps = (field: ManualRecipeField, hint?: boolean) => ({
-    id: field,
+    id: idOf(field),
     name: field,
     defaultValue: state.values[field],
     "aria-invalid": state.fieldErrors[field] ? true : undefined,
@@ -77,7 +80,7 @@ export default function ManualRecipeForm({
   return (
     <form ref={formRef} action={formAction} className={styles.form} noValidate>
       <div className={styles.field}>
-        <label htmlFor="title" className={styles.label}>
+        <label htmlFor={idOf("title")} className={styles.label}>
           Tittel
         </label>
         <input
@@ -91,10 +94,10 @@ export default function ManualRecipeForm({
       </div>
 
       <div className={styles.field}>
-        <label htmlFor="servings" className={styles.label}>
+        <label htmlFor={idOf("servings")} className={styles.label}>
           Antall personer
         </label>
-        <p id="servings-hint" className={styles.hint}>
+        <p id={`${idOf("servings")}-hint`} className={styles.hint}>
           Hvor mange oppskriften er til, et helt tall fra 1 til 50.
         </p>
         <input
@@ -109,10 +112,10 @@ export default function ManualRecipeForm({
       </div>
 
       <div className={styles.field}>
-        <label htmlFor="ingredients" className={styles.label}>
+        <label htmlFor={idOf("ingredients")} className={styles.label}>
           Ingredienser
         </label>
-        <p id="ingredients-hint" className={styles.hint}>
+        <p id={`${idOf("ingredients")}-hint`} className={styles.hint}>
           Én ingrediens per linje, for eksempel «400 g mel» eller «2 egg».
         </p>
         <textarea
@@ -125,10 +128,10 @@ export default function ManualRecipeForm({
       </div>
 
       <div className={styles.field}>
-        <label htmlFor="steps" className={styles.label}>
+        <label htmlFor={idOf("steps")} className={styles.label}>
           Steg (valgfritt)
         </label>
-        <p id="steps-hint" className={styles.hint}>
+        <p id={`${idOf("steps")}-hint`} className={styles.hint}>
           Ett steg per linje. Stegene nummereres automatisk.
         </p>
         <textarea rows={8} className={styles.textarea} {...fieldProps("steps", true)} />

@@ -1,5 +1,7 @@
 # Spec 5.5: metriske mål
 
+> **Erstattet av Story 5.9 (2026-11-10):** avkrysningsboksen «Vis i metriske mål» ble byttet ut med radiogruppen «Vis mengder i» (som i oppskriften / dl / gram). Omregningen av kopper, unser og pund under gjelder fortsatt.
+
 ## Intent
 Versjon 2. Oppskrifter fra engelske sider bruker kopper, unser og pund. Brukeren kan slå på «Vis i metriske mål» og se mengdene i dl, gram og kg. Omregning av enheter sto utenfor v1 (PRD).
 

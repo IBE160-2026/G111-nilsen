@@ -1,5 +1,7 @@
 # Spec 5.11: forslag som er tatt i bruk vises i oppskriften
 
+> **Delvis erstattet av Story 5.12 (2026-11-10):** stegforslag blir ikke lenger egne steg, men flettes inn i teksten i steget de hører til. Ingrediensforslag og «Forslag til retten» under gjelder fortsatt.
+
 ## Intent
 Versjon 2. Når brukeren trykker «Ta i bruk», skal forslaget komme inn i oppskriften: i ingredienslisten eller ved riktig steg. Valgt av Maja: vis det i listene, merket, uten å endre originalen (alternativet var å redigere oppskriften).
 

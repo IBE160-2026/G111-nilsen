@@ -230,3 +230,22 @@
   summary: CI-arbeidsflyten `.github/workflows/ci.yml` er skrevet men ikke kjørt på GitHub. `npm ci` på ubuntu bygger `better-sqlite3` fra ferdig bygg (`gypfile: false`), og e2e installerer Chromium med `--with-deps`.
   evidence: Se første kjøring under Actions og rett ved behov.
 
+- source_spec: `spec-5-13-innlogging.md`
+  summary: Glemt passord og bytte passord. Forslag: e-postport med konsolladapter uten nøkkel (lenken skrives i Terminal) og ekte e-post med nøkkel, som forslagene; engangslenke som varer i én time.
+  evidence: Krever utsending av e-post; Maja valgte å ta det senere (2026-11-10). Retrospektiv Epic 5, tiltak A6.
+- source_spec: `spec-5-13-innlogging.md`
+  summary: Begrensning av innloggingsforsøk, sletting av konto, og at en oppskrift hentet uten innlogging kan åpnes og endres av alle med lenken til den lagres eller ryddes.
+  evidence: AD-12 og triageloggen i spec-5-13. Greit lokalt; må tas før appen eventuelt hostes.
+- source_spec: `epic-5-retro-2026-11-10.md`
+  summary: Én felles ordmatching i domenet. I dag matcher `convert-units` (tettheter), `step-ingredients`, `suggest-for-recipe` og `apply-suggestions` ingrediensnavn på fire litt ulike måter.
+  evidence: Retrospektiv Epic 5, funn K2.
+- source_spec: `spec-5-7-handleliste.md`, `spec-5-8-har-hjemme.md`
+  summary: Handlelisten: slå sammen beslektede navn («mel»/«hvetemel») og enheter (dl + ss), kg/l for store summer, huske utvalg og avkrysning, rader per avdeling, la «Har hjemme» matche beslektede navn.
+  evidence: Utsatt i triageloggene til 5.7 og 5.8.
+- source_spec: `spec-5-9-mal-dl-og-gram.md`, `spec-5-12-forslag-i-stegteksten.md`
+  summary: Egne tettheter per ingrediens og flere varer, huske valg av mål, skalere mengder i stegtekst, la språkmodellen gi linje og plassering for forslag.
+  evidence: Utsatt i triageloggene til 5.9, 5.11 og 5.12.
+- source_spec: `spec-5-2-sok-og-filter.md`, `spec-5-3-glidebryter-for-porsjoner.md`
+  summary: Søk og filter i adressen (kan deles og overlever omlasting), sortering, og lagre valgt antall først når glidebryteren slippes.
+  evidence: Utsatt i triageloggene til 5.2 og 5.3.
+

@@ -11,7 +11,7 @@ import {
   type UnitSystem,
 } from "@/domain";
 import { cookingModeMessages as m } from "@/lib/messages";
-import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
+import { isSelectedServings, validOriginalServings } from "@/lib/recipe-input";
 import { useGetSelectedServings, useGetUnitSystem } from "./SelectedServings";
 import { servingsText } from "./ServingStepper";
 import StepText from "./StepText";
@@ -26,15 +26,6 @@ type Props = {
   /** Lagret valgt antall, brukt når ingenting er valgt på siden. */
   selectedServings: number | null;
 };
-
-function validOriginal(value: number | null): number | null {
-  return value !== null &&
-    Number.isInteger(value) &&
-    value >= LIMITS.servingsMin &&
-    value <= LIMITS.servingsMax
-    ? value
-    : null;
-}
 
 /**
  * Kokemodus (Story 5.4): fullskjerms modal med ett steg om gangen i stor tekst, ingrediensene i
@@ -57,7 +48,7 @@ export default function CookingMode({
   const getUnits = useGetUnitSystem();
   // Målsystemet som gjaldt da kokemodus ble åpnet.
   const [units, setUnits] = useState<UnitSystem>("original");
-  const original = validOriginal(originalServings);
+  const original = validOriginalServings(originalServings);
 
   function openMode() {
     setUnits(getUnits());

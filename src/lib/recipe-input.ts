@@ -14,6 +14,19 @@ export const LIMITS = {
 } as const;
 
 /**
+ * Antallet oppskriften er skrevet for, når det kan skaleres fra: heltall 1–50. Alt annet (0,
+ * negativt, desimal, over 50, `null`) gir `null`, og oppskriften vises uskalert.
+ */
+export function validOriginalServings(value: number | null): number | null {
+  return value !== null &&
+    Number.isInteger(value) &&
+    value >= LIMITS.servingsMin &&
+    value <= LIMITS.servingsMax
+    ? value
+    : null;
+}
+
+/**
  * Gyldig valgt antall personer (Story 5.1, 5.3): hele eller halve tall fra 0,5 til 50 (4, 4,5, 5 …).
  * Antallet oppskriften er skrevet for (`originalServings`) er fortsatt bare hele tall.
  */

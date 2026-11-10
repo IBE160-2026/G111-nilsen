@@ -12,7 +12,7 @@ import {
   type UnitSystem,
 } from "@/domain";
 import { servingsDialogMessages } from "@/lib/messages";
-import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
+import { isSelectedServings, validOriginalServings } from "@/lib/recipe-input";
 import CheckRow from "./CheckRow";
 import { useReportSelectedServings, useReportUnitSystem } from "./SelectedServings";
 import ServingsDialog, { DEFAULT_SERVINGS } from "./ServingsDialog";
@@ -127,15 +127,6 @@ type Props = {
  * til serveren via `onServingsChange` (lagret oppskrift). Avkrysningen er nøklet på
  * linje-id, så den består når antallet endres.
  */
-/** Opprinnelig antall som kan skaleres fra: heltall innenfor 1–50, ellers `null`. */
-function validServings(value: number | null): number | null {
-  return value !== null &&
-    Number.isInteger(value) &&
-    value >= LIMITS.servingsMin &&
-    value <= LIMITS.servingsMax
-    ? value
-    : null;
-}
 
 /** Sender antallet til serveren uten å vente; feil logges og forstyrrer ikke siden. */
 function remember(save: (servings: number) => unknown, servings: number) {
@@ -163,7 +154,7 @@ export default function IngredientList({
   // Ugyldig opprinnelig antall (0, negativt, desimal, over 50) behandles som manglende.
   // Etter lagring i dialogen er det lokale antallet fasit (siden revalideres i bakgrunnen).
   const [savedOriginal, setSavedOriginal] = useState<number | null>(null);
-  const originalServings = savedOriginal ?? validServings(rawOriginal);
+  const originalServings = savedOriginal ?? validOriginalServings(rawOriginal);
   // Ugyldig lagret antall (0, 99, desimal) gir opprinnelig antall.
   const [selected, setSelected] = useState(
     originalServings === null

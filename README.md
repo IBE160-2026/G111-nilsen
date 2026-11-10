@@ -256,7 +256,7 @@ Playwright-versjonen er låst i `package-lock.json`. Ligger nettleseren et annet
 
 ### Hva testene dekker
 
-`npm test` kjører Vitest én gang og gir i dag 99 testfiler og 2618 tester (ende-til-ende-testene kommer i tillegg, se over). Ingen test bruker nettverket (bare lokale 127.0.0.1-tjenere) eller en ekte API-nøkkel.
+`npm test` kjører Vitest én gang og gir i dag 100 testfiler og 2626 tester (ende-til-ende-testene kommer i tillegg, se over). Ingen test bruker nettverket (bare lokale 127.0.0.1-tjenere) eller en ekte API-nøkkel.
 
 - **Domenet** (`src/domain/`): tolking av mengder og ingredienslinjer og skalering og formatering, med fasittabellen fra Epic 1 (400 g mel for 6 gir 600 g, «1 egg (ca.)», og så videre) som egne tester, og lesing av oppskriftsdata fra lagrede HTML-sider (JSON-LD, normalisering, tekstrensing, ytelse for 2 MB og aldri-kaster-egenskap).
 - **Server** (`src/server/`): repositorier og tjenester mot en ekte SQLite-database i minnet, blant annet tilbakerulling ved feil, redigering, samlingen, lagring, sletting og opprydding, og datamigrasjonen (en database med bare den første migrasjonen oppgraderes).

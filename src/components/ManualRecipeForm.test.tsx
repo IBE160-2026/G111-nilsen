@@ -53,9 +53,8 @@ describe("ManualRecipeForm", () => {
     expect(servings).toHaveAttribute("aria-invalid", "true");
     expect(servings).toHaveAccessibleDescription(/Skriv et helt tall fra 1 til 50\./);
     expect(servings.getAttribute("aria-describedby")).toContain("servings-error");
-    expect(document.getElementById("servings-error")).toHaveTextContent(
-      "Skriv et helt tall fra 1 til 50.",
-    );
+    const errorId = servings.getAttribute("aria-describedby")!.split(" ").at(-1)!;
+    expect(document.getElementById(errorId)).toHaveTextContent("Skriv et helt tall fra 1 til 50.");
     expect(screen.getByLabelText("Ingredienser")).toHaveAccessibleDescription(
       /Skriv minst én ingrediens/,
     );
