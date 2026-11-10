@@ -106,6 +106,7 @@ export async function importRecipe(
       ingredients: content.ingredients,
       steps: content.steps,
       userId,
+      totalMinutes: imported.value.totalMinutes ?? null,
     });
     return stored.kind === "duplicate"
       ? err(appError("duplicate", String(stored.id)))

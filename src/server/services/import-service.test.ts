@@ -472,3 +472,18 @@ describe("importRecipe og eierskap (Story 5.13)", () => {
     expect(anonymous.ok).toBe(true);
   });
 });
+
+describe("importRecipe: tid (Story 6.2)", () => {
+  it("lagrer tiden fra kilden (totalTime PT80M på Rundstykker)", async () => {
+    const d = deps();
+    const result = await importRecipe(
+      "https://www.matprat.no/oppskrifter/familien/rundstykker/",
+      d,
+    );
+    if (!result.ok) throw new Error("feil");
+    const row = d.db.$client
+      .prepare("select total_minutes as m from recipes where id = ?")
+      .get(result.value.id);
+    expect(row).toEqual({ m: 80 });
+  });
+});

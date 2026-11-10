@@ -135,6 +135,7 @@ export default function RecipeView({
           isFavorite={recipe.isFavorite}
           onSetFavorite={setFavorite.bind(null, recipe.id)}
           loginHref={signedIn ? undefined : loginHref(`/oppskrift/${recipe.id}`)}
+          totalMinutes={recipe.totalMinutes ?? null}
         />
       </article>
     </SelectedServingsProvider>

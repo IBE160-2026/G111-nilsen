@@ -1,6 +1,7 @@
 import "server-only";
 import {
   buildSearchText,
+  isRecipeMinutes,
   parseLine,
   type CollectionEntry,
   type Recipe,
@@ -35,9 +36,11 @@ export type ManualRecipeInput = {
   servings: number;
   ingredients: string[];
   steps: string[];
+  /** Tid i minutter, 1–1440 (Story 6.2); `null` = ingen tid, utelatt = ikke en del av skjemaet. */
+  minutes?: number | null;
 };
 
-type ManualRecipeField = "title" | "servings" | "ingredients" | "steps";
+type ManualRecipeField = "title" | "servings" | "minutes" | "ingredients" | "steps";
 
 function linesOf(texts: string[]): string[] {
   return texts.flatMap(splitLines);
@@ -82,6 +85,9 @@ function buildContent(input: ManualRecipeInput): Result<RecipeContent> {
 
   const invalid = invalidField(title, input.servings, ingredients, stepTexts);
   if (invalid) return err(appError("validation", invalid));
+  if (input.minutes != null && !isRecipeMinutes(input.minutes)) {
+    return err(appError("validation", "minutes"));
+  }
 
   return ok({
     title,
@@ -120,6 +126,7 @@ export function createManualRecipe(
     ingredients: content.value.ingredients,
     steps: content.value.steps,
     userId,
+    totalMinutes: input.minutes ?? null,
   });
   return ok({ id });
 }
@@ -145,6 +152,7 @@ export function updateManualRecipe(
     updatedAt: new Date().toISOString(),
     ingredients: content.value.ingredients,
     steps: content.value.steps,
+    ...(input.minutes !== undefined ? { totalMinutes: input.minutes } : {}),
   });
   return updated ? ok({ id }) : err(appError("not_found"));
 }

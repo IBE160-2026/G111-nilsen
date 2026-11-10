@@ -14,6 +14,7 @@ function failingAction(fieldErrors: ManualRecipeFormState["fieldErrors"]) {
     values: {
       title: String(formData.get("title") ?? ""),
       servings: String(formData.get("servings") ?? ""),
+      minutes: String(formData.get("minutes") ?? ""),
       ingredients: String(formData.get("ingredients") ?? ""),
       steps: String(formData.get("steps") ?? ""),
     },
@@ -76,7 +77,7 @@ describe("ManualRecipeForm", () => {
     await waitFor(() => expect(button).toBeDisabled());
     finish({
       fieldErrors: { title: "Skriv en tittel." },
-      values: { title: "", servings: "", ingredients: "", steps: "" },
+      values: { title: "", servings: "", minutes: "", ingredients: "", steps: "" },
     });
     await waitFor(() => expect(button).toBeEnabled());
     // Fokus flyttes i en effekt etter at knappen er aktiv igjen, så det må ventes på.
@@ -94,7 +95,7 @@ describe("ManualRecipeForm", () => {
     const user = userEvent.setup();
     const action = vi.fn(async () => ({
       fieldErrors: {},
-      values: { title: "A", servings: "4", ingredients: "2 egg", steps: "" },
+      values: { title: "A", servings: "4", minutes: "", ingredients: "2 egg", steps: "" },
       formError: "Noe gikk galt. Prøv igjen.",
     }));
     render(<ManualRecipeForm action={action} />);
@@ -119,6 +120,7 @@ describe("ManualRecipeForm", () => {
         initialValues={{
           title: "Vafler",
           servings: "6",
+          minutes: "",
           ingredients: "1 egg\n2 dl melk",
           steps: "Rør.",
         }}
@@ -140,7 +142,13 @@ describe("ManualRecipeForm", () => {
     render(
       <ManualRecipeForm
         action={failingAction({ title: "Skriv en tittel." })}
-        initialValues={{ title: "Vafler", servings: "6", ingredients: "1 egg", steps: "" }}
+        initialValues={{
+          title: "Vafler",
+          servings: "6",
+          minutes: "",
+          ingredients: "1 egg",
+          steps: "",
+        }}
         submitLabel="Lagre endringer"
         cancelHref="/oppskrift/7"
       />,
@@ -170,7 +178,7 @@ describe("ManualRecipeForm", () => {
     expect(click.defaultPrevented).toBe(true);
     finish({
       fieldErrors: { title: "Skriv en tittel." },
-      values: { title: "", servings: "", ingredients: "", steps: "" },
+      values: { title: "", servings: "", minutes: "", ingredients: "", steps: "" },
     });
     await waitFor(() => expect(cancel).not.toHaveAttribute("aria-disabled"));
     const after = new MouseEvent("click", { bubbles: true, cancelable: true });
@@ -179,7 +187,13 @@ describe("ManualRecipeForm", () => {
   });
 
   it("viser nye startverdier når skjemaet får ny key (ikke gamle verdier)", () => {
-    const values = (title: string) => ({ title, servings: "4", ingredients: "1 egg", steps: "" });
+    const values = (title: string) => ({
+      title,
+      servings: "4",
+      minutes: "",
+      ingredients: "1 egg",
+      steps: "",
+    });
     const { rerender } = render(
       <ManualRecipeForm key="1-a" action={failingAction({})} initialValues={values("Gammel")} />,
     );
@@ -188,5 +202,13 @@ describe("ManualRecipeForm", () => {
       <ManualRecipeForm key="1-b" action={failingAction({})} initialValues={values("Ny")} />,
     );
     expect(screen.getByLabelText("Tittel")).toHaveValue("Ny");
+  });
+
+  it("har et valgfritt felt for tid i minutter med forklaring (Story 6.2)", () => {
+    render(<ManualRecipeForm action={failingAction({})} />);
+    const field = screen.getByLabelText("Tid (minutter)");
+    expect(field).toHaveAttribute("name", "minutes");
+    expect(field).not.toHaveAttribute("aria-required");
+    expect(field).toHaveAccessibleDescription(/Valgfritt/);
   });
 });

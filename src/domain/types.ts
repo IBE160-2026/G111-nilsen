@@ -88,6 +88,8 @@ export type Recipe = {
   updatedAt: string;
   ingredients: RecipeLine[];
   steps: Step[];
+  /** Hvor lang tid oppskriften tar, i minutter (Story 6.2); `null` eller utelatt = ikke oppgitt. */
+  totalMinutes?: number | null;
   /** Forslag brukeren har tatt i bruk (Story 4.2), eldste først. Endrer aldri ingredienser eller steg. */
   suggestions: AppliedSuggestion[];
 };

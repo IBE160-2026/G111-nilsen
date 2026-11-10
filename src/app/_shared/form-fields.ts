@@ -1,5 +1,11 @@
 /** Feltene i skjemaet «Legg inn selv», i den rekkefølgen de vises. */
-export const MANUAL_RECIPE_FIELDS = ["title", "servings", "ingredients", "steps"] as const;
+export const MANUAL_RECIPE_FIELDS = [
+  "title",
+  "servings",
+  "minutes",
+  "ingredients",
+  "steps",
+] as const;
 export type ManualRecipeField = (typeof MANUAL_RECIPE_FIELDS)[number];
 
 export type ManualRecipeValues = Record<ManualRecipeField, string>;

@@ -147,6 +147,7 @@ describe("lagrede oppskriftssider med Recipe", () => {
         "sourceName",
         "steps",
         "title",
+        "totalMinutes",
       ]);
     },
   );

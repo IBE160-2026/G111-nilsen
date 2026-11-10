@@ -13,6 +13,7 @@ import {
 } from "@/lib/messages";
 import { STATUS_MESSAGE_MS } from "@/lib/timing";
 import ConfirmDialog from "./ConfirmDialog";
+import RecipeTime from "./RecipeTime";
 import FavoriteButton, { type FavoriteResult } from "./FavoriteButton";
 import FolderDialog from "./FolderDialog";
 import styles from "./RecipeActions.module.css";
@@ -22,6 +23,8 @@ import { useGetSelectedServings } from "./SelectedServings";
 export const SAVED_MESSAGE_MS = STATUS_MESSAGE_MS;
 
 type Props = {
+  /** Hvor lang tid oppskriften tar (Story 6.2), vist ved hjertet; `null` eller utelatt = ingen. */
+  totalMinutes?: number | null;
   /**
    * Satt uten innlogging (Story 5.13): «Lagre» byttes med en lenke til innlogging, som sender
    * brukeren tilbake hit etterpå.
@@ -80,6 +83,7 @@ export default function RecipeActions({
   isFavorite,
   onSetFavorite,
   loginHref,
+  totalMinutes = null,
 }: Props) {
   const getSelectedServings = useGetSelectedServings();
   const [saving, setSaving] = useState(false);
@@ -198,6 +202,7 @@ export default function RecipeActions({
               onSetFavorite={onSetFavorite}
               onResult={favoriteChanged}
             />
+            {totalMinutes != null ? <RecipeTime minutes={totalMinutes} /> : null}
             <button
               ref={folderButton}
               type="button"
@@ -233,7 +238,9 @@ export default function RecipeActions({
               {recipeActionMessages.delete}
             </button>
           </>
-        ) : loginHref ? (
+        ) : null}
+        {!saved && totalMinutes != null ? <RecipeTime minutes={totalMinutes} /> : null}
+        {saved ? null : loginHref ? (
           <Link href={loginHref} className={styles.primary}>
             {accountMessages.saveNeedsLogin}
           </Link>

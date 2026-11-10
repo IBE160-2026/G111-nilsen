@@ -598,3 +598,18 @@ describe("RecipeActions: uten innlogging (Story 5.13)", () => {
     expect(screen.queryByRole("button", { name: "Lagre" })).not.toBeInTheDocument();
   });
 });
+
+describe("RecipeActions: tid (Story 6.2)", () => {
+  it("viser tiden ved hjertet for en lagret oppskrift", () => {
+    setup({ saved: true, totalMinutes: 75 });
+    expect(screen.getByText("Tid: 1 t 15 min")).toBeInTheDocument();
+  });
+
+  it("viser tiden også før oppskriften er lagret, og ingenting uten tid", () => {
+    setup({ totalMinutes: 45 });
+    expect(screen.getByText("Tid: 45 min")).toBeInTheDocument();
+    cleanup();
+    setup({});
+    expect(screen.queryByText(/^Tid:/)).not.toBeInTheDocument();
+  });
+});

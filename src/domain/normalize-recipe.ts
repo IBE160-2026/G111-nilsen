@@ -1,3 +1,4 @@
+import { isRecipeMinutes, parseIsoDuration } from "./duration";
 import { cleanLines, cleanText } from "./clean-text";
 import { importOk, noRecipe } from "./import-types";
 import type { ImportedRecipe, ImportResult, RecipeNode } from "./import-types";
@@ -40,11 +41,26 @@ export function normalizeRecipe(node: RecipeNode): ImportResult<ImportedRecipe> 
       servings: readServings(node.recipeYield),
       ingredients: ingredients.map((text) => ({ text })),
       steps,
+      totalMinutes: readTotalMinutes(node),
     });
   } catch {
     // Sikkerhetsnett (for eksempel stackoverflow i dype strukturer).
     return noRecipe();
   }
+}
+
+/**
+ * Tid i minutter (Story 6.2): `totalTime`, ellers summen av `prepTime` og `cookTime` når minst én
+ * av dem kan leses. Ugyldig eller over et døgn gir `null`.
+ */
+function readTotalMinutes(node: Record<string, unknown>): number | null {
+  const total = parseIsoDuration(node.totalTime);
+  if (total !== null) return total;
+  const prep = parseIsoDuration(node.prepTime);
+  const cook = parseIsoDuration(node.cookTime);
+  if (prep === null && cook === null) return null;
+  const sum = (prep ?? 0) + (cook ?? 0);
+  return isRecipeMinutes(sum) ? sum : null;
 }
 
 /** Første ikke-tomme rensede streng: en streng, eller første i en liste. */

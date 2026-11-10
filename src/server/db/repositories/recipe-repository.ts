@@ -29,6 +29,8 @@ export type NewRecipe = {
   steps: NewStep[];
   /** Eieren (Story 5.13); `null` eller utelatt = importert uten innlogging. */
   userId?: number | null;
+  /** Tid i minutter (Story 6.2); `null` eller utelatt = ikke oppgitt. */
+  totalMinutes?: number | null;
 };
 
 type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
@@ -47,6 +49,7 @@ function insertRecipeRows(tx: Tx, recipe: NewRecipe): number {
       createdAt: recipe.createdAt,
       updatedAt: recipe.updatedAt,
       userId: recipe.userId ?? null,
+      totalMinutes: recipe.totalMinutes ?? null,
     })
     .returning({ id: recipes.id })
     .get();
@@ -162,6 +165,8 @@ export type RecipeUpdate = {
   updatedAt: string;
   ingredients: NewIngredientLine[];
   steps: NewStep[];
+  /** Ny tid i minutter (Story 6.2); utelatt = uendret, `null` = fjernet. */
+  totalMinutes?: number | null;
 };
 
 /**
@@ -185,6 +190,7 @@ export function updateRecipe(db: Db, id: number, data: RecipeUpdate): boolean {
           title: data.title,
           originalServings: data.originalServings,
           updatedAt: data.updatedAt,
+          ...(data.totalMinutes !== undefined ? { totalMinutes: data.totalMinutes } : {}),
           ...(current.originalServings !== data.originalServings ? { selectedServings: null } : {}),
         })
         .where(eq(recipes.id, id))
@@ -268,6 +274,7 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
     sourceUrl: row.sourceUrl,
     sourceName: row.sourceName,
     originalServings: row.originalServings,
+    totalMinutes: row.totalMinutes,
     selectedServings: row.selectedServings,
     savedAt: row.savedAt,
     folderId: row.folderId,

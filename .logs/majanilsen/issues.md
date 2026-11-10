@@ -85,3 +85,4 @@
 - [ ] 2026-11-10 [retrospektiv Epic 5](960-2026-11-10-22-45-00-retrospektiv-epic-5.md) — Maja: push, avgjør A1 (uavhengig sikkerhetsgjennomgang), test på mobil og i mørk modus
 - [ ] 2026-11-10 [README per epic](959-2026-11-10-23-00-00-readme-oversikt-per-epic.md) — Maja: push
 - [ ] 2026-11-10 [Epic 6 og story 6.1](958-2026-11-10-23-30-00-epic-6-plan-og-story-6-1.md) — Maja: push
+- [ ] 2026-11-10 [story 6.2](957-2026-11-10-23-55-00-story-6-2-tid.md) — Maja: npm test (2679), prøv tid på importert og egen oppskrift, push

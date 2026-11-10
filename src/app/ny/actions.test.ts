@@ -60,6 +60,7 @@ function rows(table: string): number {
 const valid = {
   title: "Pannekaker",
   servings: "4",
+  minutes: "",
   ingredients: "3 dl hvetemel\n6 dl melk\n3 egg",
   steps: "Visp sammen.\nStek.",
 };
@@ -95,7 +96,13 @@ describe("saveManualRecipe", () => {
 
   it("behandler manglende felt som tomme", async () => {
     const result = await saveManualRecipe(initialManualRecipeState, new FormData());
-    expect(result.values).toEqual({ title: "", servings: "", ingredients: "", steps: "" });
+    expect(result.values).toEqual({
+      title: "",
+      servings: "",
+      minutes: "",
+      ingredients: "",
+      steps: "",
+    });
     expect(Object.keys(result.fieldErrors)).toEqual(["title", "servings", "ingredients"]);
     expect(rows("recipes")).toBe(0);
   });

@@ -44,6 +44,7 @@ function form(values: Record<string, string>): FormData {
 const valid = {
   title: "Vafler",
   servings: "6",
+  minutes: "",
   ingredients: "1 ts salt\n4 egg",
   steps: "Rør.",
 };

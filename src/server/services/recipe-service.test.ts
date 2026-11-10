@@ -759,3 +759,31 @@ describe("eierskap (Story 5.13)", () => {
     expect(shopping.ok && shopping.value.map((r) => r.title)).toEqual(["Deres"]);
   });
 });
+
+describe("tid i minutter (Story 6.2)", () => {
+  it("lagres ved ny oppskrift og ved redigering, og kan fjernes", () => {
+    const db = createTestDb();
+    const created = createManualRecipe(TEST_USER_ID, { ...input, minutes: 45 }, db);
+    if (!created.ok) throw new Error("feil");
+    const id = created.value.id;
+    expect(getRecipe(id, db)).toMatchObject({ ok: true, value: { totalMinutes: 45 } });
+    expect(updateManualRecipe(id, { ...input, minutes: 90 }, db).ok).toBe(true);
+    expect(getRecipe(id, db)).toMatchObject({ ok: true, value: { totalMinutes: 90 } });
+    // Uten feltet (for eksempel eldre kall) beholdes tiden; null fjerner den.
+    expect(updateManualRecipe(id, input, db).ok).toBe(true);
+    expect(getRecipe(id, db)).toMatchObject({ ok: true, value: { totalMinutes: 90 } });
+    expect(updateManualRecipe(id, { ...input, minutes: null }, db).ok).toBe(true);
+    expect(getRecipe(id, db)).toMatchObject({ ok: true, value: { totalMinutes: null } });
+  });
+
+  it("ugyldig tid gir validation på feltet minutes og lagrer ingenting", () => {
+    const db = createTestDb();
+    for (const minutes of [0, 1441, 4.5]) {
+      expect(createManualRecipe(TEST_USER_ID, { ...input, minutes }, db)).toEqual({
+        ok: false,
+        error: { kind: "validation", detail: "minutes" },
+      });
+    }
+    expect(db.$client.prepare("select count(*) as n from recipes").get()).toEqual({ n: 0 });
+  });
+});

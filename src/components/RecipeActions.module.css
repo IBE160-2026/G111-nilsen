@@ -29,6 +29,18 @@
   text-align: left;
 }
 
+/* Smal skjerm: litt tettere, så hjerte, tid, mappe og slett får plass på én linje på 360 px. */
+@media (max-width: 479px) {
+  .actions {
+    column-gap: var(--space-2);
+  }
+
+  .primary,
+  .secondary {
+    padding-inline: var(--space-3);
+  }
+}
+
 /* Primærknapp som i EmptyState. Brukes også for lenken «Logg inn for å lagre» (Story 5.13). */
 .primary {
   display: inline-flex;

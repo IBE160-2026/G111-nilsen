@@ -1,5 +1,6 @@
 "use client";
 
+import { recipeTimeMessages } from "@/lib/messages";
 import Link from "next/link";
 import { useActionState, useEffect, useId, useRef } from "react";
 import {
@@ -18,7 +19,7 @@ type FormAction = (
 
 export const initialManualRecipeState: ManualRecipeFormState = {
   fieldErrors: {},
-  values: { title: "", servings: "", ingredients: "", steps: "" },
+  values: { title: "", servings: "", minutes: "", ingredients: "", steps: "" },
 };
 
 /**
@@ -109,6 +110,23 @@ export default function ManualRecipeForm({
           {...fieldProps("servings", true)}
         />
         {error("servings")}
+      </div>
+
+      <div className={styles.field}>
+        <label htmlFor={idOf("minutes")} className={styles.label}>
+          {recipeTimeMessages.label}
+        </label>
+        <p id={`${idOf("minutes")}-hint`} className={styles.hint}>
+          {recipeTimeMessages.hint}
+        </p>
+        <input
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          className={`${styles.input} ${styles.servings}`}
+          {...fieldProps("minutes", true)}
+        />
+        {error("minutes")}
       </div>
 
       <div className={styles.field}>

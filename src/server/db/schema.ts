@@ -74,6 +74,8 @@ export const recipes = sqliteTable("recipes", {
    * En lagret oppskrift har alltid eier, og bare eieren ser og endrer den.
    */
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
+  /** Hvor lang tid oppskriften tar, i minutter (Story 6.2); `null` = ikke oppgitt. */
+  totalMinutes: integer("total_minutes"),
 });
 
 export const ingredientLines = sqliteTable(

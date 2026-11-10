@@ -36,6 +36,7 @@ describe("normalizeRecipe: form og tittel", () => {
       "sourceName",
       "steps",
       "title",
+      "totalMinutes",
     ]);
     expect(JSON.stringify(recipe)).not.toMatch(/https?:|example\.com/);
   });
@@ -753,5 +754,28 @@ describe("normalizeRecipe: skadelig tekst", () => {
       recipeIngredient: ['<a href="https://example.com/x?y=1">1 dl melk</a>'],
     });
     expect(result.ingredients).toEqual([{ text: "1 dl melk" }]);
+  });
+});
+
+describe("normalizeRecipe: tid (Story 6.2)", () => {
+  const base = { name: "Pannekaker", recipeIngredient: ["3 egg"] };
+  const minutes = (extra: Record<string, unknown>) => {
+    const result = normalizeRecipe({ ...base, ...extra });
+    return result.ok ? result.value.totalMinutes : "feil";
+  };
+
+  it("bruker totalTime når den finnes", () => {
+    expect(minutes({ totalTime: "PT1H15M", prepTime: "PT10M", cookTime: "PT20M" })).toBe(75);
+  });
+
+  it("legger sammen prepTime og cookTime når totalTime mangler eller er ugyldig", () => {
+    expect(minutes({ prepTime: "PT10M", cookTime: "PT20M" })).toBe(30);
+    expect(minutes({ totalTime: "snart", cookTime: "PT20M" })).toBe(20);
+  });
+
+  it("gir null uten tid eller med ugyldig tid", () => {
+    expect(minutes({})).toBeNull();
+    expect(minutes({ totalTime: "45 min" })).toBeNull();
+    expect(minutes({ prepTime: "P1D", cookTime: "PT1H" })).toBeNull();
   });
 });

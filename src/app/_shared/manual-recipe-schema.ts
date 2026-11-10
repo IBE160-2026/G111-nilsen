@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { manualRecipeFieldMessages as m } from "@/lib/messages";
+import { isRecipeMinutes } from "@/domain";
 import { LIMITS, splitLines } from "@/lib/recipe-input";
 import type { ManualRecipeField, ManualRecipeFieldErrors, ManualRecipeValues } from "./form-fields";
 
@@ -33,6 +34,13 @@ export const manualRecipeSchema = z.object({
         .min(LIMITS.servingsMin, { error: m.servingsInvalid })
         .max(LIMITS.servingsMax, { error: m.servingsInvalid }),
     ),
+  // Valgfritt (Story 6.2): tomt = ingen tid, ellers hele minutter 1–1440.
+  minutes: z
+    .string()
+    .trim()
+    .regex(/^(\d{1,4})?$/, { error: m.minutesInvalid })
+    .transform((text) => (text === "" ? null : Number(text)))
+    .refine((value) => value === null || isRecipeMinutes(value), { error: m.minutesInvalid }),
   ingredients: lines(
     m.ingredientsTooMany,
     m.ingredientLineTooLong,
@@ -55,6 +63,7 @@ export function valuesFromFormData(formData: FormData): ManualRecipeValues {
   return {
     title: get("title"),
     servings: get("servings"),
+    minutes: get("minutes"),
     ingredients: get("ingredients"),
     steps: get("steps"),
   };

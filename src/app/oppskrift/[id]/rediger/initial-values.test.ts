@@ -45,6 +45,7 @@ describe("initialValuesOf", () => {
     expect(initialValuesOf(recipe)).toEqual({
       title: "Importert",
       servings: "",
+      minutes: "",
       ingredients: "2 egg\nsalt",
       steps: "Stek.",
     });
@@ -52,5 +53,10 @@ describe("initialValuesOf", () => {
 
   it("porsjonsantall vises som tekst", () => {
     expect(initialValuesOf({ ...recipe, originalServings: 4 }).servings).toBe("4");
+  });
+
+  it("tid vises som tekst, og manglende tid som tomt felt (Story 6.2)", () => {
+    expect(initialValuesOf({ ...recipe, totalMinutes: 45 }).minutes).toBe("45");
+    expect(initialValuesOf({ ...recipe, totalMinutes: null }).minutes).toBe("");
   });
 });

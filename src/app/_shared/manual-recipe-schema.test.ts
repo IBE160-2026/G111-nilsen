@@ -6,6 +6,7 @@ import type { ManualRecipeValues } from "./form-fields";
 const valid: ManualRecipeValues = {
   title: "Pannekaker",
   servings: "4",
+  minutes: "",
   ingredients: "3 dl hvetemel\n6 dl melk\n3 egg",
   steps: "Visp sammen.\nStek tynne pannekaker.",
 };
@@ -33,6 +34,7 @@ describe("validateManualRecipe (matrisen i spec 1.4)", () => {
       data: {
         title: "Pannekaker",
         servings: 4,
+        minutes: null,
         ingredients: ["3 dl hvetemel", "6 dl melk", "3 egg"],
         steps: ["Visp sammen.", "Stek tynne pannekaker."],
       },
@@ -106,6 +108,26 @@ describe("validateManualRecipe (matrisen i spec 1.4)", () => {
       title: m.titleRequired,
       servings: m.servingsInvalid,
       ingredients: m.ingredientsRequired,
+    });
+  });
+});
+
+describe("tid i minutter (Story 6.2)", () => {
+  it.each([
+    ["", null],
+    ["  ", null],
+    ["45", 45],
+    [" 90 ", 90],
+    ["1440", 1440],
+  ])("%j gir %j", (minutes, expected) => {
+    const result = check({ minutes });
+    expect(result.ok && result.data.minutes).toBe(expected);
+  });
+
+  it.each(["0", "1441", "4,5", "-3", "en time", "12345"])("%j gir feil under feltet", (minutes) => {
+    expect(check({ minutes })).toEqual({
+      ok: false,
+      fieldErrors: { minutes: m.minutesInvalid },
     });
   });
 });

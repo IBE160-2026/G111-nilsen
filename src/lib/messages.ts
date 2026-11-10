@@ -93,6 +93,14 @@ export const manualRecipeFieldMessages = {
     "En ingredienslinje kan være maks 300 tegn. Del den opp eller gjør den kortere.",
   stepsTooMany: "Du kan ha maks 100 steg.",
   stepTooLong: "Et steg kan være maks 2000 tegn. Del det opp i flere steg.",
+  minutesInvalid: "Skriv tiden i hele minutter, fra 1 til 1440, eller la feltet stå tomt.",
+} as const;
+
+/** Tid for oppskriften (Story 6.2). */
+export const recipeTimeMessages = {
+  label: "Tid (minutter)",
+  hint: "Valgfritt. Hvor lang tid oppskriften tar alt i alt, for eksempel 45.",
+  shown: (time: string) => `Tid: ${time}`,
 } as const;
 
 /**
@@ -102,6 +110,7 @@ export const manualRecipeFieldMessages = {
 export const manualRecipeFieldInvalid = {
   title: "Skriv en tittel på maks 200 tegn.",
   servings: manualRecipeFieldMessages.servingsInvalid,
+  minutes: manualRecipeFieldMessages.minutesInvalid,
   ingredients: "Skriv 1–100 ingredienser, én per linje, hver på maks 300 tegn.",
   steps: "Du kan ha maks 100 steg, hvert på maks 2000 tegn.",
 } as const;

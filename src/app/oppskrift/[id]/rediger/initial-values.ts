@@ -8,6 +8,7 @@ export function initialValuesOf(recipe: Recipe): ManualRecipeValues {
   return {
     title: recipe.title,
     servings: recipe.originalServings === null ? "" : String(recipe.originalServings),
+    minutes: recipe.totalMinutes == null ? "" : String(recipe.totalMinutes),
     ingredients: byPosition(recipe.ingredients)
       .map((line) => line.original)
       .join("\n"),

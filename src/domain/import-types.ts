@@ -30,6 +30,8 @@ export type ImportedRecipe = {
   /** Rå originaltekst per linje; mengder tolkes senere av `parseLine`. */
   ingredients: { text: string }[];
   steps: { text: string; section: string | null }[];
+  /** Tid i minutter fra `totalTime`, eller `prepTime` + `cookTime` (Story 6.2); `null` = ukjent. */
+  totalMinutes?: number | null;
 };
 
 export function importOk<T>(value: T): ImportResult<T> {

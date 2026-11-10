@@ -31,6 +31,7 @@ export async function saveRecipeEdits(
     const result = updateManualRecipe(id, {
       title: validated.data.title,
       servings: validated.data.servings,
+      minutes: validated.data.minutes,
       ingredients: validated.data.ingredients,
       steps: validated.data.steps,
     });

@@ -45,4 +45,5 @@ export {
   type SuggestInput,
   type TipPlacement,
 } from "./suggest-for-recipe";
+export { formatMinutes, isRecipeMinutes, MAX_RECIPE_MINUTES, parseIsoDuration } from "./duration";
 export { withAppliedSuggestions, type RecipeWithSuggestions } from "./apply-suggestions";

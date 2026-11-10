@@ -144,6 +144,7 @@ describe("migrasjon 0001 (Story 3.1: manuelle oppskrifter i samlingen)", () => {
       "0004_suggestions",
       "0005_pantry",
       "0006_accounts",
+      "0007_recipe_time",
     ]);
     expect(existsSync(join(migrationsFolder(), "meta", "0001_snapshot.json"))).toBe(true);
   });
@@ -215,6 +216,7 @@ describe("migrasjon 0002 (Story 3.3: mapper)", () => {
         folder_id: null,
         is_favorite: 0,
         user_id: null,
+        total_minutes: null,
       })),
     );
     expect(rows(db, "select * from ingredient_lines order by id")).toEqual(before.lines);
@@ -367,7 +369,7 @@ describe("migrasjon 0003 (Story 3.4: favoritter)", () => {
     runMigrations(db);
 
     expect(rows(db, "select * from recipes order by id")).toEqual(
-      before.recipes.map((row) => ({ ...row, is_favorite: 0, user_id: null })),
+      before.recipes.map((row) => ({ ...row, is_favorite: 0, user_id: null, total_minutes: null })),
     );
     expect(rows(db, "select * from folders")).toEqual(
       (before.folders as Record<string, unknown>[]).map((row) => ({ ...row, user_id: null })),
