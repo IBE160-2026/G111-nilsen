@@ -73,6 +73,8 @@ npm run build    # produksjonsbygg
 npm start        # kjør produksjonsbygget
 ```
 
+Feiler `npm run build` med «Failed to type check» etter at en rute er omdøpt eller fjernet, ligger det gamle typer i `.next/`. Slett mappen (`rm -rf .next`) og bygg på nytt.
+
 ## Oppskrifter (samlingen)
 
 Menypunktet og overskriften heter «Oppskrifter». Adressen er fortsatt `/oppskrifter`, og koden og dokumentene kaller lagrede oppskrifter «samlingen».
