@@ -1,0 +1,10 @@
+{
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "```json\n[{\"text\":\"Server med frisk salat.\",\"reason\":\"Gir kontrast til en rik rett.\",\"appliesTo\":\"recipe\"}]\n```"
+    }
+  ]
+}

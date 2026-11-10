@@ -123,16 +123,25 @@ describe("getSuggestions", () => {
 });
 
 describe("providerFor", () => {
-  it("gir en leverandør for begge moduser (mock til språkmodell-adapteren kommer)", async () => {
+  it("gir mock-leverandøren uten nøkkel, også hvis modus sier llm", async () => {
     for (const mode of ["mock", "llm"] as const) {
-      const created = createManualRecipe(
-        { title: "Suppe", servings: 2, ingredients: ["1 løk"], steps: ["Kok."] },
-        db,
-      );
-      if (!created.ok) throw new Error("kunne ikke lage oppskrift");
-      const result = await getSuggestions(created.value.id, db, providerFor(mode));
+      const provider = providerFor(mode, { llmApiKey: undefined, llmModel: undefined });
+      const result = await getSuggestions(id, db, provider);
       expect(result.ok && result.value.isExample).toBe(true);
     }
+  });
+
+  it("gir mock i modus mock selv om en nøkkel er satt", async () => {
+    const provider = providerFor("mock", { llmApiKey: "test-key", llmModel: undefined });
+    const result = await getSuggestions(id, db, provider);
+    expect(result.ok && result.value.isExample).toBe(true);
+  });
+
+  it("gir språkmodell-leverandøren med nøkkel, og samme objekt for samme innstillinger", () => {
+    const settings = { llmApiKey: "test-key", llmModel: "test-modell" };
+    const a = providerFor("llm", settings);
+    expect(providerFor("llm", settings)).toBe(a);
+    expect(providerFor("llm", { ...settings, llmModel: "annen" })).not.toBe(a);
   });
 });
 

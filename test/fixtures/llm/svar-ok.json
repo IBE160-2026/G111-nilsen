@@ -1,0 +1,13 @@
+{
+  "id": "msg_eksempel",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-haiku-5-5",
+  "content": [
+    {
+      "type": "text",
+      "text": "[{\"text\":\"Stek løken lenger, til den er gyllen.\",\"reason\":\"Karamellisert løk gir mer søthet og dybde.\",\"appliesTo\":\"steps\"},{\"text\":\"Tilsett en skvett sitronsaft helt til slutt.\",\"reason\":\"Syre løfter smaken uten mer salt.\",\"appliesTo\":\"ingredients\"}]"
+    }
+  ],
+  "stop_reason": "end_turn"
+}

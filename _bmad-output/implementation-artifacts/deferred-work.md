@@ -198,10 +198,10 @@
 
 - source_spec: `spec-4-1-forslag-i-demomodus.md`
   summary: Med `LLM_API_KEY` satt brukes fortsatt mock-leverandøren (`suggestionMode: "llm"` peker på mock) til språkmodell-adapteren kommer i Story 4.3.
-  evidence: Svaret er merket «Eksempelforslag», så merket er riktig. Bytt `llm` i `providers` i `suggestion-service.ts` i 4.3.
+  evidence: Løst i Story 4.3: `providerFor` gir språkmodell-adapteren med nøkkel.
 - source_spec: `spec-4-1-forslag-i-demomodus.md`
   summary: Hvert trykk på «Få forslag» er ett kall til leverandøren. Mock er gratis, men språkmodellen koster penger, og det finnes ingen grense mot gjentatte kall.
-  evidence: Vurder grense per oppskrift eller per minutt i 4.3 (samme tema som samtidighetsgrensen for import).
+  evidence: Delvis løst i Story 4.3: maks 10 kall per minutt per prosess i adapteren. Ingen grense per oppskrift eller bruker.
 - source_spec: `spec-4-1-forslag-i-demomodus.md`
   summary: På smal skjerm står forslagene visuelt mellom ingredienser og steg (UX), men etter stegene i dokumentet, slik at tastaturrekkefølgen følger bredt oppsett.
   evidence: Ikke testet med skjermleser. Vurder å flytte forslagene i dokumentet hvis det viser seg forvirrende.
@@ -215,3 +215,10 @@
 - source_spec: `spec-4-2-ta-i-bruk-forslag.md`
   summary: Sporadisk testfeil sett én gang på Macen under Story 4.1: `ManualRecipeForm.test.tsx > deaktiverer knappen mens skjemaet sendes` (forventet fokus på tittelfeltet, fikk knappen). Bestod ved neste kjøring og i alle kjøringer i skymiljøet.
   evidence: Fokusforventningen etter `waitFor(enabled)` er timing-avhengig. Kjørt på kode uten 4.1-endringer (HEAD 7155096). Rett testen (vent på fokus i stedet for knappen) ved neste anledning.
+
+- source_spec: `spec-4-3-forslag-fra-sprakmodell.md`
+  summary: Adapteren er ikke prøvd mot ekte API (ingen nøkkel eller nett i utviklingsmiljøet). Svarformen er bygget etter dokumentert Messages API og testet med lagrede svar.
+  evidence: Maja prøver 3–5 oppskrifter med egen nøkkel og ser at forslagene er konkrete og trygge (research-og-avklaringer A6). Rett prompten i `llm-suggestions.ts` ved behov.
+- source_spec: `spec-4-3-forslag-fra-sprakmodell.md`
+  summary: Grensen på 10 kall i minuttet er per prosess og i minnet; den nullstilles ved omstart og deles av alle brukere. Oppskriftstekst fra nettet sendes til tredjepart (prompt-injeksjon mulig, men svaret valideres og vises bare som tekst).
+  evidence: Greit for en lokal skoleapp. Vurder per-bruker-grense og innholdsfilter ved hosting.

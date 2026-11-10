@@ -1,8 +1,9 @@
 import "server-only";
 import type { AppliedSuggestion, SuggestionSet } from "@/domain";
 import { appError, err, ok, type Result } from "@/lib/result";
+import { createLlmSuggestionProvider } from "../adapters/llm-suggestions";
 import { createMockSuggestionProvider } from "../adapters/mock-suggestions";
-import { config, type SuggestionMode } from "../config";
+import { config, type Config, type SuggestionMode } from "../config";
 import { getDb, type Db } from "../db/client";
 import {
   deleteAppliedSuggestion,
@@ -16,16 +17,32 @@ import {
 import { getRecipe } from "./recipe-service";
 
 /**
- * Leverandør per modus (AD-5). Språkmodell-adapteren kommer i Story 4.3 og tar over `llm`; til da
- * brukes mock også med nøkkel, og svaret er fortsatt merket som eksempel, så merket er alltid riktig.
+ * Leverandør per modus (AD-5): mock uten nøkkel, ellers språkmodell-adapteren (Story 4.3). Én
+ * språkmodell-leverandør lages per prosess, så grensen mot gjentatte kall teller på tvers av kall.
  */
-const providers: Record<SuggestionMode, () => SuggestionProvider> = {
-  mock: createMockSuggestionProvider,
-  llm: createMockSuggestionProvider,
-};
+let llmProvider: { key: string; model: string | undefined; provider: SuggestionProvider } | null =
+  null;
 
-export function providerFor(mode: SuggestionMode): SuggestionProvider {
-  return providers[mode]();
+export function providerFor(
+  mode: SuggestionMode,
+  settings: Pick<Config, "llmApiKey" | "llmModel"> = config,
+): SuggestionProvider {
+  if (mode === "mock" || !settings.llmApiKey) return createMockSuggestionProvider();
+  if (
+    !llmProvider ||
+    llmProvider.key !== settings.llmApiKey ||
+    llmProvider.model !== settings.llmModel
+  ) {
+    llmProvider = {
+      key: settings.llmApiKey,
+      model: settings.llmModel,
+      provider: createLlmSuggestionProvider({
+        apiKey: settings.llmApiKey,
+        model: settings.llmModel,
+      }),
+    };
+  }
+  return llmProvider.provider;
 }
 
 /**

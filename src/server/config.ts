@@ -9,9 +9,9 @@ export type ImportSource = "http" | "fixtures";
 export type SuggestionMode = "mock" | "llm";
 
 export type Config = {
-  /** API-nøkkel for forslag (Epic 4). Valgfri – kjernefunksjonene virker uten. */
+  /** API-nøkkel (Anthropic) for forslag (Epic 4). Valgfri – kjernefunksjonene virker uten. */
   llmApiKey: string | undefined;
-  /** Modellnavn for forslag. Valgfri. */
+  /** Modellnavn for forslag. Valgfri; adapteren har en billig standardmodell. */
   llmModel: string | undefined;
   /** `mock` når `LLM_API_KEY` mangler, ellers `llm`. */
   suggestionMode: SuggestionMode;

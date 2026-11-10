@@ -41,7 +41,7 @@ På oppskriftssiden er hver ingredienslinje og hvert steg en avkrysningsboks. Tr
 ## Krav
 
 - [Node.js](https://nodejs.org/) 22 eller nyere (npm følger med). Testet med Node.js 22.23 og npm 10.9.
-- Ingen database-server, konto eller API-nøkkel trengs
+- Ingen database-server, konto eller API-nøkkel trengs (nøkkel til språkmodell er valgfri, se «Forslag»)
 
 ## Installasjon
 
@@ -141,6 +141,16 @@ Story 2.2 binder import sammen. På Importer-siden (`/`) limer du inn en lenke o
 - **Oppskrift uten porsjonsantall:** finner ikke siden et tydelig antall, lagres `originalServings = null`. Oppskriftssiden viser da ingen porsjonsvelger og mengdene som i originalen (uskalert). Dialogen for å velge antall kommer i Story 2.4.
 - **Testdata:** `scripts/fetch-fixtures.sh` henter sidene i `test/fixtures/sources.md` på nytt. Fixture-adapteren leser samme tabell; legg til en rad der når du lagrer en ny side.
 - Testes med `npm test`: adresseregler (tabeller for alle områdene, IPv6, IPv4-mappet og vertsnavn), HTTP-adapteren mot lokale 127.0.0.1-tjenere og falske oppslag (omdirigeringer, tidsfrist med falske timere, 2 MB-grense, tegnsett, statuskoder, ikke-HTML, selvsignert HTTPS-sertifikat avvises, ingen hengende sockets eller timere), fixture-adapteren, `importRecipe` mot en database i minnet (Tine, Matprat og Godt, duplikat uten henting, gjenbruk, avkorting, tilbakerulling), Server Action, skjema og side.
+
+## Forslag (valgfritt)
+
+«Få forslag» på en oppskrift gir 1–3 forslag med begrunnelse. Forslag du tar i bruk lagres med oppskriften; resten forsvinner.
+
+- **Uten nøkkel (standard):** appen viser lagrede eksempelforslag fra `test/fixtures/suggestions/`, merket «Eksempelforslag». Ingen konto og ingen nettverk trengs.
+- **Med nøkkel:** lag en API-nøkkel hos [Anthropic](https://console.anthropic.com/), kopier `.env.example` til `.env.local` og sett `LLM_API_KEY=<nøkkelen din>`. Start `npm run dev` på nytt. Forslagene lages da for akkurat den oppskriften (tittel, ingredienslinjer og steg sendes til API-et) og har ikke eksempelmerket. `LLM_MODEL` kan settes for å bruke en annen modell; standard er `claude-haiku-5-5`.
+- Skriv aldri nøkkelen i koden eller i `.env.example`. `.env.local` ligger utenfor git.
+- Svaret kontrolleres mot samme skjema som eksempelforslagene. Feil, tidsavbrudd (20 s) eller ugyldig svar gir «Fikk ikke laget forslag akkurat nå. Prøv igjen senere.», og resten av siden virker. Appen stopper etter 10 kall i minuttet for å holde kostnaden nede.
+- Testene bruker lagrede svar fra `test/fixtures/llm/`, ingen ekte nøkkel og ingen nettverkskall.
 
 ## Database
 
