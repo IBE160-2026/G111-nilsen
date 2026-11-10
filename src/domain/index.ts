@@ -31,3 +31,9 @@ export {
 } from "./filter-collection";
 export { convertLine, hasConvertibleUnit, type UnitSystem } from "./convert-units";
 export { ingredientsForStep } from "./step-ingredients";
+export {
+  buildShoppingList,
+  type ShoppingItem,
+  type ShoppingRecipe,
+  type ShoppingSelection,
+} from "./shopping-list";

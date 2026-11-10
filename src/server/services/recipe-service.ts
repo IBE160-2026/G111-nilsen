@@ -5,6 +5,7 @@ import {
   type CollectionEntry,
   type Recipe,
   type RecipeSummary,
+  type ShoppingRecipe,
 } from "@/domain";
 import { isSelectedServings, LIMITS, splitLines } from "@/lib/recipe-input";
 import { appError, err, ok, type Result } from "@/lib/result";
@@ -238,6 +239,26 @@ export function listCollection(db: Db = getDb()): Result<CollectionEntry[]> {
       ]),
     })),
   );
+}
+
+/**
+ * Lagrede oppskrifter med ingredienser, til handlelisten (Story 5.7). Sist lagret først, som i
+ * samlingen.
+ */
+export function listShoppingRecipes(db: Db = getDb()): Result<ShoppingRecipe[]> {
+  const recipes: ShoppingRecipe[] = [];
+  for (const summary of listSavedRecipes(db)) {
+    const recipe = findRecipeById(db, summary.id);
+    if (!recipe) continue;
+    recipes.push({
+      id: recipe.id,
+      title: recipe.title,
+      originalServings: recipe.originalServings,
+      selectedServings: recipe.selectedServings,
+      ingredients: recipe.ingredients,
+    });
+  }
+  return ok(recipes);
 }
 
 /**

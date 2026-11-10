@@ -1,0 +1,108 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: var(--content-max-width);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-md);
+}
+
+.recipes,
+.items {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recipe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  min-height: var(--tap-target-min);
+}
+
+.pick,
+.metric {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target-min);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.pick input,
+.metric input {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--color-accent);
+}
+
+.servings {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}
+
+.number {
+  width: 5rem;
+  min-height: var(--tap-target-min);
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-base);
+  color: var(--color-ink-primary);
+  font: inherit;
+  text-align: center;
+}
+
+.hint,
+.count {
+  margin: 0;
+  color: var(--color-ink-secondary);
+}
+
+.itemText {
+  font-weight: 600;
+}
+
+.from {
+  display: block;
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}
+
+.copy {
+  align-self: flex-start;
+  min-height: var(--tap-target-min);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-raised);
+  color: var(--color-accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.status {
+  min-height: 1.25rem;
+  margin: 0;
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}

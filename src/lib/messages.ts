@@ -151,6 +151,27 @@ export const collectionMessages = {
   emptyImportAction: "Importer din første oppskrift",
 } as const;
 
+/** Handleliste (Story 5.7). */
+export const shoppingMessages = {
+  heading: "Handleliste",
+  link: "Lag handleliste",
+  loading: "Henter oppskriftene …",
+  loadFailed: "Kunne ikke hente oppskriftene",
+  emptyTitle: "Du har ingen lagrede oppskrifter ennå.",
+  emptyDescription: "Lagre oppskrifter først, så kan du velge dem og lage en handleliste.",
+  emptyAction: "Se oppskrifter",
+  pickHeading: "Velg oppskrifter",
+  servingsLabel: "Personer",
+  servingsFor: (title: string) => `Antall personer for ${title}`,
+  listHeading: "Du må kjøpe",
+  nothingPicked: "Velg minst én oppskrift for å lage en liste.",
+  fromPrefix: "Til",
+  count: (n: number) => (n === 1 ? "1 vare" : `${n} varer`),
+  copy: "Kopier listen",
+  copied: "Listen er kopiert.",
+  copyFailed: "Kunne ikke kopiere. Marker teksten og kopier selv.",
+} as const;
+
 /** Metriske mål (Story 5.5). */
 export const unitMessages = {
   metric: "Vis i metriske mål",

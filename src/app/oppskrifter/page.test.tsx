@@ -91,6 +91,14 @@ async function show() {
 }
 
 describe("/oppskrifter", () => {
+  it("har en lenke til handlelisten ved overskriften", async () => {
+    render((await renderPage()).heading);
+    expect(screen.getByRole("link", { name: "Lag handleliste" })).toHaveAttribute(
+      "href",
+      "/handleliste",
+    );
+  });
+
   it("har overskriften utenfor Suspense og en reservetekst", async () => {
     const { heading, fallback } = await renderPage();
     render(heading);
@@ -109,7 +117,9 @@ describe("/oppskrifter", () => {
     expect(
       screen.getByRole("heading", { level: 2, name: "Du har ingen lagrede oppskrifter ennå." }),
     ).toBeInTheDocument();
-    const links = screen.getAllByRole("link");
+    const links = screen
+      .getAllByRole("link")
+      .filter((a) => a.getAttribute("href") !== "/handleliste");
     expect(links.map((a) => [a.textContent, a.getAttribute("href")])).toEqual([
       ["Legg inn selv", "/ny"],
       ["Importer din første oppskrift", "/"],
@@ -155,7 +165,9 @@ describe("/oppskrifter", () => {
     );
     moveRecipeToFolder(inFolder, 1, state.db!);
     await show();
-    const links = screen.getAllByRole("link");
+    const links = screen
+      .getAllByRole("link")
+      .filter((a) => a.getAttribute("href") !== "/handleliste");
     expect(links.map((a) => a.textContent)).toEqual([
       "I mappeMatprat · Hverdag",
       "Uten mappeMatprat",

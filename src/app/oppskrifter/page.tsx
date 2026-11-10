@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import EmptyState from "@/components/EmptyState";
 import CollectionBrowser from "@/components/CollectionBrowser";
-import { collectionMessages } from "@/lib/messages";
+import { collectionMessages, shoppingMessages } from "@/lib/messages";
 import { listCollection } from "@/server/services/recipe-service";
 import listStyles from "../list-page.module.css";
+import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: collectionMessages.heading };
 
@@ -16,7 +18,12 @@ export const metadata: Metadata = { title: collectionMessages.heading };
 export default function SamlingenPage() {
   return (
     <div className={listStyles.root}>
-      <h1>{collectionMessages.heading}</h1>
+      <div className={styles.titleRow}>
+        <h1>{collectionMessages.heading}</h1>
+        <Link href="/handleliste" className={styles.titleLink}>
+          {shoppingMessages.link}
+        </Link>
+      </div>
       <Suspense fallback={<p className={listStyles.loading}>{collectionMessages.loading}</p>}>
         <CollectionLoader />
       </Suspense>

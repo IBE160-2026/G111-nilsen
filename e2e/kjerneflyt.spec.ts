@@ -205,6 +205,22 @@ test("Versjon 2: søk i Oppskrifter, halv porsjon og kokemodus", async ({ page }
   await expect(cooking).toBeHidden();
 });
 
+test("Versjon 2: handleliste fra lagret oppskrift", async ({ page }, testInfo) => {
+  const data = DATA[testInfo.project.name as keyof typeof DATA];
+  const { uj1 } = data;
+
+  await page.goto("/oppskrifter");
+  await page.getByRole("link", { name: "Lag handleliste" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Handleliste" })).toBeVisible();
+  await expect(page.getByText("Velg minst én oppskrift for å lage en liste.")).toBeVisible();
+  await page.getByRole("checkbox", { name: uj1.title }).check();
+  const list = page
+    .getByRole("heading", { name: "Du må kjøpe" })
+    .locator("xpath=ancestor::section");
+  await expect(list.getByRole("listitem").first()).toBeVisible();
+  await expect(list.getByText(`Til ${uj1.title}`).first()).toBeVisible();
+});
+
 for (const scheme of ["light", "dark"] as const) {
   test.describe(`Tastatur i ${scheme === "light" ? "lys" : "mørk"} modus`, () => {
     test.use({ colorScheme: scheme });
