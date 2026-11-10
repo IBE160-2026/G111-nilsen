@@ -1,6 +1,6 @@
 import "server-only";
 import { parseLine, type Recipe, type RecipeSummary } from "@/domain";
-import { LIMITS, splitLines } from "@/lib/recipe-input";
+import { isSelectedServings, LIMITS, splitLines } from "@/lib/recipe-input";
 import { appError, err, ok, type Result } from "@/lib/result";
 import { getDb, type Db } from "../db/client";
 import {
@@ -159,8 +159,8 @@ export function deleteRecipe(id: number, db: Db = getDb()): Result<{ id: number 
 }
 
 /**
- * Husker valgt antall personer for en lagret oppskrift. Antall utenfor 1–50 eller ikke
- * heltall gir `validation` (felt `servings`). Ukjent id og ikke-lagret oppskrift gir `not_found`.
+ * Husker valgt antall personer for en lagret oppskrift. Gyldig er hele og halve tall fra 1 til
+ * 50 (Story 5.1); alt annet gir `validation` (felt `servings`). Ukjent id gir `not_found`.
  */
 export function setSelectedServings(
   id: number,
@@ -168,13 +168,7 @@ export function setSelectedServings(
   db: Db = getDb(),
 ): Result<{ id: number }> {
   if (!isRecipeId(id)) return err(appError("not_found"));
-  if (
-    !Number.isInteger(servings) ||
-    servings < LIMITS.servingsMin ||
-    servings > LIMITS.servingsMax
-  ) {
-    return err(appError("validation", "servings"));
-  }
+  if (!isSelectedServings(servings)) return err(appError("validation", "servings"));
   return updateSelectedServings(db, id, servings) ? ok({ id }) : err(appError("not_found"));
 }
 

@@ -105,6 +105,11 @@ export const manualRecipeFieldInvalid = {
 /** Feltmelding for porsjonsvelgeren på oppskriftssiden. */
 export const servingStepperMessages = {
   invalid: `Skriv et helt tall fra ${LIMITS.servingsMin} til ${LIMITS.servingsMax}. Antallet er ikke endret.`,
+  /** Når halve porsjoner er tillatt (Story 5.1). */
+  invalidHalf: `Skriv et helt eller halvt tall fra ${LIMITS.servingsMin} til ${LIMITS.servingsMax}, for eksempel 4,5. Antallet er ikke endret.`,
+  halfOn: "Legg til en halv porsjon",
+  halfOff: "Fjern den halve porsjonen",
+  halfLabel: "+ ½",
 } as const;
 
 /** Dialogen «Hvor mange er oppskriften laget for?» (Story 2.4, FR-3, UX-DR13). */

@@ -59,7 +59,7 @@
 }
 
 .input {
-  width: 2.6em;
+  width: 3.4em;
   min-height: var(--tap-target-min);
   padding: 0 var(--space-1);
   border: 1px solid var(--color-control-border);
@@ -94,6 +94,29 @@
   font-size: var(--type-meta-size);
   text-decoration: underline;
   cursor: pointer;
+}
+
+.half {
+  align-self: flex-start;
+  min-height: var(--tap-target-min);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-raised);
+  color: var(--color-accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.half[aria-pressed="true"] {
+  background: var(--color-accent);
+  color: var(--color-surface-raised);
+}
+
+.half[aria-disabled="true"] {
+  border-color: var(--color-border-strong);
+  color: var(--color-ink-secondary);
+  cursor: not-allowed;
 }
 
 .edit {

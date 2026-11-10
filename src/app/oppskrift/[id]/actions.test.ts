@@ -92,7 +92,7 @@ describe("saveRecipe", () => {
     expect(stored().selectedServings).toBe(6);
   });
 
-  it.each([0, 51, 1.5, NaN, "5" as unknown as number])(
+  it.each([0, 51, 1.3, NaN, "5" as unknown as number])(
     "ugyldig antall %s: oppskriften lagres, antallet ignoreres",
     async (bad) => {
       unsave();
@@ -195,7 +195,12 @@ describe("rememberServings", () => {
     expect(revalidatePath).not.toHaveBeenCalled();
   });
 
-  it.each([0, 51, 2.5, -1, NaN, Infinity, "6" as unknown as number])(
+  it.each([4.5, 6.5, 1.5, 49.5])("halvt antall %s lagres (Story 5.1)", async (half) => {
+    expect(await rememberServings(id, half)).toEqual({ ok: true });
+    expect(stored().selectedServings).toBe(half);
+  });
+
+  it.each([0, 0.5, 50.5, 51, 2.3, -1, NaN, Infinity, "6" as unknown as number])(
     "ugyldig antall %s: validation, ingenting lagres",
     async (bad) => {
       expect(await rememberServings(id, bad)).toEqual(failure("validation"));

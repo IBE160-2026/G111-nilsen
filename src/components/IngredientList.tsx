@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { ActionResult } from "@/app/_shared/action-result";
 import { formatQuantity, scaleLine, type RecipeLine, type ScaledLine } from "@/domain";
 import { servingsDialogMessages } from "@/lib/messages";
-import { LIMITS } from "@/lib/recipe-input";
+import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import CheckRow from "./CheckRow";
 import { useReportSelectedServings } from "./SelectedServings";
 import ServingsDialog, { DEFAULT_SERVINGS } from "./ServingsDialog";
@@ -142,7 +142,11 @@ export default function IngredientList({
   const originalServings = savedOriginal ?? validServings(rawOriginal);
   // Ugyldig lagret antall (0, 99, desimal) gir opprinnelig antall.
   const [selected, setSelected] = useState(
-    originalServings === null ? null : (validServings(selectedServings) ?? originalServings),
+    originalServings === null
+      ? null
+      : isSelectedServings(selectedServings)
+        ? selectedServings
+        : originalServings,
   );
   // Mangler antallet, spørres det før skalering er mulig (FR-3); «Avbryt» lar oppskriften stå uskalert.
   const [dialogOpen, setDialogOpen] = useState(
@@ -171,6 +175,7 @@ export default function IngredientList({
           value={selected}
           onChange={change}
           original={originalServings}
+          allowHalf
           onEditOriginal={onOriginalServingsChange ? () => setDialogOpen(true) : undefined}
         />
       ) : onOriginalServingsChange ? (

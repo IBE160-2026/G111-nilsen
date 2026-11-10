@@ -2,23 +2,33 @@
 
 import { useId, useState, type KeyboardEvent } from "react";
 import { servingStepperMessages, servingsDialogMessages } from "@/lib/messages";
-import { LIMITS } from "@/lib/recipe-input";
+import { formatServings, isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import styles from "./ServingStepper.module.css";
 
 const MIN = LIMITS.servingsMin;
 const MAX = LIMITS.servingsMax;
 
-/** «1 person» / «N personer». */
+/** «1 person» / «N personer» (halve tall med komma: «4,5 personer»). */
 export function servingsText(servings: number): string {
-  return servings === 1 ? "1 person" : `${servings} personer`;
+  return servings === 1 ? "1 person" : `${formatServings(servings)} personer`;
 }
 
-/** Tolker inntastet antall: helt tall innenfor 1–50, ellers `null`. */
-export function parseServings(text: string): number | null {
+/**
+ * Tolker inntastet antall: helt tall innenfor 1–50, ellers `null`. Med `allowHalf` godtas også
+ * halve tall med komma eller punktum (4,5 / 4.5).
+ */
+export function parseServings(text: string, allowHalf = false): number | null {
   const trimmed = text.trim();
-  if (!/^\d+$/.test(trimmed)) return null;
-  const value = Number(trimmed);
-  return value >= MIN && value <= MAX ? value : null;
+  const pattern = allowHalf ? /^\d+(?:[.,]5|[.,]0)?$/ : /^\d+$/;
+  if (!pattern.test(trimmed)) return null;
+  const value = Number(trimmed.replace(",", "."));
+  return allowHalf
+    ? isSelectedServings(value)
+      ? value
+      : null
+    : value >= MIN && value <= MAX
+      ? value
+      : null;
 }
 
 type Props = {
@@ -34,6 +44,8 @@ type Props = {
   bare?: boolean;
   /** Kalles med gyldig antall når Enter trykkes i feltet (til dialogen: Enter lagrer). */
   onEnter?: (value: number) => void;
+  /** Tillat halve porsjoner (4,5): gir «+ ½»-knapp og godtar komma i feltet (Story 5.1). */
+  allowHalf?: boolean;
 };
 
 /**
@@ -50,6 +62,7 @@ export default function ServingStepper({
   onEditOriginal,
   bare = false,
   onEnter,
+  allowHalf = false,
 }: Props) {
   const id = useId();
   const inputId = `${id}-antall`;
@@ -67,7 +80,7 @@ export default function ServingStepper({
   /** Returnerer det gyldige antallet feltet nå står på, eller `null` ved ugyldig tekst. */
   function commit(): number | null {
     if (draft === null) return value;
-    const parsed = parseServings(draft);
+    const parsed = parseServings(draft, allowHalf);
     if (parsed === null) {
       setDraft(null);
       setError(true);
@@ -119,7 +132,7 @@ export default function ServingStepper({
             aria-controls={inputId}
             aria-disabled={value <= MIN ? true : undefined}
             onClick={() => {
-              if (value > MIN) change(value - 1);
+              if (value > MIN) change(Math.max(MIN, value - 1));
             }}
           >
             <span aria-hidden="true">−</span>
@@ -127,10 +140,10 @@ export default function ServingStepper({
           <input
             id={inputId}
             type="text"
-            inputMode="numeric"
+            inputMode={allowHalf ? "decimal" : "numeric"}
             autoComplete="off"
             className={styles.input}
-            value={draft ?? String(value)}
+            value={draft ?? formatServings(value)}
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? errorId : undefined}
             onChange={(event) => setDraft(event.target.value)}
@@ -144,7 +157,7 @@ export default function ServingStepper({
             aria-controls={inputId}
             aria-disabled={value >= MAX ? true : undefined}
             onClick={() => {
-              if (value < MAX) change(value + 1);
+              if (value < MAX) change(Math.min(MAX, value + 1));
             }}
           >
             <span aria-hidden="true">+</span>
@@ -152,9 +165,27 @@ export default function ServingStepper({
         </div>
       </div>
 
+      {allowHalf ? (
+        <button
+          type="button"
+          className={styles.half}
+          aria-pressed={value % 1 !== 0}
+          aria-label={
+            value % 1 !== 0 ? servingStepperMessages.halfOff : servingStepperMessages.halfOn
+          }
+          aria-disabled={value % 1 === 0 && value >= MAX ? true : undefined}
+          onClick={() => {
+            if (value % 1 !== 0) change(value - 0.5);
+            else if (value < MAX) change(value + 0.5);
+          }}
+        >
+          {servingStepperMessages.halfLabel}
+        </button>
+      ) : null}
+
       {error ? (
         <p id={errorId} role="alert" className={styles.error}>
-          {servingStepperMessages.invalid}
+          {allowHalf ? servingStepperMessages.invalidHalf : servingStepperMessages.invalid}
         </p>
       ) : null}
 

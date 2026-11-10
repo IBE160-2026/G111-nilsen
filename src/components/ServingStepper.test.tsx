@@ -22,6 +22,11 @@ function Harness({ start, original, spy }: { start: number; original: number; sp
   );
 }
 
+function HalfHarness({ start, original }: { start: number; original: number }) {
+  const [value, setValue] = useState(start);
+  return <ServingStepper allowHalf value={value} original={original} onChange={setValue} />;
+}
+
 const field = () => screen.getByLabelText("Antall personer");
 const minus = () => screen.getByRole("button", { name: "Færre personer" });
 const plus = () => screen.getByRole("button", { name: "Flere personer" });
@@ -182,5 +187,91 @@ describe("ServingStepper", () => {
     await user.type(field(), "0");
     await user.tab();
     expect(screen.getByRole("alert")).toHaveTextContent(servingStepperMessages.invalid);
+  });
+
+  describe("halve porsjoner (Story 5.1)", () => {
+    const half = (pressed: boolean) =>
+      screen.getByRole("button", {
+        name: pressed ? servingStepperMessages.halfOff : servingStepperMessages.halfOn,
+      });
+
+    it.each([
+      ["4,5", 4.5],
+      ["4.5", 4.5],
+      ["4,0", 4],
+      ["1,5", 1.5],
+      ["49,5", 49.5],
+      ["50", 50],
+      ["0,5", null],
+      ["50,5", null],
+      ["4,3", null],
+      ["4,55", null],
+      ["abc", null],
+    ])("parseServings(%j, allowHalf) = %s", (text, expected) => {
+      expect(parseServings(text, true)).toBe(expected);
+    });
+
+    it("servingsText bruker komma", () => {
+      expect(servingsText(4.5)).toBe("4,5 personer");
+      expect(servingsText(1)).toBe("1 person");
+    });
+
+    it("«+ ½» legger til og fjerner en halv porsjon", async () => {
+      const user = userEvent.setup();
+      render(<HalfHarness start={4} original={4} />);
+      await user.click(half(false));
+      expect(field()).toHaveValue("4,5");
+      expect(screen.getByRole("status")).toHaveTextContent("4,5 personer");
+      expect(half(true)).toHaveAttribute("aria-pressed", "true");
+      await user.click(half(true));
+      expect(field()).toHaveValue("4");
+    });
+
+    it("− og + beholder halvdelen og stopper på 1 og 50", async () => {
+      const user = userEvent.setup();
+      render(<HalfHarness start={4.5} original={4} />);
+      await user.click(plus());
+      expect(field()).toHaveValue("5,5");
+      await user.click(minus());
+      await user.click(minus());
+      await user.click(minus());
+      await user.click(minus());
+      expect(field()).toHaveValue("1,5");
+      await user.click(minus());
+      expect(field()).toHaveValue("1");
+      expect(minus()).toHaveAttribute("aria-disabled", "true");
+    });
+
+    it("ved 50 er «+ ½» deaktivert, og 49,5 kan ikke økes forbi 50", async () => {
+      const user = userEvent.setup();
+      render(<HalfHarness start={50} original={4} />);
+      expect(half(false)).toHaveAttribute("aria-disabled", "true");
+      await user.click(half(false));
+      expect(field()).toHaveValue("50");
+    });
+
+    it("skriv 6,5: godtas; skriv 6,3: melding om hele eller halve tall og forrige verdi", async () => {
+      const user = userEvent.setup();
+      render(<HalfHarness start={4} original={4} />);
+      await user.clear(field());
+      await user.type(field(), "6,5");
+      await user.tab();
+      expect(field()).toHaveValue("6,5");
+      await user.clear(field());
+      await user.type(field(), "6,3");
+      await user.tab();
+      expect(screen.getByRole("alert")).toHaveTextContent(servingStepperMessages.invalidHalf);
+      expect(field()).toHaveValue("6,5");
+    });
+
+    it("uten allowHalf finnes ingen «+ ½»-knapp og komma avvises", async () => {
+      const user = userEvent.setup();
+      render(<Harness start={4} original={4} />);
+      expect(screen.queryByRole("button", { name: servingStepperMessages.halfOn })).toBeNull();
+      await user.clear(field());
+      await user.type(field(), "4,5");
+      await user.tab();
+      expect(field()).toHaveValue("4");
+    });
   });
 });

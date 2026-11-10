@@ -81,7 +81,7 @@ describe("IngredientList", () => {
     expect(screen.getByRole("button", { name: "Tilbakestill til 4" })).toBeInTheDocument();
   });
 
-  it.each(["0", "51", "2,5", "", "abc"])(
+  it.each(["0", "51", "2,3", "", "abc"])(
     "Skriv ugyldig «%s»: melding, og antall og mengder fra forrige gyldige verdi",
     async (text) => {
       const user = userEvent.setup();
@@ -91,7 +91,7 @@ describe("IngredientList", () => {
       if (text) await user.type(field(), text);
       await user.tab();
 
-      expect(screen.getByText(servingStepperMessages.invalid)).toBeInTheDocument();
+      expect(screen.getByText(servingStepperMessages.invalidHalf)).toBeInTheDocument();
       expect(field()).toHaveValue("5");
       expect(shown()).toEqual(["500 g mel", "1 egg ca.", "salt og pepper"]);
     },
@@ -241,7 +241,8 @@ describe("IngredientList", () => {
     it("Tastatur: Tab til en boks, mellomrom veksler, og fokus blir stående", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={basic} originalServings={4} />);
-      // Porsjonsvelgeren (−, felt, +) kommer først i tabulatorrekkefølgen.
+      // Porsjonsvelgeren (−, felt, +, ½) kommer først i tabulatorrekkefølgen.
+      await user.tab();
       await user.tab();
       await user.tab();
       await user.tab();
@@ -293,7 +294,7 @@ describe("IngredientList", () => {
       await user.clear(field());
       await user.type(field(), "abc");
       await user.tab();
-      expect(screen.getByText(servingStepperMessages.invalid)).toBeInTheDocument();
+      expect(screen.getByText(servingStepperMessages.invalidHalf)).toBeInTheDocument();
       expect(box("400 g mel")).toBeChecked();
     });
 
@@ -370,7 +371,7 @@ describe("IngredientList", () => {
       expect(screen.getByRole("button", { name: "Tilbakestill til 4" })).toBeInTheDocument();
     });
 
-    it.each([99, 0, 2.5, -1, null])("ugyldig lagret antall %s gir opprinnelig antall", (value) => {
+    it.each([99, 0, 2.3, -1, null])("ugyldig lagret antall %s gir opprinnelig antall", (value) => {
       render(<IngredientList ingredients={basic} originalServings={4} selectedServings={value} />);
       expect(field()).toHaveValue("4");
       expect(shown()[0]).toBe("400 g mel");
@@ -449,6 +450,32 @@ describe("IngredientList", () => {
       await user.click(screen.getByRole("checkbox", { name: "400 g mel" }));
       await user.click(plus());
       expect(screen.getByRole("checkbox", { name: "500 g mel" })).toBeChecked();
+    });
+  });
+
+  describe("halve porsjoner (Story 5.1)", () => {
+    it("4,5 personer gir 1,125 ganger mengdene, og tall med halv porsjon vises riktig", async () => {
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={lines("400 g mel", "2 egg")} originalServings={4} />);
+      await user.click(screen.getByRole("button", { name: "Legg til en halv porsjon" }));
+      expect(field()).toHaveValue("4,5");
+      expect(shown()).toEqual(["450 g mel", "2 egg ca."]);
+    });
+
+    it("lagret 6,5 brukes som startverdi og sendes til onServingsChange", async () => {
+      const onServingsChange = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <IngredientList
+          ingredients={basic}
+          originalServings={4}
+          selectedServings={6.5}
+          onServingsChange={onServingsChange}
+        />,
+      );
+      expect(field()).toHaveValue("6,5");
+      await user.click(screen.getByRole("button", { name: "Fjern den halve porsjonen" }));
+      expect(onServingsChange).toHaveBeenLastCalledWith(6);
     });
   });
 });

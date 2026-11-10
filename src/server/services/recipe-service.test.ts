@@ -470,17 +470,20 @@ describe("lagre, slette og rydde (Story 3.2)", () => {
   });
 
   describe("setSelectedServings", () => {
-    it.each([1, 6, 50])("lagrer %s for en lagret oppskrift uten å endre updatedAt", (n) => {
-      const db = createTestDb();
-      const id = stored(db, "2026-11-09T11:00:00.000Z");
-      expect(setSelectedServings(id, n, db)).toEqual({ ok: true, value: { id } });
-      expect(read(db, id)).toMatchObject({
-        selectedServings: n,
-        updatedAt: "2026-11-09T10:00:00.000Z",
-      });
-    });
+    it.each([1, 1.5, 4.5, 6, 49.5, 50])(
+      "lagrer %s for en lagret oppskrift uten å endre updatedAt",
+      (n) => {
+        const db = createTestDb();
+        const id = stored(db, "2026-11-09T11:00:00.000Z");
+        expect(setSelectedServings(id, n, db)).toEqual({ ok: true, value: { id } });
+        expect(read(db, id)).toMatchObject({
+          selectedServings: n,
+          updatedAt: "2026-11-09T10:00:00.000Z",
+        });
+      },
+    );
 
-    it.each([0, 51, 2.5, -3, NaN, Infinity])("antall %s gir validation (servings)", (n) => {
+    it.each([0, 51, 2.3, -3, NaN, Infinity])("antall %s gir validation (servings)", (n) => {
       const db = createTestDb();
       const id = stored(db, "2026-11-09T11:00:00.000Z");
       expect(setSelectedServings(id, n, db)).toEqual({

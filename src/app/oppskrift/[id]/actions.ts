@@ -12,7 +12,7 @@ import {
 } from "@/app/_shared/action-result";
 import { folderFailure, folderIdSchema, parseFolderName } from "@/app/_shared/folder-action";
 import { parseRecipeId } from "@/lib/recipe-id";
-import { LIMITS } from "@/lib/recipe-input";
+import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import { moveRecipeToFolder, moveRecipeToNewFolder } from "@/server/services/folder-service";
 import {
   deleteRecipe,
@@ -31,6 +31,8 @@ import {
 // valideres på nytt (samme regler som `parseRecipeId` og porsjonsvelgeren).
 const idSchema = z.number().refine((id) => parseRecipeId(String(id)) !== null);
 const servingsSchema = z.number().int().min(LIMITS.servingsMin).max(LIMITS.servingsMax);
+// Valgt antall kan også være halvt (Story 5.1); antallet oppskriften er skrevet for er heltall.
+const selectedServingsSchema = z.number().refine(isSelectedServings);
 
 /**
  * Legger oppskriften i samlingen (Story 3.2). Oppskriftssiden revalideres, så lagre-linjen
@@ -44,7 +46,7 @@ export async function saveRecipe(id: number, servings?: number): Promise<ActionR
     const result = saveRecipeToCollection(id);
     if (!result.ok) return actionFailure(result.error.kind);
     // Antallet brukeren valgte før lagring huskes nå (issue 009). Feil her stopper ikke lagringen.
-    if (servings !== undefined && servingsSchema.safeParse(servings).success) {
+    if (servings !== undefined && selectedServingsSchema.safeParse(servings).success) {
       const remembered = setSelectedServings(id, servings);
       if (!remembered.ok) console.error("Kunne ikke lagre valgt antall ved lagring", remembered);
     }
@@ -84,7 +86,7 @@ export async function removeRecipe(id: number): Promise<ActionResult> {
  */
 export async function rememberServings(id: number, servings: number): Promise<ActionResult> {
   if (!idSchema.safeParse(id).success) return actionFailure("not_found");
-  if (!servingsSchema.safeParse(servings).success) return actionFailure("validation");
+  if (!selectedServingsSchema.safeParse(servings).success) return actionFailure("validation");
 
   try {
     const result = setSelectedServings(id, servings);
