@@ -1,5 +1,11 @@
 import "server-only";
-import { parseLine, type Recipe, type RecipeSummary } from "@/domain";
+import {
+  buildSearchText,
+  parseLine,
+  type CollectionEntry,
+  type Recipe,
+  type RecipeSummary,
+} from "@/domain";
 import { isSelectedServings, LIMITS, splitLines } from "@/lib/recipe-input";
 import { appError, err, ok, type Result } from "@/lib/result";
 import { getDb, type Db } from "../db/client";
@@ -9,6 +15,7 @@ import {
   findRecipeById,
   insertRecipe,
   listFavoriteRecipes,
+  listSavedIngredientNames,
   listSavedRecipes,
   markRecipeSaved,
   setRecipeFavorite,
@@ -214,9 +221,23 @@ export function getRecipe(id: number, db: Db = getDb()): Result<Recipe> {
   return recipe ? ok(recipe) : err(appError("not_found"));
 }
 
-/** Oppskriftene i samlingen, sist lagret først. */
-export function listCollection(db: Db = getDb()): Result<RecipeSummary[]> {
-  return ok(listSavedRecipes(db));
+/**
+ * Oppskriftene i samlingen, sist lagret først, hver med søketekst (Story 5.2): tittel, kilde,
+ * mappe og ingrediensnavn.
+ */
+export function listCollection(db: Db = getDb()): Result<CollectionEntry[]> {
+  const names = listSavedIngredientNames(db);
+  return ok(
+    listSavedRecipes(db).map((recipe) => ({
+      ...recipe,
+      searchText: buildSearchText([
+        recipe.title,
+        recipe.sourceName,
+        recipe.folderName,
+        ...(names.get(recipe.id) ?? []),
+      ]),
+    })),
+  );
 }
 
 /**

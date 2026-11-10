@@ -365,6 +365,44 @@ describe("listCollection", () => {
   });
 });
 
+describe("listCollection: søketekst (Story 5.2)", () => {
+  it("har tittel og ingrediensnavn i små bokstaver, for hver oppskrift", () => {
+    const db = createTestDb();
+    const a = createManualRecipe(
+      { ...input, title: "Blåbærsuppe", ingredients: ["2 dl Blåbær", "1 ss sukker"] },
+      db,
+    );
+    const b = createManualRecipe({ ...input, title: "Vafler", ingredients: ["3 egg"] }, db);
+    if (!a.ok || !b.ok) throw new Error("kunne ikke lagre");
+
+    const result = listCollection(db);
+    if (!result.ok) throw new Error("forventet ok");
+    const byId = new Map(result.value.map((r) => [r.id, r.searchText]));
+    expect(byId.get(a.value.id)).toContain("blåbærsuppe");
+    expect(byId.get(a.value.id)).toContain("blåbær");
+    expect(byId.get(a.value.id)).toContain("sukker");
+    expect(byId.get(a.value.id)).not.toContain("egg");
+    expect(byId.get(b.value.id)).toContain("egg");
+  });
+
+  it("ulagrede oppskrifter er ikke med", () => {
+    const db = createTestDb();
+    insertRecipe(db, {
+      title: "Ulagret",
+      sourceUrl: null,
+      sourceName: null,
+      originalServings: 4,
+      selectedServings: null,
+      savedAt: null,
+      createdAt: "2026-11-09T10:00:00.000Z",
+      updatedAt: "2026-11-09T10:00:00.000Z",
+      ingredients: [],
+      steps: [],
+    });
+    expect(listCollection(db)).toEqual({ ok: true, value: [] });
+  });
+});
+
 describe("lagre, slette og rydde (Story 3.2)", () => {
   const stored = (
     db: ReturnType<typeof createTestDb>,

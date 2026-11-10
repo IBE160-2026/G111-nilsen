@@ -320,6 +320,27 @@ export function listSavedRecipes(db: Db, folderId?: number): RecipeSummary[] {
 }
 
 /**
+ * Ingrediensnavn for alle lagrede oppskrifter i én spørring (Story 5.2), nøklet på oppskrifts-id.
+ * Brukes til søk i Samlingen; rekkefølgen følger linjene.
+ */
+export function listSavedIngredientNames(db: Db): Map<number, string[]> {
+  const rows = db
+    .select({ recipeId: ingredientLines.recipeId, name: ingredientLines.name })
+    .from(ingredientLines)
+    .innerJoin(recipes, eq(ingredientLines.recipeId, recipes.id))
+    .where(isNotNull(recipes.savedAt))
+    .orderBy(asc(ingredientLines.recipeId), asc(ingredientLines.position), asc(ingredientLines.id))
+    .all();
+  const names = new Map<number, string[]>();
+  for (const row of rows) {
+    const list = names.get(row.recipeId);
+    if (list) list.push(row.name);
+    else names.set(row.recipeId, [row.name]);
+  }
+  return names;
+}
+
+/**
  * Lagrede favoritter (Story 3.4) i samme rekkefølge som samlingen: sist lagret først.
  * Det finnes ingen «sist åpnet» ennå.
  */

@@ -22,3 +22,10 @@ export { formatLine, formatQuantity } from "./format-quantity";
 export type { ImportedRecipe, ImportError, ImportResult, RecipeNode } from "./import-types";
 export { extractRecipeJsonLd } from "./extract-recipe-jsonld";
 export { normalizeRecipe } from "./normalize-recipe";
+export {
+  buildSearchText,
+  filterCollection,
+  normalizeSearch,
+  type CollectionEntry,
+  type CollectionFilter,
+} from "./filter-collection";

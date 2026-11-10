@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import EmptyState from "@/components/EmptyState";
-import RecipeCard from "@/components/RecipeCard";
+import CollectionBrowser from "@/components/CollectionBrowser";
 import { collectionMessages } from "@/lib/messages";
 import { listCollection } from "@/server/services/recipe-service";
 import listStyles from "../list-page.module.css";
@@ -42,13 +42,5 @@ async function CollectionLoader() {
     );
   }
 
-  return (
-    <ul className={listStyles.list} role="list">
-      {result.value.map((recipe) => (
-        <li key={recipe.id}>
-          <RecipeCard recipe={recipe} />
-        </li>
-      ))}
-    </ul>
-  );
+  return <CollectionBrowser entries={result.value} />;
 }

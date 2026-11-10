@@ -150,6 +150,24 @@ export const collectionMessages = {
   emptyImportAction: "Importer din første oppskrift",
 } as const;
 
+/** Søk og filtrering i Oppskrifter (Story 5.2). */
+export const collectionFilterMessages = {
+  searchLabel: "Søk i oppskrifter",
+  searchHint: "Skriv for eksempel tittel eller ingrediens",
+  onlyFavorites: "Bare favoritter",
+  folderLabel: "Mappe",
+  allFolders: "Alle mapper",
+  noMatch: "Ingen oppskrifter passer.",
+  noMatchHint: "Prøv et annet søkeord, eller fjern et filter.",
+  reset: "Nullstill søk",
+  count: (shown: number, total: number) =>
+    shown === total
+      ? total === 1
+        ? "1 oppskrift"
+        : `${total} oppskrifter`
+      : `${shown} av ${total} oppskrifter`,
+} as const;
+
 /** Tekster for lagre-linjen nederst på oppskriftssiden (Story 3.2). */
 export const recipeActionMessages = {
   save: "Lagre",
