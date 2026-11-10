@@ -214,7 +214,7 @@
   evidence: Valgt for at listen ikke skal hoppe ved revalidering. Fjern/ta i bruk på et forslag som er borte gir en melding.
 - source_spec: `spec-4-2-ta-i-bruk-forslag.md`
   summary: Sporadisk testfeil sett én gang på Macen under Story 4.1: `ManualRecipeForm.test.tsx > deaktiverer knappen mens skjemaet sendes` (forventet fokus på tittelfeltet, fikk knappen). Bestod ved neste kjøring og i alle kjøringer i skymiljøet.
-  evidence: Fokusforventningen etter `waitFor(enabled)` er timing-avhengig. Kjørt på kode uten 4.1-endringer (HEAD 7155096). Rett testen (vent på fokus i stedet for knappen) ved neste anledning.
+  evidence: Løst 2026-11-10: testen venter nå på fokus (`waitFor`) i stedet for å sjekke det rett etter at knappen er aktiv. Årsak: komponenten flytter fokus i en effekt etter at `pending` er false. Sett igjen på Macen (11:56, grønn ved neste kjøring).
 
 - source_spec: `spec-4-3-forslag-fra-sprakmodell.md`
   summary: Adapteren er ikke prøvd mot ekte API (ingen nøkkel eller nett i utviklingsmiljøet). Svarformen er bygget etter dokumentert Messages API og testet med lagrede svar.

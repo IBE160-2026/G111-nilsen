@@ -80,7 +80,8 @@ describe("ManualRecipeForm", () => {
       values: { title: "", servings: "", ingredients: "", steps: "" },
     });
     await waitFor(() => expect(button).toBeEnabled());
-    expect(screen.getByLabelText("Tittel")).toHaveFocus();
+    // Fokus flyttes i en effekt etter at knappen er aktiv igjen, så det må ventes på.
+    await waitFor(() => expect(screen.getByLabelText("Tittel")).toHaveFocus());
   });
 
   it("har live-regionen i DOM-en også før det finnes en skjemafeil", () => {
