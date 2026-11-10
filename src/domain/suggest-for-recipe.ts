@@ -11,8 +11,9 @@ export type SuggestInput = {
 type Context = { title: string; ingredients: string; steps: string; all: string };
 
 /**
- * Hvordan et råd vises i oppskriften når det er tatt i bruk (Story 5.11, 5.12): `line` er
- * ingredienslinjen (tolkes og skaleres som de andre). `before` er stammer for steget et stegråd
+ * Hvordan et råd vises i oppskriften når det er tatt i bruk (Story 5.11, 5.12, 6.1): `line` er
+ * ingredienslinjen (tolkes og skaleres som de andre); den legges i ingredienslisten også for steg-
+ * og serveringsråd som innfører en ingrediens. `before` er stammer for steget et stegråd
  * flettes inn foran («*» betyr første steg). For ingrediensråd er `stepText` setningen som flettes
  * inn etter teksten i første steg som passer `into`.
  */
@@ -65,6 +66,7 @@ const GROUPS: readonly Group[] = [
         text: "Server med kokte poteter og en enkel råkost eller agurksalat.",
         reason: "Frisk og sprø kontrast til en mør og saftig rett.",
         appliesTo: "recipe",
+        line: "Poteter og råkost til servering",
       },
     ],
   },
@@ -77,6 +79,7 @@ const GROUPS: readonly Group[] = [
         text: "Pensle med sammenvispet egg eller melk og strø over frø før steking.",
         reason: "Gir blank, gyllen skorpe og litt ekstra smak og knas.",
         appliesTo: "steps",
+        line: "1 egg eller litt melk til pensling, og frø",
         before: ["stek"],
         skipWhen: (c) => hasStep(c, ["pensl"]) || any(c.ingredients, ["pensling"]),
       },
@@ -127,6 +130,7 @@ const GROUPS: readonly Group[] = [
         text: "Server med friske bær og rømme, eller med syltetøy og litt sukker.",
         reason: "Syrlige bær balanserer det milde og søte.",
         appliesTo: "recipe",
+        line: "Friske bær og rømme, eller syltetøy",
       },
     ],
   },
@@ -172,6 +176,7 @@ const GROUPS: readonly Group[] = [
         text: "Riv parmesan eller pecorino over rett før servering.",
         reason: "Salt og kraftig smak som runder av sausen.",
         appliesTo: "recipe",
+        line: "Parmesan eller pecorino",
         skipWhen: (c) => any(c.ingredients, ["parmesan", "pecorino"]),
       },
     ],
@@ -192,6 +197,7 @@ const GROUPS: readonly Group[] = [
         text: "Tilsett frisk basilikum eller oregano helt til slutt.",
         reason: "Friske urter mister duften hvis de koker for lenge.",
         appliesTo: "steps",
+        line: "Frisk basilikum eller oregano",
         skipWhen: (c) => any(c.ingredients, ["basilikum", "oregano"]),
       },
     ],
@@ -229,6 +235,7 @@ const GROUPS: readonly Group[] = [
         text: "Server med kokte poteter og en frisk agurksalat.",
         reason: "Mild og frisk følge som lar fisken stå i sentrum.",
         appliesTo: "recipe",
+        line: "Poteter og agurk til servering",
       },
     ],
   },
@@ -259,6 +266,7 @@ const GROUPS: readonly Group[] = [
         text: "Smak til med en skvett sitron eller eddik helt til slutt.",
         reason: "Syre løfter smakene i varme retter som har fått koke lenge.",
         appliesTo: "steps",
+        line: "Litt sitron eller eddik",
       },
       {
         text: "Lag dobbel porsjon og frys ned halvparten.",

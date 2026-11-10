@@ -106,6 +106,7 @@ Dette dokumentet deler kravene fra PRD, UX (DESIGN.md og EXPERIENCE.md) og arkit
 - FR-17: Epic 1 – avkrysning under matlaging
 - FR-18: Epic 3 – redigere en oppskrift
 - FR-19–FR-27: Epic 5 – versjon 2
+- FR-28–FR-39: Epic 6 – videre utvikling
 
 ## Epic-liste
 
@@ -128,6 +129,13 @@ Brukeren kan få 1–3 konkrete forslag til oppskriften og ta dem i bruk, også 
 ### Epic 5: Versjon 2 (lagt til 2026-11-10)
 Brukeren får mer ut av oppskriftene sine: halve porsjoner, søk, kokemodus, valg av mål, handleliste med «Har hjemme», forslag som passer retten og står i oppskriften, og en konto å lagre på.
 **Krav:** FR-19, FR-20, FR-21, FR-22, FR-23, FR-24, FR-25, FR-26, FR-27
+
+### Epic 6: Videre utvikling (lagt til 2026-11-10)
+Flere funksjoner fra Majas ønskeliste: forslag i ingredienslisten, tid, notater, ukemeny, kjøkkenhjelp, organisering, import/eksport, mobil og deling, og glemt passord til slutt. Hver story legges inn her før den bygges.
+**Krav:** FR-28 til FR-39
+
+### Epic 7: Design (planlagt)
+Samlet designrunde etter at funksjonene er på plass: `DESIGN.md` og `EXPERIENCE.md` oppdateres først (BMAD UX), så kode.
 
 NFR og UX-DR dekkes i storiene som trenger dem. README oppdateres i siste story i hver epic.
 
@@ -782,3 +790,61 @@ slik at oppskriftene mine lagres på kontoen min.
 **Og** den første kontoen overtar det som fantes fra før, passord lagres bare som hash, og feil e-post og feil passord gir samme melding (NFR-7)
 
 **Og** README er oppdatert med versjon 2
+
+## Epic 6: Videre utvikling
+
+Lagt til 2026-11-10 (PRD §4.7). Rekkefølgen under er planen; hver story får spec (`spec-6-N-*.md`) før den bygges, og akseptansekriteriene utdypes der.
+
+| Story | Innhold | Krav |
+|---|---|---|
+| 6.1 | Forslag som innfører en ingrediens, gir også en linje i ingredienslisten (også stegforslag) | FR-28 |
+| 6.2 | Tid for oppskriften: fra kilden (`totalTime`, `prepTime` + `cookTime`) eller skrevet inn selv; vist ved hjertet | FR-29 |
+| 6.3 | Notater på oppskriften og «Sist laget» | FR-30 |
+| 6.4 | Ukemeny: oppskrifter på dager, handleliste for uka | FR-31 |
+| 6.5 | Tidtaker i kokemodus fra tider i steget | FR-32 |
+| 6.6 | Utskriftsvennlig oppskrift | FR-33 |
+| 6.7 | Merkelapper, også i søket | FR-34 |
+| 6.8 | Egen vurdering (stjerner) | FR-34 |
+| 6.9 | Sortering: sist lagret, sist laget, mest laget, alfabetisk | FR-34 |
+| 6.10 | Kopier en oppskrift som egen variant | FR-34 |
+| 6.11 | Angre sletting | FR-34 |
+| 6.12 | «Hva kan jeg lage?» ut fra «Har hjemme» | FR-35 |
+| 6.13 | Tilfeldig middagsforslag fra samlingen | FR-35 |
+| 6.14 | Lim inn tekst og få oppskriften tolket | FR-36 |
+| 6.15 | Eksport og import av samlingen som fil | FR-36 |
+| 6.16 | Installerbar app (PWA) | FR-37 |
+| 6.17 | Handlelisten uten nett | FR-37 |
+| 6.18 | Stemmestyring i kokemodus | FR-32 |
+| 6.19 | Delt handleliste eller samling i husstanden | FR-38 |
+| 6.20 | Offentlig lenke til en oppskrift (bare lesing) | FR-38 |
+| 6.21 | Glemt passord | FR-39 |
+
+### Story 6.1: Forslag i ingredienslisten
+
+Som Tor,
+vil jeg at et forslag som legger til en ingrediens også står i ingredienslisten,
+slik at jeg har den med når jeg handler og lager maten.
+
+**Akseptansekriterier:**
+
+**Gitt** et forslag som innfører en ingrediens, også et stegforslag («Tilsett frisk basilikum eller oregano helt til slutt», «Pensle med egg … og strø over frø»)
+**Når** jeg tar det i bruk
+**Så** står ingrediensen som en linje merket «Forslag» i ingredienslisten, i tillegg til i stegteksten (FR-28)
+**Og** «Fjern» tar bort både linjen og teksten, og originalen endres ikke (AD-2)
+
+### Story 6.2: Tid for oppskriften
+
+Som Ida,
+vil jeg se hvor lang tid oppskriften tar,
+slik at jeg kan velge noe som passer tiden jeg har.
+
+**Akseptansekriterier:**
+
+**Gitt** en oppskrift fra en side med tid (`totalTime`, eller `prepTime` og `cookTime`)
+**Når** den importeres
+**Så** lagres tiden, og den vises ved favoritthjertet som for eksempel «45 min» eller «1 t 15 min» (FR-29)
+
+**Gitt** «Legg inn selv» eller «Rediger»
+**Når** jeg fyller inn tid i minutter (valgfritt)
+**Så** lagres og vises den på samme måte; tomt felt betyr ingen tid
+

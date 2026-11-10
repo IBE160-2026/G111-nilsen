@@ -138,4 +138,55 @@ describe("withAppliedSuggestions", () => {
     ]);
     expect({ ingredients, steps }).toEqual(copy);
   });
+
+  describe("forslag som innfører en ingrediens (Story 6.1)", () => {
+    it("et stegforslag gir både tekst i steget og en linje i ingredienslisten", () => {
+      const shown = withAppliedSuggestions(ingredients, steps, [
+        applied(11, "Tilsett frisk basilikum eller oregano helt til slutt.", "steps"),
+      ]);
+      expect(shown.ingredients.at(-1)).toMatchObject({
+        id: -11,
+        original: "Frisk basilikum eller oregano",
+        suggested: true,
+      });
+      expect(shown.ingredients).toHaveLength(4);
+      expect(shown.steps.at(-1)!.addedAfter).toEqual([
+        "Tilsett frisk basilikum eller oregano helt til slutt.",
+      ]);
+    });
+
+    it("pensling gir en tolket linje med mengde", () => {
+      const shown = withAppliedSuggestions(ingredients, steps, [
+        applied(
+          12,
+          "Pensle med sammenvispet egg eller melk og strø over frø før steking.",
+          "steps",
+        ),
+      ]);
+      expect(shown.ingredients.at(-1)).toMatchObject({
+        original: "1 egg eller litt melk til pensling, og frø",
+        quantity: { min: 1 },
+      });
+      expect(shown.steps[1].addedBefore?.[0]).toContain("Pensle");
+    });
+
+    it("et serveringsforslag gir en linje og står under «Forslag til retten»", () => {
+      const shown = withAppliedSuggestions(ingredients, steps, [
+        applied(13, "Server med friske bær og rømme, eller med syltetøy og litt sukker.", "recipe"),
+      ]);
+      expect(shown.ingredients.at(-1)).toMatchObject({
+        original: "Friske bær og rømme, eller syltetøy",
+      });
+      expect(shown.tips).toHaveLength(1);
+    });
+
+    it("stegforslag uten ingrediens og forslag fra språkmodell gir ingen linje", () => {
+      const shown = withAppliedSuggestions(ingredients, steps, [
+        applied(14, "La røren hvile i 20–30 minutter før du begynner å steke.", "steps"),
+        applied(15, "Tilsett litt chili.", "steps"),
+        applied(16, "Server med salat.", "recipe"),
+      ]);
+      expect(shown.ingredients).toHaveLength(3);
+    });
+  });
 });

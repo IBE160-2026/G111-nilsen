@@ -283,6 +283,23 @@ Brukeren kan lage konto med e-post og passord, logge inn og ut. Lagring, mapper,
 - En annen bruker får «Fant ikke oppskriften» for en lagret oppskrift som ikke er hans.
 - Feil e-post og feil passord gir samme melding; passord lagres aldri i klartekst.
 
+### 4.7 Videre utvikling (Epic 6, lagt til 2026-11-10)
+
+**Beskrivelse:** Ønsker fra Maja etter versjon 2. Rekkefølgen er prioriteten; glemt passord tas sist, og designet tas samlet i en egen runde etter at funksjonene er på plass. Hver story får en spec før den bygges.
+
+- **FR-28 Forslag i ingredienslisten:** et forslag som innfører en ingrediens, også når det er et stegforslag («Tilsett frisk basilikum til slutt»), gir en merket linje i ingredienslisten.
+- **FR-29 Tid:** oppskriften viser hvor lang tid den tar (fra kilden eller skrevet inn selv), ved favoritthjertet.
+- **FR-30 Notater og sist laget:** eget notatfelt per oppskrift og «Sist laget»-dato.
+- **FR-31 Ukemeny:** legge oppskrifter på dager i uka og få handleliste for uka.
+- **FR-32 Kokemodus:** tidtaker fra tider i steget, og stemmestyring («neste»).
+- **FR-33 Utskrift:** utskriftsvennlig visning av en oppskrift.
+- **FR-34 Organisering:** merkelapper (også i søket), egen vurdering, sortering, kopiere en oppskrift som egen variant, angre sletting.
+- **FR-35 Finne noe å lage:** «Hva kan jeg lage?» ut fra «Har hjemme», og tilfeldig forslag fra samlingen.
+- **FR-36 Import og eksport:** lime inn tekst og få den tolket, og eksport/import av hele samlingen som fil.
+- **FR-37 Mobil:** installerbar på hjemskjermen (PWA), og handlelisten tilgjengelig uten nett.
+- **FR-38 Deling:** delt handleliste eller samling i husstanden, og offentlig lenke (bare lesing) til en oppskrift.
+- **FR-39 Glemt passord:** tilbakestilling med engangslenke; uten e-postnøkkel skrives lenken i terminalen.
+
 ## 5. Tverrgående krav (NFR)
 
 - **NFR-1 Kjørbarhet:** Appen kan installeres og startes lokalt etter README med Node.js og npm, uten egen databaseserver, betalte kontoer eller nøkler. Hele kjerneflyten (import, visning, skalering, lagring, mapper, favoritter) virker uten nøkkel. Kontoer (FR-27) er lokale i appen og krever ingen ekstern tjeneste.

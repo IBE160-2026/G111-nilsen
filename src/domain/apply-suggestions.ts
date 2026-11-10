@@ -26,6 +26,8 @@ function sentence(text: string): string {
  * Legger forslagene som er tatt i bruk inn i ingredienslisten og stegteksten (Story 5.11, 5.12),
  * uten å endre originalen (AD-2): det er en ny visning, og «Fjern» tar dem bort igjen.
  *
+ * - Steg- og serveringsforslag som innfører en ingrediens (`line`), gir også en merket linje sist
+ *   i ingredienslisten (Story 6.1).
  * - Ingrediensforslag blir en merket linje sist (enkle forslag har en kort linje som tolkes og
  *   skaleres; ellers står forslagsteksten). Har forslaget en `stepText`, flettes den inn etter
  *   teksten i første steg som passer `into`.
@@ -53,17 +55,25 @@ export function withAppliedSuggestions(
     step[where] = [...(step[where] ?? []), sentence(text)];
   };
 
+  const addLine = (id: number, text: string) => {
+    lastPosition += 1;
+    lines.push({
+      ...parseLine(text),
+      id: -id,
+      position: lastPosition,
+      section: null,
+      suggested: true,
+    });
+  };
+
   for (const suggestion of suggestions) {
     const placement = tipPlacement(suggestion.text);
+    // Et steg- eller serveringsråd som innfører en ingrediens, gir også en linje (Story 6.1).
+    if (suggestion.appliesTo !== "ingredients" && placement?.line) {
+      addLine(suggestion.id, placement.line);
+    }
     if (suggestion.appliesTo === "ingredients") {
-      lastPosition += 1;
-      lines.push({
-        ...parseLine(placement?.line ?? suggestion.text),
-        id: -suggestion.id,
-        position: lastPosition,
-        section: null,
-        suggested: true,
-      });
+      addLine(suggestion.id, placement?.line ?? suggestion.text);
       if (placement?.stepText && placement.into) {
         const index = ordered.findIndex(
           (step) => !step.suggested && stepMatches(step, placement.into!),

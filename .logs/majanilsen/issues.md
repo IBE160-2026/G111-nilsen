@@ -84,3 +84,4 @@
 - [ ] 2026-11-10 [versjon 2 i planen](961-2026-11-10-22-15-00-versjon-2-i-planen.md) — Maja: push, se over PRD/epics/arkitektur, avgjør draft → ferdig, retrospektiv for Epic 5
 - [ ] 2026-11-10 [retrospektiv Epic 5](960-2026-11-10-22-45-00-retrospektiv-epic-5.md) — Maja: push, avgjør A1 (uavhengig sikkerhetsgjennomgang), test på mobil og i mørk modus
 - [ ] 2026-11-10 [README per epic](959-2026-11-10-23-00-00-readme-oversikt-per-epic.md) — Maja: push
+- [ ] 2026-11-10 [Epic 6 og story 6.1](958-2026-11-10-23-30-00-epic-6-plan-og-story-6-1.md) — Maja: push
