@@ -184,4 +184,34 @@ describe("CookingMode", () => {
     await user.click(openButton());
     expect(within(dialog()).getByText("Visp sammen mel og melk.")).toBeInTheDocument();
   });
+
+  it("følger metriske mål valgt på siden", async () => {
+    const user = userEvent.setup();
+    const us: RecipeLine[] = ["2 cups flour", "1 tbsp salt"].map((text, i) => ({
+      ...parseLine(text),
+      id: i + 1,
+      position: i + 1,
+      section: null,
+    }));
+    render(
+      <SelectedServingsProvider>
+        <IngredientList ingredients={us} originalServings={4} />
+        <CookingMode
+          title="Pannekaker"
+          steps={steps}
+          ingredients={us}
+          originalServings={4}
+          selectedServings={null}
+        />
+      </SelectedServingsProvider>,
+    );
+    await user.click(openButton());
+    expect(within(dialog()).getByText("2 cup flour")).toBeInTheDocument();
+    await user.keyboard("{Escape}");
+    dialog().dispatchEvent(new Event("cancel", { cancelable: true }));
+    await user.click(screen.getByLabelText(/Vis i metriske mål/));
+    await user.click(openButton());
+    expect(within(dialog()).getByText("4,8 dl flour (ca.)")).toBeInTheDocument();
+    expect(within(dialog()).getByText("1 ss salt")).toBeInTheDocument();
+  });
 });

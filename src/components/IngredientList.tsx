@@ -2,11 +2,19 @@
 
 import { useState } from "react";
 import type { ActionResult } from "@/app/_shared/action-result";
-import { formatQuantity, scaleLine, type RecipeLine, type ScaledLine } from "@/domain";
-import { servingsDialogMessages } from "@/lib/messages";
+import {
+  convertLine,
+  formatQuantity,
+  hasConvertibleUnit,
+  scaleLine,
+  type RecipeLine,
+  type ScaledLine,
+  type UnitSystem,
+} from "@/domain";
+import { servingsDialogMessages, unitMessages } from "@/lib/messages";
 import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import CheckRow from "./CheckRow";
-import { useReportSelectedServings } from "./SelectedServings";
+import { useReportSelectedServings, useReportUnitSystem } from "./SelectedServings";
 import ServingsDialog, { DEFAULT_SERVINGS } from "./ServingsDialog";
 import ServingStepper from "./ServingStepper";
 import { useCheckedSet } from "./use-checked-set";
@@ -153,6 +161,13 @@ export default function IngredientList({
     originalServings === null && onOriginalServingsChange !== undefined,
   );
 
+  const [unitSystem, setUnitSystem] = useState<UnitSystem>("original");
+  const reportUnitSystem = useReportUnitSystem();
+  const canConvert = ingredients.some(hasConvertibleUnit);
+  function changeUnitSystem(system: UnitSystem) {
+    setUnitSystem(system);
+    reportUnitSystem(system);
+  }
   const reportSelected = useReportSelectedServings();
   function change(servings: number) {
     setSelected(servings);
@@ -195,6 +210,19 @@ export default function IngredientList({
 
       <section className={styles.card} aria-labelledby="ingredienser">
         <h2 id="ingredienser">Ingredienser</h2>
+        {canConvert ? (
+          <label className={styles.unitToggle}>
+            <input
+              type="checkbox"
+              checked={unitSystem === "metric"}
+              onChange={(event) => changeUnitSystem(event.target.checked ? "metric" : "original")}
+            />
+            <span>
+              {unitMessages.metric}
+              <span className={styles.unitHint}>{unitMessages.metricHint}</span>
+            </span>
+          </label>
+        ) : null}
         {groups.map((group, index) => {
           const labelId = group.section ? `ingrediensseksjon-${index}` : undefined;
           return (
@@ -209,7 +237,7 @@ export default function IngredientList({
                   <Line
                     key={line.id}
                     id={line.id}
-                    line={scaleLine(line, factor)}
+                    line={convertLine(scaleLine(line, factor), unitSystem)}
                     checked={isChecked(line.id)}
                     onToggle={toggle}
                   />

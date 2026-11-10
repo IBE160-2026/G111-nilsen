@@ -520,4 +520,35 @@ describe("IngredientList", () => {
       expect(field()).toHaveValue("1");
     });
   });
+
+  describe("metriske mål (Story 5.5)", () => {
+    const us = lines("2 cups flour", "1 lb beef", "2 tbsp butter", "3 egg");
+    const toggle = () => screen.getByLabelText(/Vis i metriske mål/);
+
+    it("vises bare når en linje har amerikansk enhet", () => {
+      const { unmount } = render(<IngredientList ingredients={basic} originalServings={4} />);
+      expect(screen.queryByLabelText(/Vis i metriske mål/)).not.toBeInTheDocument();
+      unmount();
+      render(<IngredientList ingredients={us} originalServings={4} />);
+      expect(toggle()).not.toBeChecked();
+    });
+
+    it("regner om til dl, g og ss, og tilbake til originalen", async () => {
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={us} originalServings={4} />);
+      expect(shown()).toEqual(["2 cup flour", "1 lb beef", "2 tbsp butter", "3 egg"]);
+      await user.click(toggle());
+      expect(shown()).toEqual(["4,8 dl flour ca.", "450 g beef ca.", "2 ss butter", "3 egg"]);
+      await user.click(toggle());
+      expect(shown()).toEqual(["2 cup flour", "1 lb beef", "2 tbsp butter", "3 egg"]);
+    });
+
+    it("regner om etter skalering", async () => {
+      const user = userEvent.setup();
+      render(<IngredientList ingredients={lines("1 cup milk")} originalServings={4} />);
+      await user.click(toggle());
+      await user.click(plus());
+      expect(shown()).toEqual(["3 dl milk ca."]);
+    });
+  });
 });

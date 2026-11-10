@@ -29,3 +29,4 @@ export {
   type CollectionEntry,
   type CollectionFilter,
 } from "./filter-collection";
+export { convertLine, hasConvertibleUnit, type UnitSystem } from "./convert-units";

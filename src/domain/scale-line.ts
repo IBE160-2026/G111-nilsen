@@ -29,7 +29,7 @@ function roundHalfUp(value: number): number {
 }
 
 /** g/ml: fra 100 og opp to gjeldende sifre, ellers hele tall; minst 1. */
-function roundWeightVolume(value: number): number {
+export function roundWeightVolume(value: number): number {
   const whole = roundHalfUp(value);
   if (whole < 100) return Math.max(1, whole);
   const step = 10 ** (Math.floor(Math.log10(value)) - 1);

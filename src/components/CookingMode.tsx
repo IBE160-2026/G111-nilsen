@@ -1,10 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { formatLine, scaleLine, type RecipeLine, type Step } from "@/domain";
+import {
+  convertLine,
+  formatLine,
+  scaleLine,
+  type RecipeLine,
+  type Step,
+  type UnitSystem,
+} from "@/domain";
 import { cookingModeMessages as m } from "@/lib/messages";
 import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
-import { useGetSelectedServings } from "./SelectedServings";
+import { useGetSelectedServings, useGetUnitSystem } from "./SelectedServings";
 import { servingsText } from "./ServingStepper";
 import styles from "./CookingMode.module.css";
 
@@ -45,9 +52,13 @@ export default function CookingMode({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const getPicked = useGetSelectedServings();
+  const getUnits = useGetUnitSystem();
+  // Målsystemet som gjaldt da kokemodus ble åpnet.
+  const [units, setUnits] = useState<UnitSystem>("original");
   const original = validOriginal(originalServings);
 
   function openMode() {
+    setUnits(getUnits());
     if (original === null) {
       setServings(null);
     } else {
@@ -135,6 +146,7 @@ export default function CookingMode({
             ingredients={ingredients}
             factor={original !== null && servings !== null ? servings / original : 1}
             servings={original !== null ? servings : null}
+            units={units}
             onExit={closeMode}
           />
         ) : null}
@@ -149,6 +161,7 @@ function Session({
   ingredients,
   factor,
   servings,
+  units,
   onExit,
 }: {
   title: string;
@@ -156,6 +169,7 @@ function Session({
   ingredients: readonly RecipeLine[];
   factor: number;
   servings: number | null;
+  units: UnitSystem;
   onExit: () => void;
 }) {
   const sorted = [...steps].sort((a, b) => a.position - b.position);
@@ -209,7 +223,7 @@ function Session({
         </summary>
         <ul role="list" className={styles.lines}>
           {lines.map((line) => (
-            <li key={line.id}>{formatLine(scaleLine(line, factor))}</li>
+            <li key={line.id}>{formatLine(convertLine(scaleLine(line, factor), units))}</li>
           ))}
         </ul>
       </details>

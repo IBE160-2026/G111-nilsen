@@ -151,6 +151,12 @@ export const collectionMessages = {
   emptyImportAction: "Importer din første oppskrift",
 } as const;
 
+/** Metriske mål (Story 5.5). */
+export const unitMessages = {
+  metric: "Vis i metriske mål",
+  metricHint: "Kopper, unser og pund regnes om til dl, gram og kg (ca.).",
+} as const;
+
 /** Kokemodus (Story 5.4). */
 export const cookingModeMessages = {
   open: "Kokemodus",
