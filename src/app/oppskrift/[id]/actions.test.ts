@@ -44,6 +44,7 @@ const {
   requestSuggestions,
   saveRecipe,
   setFavorite,
+  fetchTimeFromSource,
 } = await import("./actions");
 
 const failure = (kind: string | undefined) => {
@@ -594,5 +595,15 @@ describe("innlogging og eierskap (Story 5.13)", () => {
     expect(
       state.db!.$client.prepare("select user_id as u from recipes where id = ?").get(id),
     ).toEqual({ u: TEST_USER_ID });
+  });
+});
+
+describe("fetchTimeFromSource (Story 6.2)", () => {
+  it("en oppskrift uten kilde gir «fant ikke», og ugyldig id avvises", async () => {
+    expect(await fetchTimeFromSource(id)).toEqual({
+      ok: false,
+      message: expect.stringContaining("Vi fant ikke oppskriften"),
+    });
+    expect(await fetchTimeFromSource(0)).toMatchObject({ ok: false });
   });
 });

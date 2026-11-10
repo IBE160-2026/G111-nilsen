@@ -3,6 +3,7 @@ import { withAppliedSuggestions, type Folder, type Recipe } from "@/domain";
 import {
   applySuggestion,
   changeOriginalServings,
+  fetchTimeFromSource,
   moveToFolder,
   moveToNewFolder,
   removeRecipe,
@@ -16,7 +17,9 @@ import { editRecipeMessages, sourceLinkMessages } from "@/lib/messages";
 import { sourceLabel } from "@/lib/source-label";
 import { isHttpUrl } from "@/lib/source-url";
 import CookingMode from "./CookingMode";
+import FetchTimeButton from "./FetchTimeButton";
 import IngredientList from "./IngredientList";
+import RecipeTime from "./RecipeTime";
 import { loginHref } from "./LoginRequired";
 import RecipeActions from "./RecipeActions";
 import { SelectedServingsProvider } from "./SelectedServings";
@@ -83,6 +86,17 @@ export default function RecipeView({
             ) : (
               sourceLabel(recipe)
             )}
+            {recipe.totalMinutes != null ? (
+              <>
+                <span aria-hidden="true">{" · "}</span>
+                <RecipeTime minutes={recipe.totalMinutes} inline />
+              </>
+            ) : recipe.sourceUrl !== null && isHttpUrl(recipe.sourceUrl) ? (
+              <>
+                <span aria-hidden="true">{" · "}</span>
+                <FetchTimeButton onFetch={fetchTimeFromSource.bind(null, recipe.id)} />
+              </>
+            ) : null}
           </p>
         </header>
 

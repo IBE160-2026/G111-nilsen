@@ -175,8 +175,8 @@ test("UJ-1: importer, skaler til ett flere, lagre i mappe og gjør til favoritt"
   await expect(page.getByLabel("Antall personer", { exact: true })).toHaveValue(
     String(uj1.original),
   );
-  // Tiden fra kilden vises ved lagre-linjen (Story 6.2).
-  await expect(page.getByText(/^Tid: /)).toBeAttached();
+  // Tiden fra kilden vises under tittelen og ved lagre-linjen (Story 6.2).
+  await expect(page.getByText(/^Tid: /)).toHaveCount(2);
   const before = await ingredientsText(page);
 
   await page.getByRole("button", { name: "Flere personer" }).click();

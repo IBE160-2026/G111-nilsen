@@ -204,6 +204,7 @@ describe("listRecipesInFolder", () => {
       savedAt: "2026-11-09T09:00:00.000Z",
       isFavorite: false,
       folderName: "Hverdag",
+      totalMinutes: null,
     });
     expect(listRecipesInFolder(db, TEST_USER_ID, 999)).toEqual([]);
   });

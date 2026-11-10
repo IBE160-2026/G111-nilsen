@@ -101,6 +101,9 @@ export const recipeTimeMessages = {
   label: "Tid (minutter)",
   hint: "Valgfritt. Hvor lang tid oppskriften tar alt i alt, for eksempel 45.",
   shown: (time: string) => `Tid: ${time}`,
+  fetch: "Hent tid fra kilden",
+  fetching: "Henter tid …",
+  notFound: "Fant ingen tid på siden. Du kan skrive den inn under «Rediger».",
 } as const;
 
 /**

@@ -4,8 +4,8 @@ import { appError, err, ok } from "@/lib/result";
 import { createTestDb, TEST_USER_ID } from "../db/client";
 import { createFixtureFetcher } from "../adapters/fixture-fetcher";
 import type { RecipeSourceFetcher } from "../ports/recipe-source-fetcher";
-import { buildImportedContent, importRecipe } from "./import-service";
-import { getRecipe, saveRecipeToCollection } from "./recipe-service";
+import { buildImportedContent, importRecipe, refreshTimeFromSource } from "./import-service";
+import { createManualRecipe, getRecipe, saveRecipeToCollection } from "./recipe-service";
 
 const NOW = new Date("2026-11-09T12:00:00.000Z");
 const deps = (extra: Parameters<typeof importRecipe>[1] = {}) => ({
@@ -485,5 +485,54 @@ describe("importRecipe: tid (Story 6.2)", () => {
       .prepare("select total_minutes as m from recipes where id = ?")
       .get(result.value.id);
     expect(row).toEqual({ m: 80 });
+  });
+});
+
+describe("refreshTimeFromSource (Story 6.2)", () => {
+  async function importedWithoutTime(d: ReturnType<typeof deps>) {
+    const result = await importRecipe(
+      "https://www.matprat.no/oppskrifter/familien/rundstykker/",
+      d,
+    );
+    if (!result.ok) throw new Error("feil");
+    d.db.$client.prepare("update recipes set total_minutes = null").run();
+    return result.value.id;
+  }
+
+  it("henter tiden fra kilden og endrer ingenting annet", async () => {
+    const d = deps();
+    const id = await importedWithoutTime(d);
+    const before = d.db.$client.prepare("select title, updated_at from recipes").get();
+    expect(await refreshTimeFromSource(id, d)).toEqual({ ok: true, value: { totalMinutes: 80 } });
+    expect(d.db.$client.prepare("select total_minutes as m from recipes").get()).toEqual({ m: 80 });
+    expect(d.db.$client.prepare("select title, updated_at from recipes").get()).toEqual(before);
+  });
+
+  it("en side uten tid gir no_recipe med detail no_time, og ingenting lagres", async () => {
+    const d = deps();
+    const id = await importedWithoutTime(d);
+    const result = await refreshTimeFromSource(id, {
+      ...d,
+      fetcher: staticFetcher(ld({ name: "Rundstykker", recipeIngredient: ["mel"] })),
+    });
+    expect(result).toEqual({ ok: false, error: { kind: "no_recipe", detail: "no_time" } });
+  });
+
+  it("ukjent oppskrift eller oppskrift uten kilde gir not_found uten henting", async () => {
+    const d = deps({ fetcher: forbiddenFetcher });
+    expect(await refreshTimeFromSource(999, d)).toEqual({
+      ok: false,
+      error: { kind: "not_found" },
+    });
+    const created = createManualRecipe(
+      TEST_USER_ID,
+      { title: "Egen", servings: 2, ingredients: ["1 egg"], steps: [] },
+      d.db,
+    );
+    if (!created.ok) throw new Error("feil");
+    expect(await refreshTimeFromSource(created.value.id, d)).toMatchObject({
+      ok: false,
+      error: { kind: "not_found" },
+    });
   });
 });

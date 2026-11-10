@@ -28,3 +28,10 @@ Egen gjennomgang.
 - Første versjon brøt lagre-linjen på to linjer ved 360 px (hjerte + tid + «Lagre i mappe» + «Slett» = 344 px av 328). Løst med tettere avstand og uten klokke under 400 px.
 - Oppdatering uten feltet `minutes` (eldre kall) beholder tiden; `null` fjerner den. Testet.
 - Utsatt: vise tiden i Oppskrifter-listen og filtrere/sortere på tid (passer med 6.9), skille forberedelse og steketid.
+
+## Oppfølging 2026-11-10 (etter Majas test)
+Maja fant at tiden bare kom når hun skrev den inn: oppskriftene hennes var importert før 6.2, og en ny import av samme lenke gjenbruker den lagrede oppskriften uten å hente siden. Hun ville også se tiden tydeligere.
+- **«Hent tid fra kilden»:** en importert oppskrift uten tid har knappen under tittelen. Handlingen `fetchTimeFromSource` (tilgangssjekk som andre handlinger) henter siden på nytt via `refreshTimeFromSource` og lagrer bare tiden; tittel, ingredienser, steg og `updatedAt` røres ikke. Uten tid på siden: «Fant ingen tid på siden. Du kan skrive den inn under «Rediger».»
+- **Mer robust lesing av tid:** også «P0Y0M0DT0H30M0.000S», desimaler («PT0.5H», «PT0,5H») og uker; år og måneder godtas bare som 0.
+- **Synlig flere steder:** under tittelen («Matprat · 45 min»), ved hjertet som før, og på oppskriftskortene i Oppskrifter, Mapper og Favoritter (`RecipeSummary.totalMinutes`).
+- Verifisering: 2695 enhetstester og 18 e2e grønne i skyen (UJ-1 sjekker tid både under tittelen og ved hjertet); skjermbilder ved 1280 px sett.

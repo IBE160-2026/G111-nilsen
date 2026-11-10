@@ -16,6 +16,7 @@ const actions = vi.hoisted(() => ({
   requestSuggestions: vi.fn(),
   applySuggestion: vi.fn(),
   removeSuggestion: vi.fn(),
+  fetchTimeFromSource: vi.fn(),
 }));
 vi.mock("@/app/oppskrift/[id]/actions", () => actions);
 
@@ -509,5 +510,40 @@ describe("RecipeView", () => {
       const ingredients = screen.getByRole("region", { name: "Ingredienser" });
       expect(within(ingredients).getAllByRole("listitem")[0]).toHaveTextContent("2 ¼ dl melk");
     });
+  });
+});
+
+describe("RecipeView: tid (Story 6.2)", () => {
+  it("viser tiden under tittelen og ved hjertet", () => {
+    render(
+      <RecipeView
+        recipe={{ ...recipe, savedAt: "2026-11-09T10:00:00.000Z", totalMinutes: 45 }}
+        folders={folders}
+      />,
+    );
+    expect(screen.getAllByText("Tid: 45 min")).toHaveLength(2);
+    expect(screen.queryByRole("button", { name: "Hent tid fra kilden" })).not.toBeInTheDocument();
+  });
+
+  it("uten tid: «Hent tid fra kilden» for en importert oppskrift, ingenting for en egen", async () => {
+    const user = userEvent.setup();
+    actions.fetchTimeFromSource.mockResolvedValue({
+      ok: false,
+      message: "Fant ingen tid på siden. Du kan skrive den inn under «Rediger».",
+    });
+    const { unmount } = render(
+      <RecipeView
+        recipe={{ ...recipe, id: 9, sourceUrl: "https://www.matprat.no/x/", totalMinutes: null }}
+        folders={folders}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Hent tid fra kilden" }));
+    expect(actions.fetchTimeFromSource).toHaveBeenCalledWith(9);
+    expect(await screen.findByText(/Fant ingen tid på siden/)).toBeInTheDocument();
+    unmount();
+    render(
+      <RecipeView recipe={{ ...recipe, sourceUrl: null, totalMinutes: null }} folders={folders} />,
+    );
+    expect(screen.queryByRole("button", { name: "Hent tid fra kilden" })).not.toBeInTheDocument();
   });
 });

@@ -161,3 +161,13 @@ describe("RecipeCard: hjerte (Story 3.4)", () => {
     expect(screen.getAllByRole("button")).toHaveLength(1);
   });
 });
+
+describe("RecipeCard: tid (Story 6.2)", () => {
+  it("viser tiden i kortet når den finnes", () => {
+    render(<RecipeCard recipe={{ ...recipe, totalMinutes: 75 }} />);
+    expect(screen.getByText("Tid: 1 t 15 min")).toBeInTheDocument();
+    cleanup();
+    render(<RecipeCard recipe={recipe} />);
+    expect(screen.queryByText(/^Tid:/)).not.toBeInTheDocument();
+  });
+});

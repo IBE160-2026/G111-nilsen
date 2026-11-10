@@ -6,8 +6,10 @@ import { normalizeSourceUrl, validateUrl } from "@/lib/source-url";
 import { truncateText } from "@/lib/truncate-text";
 import { getDb, type Db } from "../db/client";
 import {
+  findRecipeById,
   findRecipeBySourceUrl,
   insertImportedRecipe,
+  updateTotalMinutes,
   refreshUnsavedRecipe,
   type NewRecipe,
 } from "../db/repositories/recipe-repository";
@@ -113,6 +115,40 @@ export async function importRecipe(
       : ok({ id: stored.id });
   } catch (error) {
     console.error("Import feilet uventet", error);
+    return err(appError("unknown"));
+  }
+}
+
+/**
+ * Henter tiden fra kilden på nytt for en importert oppskrift som mangler tid (Story 6.2), for
+ * eksempel importert før tid ble lest. Bare tiden endres; ingredienser, steg og tittel røres ikke.
+ * Ukjent oppskrift eller oppskrift uten kildeadresse gir `not_found`; en side uten tid gir
+ * `no_recipe`; feil ved henting gir samme feil som import.
+ */
+export async function refreshTimeFromSource(
+  id: number,
+  deps: Omit<ImportDeps, "userId"> = {},
+): Promise<Result<{ totalMinutes: number }, AppError>> {
+  try {
+    const db = deps.db ?? getDb();
+    const recipe = findRecipeById(db, id);
+    if (!recipe || recipe.sourceUrl === null) return err(appError("not_found"));
+    const valid = validateUrl(recipe.sourceUrl);
+    if (!valid.ok) return err(appError("not_found"));
+
+    const fetcher = deps.fetcher ?? getRecipeFetcher();
+    const page = await fetcher.fetch(normalizeSourceUrl(valid.value));
+    if (!page.ok) return page;
+    const node = extractRecipeJsonLd(page.value.html);
+    if (!node.ok) return err(appError("no_recipe"));
+    const imported = normalizeRecipe(node.value);
+    const minutes = imported.ok ? (imported.value.totalMinutes ?? null) : null;
+    if (minutes === null) return err(appError("no_recipe", "no_time"));
+
+    updateTotalMinutes(db, id, minutes);
+    return ok({ totalMinutes: minutes });
+  } catch (error) {
+    console.error("Kunne ikke hente tid fra kilden", error);
     return err(appError("unknown"));
   }
 }

@@ -13,16 +13,33 @@ describe("parseIsoDuration", () => {
     ["PT30S", 1],
     ["pt20m", 20],
     [" PT10M ", 10],
+    ["P0Y0M0DT0H30M0.000S", 30],
+    ["PT0.5H", 30],
+    ["PT0,5H", 30],
+    ["PT1H0M", 60],
+    ["PT20M30S", 21],
   ])("%j gir %j minutter", (value, expected) => {
     expect(parseIsoDuration(value)).toBe(expected);
   });
 
-  it.each([["P"], ["PT"], ["PT0M"], ["45"], ["45 min"], ["P2D"], [""], [null], [45], [undefined]])(
-    "%j gir null",
-    (value) => {
-      expect(parseIsoDuration(value)).toBeNull();
-    },
-  );
+  it.each([
+    ["P"],
+    ["PT"],
+    ["PT0M"],
+    ["45"],
+    ["45 min"],
+    ["P2D"],
+    ["P1M"],
+    ["P1W"],
+    ["PT1H5"],
+    ["P1DT"],
+    [""],
+    [null],
+    [45],
+    [undefined],
+  ])("%j gir null", (value) => {
+    expect(parseIsoDuration(value)).toBeNull();
+  });
 });
 
 describe("formatMinutes", () => {

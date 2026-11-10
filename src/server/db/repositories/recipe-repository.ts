@@ -320,6 +320,7 @@ function selectSavedSummaries(db: Db, userId: number, extra?: SQL): RecipeSummar
       sourceUrl: recipes.sourceUrl,
       savedAt: recipes.savedAt,
       isFavorite: recipes.isFavorite,
+      totalMinutes: recipes.totalMinutes,
       folderName: folders.name,
     })
     .from(recipes)
@@ -467,4 +468,9 @@ export function deleteStaleUnsavedRecipes(db: Db, cutoff: string): number {
     .delete(recipes)
     .where(and(isNull(recipes.savedAt), lt(recipes.createdAt, cutoff)))
     .run().changes;
+}
+
+/** Setter tiden (Story 6.2). `updatedAt` røres ikke. Returnerer `false` når id-en ikke finnes. */
+export function updateTotalMinutes(db: Db, id: number, totalMinutes: number | null): boolean {
+  return db.update(recipes).set({ totalMinutes }).where(eq(recipes.id, id)).run().changes > 0;
 }

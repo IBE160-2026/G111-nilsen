@@ -11,9 +11,11 @@ import {
   type SuggestionsActionResult,
 } from "@/app/_shared/action-result";
 import { folderFailure, folderIdSchema, parseFolderName } from "@/app/_shared/folder-action";
+import { recipeTimeMessages } from "@/lib/messages";
 import { parseRecipeId } from "@/lib/recipe-id";
 import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import { moveRecipeToFolder, moveRecipeToNewFolder } from "@/server/services/folder-service";
+import { refreshTimeFromSource } from "@/server/services/import-service";
 import { currentUserId } from "@/server/session";
 import {
   canAccessRecipe,
@@ -272,4 +274,28 @@ export async function removeSuggestion(
     console.error("Kunne ikke fjerne forslaget", error);
     return actionFailure(undefined);
   }
+}
+
+/**
+ * Henter tiden fra kilden på nytt (Story 6.2) for en importert oppskrift uten tid. Siden
+ * revalideres ved suksess, så tiden vises ved hjertet og under tittelen. Ingen tid på siden gir
+ * en egen melding; andre feil gir meldingen for feiltypen.
+ */
+export async function fetchTimeFromSource(id: number): Promise<ActionResult> {
+  if (!idSchema.safeParse(id).success) return actionFailure("not_found");
+  try {
+    if (!(await mayChange(id))) return actionFailure("not_found");
+    const result = await refreshTimeFromSource(id);
+    if (!result.ok) {
+      if (result.error.detail === "no_time")
+        return { ok: false, message: recipeTimeMessages.notFound };
+      return actionFailure(result.error.kind);
+    }
+  } catch (error) {
+    console.error("Kunne ikke hente tid fra kilden", error);
+    return actionFailure("unknown");
+  }
+  revalidatePath(`/oppskrift/${id}`);
+  revalidatePath("/oppskrifter");
+  return { ok: true };
 }

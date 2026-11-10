@@ -3,10 +3,12 @@ import { setFavorite } from "@/app/oppskrift/[id]/actions";
 import type { RecipeSummary } from "@/domain";
 import { sourceLabel } from "@/lib/source-label";
 import FavoriteButton from "./FavoriteButton";
+import RecipeTime from "./RecipeTime";
 import styles from "./RecipeCard.module.css";
 
 /**
- * Oppskriftskort i Samlingen, i mapper og i Favoritter (UX-DR10): tittel, kilde og mappenavn.
+ * Oppskriftskort i Samlingen, i mapper og i Favoritter (UX-DR10): tittel, kilde, mappenavn og tid
+ * (Story 6.2).
  * Selve kortet er én lenke til oppskriften. Hjertet (Story 3.4, UX-DR11) er en søsken til
  * lenken, aldri inni den, og står øverst til høyre; det er plass til det i kortet, så tittel
  * og meta ikke havner under. Tabrekkefølge: lenke, så hjerte.
@@ -29,6 +31,12 @@ export default function RecipeCard({
             <>
               {" · "}
               <span>{recipe.folderName}</span>
+            </>
+          ) : null}
+          {recipe.totalMinutes != null ? (
+            <>
+              {" · "}
+              <RecipeTime minutes={recipe.totalMinutes} inline />
             </>
           ) : null}
         </p>

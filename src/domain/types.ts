@@ -100,7 +100,7 @@ export type Recipe = {
  */
 export type RecipeSummary = Pick<
   Recipe,
-  "id" | "title" | "sourceUrl" | "sourceName" | "isFavorite"
+  "id" | "title" | "sourceUrl" | "sourceName" | "isFavorite" | "totalMinutes"
 > & {
   savedAt: string;
   folderName: string | null;

@@ -302,6 +302,7 @@ describe("listSavedRecipes", () => {
         savedAt: "2026-11-09T10:00:00.000Z",
         isFavorite: false,
         folderName: null,
+        totalMinutes: null,
       },
     ]);
   });
@@ -533,6 +534,7 @@ describe("favoritter (Story 3.4)", () => {
       savedAt: "2026-11-09T09:00:00.000Z",
       isFavorite: true,
       folderName: null,
+      totalMinutes: null,
     });
   });
 

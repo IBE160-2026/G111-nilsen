@@ -15,9 +15,20 @@
   color: var(--color-accent);
 }
 
+.inline {
+  min-height: 0;
+  vertical-align: middle;
+  font-weight: inherit;
+}
+
+.inline .icon {
+  width: 1.1em;
+  height: 1.1em;
+}
+
 /* På de smaleste skjermene står bare teksten, så lagre-linjen får plass på én linje. */
 @media (max-width: 399px) {
-  .icon {
+  .time:not(.inline) .icon {
     display: none;
   }
 }
