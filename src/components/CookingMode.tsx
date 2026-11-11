@@ -321,6 +321,16 @@ function Session({
             })}
           </ul>
         ) : null}
+        {durations.length > 0 || timers.length > 0 ? (
+          <div className={styles.soundTest}>
+            <button type="button" className={styles.soundTestButton} onClick={testSound}>
+              {m.soundTest}
+            </button>
+            <span role="status" className={styles.soundStatus}>
+              {soundOk === true ? m.soundTestPlayed : soundOk === false ? m.soundBlocked : ""}
+            </span>
+          </div>
+        ) : null}
         {stepLines.length > 0 ? (
           <section className={styles.stepIngredients} aria-labelledby="kokemodus-i-steget">
             <h3 id="kokemodus-i-steget" className={styles.stepIngredientsTitle}>
@@ -333,15 +343,6 @@ function Session({
             </ul>
           </section>
         ) : null}
-      </div>
-
-      <div className={styles.soundTest}>
-        <button type="button" className={styles.soundTestButton} onClick={testSound}>
-          {m.soundTest}
-        </button>
-        <span role="status" className={styles.soundStatus}>
-          {soundOk === true ? m.soundTestPlayed : soundOk === false ? m.soundBlocked : ""}
-        </span>
       </div>
 
       <details className={styles.ingredients}>

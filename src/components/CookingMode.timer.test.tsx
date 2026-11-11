@@ -240,6 +240,7 @@ describe("tidtaker i kokemodus", () => {
   it("«Test lyden» spiller signalet og sier fra at lyden ble spilt", async () => {
     const user = setup();
     const dialog = open(user);
+    user.click(within(dialog).getByRole("button", { name: "Neste" }));
     expect(within(dialog).getByRole("status")).toHaveTextContent("");
     user.click(within(dialog).getByRole("button", { name: "Test lyden" }));
     await act(async () => void vi.advanceTimersByTime(200));
@@ -252,10 +253,10 @@ describe("tidtaker i kokemodus", () => {
     oscillators.playRejects = true;
     const user = setup();
     const dialog = open(user);
+    user.click(within(dialog).getByRole("button", { name: "Neste" }));
     user.click(within(dialog).getByRole("button", { name: "Test lyden" }));
     await act(async () => void vi.advanceTimersByTime(200));
     expect(within(dialog).getByRole("status")).toHaveTextContent("Nettleseren ga ikke lyd.");
-    user.click(within(dialog).getByRole("button", { name: "Neste" }));
     user.click(within(dialog).getAllByRole("button", { name: /^Start tidtaker/ })[1]);
     await act(async () => void vi.advanceTimersByTime(31_000));
     expect(within(dialog).getByRole("alert")).toHaveTextContent("Nettleseren ga ikke lyd.");

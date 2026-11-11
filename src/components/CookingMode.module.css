@@ -258,14 +258,14 @@
 
 .startTimer {
   min-height: 3.5rem;
-  padding: 0 var(--space-5);
-  border: 2px solid var(--color-accent);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-accent);
   border-radius: var(--radius-md);
-  background: var(--color-accent);
-  color: var(--color-surface-raised);
+  background: var(--color-surface-raised);
+  color: var(--color-accent);
   font: inherit;
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.125rem;
+  font-weight: 600;
   cursor: pointer;
 }
 
