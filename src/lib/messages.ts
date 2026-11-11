@@ -64,9 +64,45 @@ export function messageFor(kind: ErrorKind | string | null | undefined): ErrorMe
 /** Forsiden (`/`): velkomst og snarveier til delene av appen. */
 export const homeMessages = {
   tabTitle: "Forside",
-  heading: "RecipeMate",
-  lead: "Hent oppskrifter fra nettet, skaler dem til riktig antall porsjoner, planlegg uka og få handlelisten.",
-  sectionLabel: "Kom i gang",
+  heading: "Fra oppskrift på nettet til middag på bordet",
+  lead: "Slutt med lange tekster, reklame og rulling med fete fingre. Lim inn en lenke, så får du oppskriften ryddig og klar til å lage, regnet om til akkurat så mange porsjoner du trenger.",
+  cta: "Hent en oppskrift",
+  ctaHint: "Du trenger ikke konto for å prøve.",
+  howHeading: "Slik virker det",
+  steps: [
+    {
+      title: "Lim inn en lenke",
+      text: "RecipeMate henter ingrediensene og stegene og viser dem i et fast, ryddig format.",
+    },
+    {
+      title: "Velg antall porsjoner",
+      text: "Mengdene regnes om for deg, også for halve porsjoner.",
+    },
+    {
+      title: "Lag maten",
+      text: "Kokemodus viser ett steg om gangen, og tidtakeren starter fra tiden som står i steget.",
+    },
+  ],
+  moreHeading: "Mer enn en samling oppskrifter",
+  features: [
+    {
+      title: "Ukemeny og handleliste",
+      text: "Legg oppskrifter på dagene i uka og få én handleliste for hele uka. Kryss av varer du har hjemme.",
+    },
+    {
+      title: "Mapper og favoritter",
+      text: "Sorter oppskriftene i mapper som hverdag og helg, og merk dem du kommer tilbake til.",
+    },
+    {
+      title: "Dine egne notater",
+      text: "Skriv hva du endret, hvor mange den passer til, og når du sist lagde den.",
+    },
+    {
+      title: "Skriv ut",
+      text: "Få en ren utskrift av oppskriften, uten menyer og knapper.",
+    },
+  ],
+  sectionLabel: "Gå rett til",
   guestTitle: "Du er ikke logget inn",
   guestBody:
     "Lag en konto eller logg inn for å lagre oppskrifter, planlegge uka og lage handleliste. Du kan hente og se en oppskrift uten konto.",

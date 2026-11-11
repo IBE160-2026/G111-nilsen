@@ -28,15 +28,45 @@ async function notice() {
 }
 
 describe("forsiden og 404-siden", () => {
-  it("forsiden har overskriften «RecipeMate» og en kort forklaring", () => {
+  it("forsiden har en salgstekst, en stor «Hent en oppskrift»-knapp til Importer og en hint", () => {
     render(<HomePage />);
-    expect(screen.getByRole("heading", { level: 1, name: "RecipeMate" })).toBeInTheDocument();
-    expect(screen.getByText(/Hent oppskrifter fra nettet/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Fra oppskrift på nettet til middag på bordet",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Slutt med lange tekster/)).toBeInTheDocument();
+    const cta = screen.getAllByRole("link", { name: "Hent en oppskrift" })[0]!;
+    expect(cta).toHaveAttribute("href", "/importer");
+    expect(screen.getByText("Du trenger ikke konto for å prøve.")).toBeInTheDocument();
   });
 
-  it("forsiden har snarveier til alle delene, med «Hent en oppskrift» først", () => {
+  it("forsiden forklarer hvordan det virker i tre steg og hva appen kan mer", () => {
     render(<HomePage />);
-    const links = within(screen.getByRole("region", { name: "Kom i gang" })).getAllByRole("link");
+    const steps = within(screen.getByRole("region", { name: "Slik virker det" })).getAllByRole(
+      "heading",
+      { level: 3 },
+    );
+    expect(steps.map((h) => h.textContent)).toEqual([
+      "Lim inn en lenke",
+      "Velg antall porsjoner",
+      "Lag maten",
+    ]);
+    const more = within(
+      screen.getByRole("region", { name: "Mer enn en samling oppskrifter" }),
+    ).getAllByRole("heading", { level: 3 });
+    expect(more.map((h) => h.textContent)).toEqual([
+      "Ukemeny og handleliste",
+      "Mapper og favoritter",
+      "Dine egne notater",
+      "Skriv ut",
+    ]);
+  });
+
+  it("forsiden har snarveier til alle delene", () => {
+    render(<HomePage />);
+    const links = within(screen.getByRole("region", { name: "Gå rett til" })).getAllByRole("link");
     expect(links.map((link) => link.getAttribute("href"))).toEqual([
       "/importer",
       "/oppskrifter",
@@ -45,7 +75,6 @@ describe("forsiden og 404-siden", () => {
       "/mapper",
       "/favoritter",
     ]);
-    expect(links[0]).toHaveTextContent("Hent en oppskrift");
   });
 
   it("forsiden har ikke selv importskjemaet (det ligger på /importer)", () => {

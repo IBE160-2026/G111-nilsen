@@ -556,7 +556,9 @@ for (const scheme of ["light", "dark"] as const) {
 
 test("Forsiden har snarveier, og «Hent en oppskrift» går til Importer", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1, name: "RecipeMate" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Fra oppskrift på nettet til middag på bordet" }),
+  ).toBeVisible();
   await expect(page.getByRole("textbox")).toHaveCount(0);
   // Innlogget: ingen innloggingsmelding. Uten konto står det øverst at man må lage konto eller logge inn.
   const guest = page.getByRole("heading", { name: "Du er ikke logget inn" });
@@ -567,7 +569,7 @@ test("Forsiden har snarveier, og «Hent en oppskrift» går til Importer", async
   await expect(guest).toBeVisible();
   await expect(page.getByRole("link", { name: "Logg inn", exact: true }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: "Lag konto" }).first()).toBeVisible();
-  const shortcuts = page.getByRole("region", { name: "Kom i gang" });
+  const shortcuts = page.getByRole("region", { name: "Gå rett til" });
   await expect(shortcuts.getByRole("link")).toHaveCount(6);
   await shortcuts.getByRole("link", { name: /Hent en oppskrift/ }).click();
   await expect(page).toHaveURL(/\/importer$/);

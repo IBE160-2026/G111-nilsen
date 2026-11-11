@@ -1,8 +1,20 @@
 .root {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-6);
   max-width: var(--content-max-width);
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  max-width: 40rem;
+}
+
+.heading {
+  margin: 0;
 }
 
 .lead {
@@ -11,6 +23,38 @@
   font-size: 1.125rem;
 }
 
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.5rem;
+  padding: 0 var(--space-6);
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-surface-raised);
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.ctaHint {
+  margin: 0;
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.section h2 {
+  margin: 0;
+}
+
+.steps,
+.features,
 .cards {
   display: grid;
   grid-template-columns: 1fr;
@@ -21,9 +65,47 @@
 }
 
 @media (min-width: 600px) {
+  .features,
   .cards {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+@media (min-width: 900px) {
+  .steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.step,
+.feature {
+  padding: var(--space-4);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+}
+
+.steps {
+  counter-reset: steg;
+}
+
+.step {
+  counter-increment: steg;
+}
+
+.step .itemTitle::before {
+  content: counter(steg) ". ";
+  color: var(--color-accent);
+}
+
+.itemTitle {
+  margin: 0 0 var(--space-1);
+  font-size: 1.125rem;
+}
+
+.itemText {
+  margin: 0;
+  color: var(--color-ink-secondary);
 }
 
 .card {
@@ -48,15 +130,4 @@
 
 .cardText {
   color: var(--color-ink-secondary);
-}
-
-/* «Hent en oppskrift» er hovedhandlingen og går over hele bredden. */
-.primary {
-  border: 2px solid var(--color-accent);
-}
-
-@media (min-width: 600px) {
-  .cards > li:first-child {
-    grid-column: 1 / -1;
-  }
 }
