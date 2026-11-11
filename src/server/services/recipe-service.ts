@@ -25,6 +25,7 @@ import {
   markRecipeSaved,
   setRecipeFavorite,
   updateRecipe,
+  updateFitsFor,
   updateNotes,
   updateOriginalServings,
   updateSelectedServings,
@@ -324,6 +325,27 @@ export function getRecipeFor(viewer: number | null, id: number, db: Db = getDb()
 
 /** Hvor lange notatene kan være (Story 6.3). */
 export const NOTES_MAX_LENGTH = 2000;
+
+/** Hvor lang «Passer til» kan være. */
+export const FITS_FOR_MAX_LENGTH = 60;
+
+/**
+ * Lagrer «Passer til» på en lagret oppskrift: brukerens egen vurdering, for eksempel «2 sultne».
+ * Teksten trimmes (flere mellomrom blir ett); tom tekst fjerner den. Over 60 tegn gir
+ * `validation` (felt `fitsFor`). Ukjent eller ulagret oppskrift gir `not_found`.
+ */
+export function setRecipeFitsFor(
+  id: number,
+  fitsFor: string,
+  db: Db = getDb(),
+): Result<{ fitsFor: string | null }> {
+  if (!isRecipeId(id)) return err(appError("not_found"));
+  if (typeof fitsFor !== "string") return err(appError("validation", "fitsFor"));
+  const clean = fitsFor.replace(/\s+/g, " ").trim();
+  if (clean.length > FITS_FOR_MAX_LENGTH) return err(appError("validation", "fitsFor"));
+  const value = clean === "" ? null : clean;
+  return updateFitsFor(db, id, value) ? ok({ fitsFor: value }) : err(appError("not_found"));
+}
 
 /**
  * Lagrer notatene på en lagret oppskrift (Story 6.3). Teksten trimmes; tom tekst fjerner

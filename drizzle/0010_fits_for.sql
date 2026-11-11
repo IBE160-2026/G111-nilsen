@@ -1,0 +1,1 @@
+ALTER TABLE `recipes` ADD `fits_for` text;

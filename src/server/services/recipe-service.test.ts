@@ -6,6 +6,7 @@ import {
   canAccessRecipe,
   createManualRecipe,
   markRecipeCooked,
+  setRecipeFitsFor,
   setRecipeNotes,
   listShoppingRecipes,
   getRecipeFor,
@@ -824,6 +825,29 @@ describe("notater og sist laget (Story 6.3)", () => {
     db.$client.prepare("update recipes set saved_at = null").run();
     expect(setRecipeNotes(id, "a", db)).toMatchObject({ ok: false, error: { kind: "not_found" } });
     expect(setRecipeNotes(999, "a", db)).toMatchObject({ ok: false, error: { kind: "not_found" } });
+  });
+
+  it("«Passer til» lagres trimmet, tom tekst fjerner den, og for lang eller ulagret avvises", () => {
+    const db = createTestDb();
+    const id = saved(db);
+    expect(setRecipeFitsFor(id, "  2   sultne ", db)).toEqual({
+      ok: true,
+      value: { fitsFor: "2 sultne" },
+    });
+    const read = getRecipe(id, db);
+    expect(read.ok && read.value.fitsFor).toBe("2 sultne");
+    expect(setRecipeFitsFor(id, "  ", db)).toEqual({ ok: true, value: { fitsFor: null } });
+    expect(setRecipeFitsFor(id, "x".repeat(61), db)).toEqual({
+      ok: false,
+      error: { kind: "validation", detail: "fitsFor" },
+    });
+    expect(setRecipeFitsFor(id, "x".repeat(60), db).ok).toBe(true);
+    db.$client.prepare("update recipes set saved_at = null").run();
+    expect(setRecipeFitsFor(id, "a", db)).toMatchObject({
+      ok: false,
+      error: { kind: "not_found" },
+    });
+    expect(setRecipeFitsFor(999, "a", db)).toMatchObject({ ok: false });
   });
 
   it("«Laget i dag» setter dato og teller opp", () => {

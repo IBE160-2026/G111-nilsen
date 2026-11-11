@@ -78,6 +78,8 @@ export const recipes = sqliteTable("recipes", {
   totalMinutes: integer("total_minutes"),
   /** Brukerens egne notater (Story 6.3); `null` = ingen. */
   notes: text("notes"),
+  /** Brukerens egen vurdering av hvem oppskriften passer til, for eksempel «2 sultne» (Story 6.6b); `null` = ingen. */
+  fitsFor: text("fits_for"),
   /** Sist brukeren trykket «Laget i dag» (Story 6.3), ISO-tid; `null` = aldri. */
   lastCookedAt: text("last_cooked_at"),
   /** Hvor mange ganger oppskriften er laget (Story 6.3). */

@@ -45,6 +45,7 @@ const {
   saveRecipe,
   setFavorite,
   fetchTimeFromSource,
+  saveFitsFor,
   saveNotes,
   markCookedToday,
 } = await import("./actions");
@@ -607,6 +608,23 @@ describe("fetchTimeFromSource (Story 6.2)", () => {
       message: expect.stringContaining("Vi fant ikke oppskriften"),
     });
     expect(await fetchTimeFromSource(0)).toMatchObject({ ok: false });
+  });
+});
+
+describe("saveFitsFor", () => {
+  afterEach(() => {
+    session.userId = TEST_USER_ID;
+  });
+
+  it("lagrer «Passer til» for eieren og gir egen melding når den er for lang", async () => {
+    expect(await saveFitsFor(id, "2 sultne")).toEqual({ ok: true });
+    expect(stored()).toMatchObject({ fitsFor: "2 sultne" });
+    expect(await saveFitsFor(id, "x".repeat(61))).toEqual({
+      ok: false,
+      message: "«Passer til» kan være maks 60 tegn. Gjør den kortere.",
+    });
+    expect(await saveFitsFor(id, 5 as unknown as string)).toMatchObject({ ok: false });
+    expect(await saveFitsFor(0, "a")).toMatchObject({ ok: false });
   });
 });
 

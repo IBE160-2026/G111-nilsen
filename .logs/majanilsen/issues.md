@@ -97,3 +97,4 @@
 - 948 Tidtakerknapper nederst i kokemodus. Åpent: test på telefon.
 - 947 Story 6.6 utskriftsvennlig oppskrift. Åpent: prøv utskrift på Mac og telefon.
 - 946 «Porsjoner» i stedet for «personer» i hele appen og dokumentene.
+- 945 «Passer til» ved notatene (ny kolonne fits_for). Åpent: dev-databasen på Mac migreres ved start.

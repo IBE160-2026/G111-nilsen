@@ -9,9 +9,11 @@ afterEach(cleanup);
 function setup(overrides: Partial<React.ComponentProps<typeof RecipeNotes>> = {}) {
   const props = {
     notes: null,
+    fitsFor: null,
     lastCookedAt: null,
     cookedCount: 0,
     onSaveNotes: vi.fn(async () => ({ ok: true as const })),
+    onSaveFitsFor: vi.fn(async () => ({ ok: true as const })),
     onCooked: vi.fn(async () => ({
       ok: true as const,
       lastCookedAt: "2026-11-10T18:00:00.000Z",
@@ -48,6 +50,37 @@ describe("RecipeNotes", () => {
     await user.click(screen.getByRole("button", { name: "Lagre notat" }));
     expect(props.onSaveNotes).toHaveBeenCalledWith("Stek kortere.");
     expect(await screen.findByText("Notatet er lagret.")).toBeInTheDocument();
+  });
+
+  it("«Passer til» vises og lagres sammen med notatene, og bare det som er endret sendes", async () => {
+    const user = userEvent.setup();
+    const props = setup({ fitsFor: "4 barn" });
+    expect(screen.getByLabelText("Passer til")).toHaveValue("4 barn");
+    await user.clear(screen.getByLabelText("Passer til"));
+    await user.type(screen.getByLabelText("Passer til"), "2 sultne");
+    await user.click(screen.getByRole("button", { name: "Lagre notat" }));
+    expect(props.onSaveFitsFor).toHaveBeenCalledWith("2 sultne");
+    expect(props.onSaveNotes).not.toHaveBeenCalled();
+    expect(await screen.findByText("Notatet er lagret.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Lagre notat" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+  });
+
+  it("feil i «Passer til» vises, og notatene lagres likevel", async () => {
+    const user = userEvent.setup();
+    const props = setup({
+      onSaveFitsFor: vi.fn(async () => ({
+        ok: false as const,
+        message: "«Passer til» kan være maks 60 tegn. Gjør den kortere.",
+      })),
+    });
+    await user.type(screen.getByLabelText("Passer til"), "for lang");
+    await user.type(screen.getByLabelText("Dine notater"), "Halv sukker.");
+    await user.click(screen.getByRole("button", { name: "Lagre notat" }));
+    expect(props.onSaveNotes).toHaveBeenCalledWith("Halv sukker.");
+    expect(await screen.findByRole("alert")).toHaveTextContent("maks 60 tegn");
   });
 
   it("viser feilen under feltet og beholder teksten", async () => {

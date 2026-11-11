@@ -11,6 +11,7 @@ import {
   removeSuggestion,
   rememberServings,
   requestSuggestions,
+  saveFitsFor,
   saveNotes,
   saveRecipe,
   setFavorite,
@@ -140,9 +141,11 @@ export default function RecipeView({
               <RecipeNotes
                 key={`notater-${recipe.id}`}
                 notes={recipe.notes ?? null}
+                fitsFor={recipe.fitsFor ?? null}
                 lastCookedAt={recipe.lastCookedAt ?? null}
                 cookedCount={recipe.cookedCount ?? 0}
                 onSaveNotes={saveNotes.bind(null, recipe.id)}
+                onSaveFitsFor={saveFitsFor.bind(null, recipe.id)}
                 onCooked={markCookedToday.bind(null, recipe.id)}
               />
             </div>

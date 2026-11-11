@@ -21,6 +21,7 @@ import {
   canAccessRecipe,
   deleteRecipe,
   markRecipeCooked,
+  setRecipeFitsFor,
   setRecipeNotes,
   saveRecipeToCollection,
   setFavorite as setFavoriteForRecipe,
@@ -320,6 +321,25 @@ export async function saveNotes(id: number, notes: string): Promise<ActionResult
     return { ok: true };
   } catch (error) {
     console.error("Kunne ikke lagre notatene", error);
+    return actionFailure("unknown");
+  }
+}
+
+/** Lagrer «Passer til» på en lagret oppskrift. For lang tekst gir egen melding. */
+export async function saveFitsFor(id: number, fitsFor: string): Promise<ActionResult> {
+  if (!idSchema.safeParse(id).success) return actionFailure("not_found");
+  if (typeof fitsFor !== "string") return actionFailure("validation");
+  try {
+    if (!(await mayChange(id))) return actionFailure("not_found");
+    const result = setRecipeFitsFor(id, fitsFor);
+    if (!result.ok) {
+      return result.error.detail === "fitsFor"
+        ? { ok: false, message: notesMessages.fitsForTooLong }
+        : actionFailure(result.error.kind);
+    }
+    return { ok: true };
+  } catch (error) {
+    console.error("Kunne ikke lagre «Passer til»", error);
     return actionFailure("unknown");
   }
 }

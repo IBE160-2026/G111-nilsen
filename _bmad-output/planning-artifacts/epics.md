@@ -922,3 +922,19 @@ slik at jeg kan ha den på papir på kjøkkenet.
 **Når** siden skrives ut
 **Så** står tittel, kilde, antall porsjoner, ingredienser og steg i én kolonne med svart tekst på hvit bakgrunn, uten meny, knapper, forslag, notater og lagre-linje, og kilden skrives ut med adressen
 
+### Story 6.6b: «Passer til» ved notatene
+
+Som Ida,
+vil jeg skrive inn hvem en oppskrift passer til etter min egen erfaring, for eksempel «2 sultne»,
+slik at jeg husker hvor stor oppskriften egentlig er.
+
+**Akseptansekriterier:**
+
+**Gitt** en lagret oppskrift
+**Når** jeg skriver i feltet «Passer til» i notatkortet og trykker «Lagre notat»
+**Så** står teksten der også etter ny innlasting, og mengdene i oppskriften er uendret
+
+**Gitt** at jeg tømmer feltet og lagrer
+**Når** jeg åpner oppskriften igjen
+**Så** er «Passer til» tomt, og en tekst på over 60 tegn gir en melding i stedet for å lagres
+

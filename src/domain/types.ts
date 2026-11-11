@@ -92,6 +92,8 @@ export type Recipe = {
   totalMinutes?: number | null;
   /** Egne notater (Story 6.3); `null` eller utelatt = ingen. */
   notes?: string | null;
+  /** Hvem oppskriften passer til etter brukerens egen vurdering; `null` eller utelatt = ikke oppgitt. */
+  fitsFor?: string | null;
   /** Sist laget, ISO-tid (Story 6.3); `null` eller utelatt = aldri. */
   lastCookedAt?: string | null;
   /** Antall ganger laget (Story 6.3). */

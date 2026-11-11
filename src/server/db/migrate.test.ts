@@ -147,6 +147,7 @@ describe("migrasjon 0001 (Story 3.1: manuelle oppskrifter i samlingen)", () => {
       "0007_recipe_time",
       "0008_notes_and_cooked",
       "0009_meal_plan",
+      "0010_fits_for",
     ]);
     expect(existsSync(join(migrationsFolder(), "meta", "0001_snapshot.json"))).toBe(true);
   });
@@ -220,6 +221,7 @@ describe("migrasjon 0002 (Story 3.3: mapper)", () => {
         user_id: null,
         total_minutes: null,
         notes: null,
+        fits_for: null,
         last_cooked_at: null,
         cooked_count: 0,
       })),
@@ -380,6 +382,7 @@ describe("migrasjon 0003 (Story 3.4: favoritter)", () => {
         user_id: null,
         total_minutes: null,
         notes: null,
+        fits_for: null,
         last_cooked_at: null,
         cooked_count: 0,
       })),

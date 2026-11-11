@@ -65,6 +65,7 @@ describe("getDb", () => {
     ); // bare 0000 er igjen
     db.$client.exec("drop table meal_plan_entries");
     db.$client.exec("drop table sessions");
+    db.$client.exec("alter table recipes drop column fits_for");
     db.$client.exec("alter table recipes drop column cooked_count");
     db.$client.exec("alter table recipes drop column last_cooked_at");
     db.$client.exec("alter table recipes drop column notes");

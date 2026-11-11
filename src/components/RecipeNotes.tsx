@@ -10,9 +10,11 @@ type CookedResult =
 
 type Props = {
   notes: string | null;
+  fitsFor: string | null;
   lastCookedAt: string | null;
   cookedCount: number;
   onSaveNotes: (notes: string) => Promise<ActionResult>;
+  onSaveFitsFor: (fitsFor: string) => Promise<ActionResult>;
   onCooked: () => Promise<CookedResult>;
 };
 
@@ -34,14 +36,18 @@ const fail = `${fallbackMessage.title} ${fallbackMessage.body}`;
  */
 export default function RecipeNotes({
   notes: initialNotes,
+  fitsFor: initialFitsFor,
   lastCookedAt: initialCooked,
   cookedCount: initialCount,
   onSaveNotes,
+  onSaveFitsFor,
   onCooked,
 }: Props) {
   const id = useId();
   const [notes, setNotes] = useState(initialNotes ?? "");
   const [savedNotes, setSavedNotes] = useState(initialNotes ?? "");
+  const [fitsFor, setFitsFor] = useState(initialFitsFor ?? "");
+  const [savedFitsFor, setSavedFitsFor] = useState(initialFitsFor ?? "");
   const [cooked, setCooked] = useState({ at: initialCooked, count: initialCount });
   const [pending, setPending] = useState<"notes" | "cooked" | null>(null);
   const [status, setStatus] = useState("");
@@ -53,11 +59,20 @@ export default function RecipeNotes({
     setStatus("");
     setError("");
     try {
-      const result = await onSaveNotes(notes);
-      if (result.ok) {
-        setSavedNotes(notes.trim());
-        setStatus(m.saved);
-      } else setError(result.message);
+      // Bare det som er endret lagres; en feil i det ene stopper ikke det andre.
+      const messages: string[] = [];
+      if (notes.trim() !== savedNotes.trim()) {
+        const result = await onSaveNotes(notes);
+        if (result.ok) setSavedNotes(notes.trim());
+        else messages.push(result.message);
+      }
+      if (fitsFor.trim() !== savedFitsFor.trim()) {
+        const result = await onSaveFitsFor(fitsFor);
+        if (result.ok) setSavedFitsFor(fitsFor.trim());
+        else messages.push(result.message);
+      }
+      if (messages.length === 0) setStatus(m.saved);
+      else setError(messages.join(" "));
     } catch (cause) {
       console.error("Kunne ikke lagre notatene", cause);
       setError(fail);
@@ -85,7 +100,7 @@ export default function RecipeNotes({
     }
   }
 
-  const unchanged = notes.trim() === savedNotes.trim();
+  const unchanged = notes.trim() === savedNotes.trim() && fitsFor.trim() === savedFitsFor.trim();
 
   return (
     <section className={styles.card} aria-labelledby={`${id}-overskrift`}>
@@ -103,6 +118,24 @@ export default function RecipeNotes({
         >
           {pending === "cooked" ? m.cookedSaving : m.cooked}
         </button>
+      </div>
+
+      <div className={styles.field}>
+        <label htmlFor={`${id}-passer`} className={styles.label}>
+          {m.fitsForLabel}
+        </label>
+        <p id={`${id}-passer-hint`} className={styles.hint}>
+          {m.fitsForHint}
+        </p>
+        <input
+          id={`${id}-passer`}
+          type="text"
+          autoComplete="off"
+          className={styles.input}
+          value={fitsFor}
+          aria-describedby={`${id}-passer-hint`}
+          onChange={(event) => setFitsFor(event.target.value)}
+        />
       </div>
 
       <div className={styles.field}>

@@ -276,6 +276,7 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
     originalServings: row.originalServings,
     totalMinutes: row.totalMinutes,
     notes: row.notes,
+    fitsFor: row.fitsFor,
     lastCookedAt: row.lastCookedAt,
     cookedCount: row.cookedCount,
     selectedServings: row.selectedServings,
@@ -487,6 +488,17 @@ export function updateNotes(db: Db, id: number, notes: string | null): boolean {
     db
       .update(recipes)
       .set({ notes })
+      .where(and(eq(recipes.id, id), isNotNull(recipes.savedAt)))
+      .run().changes > 0
+  );
+}
+
+/** Lagrer «Passer til» for en lagret oppskrift; `false` når den ikke finnes eller ikke er lagret. */
+export function updateFitsFor(db: Db, id: number, fitsFor: string | null): boolean {
+  return (
+    db
+      .update(recipes)
+      .set({ fitsFor })
       .where(and(eq(recipes.id, id), isNotNull(recipes.savedAt)))
       .run().changes > 0
   );
