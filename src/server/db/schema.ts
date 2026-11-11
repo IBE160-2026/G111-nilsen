@@ -234,6 +234,25 @@ export const shoppingListItems = sqliteTable(
 );
 
 /**
+ * Nylig slettede oppskrifter (Story 6.11): et øyeblikksbilde (`snapshot`, JSON) av oppskriften med
+ * innhold, mappe, merkelapper, forslag og plass i ukemeny og handlelister. Slettes av eieren, etter
+ * en uke og med brukeren.
+ */
+export const deletedRecipes = sqliteTable(
+  "deleted_recipes",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    deletedAt: text("deleted_at").notNull(),
+    snapshot: text("snapshot").notNull(),
+  },
+  (table) => [index("deleted_recipes_user_idx").on(table.userId, table.deletedAt)],
+);
+
+/**
  * Merkelapper på en lagret oppskrift (Story 6.7), for eksempel «hverdag» eller «vegetar».
  * `labelKey` er navnet normalisert (NFC + små bokstaver); samme merkelapp finnes bare én gang per
  * oppskrift. Slettes med oppskriften.

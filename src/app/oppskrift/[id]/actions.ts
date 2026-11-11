@@ -81,24 +81,28 @@ export async function saveRecipe(id: number, servings?: number): Promise<ActionR
 }
 
 /**
- * Sletter oppskriften med ingredienser og steg og sender brukeren til Samlingen. Ved feil
+ * Sletter oppskriften og sender brukeren til Samlingen (Story 6.11: en lagret oppskrift legges i
+ * «Nylig slettet» i 7 dager, og Samlingen viser «Angre»). Ved feil
  * returneres en norsk melding og brukeren blir på siden. Samlingen revalideres, så den
  * slettede oppskriften ikke vises fra en bevart side.
  */
 export async function removeRecipe(id: number): Promise<ActionResult> {
   if (!idSchema.safeParse(id).success) return actionFailure("not_found");
+  let trashId: number | null;
   try {
     if (!(await mayChange(id))) return actionFailure("not_found");
     const result = deleteRecipe(id);
     if (!result.ok) return actionFailure(result.error.kind);
+    trashId = result.value.trashId;
     revalidatePath("/", "layout");
   } catch (error) {
     console.error("Kunne ikke slette oppskriften", error);
     return actionFailure(undefined);
   }
 
-  // redirect() kaster et kontrollflytunntak og må ligge utenfor try/catch.
-  redirect("/oppskrifter");
+  // redirect() kaster et kontrollflytunntak og må ligge utenfor try/catch. En lagret oppskrift
+  // ligger nå i «Nylig slettet», og Oppskrifter viser «Angre» (Story 6.11).
+  redirect(trashId === null ? "/oppskrifter" : `/oppskrifter?slettet=${trashId}`);
 }
 
 /**

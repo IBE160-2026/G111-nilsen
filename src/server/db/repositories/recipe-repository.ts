@@ -34,10 +34,10 @@ export type NewRecipe = {
   totalMinutes?: number | null;
 };
 
-type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
+export type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 
 /** Skriver oppskrift, linjer og steg med en åpen transaksjon (eller tilkobling) og returnerer id. */
-function insertRecipeRows(tx: Tx, recipe: NewRecipe): number {
+export function insertRecipeRows(tx: Tx, recipe: NewRecipe): number {
   const { id } = tx
     .insert(recipes)
     .values({

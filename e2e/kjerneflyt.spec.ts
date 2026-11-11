@@ -657,6 +657,57 @@ test("Versjon 2: lag egen variant av en oppskrift og endre navnet", async ({ pag
   await expect(page.getByRole("heading", { level: 2, name: uj1.title }).first()).toBeVisible();
 });
 
+test("Versjon 2: slettet oppskrift kan angres, hentes tilbake og slettes for godt", async ({
+  page,
+}, testInfo) => {
+  const title = `Slettetest ${testInfo.project.name}`;
+  await page.goto("/ny");
+  await page.waitForLoadState("networkidle");
+  await field(page, "Tittel").fill(title);
+  await field(page, "Antall porsjoner").fill("2");
+  await field(page, "Ingredienser").fill("2 egg\n1 dl melk");
+  await page.getByRole("button", { name: "Lagre oppskrift" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+  await page.getByRole("button", { name: "4 av 5 stjerner" }).click();
+  await expect(page.getByText("Vurderingen er satt til 4 av 5.")).toBeVisible();
+
+  const remove = async () => {
+    await page.getByRole("button", { name: `Slett ${title}` }).click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^Slett/ })
+      .click();
+  };
+
+  // Slett og angre rett etterpå: oppskriften kommer tilbake med vurderingen.
+  await remove();
+  await expect(page).toHaveURL(/\/oppskrifter\?slettet=\d+$/);
+  await expect(page.getByText(`Oppskriften «${title}» er slettet.`)).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: title })).toHaveCount(0);
+  await page.getByRole("button", { name: `Angre slettingen av ${title}` }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+  await expect(page.getByRole("button", { name: "4 av 5 stjerner" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+
+  // Slett igjen og hent tilbake fra «Nylig slettet».
+  await remove();
+  await page.getByRole("link", { name: "Se nylig slettet" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Nylig slettet" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: title })).toBeVisible();
+  await page.getByRole("button", { name: `Hent tilbake ${title}` }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+
+  // Slett en tredje gang og slett for godt.
+  await remove();
+  await page.getByRole("link", { name: "Se nylig slettet" }).click();
+  await page.getByRole("button", { name: `Slett ${title} for godt` }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Slett for godt" }).click();
+  await expect(page.getByText(`«${title}» er slettet for godt.`)).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: title })).toHaveCount(0);
+});
+
 test("Versjon 2: Oppskrifter kan sorteres alfabetisk og tilbake til sist lagret", async ({
   page,
 }) => {

@@ -38,6 +38,14 @@ import {
   type NewIngredientLine,
   type NewStep,
 } from "../db/repositories/recipe-repository";
+import {
+  deleteTrashed,
+  findDeletedRecipe as findTrashed,
+  listDeletedRecipes as listTrash,
+  purgeTrash,
+  restoreRecipe as restoreTrashed,
+  trashRecipe,
+} from "../db/repositories/trash-repository";
 
 /** Ferdig validert input fra skjemaet «Legg inn selv». */
 export type ManualRecipeInput = {
@@ -203,10 +211,101 @@ export function copyRecipeAsVariant(
   return newId === null ? err(appError("not_found")) : ok({ id: newId });
 }
 
-/** Sletter oppskriften med ingredienser og steg. Ugyldig eller ukjent id gir `not_found`. */
-export function deleteRecipe(id: number, db: Db = getDb()): Result<{ id: number }> {
+/**
+ * Sletter oppskriften (Story 6.11). En lagret oppskrift med eier legges først i «Nylig slettet»
+ * (`trashId`), så den kan hentes tilbake i 7 dager; en ulagret oppskrift slettes rett
+ * (`trashId: null`). Ugyldig eller ukjent id gir `not_found`.
+ */
+export function deleteRecipe(
+  id: number,
+  db: Db = getDb(),
+  now: Date = new Date(),
+): Result<{ id: number; trashId: number | null }> {
   if (!isRecipeId(id)) return err(appError("not_found"));
-  return deleteRecipeById(db, id) ? ok({ id }) : err(appError("not_found"));
+  const trashId = trashRecipe(db, id, now.toISOString());
+  if (trashId !== null) return ok({ id, trashId });
+  return deleteRecipeById(db, id) ? ok({ id, trashId: null }) : err(appError("not_found"));
+}
+
+/** Hvor mange dager en slettet oppskrift kan hentes tilbake (Story 6.11). */
+export const TRASH_DAYS = 7;
+const TRASH_MAX_AGE_MS = TRASH_DAYS * 24 * 60 * 60 * 1000;
+
+/** En slettet oppskrift med når den slettes for godt. */
+export type DeletedRecipe = {
+  id: number;
+  title: string;
+  deletedAt: string;
+  expiresAt: string;
+  /** Hele døgn igjen før den slettes for godt (0 = i dag). */
+  daysLeft: number;
+};
+
+function trashCutoff(now: Date): string {
+  return new Date(now.getTime() - TRASH_MAX_AGE_MS).toISOString();
+}
+
+function withExpiry(
+  row: { id: number; title: string; deletedAt: string },
+  now: Date,
+): DeletedRecipe {
+  const expires = new Date(row.deletedAt).getTime() + TRASH_MAX_AGE_MS;
+  return {
+    ...row,
+    expiresAt: new Date(expires).toISOString(),
+    daysLeft: Math.max(0, Math.floor((expires - now.getTime()) / (24 * 60 * 60 * 1000))),
+  };
+}
+
+/** Brukerens slettede oppskrifter fra de siste 7 dagene, nyeste først. */
+export function listDeletedRecipes(
+  userId: number,
+  db: Db = getDb(),
+  now: Date = new Date(),
+): Result<DeletedRecipe[]> {
+  return ok(listTrash(db, userId, trashCutoff(now)).map((row) => withExpiry(row, now)));
+}
+
+/** Én slettet oppskrift (for «Angre»-meldingen), eller `not_found`. */
+export function getDeletedRecipe(
+  userId: number,
+  trashId: number,
+  db: Db = getDb(),
+  now: Date = new Date(),
+): Result<DeletedRecipe> {
+  if (!isRecipeId(trashId)) return err(appError("not_found"));
+  const row = findTrashed(db, userId, trashId, trashCutoff(now));
+  return row === null ? err(appError("not_found")) : ok(withExpiry(row, now));
+}
+
+/** Henter en slettet oppskrift tilbake; gir ny id. Ukjent, en annens eller utløpt gir `not_found`. */
+export function restoreDeletedRecipe(
+  userId: number,
+  trashId: number,
+  db: Db = getDb(),
+  now: Date = new Date(),
+): Result<{ id: number }> {
+  if (!isRecipeId(trashId)) return err(appError("not_found"));
+  const id = restoreTrashed(db, userId, trashId, trashCutoff(now));
+  return id === null ? err(appError("not_found")) : ok({ id });
+}
+
+/** Sletter en slettet oppskrift for godt. Ukjent eller en annens gir `not_found`. */
+export function deleteDeletedRecipeForGood(
+  userId: number,
+  trashId: number,
+  db: Db = getDb(),
+): Result<{ id: number }> {
+  if (!isRecipeId(trashId)) return err(appError("not_found"));
+  return deleteTrashed(db, userId, trashId) ? ok({ id: trashId }) : err(appError("not_found"));
+}
+
+/** Sletter slettede oppskrifter som er eldre enn 7 dager. Returnerer antall. */
+export function purgeDeletedRecipes(
+  now: Date = new Date(),
+  db: Db = getDb(),
+): Result<{ deleted: number }> {
+  return ok({ deleted: purgeTrash(db, trashCutoff(now)) });
 }
 
 /**

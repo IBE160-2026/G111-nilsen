@@ -106,6 +106,13 @@
       "when": 1794416920635,
       "tag": "0014_recipe_rating",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "6",
+      "when": 1794425756502,
+      "tag": "0015_deleted_recipes",
+      "breakpoints": true
     }
   ]
 }

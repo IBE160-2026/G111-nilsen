@@ -220,6 +220,39 @@ export const servingsDialogMessages = {
 } as const;
 
 /** Tekster for redigering av en oppskrift (Story 3.5). */
+/** «Nylig slettet» og «Angre» etter sletting (Story 6.11). */
+export const trashMessages = {
+  heading: "Nylig slettet",
+  link: "Nylig slettet",
+  loading: "Henter slettede oppskrifter …",
+  loadFailed: "Kunne ikke hente slettede oppskrifter",
+  lead: "Slettede oppskrifter ligger her i 7 dager. Etter det er de borte for godt.",
+  emptyTitle: "Ingen slettede oppskrifter.",
+  emptyDescription: "Når du sletter en oppskrift, kan du hente den tilbake herfra i 7 dager.",
+  emptyAction: "Se oppskrifter",
+  deletedOn: (date: string) => `Slettet ${date}`,
+  expiresIn: (days: number) =>
+    days <= 0
+      ? "Borte for godt i dag"
+      : days === 1
+        ? "Borte for godt i morgen"
+        : `Borte for godt om ${days} dager`,
+  restore: "Hent tilbake",
+  restoreFor: (title: string) => `Hent tilbake ${title}`,
+  restoring: "Henter tilbake …",
+  deleteForGood: "Slett for godt",
+  deleteForGoodFor: (title: string) => `Slett ${title} for godt`,
+  confirmTitle: "Slette for godt?",
+  confirmAfterTitle: "blir borte for godt. Du kan ikke angre.",
+  confirmYes: "Slett for godt",
+  cancel: "Avbryt",
+  deletedForGood: (title: string) => `«${title}» er slettet for godt.`,
+  bannerDeleted: (title: string) => `Oppskriften «${title}» er slettet.`,
+  undo: "Angre",
+  undoFor: (title: string) => `Angre slettingen av ${title}`,
+  seeAll: "Se nylig slettet",
+} as const;
+
 /** «Lag egen variant» ved oppskriftens tittel (Story 6.10). */
 export const variantMessages = {
   button: "Lag egen variant",
@@ -569,7 +602,8 @@ export const recipeActionMessages = {
 /** Tekster for dialogen «Slette oppskriften?» (Story 3.2). Tittelen settes inn foran `descriptionAfterTitle`. */
 export const deleteDialogMessages = {
   title: "Slette oppskriften?",
-  descriptionAfterTitle: "fjernes fra oppskriftene dine. Du kan ikke angre.",
+  descriptionAfterTitle:
+    "fjernes fra oppskriftene dine. Du kan hente den tilbake under «Nylig slettet» i 7 dager.",
   confirm: "Slett",
   cancel: "Avbryt",
 } as const;

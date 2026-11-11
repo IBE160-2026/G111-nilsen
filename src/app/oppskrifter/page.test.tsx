@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import { insertRecipe, type NewRecipe } from "@/server/db/repositories/recipe-repository";
 import { createFolder, moveRecipeToFolder } from "@/server/services/folder-service";
-import { setFavorite } from "@/server/services/recipe-service";
+import { deleteRecipe, setFavorite } from "@/server/services/recipe-service";
 
 const session = vi.hoisted(() => ({ userId: 1 as number | null }));
 vi.mock("@/server/session", () => ({
@@ -74,8 +74,10 @@ const recipe = (title: string, savedAt: string | null, extra: Partial<NewRecipe>
 type AsyncComponent = (props: unknown) => Promise<ReactElement>;
 
 /** Overskriften utenfor Suspense, og den asynkrone delen inne i grensen. */
-async function renderPage() {
-  const page = SamlingenPage() as ReactElement<{ children: ReactElement[] }>;
+async function renderPage(searchParams: { slettet?: string | string[] } = {}) {
+  const page = SamlingenPage({ searchParams: Promise.resolve(searchParams) }) as ReactElement<{
+    children: ReactElement[];
+  }>;
   const [heading, suspense] = page.props.children as [
     ReactElement,
     ReactElement<{ children: ReactElement; fallback: ReactElement }>,
@@ -88,8 +90,8 @@ async function renderPage() {
   };
 }
 
-async function show() {
-  const { heading, content } = await renderPage();
+async function show(searchParams: { slettet?: string | string[] } = {}) {
+  const { heading, content } = await renderPage(searchParams);
   render(
     <>
       {heading}
@@ -127,7 +129,7 @@ describe("/oppskrifter", () => {
     ).toBeInTheDocument();
     const links = screen
       .getAllByRole("link")
-      .filter((a) => a.getAttribute("href") !== "/handleliste");
+      .filter((a) => !["/handleliste", "/nylig-slettet"].includes(a.getAttribute("href") ?? ""));
     expect(links.map((a) => [a.textContent, a.getAttribute("href")])).toEqual([
       ["Legg inn selv", "/ny"],
       ["Importer din første oppskrift", "/importer"],
@@ -175,7 +177,7 @@ describe("/oppskrifter", () => {
     await show();
     const links = screen
       .getAllByRole("link")
-      .filter((a) => a.getAttribute("href") !== "/handleliste");
+      .filter((a) => !["/handleliste", "/nylig-slettet"].includes(a.getAttribute("href") ?? ""));
     expect(links.map((a) => a.textContent)).toEqual([
       "I mappeMatprat · Hverdag",
       "Uten mappeMatprat",
@@ -213,6 +215,63 @@ describe("/oppskrifter", () => {
   it("kaster en feil til error.tsx når lesingen feiler, i stedet for å vise tom samling", async () => {
     state.forcedErrorKind = "unknown";
     await expect(renderPage()).rejects.toThrow(/Kunne ikke hente oppskriftene \(unknown\)/);
+  });
+});
+
+describe("/oppskrifter etter en sletting (Story 6.11)", () => {
+  function deleteOne(title: string): number {
+    const id = insertRecipe(state.db!, recipe(title, "2026-11-09T10:00:00.000Z"));
+    const deleted = deleteRecipe(id, state.db!);
+    if (!deleted.ok || deleted.value.trashId === null) throw new Error("kunne ikke slette");
+    return deleted.value.trashId;
+  }
+
+  it("har en lenke til «Nylig slettet» ved overskriften", async () => {
+    render((await renderPage()).heading);
+    expect(screen.getByRole("link", { name: "Nylig slettet" })).toHaveAttribute(
+      "href",
+      "/nylig-slettet",
+    );
+  });
+
+  it("viser «Oppskriften … er slettet» med «Angre» over oppskriftene", async () => {
+    insertRecipe(state.db!, recipe("Blir igjen", "2026-11-09T11:00:00.000Z"));
+    const trashId = deleteOne("Slettet en");
+    await show({ slettet: String(trashId) });
+    expect(screen.getByText("Oppskriften «Slettet en» er slettet.")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Angre slettingen av Slettet en" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Blir igjen" })).toBeInTheDocument();
+  });
+
+  it("viser meldingen også når samlingen er tom etter slettingen", async () => {
+    const trashId = deleteOne("Eneste");
+    await show({ slettet: String(trashId) });
+    expect(screen.getByRole("button", { name: /^Angre slettingen/ })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Du har ingen lagrede oppskrifter ennå." }),
+    ).toBeInTheDocument();
+  });
+
+  it.each([undefined, "abc", "0", "-1", "1.5", "99999999999999999999", ["1", "2"]])(
+    "ingen melding for ugyldig eller ukjent verdi %j",
+    async (value) => {
+      deleteOne("Slettet");
+      await show({ slettet: value as string });
+      expect(screen.queryByRole("button", { name: /^Angre/ })).not.toBeInTheDocument();
+    },
+  );
+
+  it("ingen melding for en annens slettede oppskrift", async () => {
+    const trashId = deleteOne("Min");
+    session.userId = 99;
+    try {
+      await show({ slettet: String(trashId) });
+    } finally {
+      session.userId = 1;
+    }
+    expect(screen.queryByRole("button", { name: /^Angre/ })).not.toBeInTheDocument();
   });
 });
 

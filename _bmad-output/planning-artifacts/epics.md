@@ -1118,3 +1118,26 @@ slik at jeg kan endre den (mindre sukker, annen ingrediens) uten å miste origin
 **Gitt** at originalen har vurdering, er favoritt eller er laget flere ganger
 **Så** starter kopien uten vurdering, ikke som favoritt og med null ganger laget
 
+### Story 6.11: Angre sletting, «Nylig slettet» i 7 dager
+
+Som Ida,
+vil jeg kunne angre når jeg sletter en oppskrift ved et uhell,
+slik at jeg ikke mister oppskriften med alt jeg har lagt til.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg sletter en lagret oppskrift
+**Så** kommer jeg til Oppskrifter med meldingen «Oppskriften «X» er slettet» og en «Angre»-knapp, og oppskriften ligger i «Nylig slettet»
+
+**Gitt** at jeg trykker «Angre» (eller «Hent tilbake» på siden Nylig slettet)
+**Så** er oppskriften tilbake med ingredienser, steg, notater, vurdering, merkelapper, favoritt, mappe, tatt i bruk forslag og plass i ukemeny og handlelister, og jeg kommer til den
+
+**Gitt** at en oppskrift har ligget i Nylig slettet i 7 dager
+**Så** er den borte for godt og kan ikke hentes tilbake
+
+**Gitt** at jeg velger «Slett for godt» på Nylig slettet og bekrefter
+**Så** er oppskriften borte for godt med en gang
+
+**Gitt** at jeg ikke er innlogget, eller oppskriften er slettet av en annen bruker
+**Så** ser og henter jeg ingenting
+

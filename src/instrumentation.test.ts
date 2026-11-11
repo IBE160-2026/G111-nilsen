@@ -2,7 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const purgeMock = vi.hoisted(() => vi.fn());
 
-vi.mock("./server/services/recipe-service", () => ({ purgeStaleUnsavedRecipes: purgeMock }));
+const purgeDeletedMock = vi.hoisted(() => vi.fn());
+vi.mock("./server/services/recipe-service", () => ({
+  purgeStaleUnsavedRecipes: purgeMock,
+  purgeDeletedRecipes: purgeDeletedMock,
+}));
 
 const { PURGE_INTERVAL_MS, register, schedulePurge } = await import("./instrumentation");
 
@@ -19,6 +23,7 @@ beforeEach(() => {
   vi.useFakeTimers();
   resetTimer();
   purgeMock.mockReset();
+  purgeDeletedMock.mockReset();
   purgeMock.mockReturnValue({ ok: true, value: { deleted: 0 } });
 });
 
@@ -111,5 +116,13 @@ describe("register", () => {
 
     vi.advanceTimersByTime(PURGE_INTERVAL_MS);
     expect(purgeMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("rydder også bort slettede oppskrifter som er eldre enn 7 dager (Story 6.11)", async () => {
+    vi.stubEnv("NEXT_RUNTIME", "nodejs");
+    await register();
+    expect(purgeDeletedMock).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(PURGE_INTERVAL_MS);
+    expect(purgeDeletedMock).toHaveBeenCalledTimes(2);
   });
 });

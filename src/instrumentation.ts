@@ -35,6 +35,11 @@ export function schedulePurge(purge: () => unknown): void {
  */
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
-  const { purgeStaleUnsavedRecipes } = await import("./server/services/recipe-service");
-  schedulePurge(() => purgeStaleUnsavedRecipes());
+  const { purgeDeletedRecipes, purgeStaleUnsavedRecipes } =
+    await import("./server/services/recipe-service");
+  // Ulagrede oppskrifter etter et døgn, og slettede oppskrifter etter 7 dager (Story 6.11).
+  schedulePurge(() => {
+    purgeDeletedRecipes();
+    return purgeStaleUnsavedRecipes();
+  });
 }

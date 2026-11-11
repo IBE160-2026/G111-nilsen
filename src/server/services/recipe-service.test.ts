@@ -8,6 +8,12 @@ import {
   markRecipeCooked,
   setRecipeFitsFor,
   addRecipeLabel,
+  deleteDeletedRecipeForGood,
+  getDeletedRecipe,
+  listDeletedRecipes,
+  purgeDeletedRecipes,
+  restoreDeletedRecipe,
+  TRASH_DAYS,
   copyRecipeAsVariant,
   setRecipeRating,
   removeRecipeLabel,
@@ -479,7 +485,10 @@ describe("lagre, slette og rydde (Story 3.2)", () => {
     it("sletter oppskriften med ingredienser og steg", () => {
       const db = createTestDb();
       const id = stored(db, "2026-11-09T11:00:00.000Z");
-      expect(deleteRecipe(id, db)).toEqual({ ok: true, value: { id } });
+      expect(deleteRecipe(id, db)).toEqual({
+        ok: true,
+        value: { id, trashId: expect.any(Number) },
+      });
       expect(getRecipe(id, db).ok).toBe(false);
       expect(count(db, "recipes")).toBe(0);
       expect(count(db, "ingredient_lines")).toBe(0);
@@ -1043,5 +1052,107 @@ describe("copyRecipeAsVariant (Story 6.10)", () => {
       ok: false,
       error: { kind: "not_found" },
     });
+  });
+});
+
+describe("nylig slettet (Story 6.11)", () => {
+  const DAY = 24 * 60 * 60 * 1000;
+  const T = new Date("2026-11-11T12:00:00.000Z");
+
+  function savedRecipe(db: ReturnType<typeof createTestDb>, title = input.title): number {
+    const created = createManualRecipe(TEST_USER_ID, { ...input, title }, db);
+    if (!created.ok) throw new Error("feil");
+    return created.value.id;
+  }
+
+  it("en lagret oppskrift legges i «Nylig slettet», en ulagret slettes rett", () => {
+    const db = createTestDb();
+    const id = savedRecipe(db);
+    const deleted = deleteRecipe(id, db, T);
+    expect(deleted).toEqual({ ok: true, value: { id, trashId: expect.any(Number) } });
+    expect(getRecipe(id, db).ok).toBe(false);
+    const list = listDeletedRecipes(TEST_USER_ID, db, T);
+    expect(list.ok && list.value).toEqual([
+      {
+        id: deleted.ok ? deleted.value.trashId : -1,
+        title: input.title,
+        deletedAt: T.toISOString(),
+        expiresAt: new Date(T.getTime() + TRASH_DAYS * DAY).toISOString(),
+        daysLeft: 7,
+      },
+    ]);
+
+    const other = savedRecipe(db, "Ulagret");
+    db.$client.prepare("update recipes set saved_at = null where id = ?").run(other);
+    expect(deleteRecipe(other, db, T)).toEqual({ ok: true, value: { id: other, trashId: null } });
+    expect(count(db, "deleted_recipes")).toBe(1);
+  });
+
+  it("henter tilbake med nytt id, og andre gang gir not_found", () => {
+    const db = createTestDb();
+    const id = savedRecipe(db);
+    const deleted = deleteRecipe(id, db, T);
+    const trashId = deleted.ok ? deleted.value.trashId! : -1;
+    const back = restoreDeletedRecipe(TEST_USER_ID, trashId, db, new Date(T.getTime() + DAY));
+    expect(back.ok).toBe(true);
+    const read = back.ok ? getRecipe(back.value.id, db) : null;
+    expect(read?.ok && read.value.title).toBe(input.title);
+    expect(restoreDeletedRecipe(TEST_USER_ID, trashId, db, T)).toMatchObject({
+      ok: false,
+      error: { kind: "not_found" },
+    });
+  });
+
+  it("dager igjen teller ned, og etter 7 dager er den borte (liste, oppslag og gjenoppretting)", () => {
+    const db = createTestDb();
+    const deleted = deleteRecipe(savedRecipe(db), db, T);
+    const trashId = deleted.ok ? deleted.value.trashId! : -1;
+    const at = (days: number) => new Date(T.getTime() + days * DAY - 1000);
+    const left = (days: number) => {
+      const found = getDeletedRecipe(TEST_USER_ID, trashId, db, at(days));
+      return found.ok ? found.value.daysLeft : null;
+    };
+    expect(left(0)).toBe(7);
+    expect(left(1)).toBe(6);
+    expect(left(7)).toBe(0);
+    const gone = new Date(T.getTime() + 7 * DAY + 1000);
+    expect(listDeletedRecipes(TEST_USER_ID, db, gone)).toEqual({ ok: true, value: [] });
+    expect(getDeletedRecipe(TEST_USER_ID, trashId, db, gone)).toMatchObject({ ok: false });
+    expect(restoreDeletedRecipe(TEST_USER_ID, trashId, db, gone)).toMatchObject({ ok: false });
+  });
+
+  it("en annen bruker ser og henter ingenting, og id-en må være gyldig", () => {
+    const db = createTestDb();
+    db.$client.exec(
+      "insert into users (id, email, password_hash, created_at) values (2, 'b@example.com', 'x', '2026-01-01T00:00:00.000Z')",
+    );
+    const deleted = deleteRecipe(savedRecipe(db), db, T);
+    const trashId = deleted.ok ? deleted.value.trashId! : -1;
+    expect(listDeletedRecipes(2, db, T)).toEqual({ ok: true, value: [] });
+    expect(getDeletedRecipe(2, trashId, db, T)).toMatchObject({ ok: false });
+    expect(restoreDeletedRecipe(2, trashId, db, T)).toMatchObject({ ok: false });
+    expect(deleteDeletedRecipeForGood(2, trashId, db)).toMatchObject({ ok: false });
+    for (const bad of [0, -1, 1.5, NaN]) {
+      expect(getDeletedRecipe(TEST_USER_ID, bad, db, T)).toMatchObject({ ok: false });
+      expect(restoreDeletedRecipe(TEST_USER_ID, bad, db, T)).toMatchObject({ ok: false });
+      expect(deleteDeletedRecipeForGood(TEST_USER_ID, bad, db)).toMatchObject({ ok: false });
+    }
+  });
+
+  it("sletter for godt, og rydder bort det som er eldre enn 7 dager", () => {
+    const db = createTestDb();
+    const first = deleteRecipe(savedRecipe(db, "Eldst"), db, new Date(T.getTime() - 8 * DAY));
+    const second = deleteRecipe(savedRecipe(db, "Midt"), db, new Date(T.getTime() - 2 * DAY));
+    const third = deleteRecipe(savedRecipe(db, "Ny"), db, T);
+    expect(purgeDeletedRecipes(T, db)).toEqual({ ok: true, value: { deleted: 1 } });
+    expect(count(db, "deleted_recipes")).toBe(2);
+    const secondId = second.ok ? second.value.trashId! : -1;
+    expect(deleteDeletedRecipeForGood(TEST_USER_ID, secondId, db)).toEqual({
+      ok: true,
+      value: { id: secondId },
+    });
+    expect(deleteDeletedRecipeForGood(TEST_USER_ID, secondId, db)).toMatchObject({ ok: false });
+    expect(first.ok && third.ok).toBe(true);
+    expect(count(db, "deleted_recipes")).toBe(1);
   });
 });

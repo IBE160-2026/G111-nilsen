@@ -152,9 +152,10 @@ describe("removeRecipe", () => {
   it("sletter oppskriften med linjer og steg og sender brukeren til /oppskrifter", async () => {
     const error = await removeRecipe(id).catch((e) => e);
     expect(error).toBeInstanceOf(RedirectError);
-    expect((error as RedirectError).url).toBe("/oppskrifter");
+    expect((error as RedirectError).url).toMatch(/^\/oppskrifter\?slettet=\d+$/);
     expect(getRecipe(id, state.db!).ok).toBe(false);
     expect(count("recipes")).toBe(0);
+    expect(count("deleted_recipes")).toBe(1);
     expect(count("ingredient_lines")).toBe(0);
     expect(count("steps")).toBe(0);
     expect(revalidatePath).toHaveBeenCalledWith("/", "layout");
