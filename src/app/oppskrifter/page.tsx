@@ -48,7 +48,7 @@ async function CollectionLoader() {
         title={collectionMessages.emptyTitle}
         description={collectionMessages.emptyDescription}
         action={{ href: "/ny", label: collectionMessages.emptyManualAction }}
-        secondaryAction={{ href: "/", label: collectionMessages.emptyImportAction }}
+        secondaryAction={{ href: "/importer", label: collectionMessages.emptyImportAction }}
       />
     );
   }

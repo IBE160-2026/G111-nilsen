@@ -990,3 +990,17 @@ slik at jeg bestemmer selv når uka lagres og raskt finner tidligere uker og han
 
 **Gitt** at jeg åpner en uke fra «Alle uker»
 **Så** ser jeg dagene med rettene og porsjoner, en stor «Se handlelisten for uka»-knapp og «Endre uka»
+
+### Story 6.4e: Forside
+
+Som Ida,
+vil jeg komme til en egen forside når jeg åpner RecipeMate, med snarveier til delene av appen,
+slik at jeg ikke starter midt i importskjemaet.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg åpner `/`
+**Så** ser jeg en kort velkomst og kort som leder til Hent en oppskrift, Oppskrifter, Ukemeny, Handleliste, Mapper og Favoritter
+
+**Gitt** at jeg trykker «Hent en oppskrift» eller «Importer» i menyen
+**Så** kommer jeg til importskjemaet på `/importer`

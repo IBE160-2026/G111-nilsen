@@ -1,37 +1,40 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
-
-vi.mock("./actions", () => ({ submitImport: vi.fn() }));
-import ImporterPage from "./page";
+import { cleanup, render, screen, within } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
+import HomePage from "./page";
 import NotFound from "./not-found";
 
 afterEach(cleanup);
 
-describe("sider (spec 1.1, matrise: Start og Ukjent side; Samlingen, Mapper og Favoritter testes i oppskrifter/page.test.tsx, mapper/page.test.tsx og favoritter/page.test.tsx)", () => {
-  it("Importer-siden viser overskriften «Hent en oppskrift»", () => {
-    render(<ImporterPage />);
-    expect(
-      screen.getByRole("heading", { level: 1, name: "Hent en oppskrift" }),
-    ).toBeInTheDocument();
+describe("forsiden og 404-siden", () => {
+  it("forsiden har overskriften «RecipeMate» og en kort forklaring", () => {
+    render(<HomePage />);
+    expect(screen.getByRole("heading", { level: 1, name: "RecipeMate" })).toBeInTheDocument();
+    expect(screen.getByText(/Hent oppskrifter fra nettet/)).toBeInTheDocument();
   });
 
-  it("Importer-siden lenker til «Legg inn selv» (/ny)", () => {
-    render(<ImporterPage />);
-    expect(screen.getByRole("link", { name: "Legg inn selv" })).toHaveAttribute("href", "/ny");
+  it("forsiden har snarveier til alle delene, med «Hent en oppskrift» først", () => {
+    render(<HomePage />);
+    const links = within(screen.getByRole("region", { name: "Kom i gang" })).getAllByRole("link");
+    expect(links.map((link) => link.getAttribute("href"))).toEqual([
+      "/importer",
+      "/oppskrifter",
+      "/ukemeny",
+      "/handleliste",
+      "/mapper",
+      "/favoritter",
+    ]);
+    expect(links[0]).toHaveTextContent("Hent en oppskrift");
   });
 
-  it("Importer-siden har lenkefelt med etikett, fokus og knappen «Hent oppskrift» (ikke lenger «Snart …»)", () => {
-    render(<ImporterPage />);
-    const field = screen.getByRole("textbox", { name: "Lenke til oppskriften" });
-    expect(field).toHaveFocus();
-    expect(screen.getByRole("button", { name: "Hent oppskrift" })).toBeInTheDocument();
-    expect(document.body.textContent).not.toContain("Snart");
+  it("forsiden har ikke selv importskjemaet (det ligger på /importer)", () => {
+    render(<HomePage />);
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
 
-  it("404-siden er på norsk og lenker til Importer", () => {
+  it("404-siden er på norsk og lenker til forsiden", () => {
     render(<NotFound />);
     expect(screen.getByRole("heading", { level: 1, name: "Fant ikke siden" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Gå til Importer" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Gå til forsiden" })).toHaveAttribute("href", "/");
   });
 });

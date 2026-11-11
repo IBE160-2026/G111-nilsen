@@ -21,7 +21,7 @@ export default function ErrorPage({ error, retry }: { error: unknown; retry: () 
       <EmptyState
         title={message.title}
         description={message.body}
-        action={{ href: "/", label: "Gå til Importer" }}
+        action={{ href: "/", label: "Gå til forsiden" }}
       />
       <div>
         <button type="button" className={styles.retry} onClick={() => retry()}>

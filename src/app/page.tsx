@@ -1,24 +1,34 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import ImportForm from "@/components/ImportForm";
-import { importMessages } from "@/lib/messages";
-import { submitImport } from "./actions";
-import styles from "./page.module.css";
+import { homeMessages as m } from "@/lib/messages";
+import styles from "./home.module.css";
 
-export const metadata: Metadata = { title: importMessages.tabTitle };
+export const metadata: Metadata = { title: m.tabTitle };
 
-export default function ImporterPage() {
+/**
+ * Forsiden, `/`: en kort velkomst og snarveier til delene av appen. Importer-skjemaet ligger på
+ * `/importer`. Siden henter ingen data, så den virker også uten innlogging.
+ */
+export default function HomePage() {
   return (
-    <section className={styles.intro}>
-      <h1>{importMessages.heading}</h1>
-      <p className={styles.lead}>{importMessages.lead}</p>
-      <ImportForm action={submitImport} />
-      <p className={styles.manual}>
-        {importMessages.manualPrompt}{" "}
-        <Link href="/ny" className={styles.manualLink}>
-          {importMessages.enterManually}
-        </Link>
-      </p>
-    </section>
+    <div className={styles.root}>
+      <h1>{m.heading}</h1>
+      <p className={styles.lead}>{m.lead}</p>
+      <section aria-label={m.sectionLabel}>
+        <ul role="list" className={styles.cards}>
+          {m.cards.map((card, index) => (
+            <li key={card.href}>
+              <Link
+                href={card.href}
+                className={index === 0 ? `${styles.card} ${styles.primary}` : styles.card}
+              >
+                <span className={styles.cardTitle}>{card.title}</span>
+                <span className={styles.cardText}>{card.text}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
   );
 }

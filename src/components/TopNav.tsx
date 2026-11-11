@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import styles from "./TopNav.module.css";
 
 export const NAV_ITEMS = [
-  { href: "/", label: "Importer" },
+  { href: "/importer", label: "Importer" },
   { href: "/oppskrifter", label: "Oppskrifter" },
   { href: "/mapper", label: "Mapper" },
   { href: "/favoritter", label: "Favoritter" },

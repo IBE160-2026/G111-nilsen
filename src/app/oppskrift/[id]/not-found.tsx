@@ -14,7 +14,7 @@ export default function RecipeNotFound() {
       <EmptyState
         title={message.title}
         description={message.body}
-        action={{ href: "/", label: "Gå til Importer" }}
+        action={{ href: "/", label: "Gå til forsiden" }}
       />
     </div>
   );

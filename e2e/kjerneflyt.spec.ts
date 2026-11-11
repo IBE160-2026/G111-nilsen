@@ -41,7 +41,7 @@ const DATA = {
 const OVERVIEW_URL = "https://www.klikk.no/mat/spise/oppskrift-pa-farikal-2530170";
 
 async function importRecipe(page: Page, url: string, title: string) {
-  await page.goto("/");
+  await page.goto("/importer");
   await page.getByLabel("Lenke til oppskriften").fill(url);
   await page.getByRole("button", { name: "Hent oppskrift" }).click();
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible({
@@ -256,7 +256,7 @@ test("UJ-2: forslag tas i bruk og huskes; oversiktsside gir melding", async ({
   await expect(badges).toHaveCount(0);
 
   // Kanttilfelle: lenken er en oversiktsside uten oppskrift.
-  await page.goto("/");
+  await page.goto("/importer");
   await page.getByLabel("Lenke til oppskriften").fill(OVERVIEW_URL);
   await page.getByRole("button", { name: "Hent oppskrift" }).click();
   await expect(page.getByText("Fant ingen oppskrift på siden.")).toBeVisible();
@@ -553,6 +553,17 @@ for (const scheme of ["light", "dark"] as const) {
     });
   });
 }
+
+test("Forsiden har snarveier, og «Hent en oppskrift» går til Importer", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { level: 1, name: "RecipeMate" })).toBeVisible();
+  await expect(page.getByRole("textbox")).toHaveCount(0);
+  const shortcuts = page.getByRole("region", { name: "Kom i gang" });
+  await expect(shortcuts.getByRole("link")).toHaveCount(6);
+  await shortcuts.getByRole("link", { name: /Hent en oppskrift/ }).click();
+  await expect(page).toHaveURL(/\/importer$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Hent en oppskrift" })).toBeVisible();
+});
 
 test("Den gamle adressen /samlingen sendes til /oppskrifter", async ({ page }) => {
   await page.goto("/samlingen");

@@ -39,7 +39,7 @@ export const errorMessages: Record<ErrorKind, ErrorMessage> = {
   },
   not_found: {
     title: "Vi fant ikke oppskriften.",
-    body: "Den kan være slettet, eller lenken kan være feil. Gå til Importer for å hente en oppskrift.",
+    body: "Den kan være slettet, eller lenken kan være feil. Gå til forsiden for å komme videre.",
   },
   suggestion_failed: {
     title: "Fikk ikke laget forslag akkurat nå.",
@@ -61,6 +61,46 @@ export function messageFor(kind: ErrorKind | string | null | undefined): ErrorMe
 }
 
 /** Tekster for Importer-siden (Story 2.2). Feilmeldingene hentes fra `errorMessages` via `messageFor`. */
+/** Forsiden (`/`): velkomst og snarveier til delene av appen. */
+export const homeMessages = {
+  tabTitle: "Forside",
+  heading: "RecipeMate",
+  lead: "Hent oppskrifter fra nettet, skaler dem til riktig antall porsjoner, planlegg uka og få handlelisten.",
+  sectionLabel: "Kom i gang",
+  cards: [
+    {
+      href: "/importer",
+      title: "Hent en oppskrift",
+      text: "Lim inn en lenke, eller legg inn oppskriften selv.",
+    },
+    {
+      href: "/oppskrifter",
+      title: "Oppskrifter",
+      text: "Alle oppskriftene du har lagret.",
+    },
+    {
+      href: "/ukemeny",
+      title: "Ukemeny",
+      text: "Planlegg middagene i uka og lagre dem.",
+    },
+    {
+      href: "/handleliste",
+      title: "Handleliste",
+      text: "Se hva du må kjøpe, og kryss av i butikken.",
+    },
+    {
+      href: "/mapper",
+      title: "Mapper",
+      text: "Samle oppskrifter, for eksempel hverdag og helg.",
+    },
+    {
+      href: "/favoritter",
+      title: "Favoritter",
+      text: "Oppskriftene du kommer tilbake til.",
+    },
+  ],
+} as const;
+
 export const importMessages = {
   heading: "Hent en oppskrift",
   lead: "Lim inn lenken til en oppskrift. RecipeMate henter ingrediensene og stegene og viser dem i et fast og ryddig format.",

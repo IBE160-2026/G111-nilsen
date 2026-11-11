@@ -10,8 +10,8 @@ export default function NotFound() {
       <h1>Fant ikke siden</h1>
       <EmptyState
         title="Siden finnes ikke."
-        description="Lenken kan være feil, eller siden kan være flyttet. Gå til Importer for å hente en oppskrift."
-        action={{ href: "/", label: "Gå til Importer" }}
+        description="Lenken kan være feil, eller siden kan være flyttet. Gå til forsiden for å komme videre."
+        action={{ href: "/", label: "Gå til forsiden" }}
       />
     </div>
   );

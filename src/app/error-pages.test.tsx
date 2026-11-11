@@ -17,7 +17,7 @@ describe("feilsider", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 2, name: message.title })).toBeInTheDocument();
     expect(screen.getByText(message.body)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Gå til Importer" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Gå til forsiden" })).toHaveAttribute("href", "/");
   });
 
   it("feilsiden viser norsk reservemelding og kan prøve igjen", async () => {
@@ -28,7 +28,7 @@ describe("feilsider", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Noe gikk galt" })).toBeInTheDocument();
     expect(screen.getByText(fallbackMessage.body)).toBeInTheDocument();
     expect(screen.queryByText(/databasen er låst/)).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Gå til Importer" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Gå til forsiden" })).toHaveAttribute("href", "/");
 
     await userEvent.setup().click(screen.getByRole("button", { name: "Prøv igjen" }));
     expect(retry).toHaveBeenCalledTimes(1);

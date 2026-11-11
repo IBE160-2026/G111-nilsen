@@ -1,0 +1,62 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: var(--content-max-width);
+}
+
+.lead {
+  margin: 0;
+  color: var(--color-ink-secondary);
+  font-size: 1.125rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 600px) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-height: var(--tap-target-min);
+  height: 100%;
+  padding: var(--space-4);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  color: var(--color-ink-primary);
+  text-decoration: none;
+}
+
+.cardTitle {
+  color: var(--color-accent);
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.cardText {
+  color: var(--color-ink-secondary);
+}
+
+/* «Hent en oppskrift» er hovedhandlingen og går over hele bredden. */
+.primary {
+  border: 2px solid var(--color-accent);
+}
+
+@media (min-width: 600px) {
+  .cards > li:first-child {
+    grid-column: 1 / -1;
+  }
+}

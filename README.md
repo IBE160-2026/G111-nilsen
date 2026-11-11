@@ -84,6 +84,7 @@ Kravene står i PRD §4.7 (FR-28–FR-39), og hver story har en spec i `_bmad-ou
 - **Notater og sist laget (6.3):** egne notater på oppskriften, «Laget i dag» og «Sist laget … · laget N ganger».
 - **Tøm «Har hjemme» (6.4b):** «Tøm listen» (med bekreftelse) fjerner alt i «Har hjemme» etter en handletur.
 - **Alle uker (6.4c):** «Alle uker» på Ukemeny viser hver planlagte uke (Uke 38, Uke 39 …), nyeste først, med rettene. Hver uke åpnes på en egen side (6.4d) med menyen i korte trekk, «Se handlelisten for uka» og «Endre uka». Avkrysninger i handlelisten for en uke lagres per uke.
+- **Forside (6.4e):** `/` er en forside med velkomst og snarveier til Hent en oppskrift, Oppskrifter, Ukemeny, Handleliste, Mapper og Favoritter. Importskjemaet er flyttet til `/importer`; logoen i menyen går til forsiden.
 - **Lagre uka (6.4d):** endringene i ukemenyen samles til du trykker «Lagre uka» (da erstattes hele uka). Ulagrede endringer vises, og handlelisten for uka venter til uka er lagret. «Se alle uker» er en stor knapp under menyen.
 - **Passer til (6.6b):** feltet «Passer til» i notatkortet, for din egen vurdering («2 sultne»). Endrer ikke mengdene.
 - **Utskrift (6.6):** «Skriv ut» ved tittelen åpner utskriftsdialogen. Utskriften har tittel, kilde (med adresse), antall porsjoner, ingredienser med avkrysningsbokser og steg i én kolonne, uten meny, knapper, forslag og notater.
@@ -199,7 +200,7 @@ Story 2.1 legger grunnen for import fra lenke: to rene funksjoner i `src/domain/
 
 ## Importere fra lenke
 
-Story 2.2 binder import sammen. På Importer-siden (`/`) limer du inn en lenke og trykker «Hent oppskrift». Appen går gjennom disse stegene (AD-4): `validateUrl` → duplikatsjekk → henting → `extractRecipeJsonLd` → `normalizeRecipe` → `parseLine` → lagring som «ikke i samlingen». Du havner på `/oppskrift/{id}`, der kilden vises som lenke (åpnes i ny fane), og kan lagre oppskriften i Oppskrifter derfra. Uten JavaScript virker skjemaet også, så langt som mulig.
+Story 2.2 binder import sammen. På Importer-siden (`/importer`) limer du inn en lenke og trykker «Hent oppskrift». Appen går gjennom disse stegene (AD-4): `validateUrl` → duplikatsjekk → henting → `extractRecipeJsonLd` → `normalizeRecipe` → `parseLine` → lagring som «ikke i samlingen». Du havner på `/oppskrift/{id}`, der kilden vises som lenke (åpnes i ny fane), og kan lagre oppskriften i Oppskrifter derfra. Uten JavaScript virker skjemaet også, så langt som mulig.
 
 - **Lenken:** `validateUrl` (`src/lib/source-url.ts`) trimmer blanke og usynlige tegn og omsluttende anførselstegn, setter `https://` foran når skjemaet mangler («www.matprat.no/…»), og godtar bare `http` og `https` uten brukernavn og passord. `normalizeSourceUrl` fjerner fragment og sporingsparametere (`utm_*`, `fbclid`, `gclid` …) og lagres som `sourceUrl`. To ulike stier, og `http` mot `https`, regnes som ulike oppskrifter.
 - **Duplikat:** er adressen allerede lagret i Oppskrifter, får du «Du har allerede lagret denne oppskriften» med lenke til den, og ingenting hentes. En import som ikke ble lagret, åpnes på nytt uten ny henting. Sjekken ligger bare i `import-service`.

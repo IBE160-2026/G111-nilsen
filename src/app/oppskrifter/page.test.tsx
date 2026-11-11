@@ -130,7 +130,7 @@ describe("/oppskrifter", () => {
       .filter((a) => a.getAttribute("href") !== "/handleliste");
     expect(links.map((a) => [a.textContent, a.getAttribute("href")])).toEqual([
       ["Legg inn selv", "/ny"],
-      ["Importer din første oppskrift", "/"],
+      ["Importer din første oppskrift", "/importer"],
     ]);
   });
 

@@ -34,7 +34,7 @@ describe("TopNav", () => {
       "Handleliste",
     ]);
     expect(links.map((l) => l.getAttribute("href"))).toEqual([
-      "/",
+      "/importer",
       "/oppskrifter",
       "/mapper",
       "/favoritter",
@@ -44,7 +44,7 @@ describe("TopNav", () => {
   });
 
   it.each([
-    ["/", "Importer"],
+    ["/importer", "Importer"],
     ["/oppskrifter", "Oppskrifter"],
     ["/mapper", "Mapper"],
     ["/mapper/3", "Mapper"],
@@ -57,6 +57,12 @@ describe("TopNav", () => {
     const current = navLinks().filter((l) => l.getAttribute("aria-current") === "page");
     expect(current).toHaveLength(1);
     expect(current[0]).toHaveTextContent(expected);
+  });
+
+  it("markerer ingenting på forsiden", () => {
+    pathnameMock.current = "/";
+    render(<TopNav />);
+    expect(navLinks().some((l) => l.hasAttribute("aria-current"))).toBe(false);
   });
 
   it("markerer ingenting på en ukjent side", () => {
@@ -72,7 +78,7 @@ describe("TopNav", () => {
 });
 
 describe("isActive", () => {
-  it("Importer er bare aktiv på startsiden", () => {
+  it("forsiden («/») er bare aktiv på forsiden", () => {
     expect(isActive("/", "/")).toBe(true);
     expect(isActive("/", "/oppskrifter")).toBe(false);
   });
