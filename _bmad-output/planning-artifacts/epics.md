@@ -1007,3 +1007,19 @@ slik at jeg ikke starter midt i importskjemaet.
 
 **Gitt** at jeg trykker «Hent en oppskrift» eller «Importer» i menyen
 **Så** kommer jeg til importskjemaet på `/importer`
+
+### Story 6.4f: Søk og nullstilling i handlelisten
+
+Som Ida,
+vil jeg søke etter en oppskrift i handlelisten, og at det jeg har valgt og krysset av uten å lagre er borte når jeg kommer tilbake,
+slik at jeg finner oppskriften raskt og alltid starter med en tom liste.
+
+**Akseptansekriterier:**
+
+**Gitt** Handleliste med mange oppskrifter
+**Når** jeg skriver i «Søk etter oppskrift»
+**Så** vises bare oppskrifter som passer (uavhengig av store bokstaver og aksenter), med antall treff, og de jeg allerede har valgt står igjen
+
+**Gitt** at jeg har valgt oppskrifter, endret porsjoner eller krysset av varer uten å lagre
+**Når** jeg går til en annen side og kommer tilbake
+**Så** er valgene, porsjonene, avkrysningene og søket nullstilt; lagrede avkrysninger for en uke og «Har hjemme» beholdes

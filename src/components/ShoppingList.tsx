@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import {
   buildShoppingList,
   splitByPantry,
@@ -17,6 +17,11 @@ import ConfirmDialog from "./ConfirmDialog";
 import styles from "./ShoppingList.module.css";
 
 /** Antallet en oppskrift starter på: sist valgt, ellers antallet den er skrevet for, ellers `null`. */
+/** Små bokstaver uten aksenter og overflødig mellomrom, så «Crème» finnes med «creme». */
+function normalize(text: string): string {
+  return text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
+}
+
 function startServings(recipe: ShoppingRecipe): number | null {
   if (isSelectedServings(recipe.selectedServings)) return recipe.selectedServings;
   const original = recipe.originalServings;
@@ -27,7 +32,9 @@ function startServings(recipe: ShoppingRecipe): number | null {
 
 /**
  * Handleliste (Story 5.7): velg oppskrifter og antall porsjoner, så slås ingrediensene sammen til
- * én liste som kan krysses av i butikken. Alt er tilstand i nettleseren; ingenting lagres.
+ * én liste som kan krysses av i butikken. Valg og avkrysninger er tilstand i nettleseren og
+ * nullstilles når man forlater siden (de lagres ikke), unntatt avkrysninger i en lagret uke og
+ * «Har hjemme», som lagres. Oppskriftene kan søkes etter.
  */
 type Props = {
   recipes: readonly ShoppingRecipe[];
@@ -74,11 +81,54 @@ export default function ShoppingList({
     () => new Set(weekChecks?.initial ?? []),
   );
   const [status, setStatus] = useState("");
+  const [query, setQuery] = useState("");
+  // Nytt tall gir nye (ukontrollerte) antallfelt, så de også nullstilles.
+  const [formKey, setFormKey] = useState(0);
   const [pantry, setPantry] = useState<readonly PantryItem[]>(initialPantry);
   const [pantryName, setPantryName] = useState("");
   const [pantryError, setPantryError] = useState("");
   const [pantryPending, setPantryPending] = useState(false);
   const [confirmingClear, setConfirmingClear] = useState(false);
+
+  // Siden kan holdes igjen i bakgrunnen når man går videre (Activity); da kjøres opprydningen under.
+  // Valg og avkrysninger som ikke er lagret nullstilles, så listen er tom når man kommer tilbake.
+  useEffect(
+    () => () => {
+      setPicked(
+        new Set(recipes.filter((recipe) => recipe.id in initialSelection).map((r) => r.id)),
+      );
+      setServings(
+        Object.fromEntries(
+          recipes.map((recipe) => {
+            const chosen = initialSelection[recipe.id];
+            return [recipe.id, isSelectedServings(chosen) ? chosen : startServings(recipe)];
+          }),
+        ),
+      );
+      setSystem("original");
+      setChecked(new Set(weekChecks?.initial ?? []));
+      setQuery("");
+      setStatus("");
+      setFormKey((key) => key + 1);
+    },
+    // Bare ved montering og når siden skjules; de nyeste verdiene leses fra den siste visningen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  const needle = normalize(query);
+  const visibleRecipes = useMemo(
+    () =>
+      recipes.filter(
+        (recipe) =>
+          needle === "" || picked.has(recipe.id) || normalize(recipe.title).includes(needle),
+      ),
+    [recipes, picked, needle],
+  );
+  const matchCount = useMemo(
+    () => recipes.filter((recipe) => normalize(recipe.title).includes(needle)).length,
+    [recipes, needle],
+  );
 
   const allItems = useMemo(
     () =>
@@ -221,8 +271,25 @@ export default function ShoppingList({
     <div className={styles.root}>
       <section aria-labelledby={`${id}-velg`} className={styles.card}>
         <h2 id={`${id}-velg`}>{m.pickHeading}</h2>
+        <div className={styles.search}>
+          <label htmlFor={`${id}-sok`}>{m.searchLabel}</label>
+          <input
+            id={`${id}-sok`}
+            type="search"
+            className={styles.searchField}
+            placeholder={m.searchPlaceholder}
+            autoComplete="off"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </div>
+        {needle !== "" ? (
+          <p role="status" className={styles.hint}>
+            {matchCount === 0 ? m.searchNoMatch(query.trim()) : m.searchCount(matchCount)}
+          </p>
+        ) : null}
         <ul role="list" className={styles.recipes}>
-          {recipes.map((recipe) => {
+          {visibleRecipes.map((recipe) => {
             const isPicked = picked.has(recipe.id);
             const current = servings[recipe.id] ?? null;
             return (
@@ -246,6 +313,7 @@ export default function ShoppingList({
                       step={0.5}
                       className={styles.number}
                       aria-label={m.servingsFor(recipe.title)}
+                      key={formKey}
                       defaultValue={current}
                       onChange={(event) => changeServings(recipe.id, event.target.value)}
                     />

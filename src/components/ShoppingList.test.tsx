@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { Activity } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { parseLine, type ShoppingRecipe } from "@/domain";
 import ShoppingList from "./ShoppingList";
@@ -380,6 +381,97 @@ describe("ShoppingList", () => {
       await user.click(pick("Pannekaker"));
       await user.click(screen.getByRole("button", { name: "Kopier listen" }));
       expect(writeText).toHaveBeenCalledWith("- 3 egg\n- 400 g mel");
+    });
+  });
+
+  describe("søk i oppskriftene", () => {
+    const visible = () =>
+      within(screen.getByRole("heading", { name: "Velg oppskrifter" }).closest("section")!)
+        .getAllByRole("checkbox")
+        .map((box) => box.getAttribute("aria-label") ?? box.closest("label")?.textContent);
+
+    it("filtrerer på tittel, uavhengig av store bokstaver og aksenter, og melder antall treff", async () => {
+      const user = userEvent.setup();
+      render(<ShoppingList recipes={[...recipes, recipe(4, "Crème brûlée", ["2 dl fløte"])]} />);
+      expect(visible()).toEqual(["Pannekaker", "Vafler", "Uten antall", "Crème brûlée"]);
+      await user.type(screen.getByRole("searchbox", { name: "Søk etter oppskrift" }), "CREME");
+      expect(visible()).toEqual(["Crème brûlée"]);
+      expect(screen.getByText("1 oppskrift passer.")).toBeInTheDocument();
+      await user.clear(screen.getByRole("searchbox", { name: "Søk etter oppskrift" }));
+      expect(visible()).toHaveLength(4);
+      expect(screen.queryByText(/oppskrift(er)? passer/)).not.toBeInTheDocument();
+    });
+
+    it("sier fra når ingen passer, og beholder valgte oppskrifter synlige", async () => {
+      const user = userEvent.setup();
+      render(<ShoppingList recipes={recipes} />);
+      await user.click(pick("Vafler"));
+      const search = screen.getByRole("searchbox", { name: "Søk etter oppskrift" });
+      await user.type(search, "lasagne");
+      expect(screen.getByText("Ingen lagrede oppskrifter passer «lasagne».")).toBeInTheDocument();
+      expect(visible()).toEqual(["Vafler"]);
+      await user.clear(search);
+      await user.type(search, "pann");
+      expect(visible()).toEqual(["Pannekaker", "Vafler"]);
+      // Listen «Du må kjøpe» påvirkes ikke av søket.
+      expect(items()).toEqual(["2 eggTil Vafler", "2 dl melkTil Vafler"]);
+    });
+  });
+
+  describe("nullstilling når man forlater siden", () => {
+    function Host({
+      mode,
+      ...props
+    }: { mode: "visible" | "hidden" } & Parameters<typeof ShoppingList>[0]) {
+      return (
+        <Activity mode={mode}>
+          <ShoppingList {...props} />
+        </Activity>
+      );
+    }
+
+    it("tømmer valg, porsjoner, avkrysninger og søk som ikke er lagret", async () => {
+      const user = userEvent.setup();
+      const { rerender } = render(<Host mode="visible" recipes={recipes} />);
+      await user.click(pick("Pannekaker"));
+      fireEvent.change(screen.getByLabelText("Antall porsjoner for Pannekaker"), {
+        target: { value: "8" },
+      });
+      await user.click(screen.getByRole("checkbox", { name: /egg/ }));
+      await user.type(screen.getByRole("searchbox", { name: "Søk etter oppskrift" }), "pann");
+      rerender(<Host mode="hidden" recipes={recipes} />);
+      rerender(<Host mode="visible" recipes={recipes} />);
+      expect(pick("Pannekaker")).not.toBeChecked();
+      expect(screen.queryByLabelText("Antall porsjoner for Pannekaker")).not.toBeInTheDocument();
+      expect(screen.getByRole("searchbox", { name: "Søk etter oppskrift" })).toHaveValue("");
+      expect(screen.getByText("Velg minst én oppskrift for å lage en liste.")).toBeInTheDocument();
+      await user.click(pick("Pannekaker"));
+      expect(screen.getByLabelText("Antall porsjoner for Pannekaker")).toHaveValue(4);
+      expect(screen.getByRole("checkbox", { name: /egg/ })).not.toBeChecked();
+    });
+
+    it("beholder uka som kom fra ukemenyen, og lagrede avkrysninger", async () => {
+      const { rerender } = render(
+        <Host
+          mode="visible"
+          recipes={recipes}
+          initialSelection={{ 2: 6 }}
+          weekChecks={{ initial: ["egg|"], onChange: vi.fn() }}
+        />,
+      );
+      await userEvent.setup().click(pick("Pannekaker"));
+      const again = (mode: "visible" | "hidden") => (
+        <Host
+          mode={mode}
+          recipes={recipes}
+          initialSelection={{ 2: 6 }}
+          weekChecks={{ initial: ["egg|"], onChange: vi.fn() }}
+        />
+      );
+      rerender(again("hidden"));
+      rerender(again("visible"));
+      expect(pick("Vafler")).toBeChecked();
+      expect(pick("Pannekaker")).not.toBeChecked();
     });
   });
 });

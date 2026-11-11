@@ -432,6 +432,33 @@ test("Versjon 2: handleliste fra lagret oppskrift", async ({ page }, testInfo) =
     .click();
   await expect(pantry.getByText("Ingenting ennå.")).toBeVisible();
   await expect(list.getByRole("listitem")).toHaveCount(before);
+
+  // Søk: filtrerer oppskriftene, og valgte blir stående.
+  const pickBox = page
+    .getByRole("heading", { name: "Velg oppskrifter" })
+    .locator("xpath=ancestor::section")
+    .getByRole("checkbox", { name: uj1.title });
+  const search = page.getByRole("searchbox", { name: "Søk etter oppskrift" });
+  await search.fill("zzzz-finnes-ikke");
+  await expect(
+    page.getByText("Ingen lagrede oppskrifter passer «zzzz-finnes-ikke»."),
+  ).toBeVisible();
+  await search.fill(uj1.title.slice(0, 5));
+  await expect(pickBox).toBeVisible();
+  await search.fill("");
+
+  // Ikke lagret: valgene er borte når man går til en annen side og kommer tilbake.
+  await page
+    .getByRole("navigation", { name: "Hovedmeny" })
+    .getByRole("link", { name: "Ukemeny" })
+    .click();
+  await expect(page.getByRole("heading", { level: 1, name: "Ukemeny" })).toBeVisible();
+  await page
+    .getByRole("navigation", { name: "Hovedmeny" })
+    .getByRole("link", { name: "Handleliste" })
+    .click();
+  await expect(page.getByText("Velg minst én oppskrift for å lage en liste.")).toBeVisible();
+  await expect(pickBox).not.toBeChecked();
 });
 
 test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
