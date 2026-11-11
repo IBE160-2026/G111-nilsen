@@ -110,3 +110,4 @@
 - 935 Søk etter oppskrift i handlelisten, og valg som ikke er lagret nullstilles når man forlater siden. Åpent: ingen.
 - 934 Lagre handlelisten, knyttet til ukemenyen (denne uka som standard) og lagrede lister. Åpent: avkrysninger og egne varer lagres ikke i listen.
 - 933 Merkelapper på oppskriftene, i søket og som filter (6.7). Åpent: nytt navn og forslag fra eksisterende merkelapper.
+- 932 Egen vurdering med stjerner (6.8). Åpent: sortering og filter på vurdering kommer i 6.9.

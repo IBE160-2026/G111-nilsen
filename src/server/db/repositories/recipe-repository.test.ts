@@ -20,6 +20,7 @@ import {
   setRecipeFavorite,
   updateRecipe,
   updateOriginalServings,
+  updateRating,
   updateSelectedServings,
   type NewRecipe,
   type RecipeUpdate,
@@ -307,6 +308,7 @@ describe("listSavedRecipes", () => {
         folderName: null,
         totalMinutes: null,
         labels: [],
+        rating: null,
       },
     ]);
   });
@@ -540,6 +542,7 @@ describe("favoritter (Story 3.4)", () => {
       folderName: null,
       totalMinutes: null,
       labels: [],
+      rating: null,
     });
   });
 
@@ -764,5 +767,21 @@ describe("merkelapper (Story 6.7)", () => {
     expect(list.find((r) => r.id === b)?.labels).toEqual([]);
     deleteRecipeById(db, a);
     expect(count(db, "recipe_labels")).toBe(0);
+  });
+});
+
+describe("vurdering (Story 6.8)", () => {
+  it("lagrer og fjerner, bare for lagrede oppskrifter, og oppsummeringen har den", () => {
+    const db = createTestDb();
+    const id = insertRecipe(db, { ...base, savedAt: "2026-11-09T10:00:00.000Z" });
+    const unsaved = insertRecipe(db, { ...base, savedAt: null });
+    expect(findRecipeById(db, id)?.rating).toBeNull();
+    expect(updateRating(db, id, 3)).toBe(true);
+    expect(findRecipeById(db, id)?.rating).toBe(3);
+    expect(listSavedRecipes(db, TEST_USER_ID)[0]?.rating).toBe(3);
+    expect(updateRating(db, unsaved, 3)).toBe(false);
+    expect(updateRating(db, 999, 3)).toBe(false);
+    expect(updateRating(db, id, null)).toBe(true);
+    expect(findRecipeById(db, id)?.rating).toBeNull();
   });
 });

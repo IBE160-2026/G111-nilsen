@@ -99,6 +99,13 @@
       "when": 1794415770223,
       "tag": "0013_recipe_labels",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1794416920635,
+      "tag": "0014_recipe_rating",
+      "breakpoints": true
     }
   ]
 }

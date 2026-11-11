@@ -370,6 +370,37 @@ test("Versjon 2: merkelapper settes på oppskriften og brukes i søk og filter",
   await expect(page.getByText("Ingen merkelapper ennå.")).toBeVisible();
 });
 
+test("Versjon 2: stjernevurdering settes på oppskriften og vises på kortet", async ({
+  page,
+}, testInfo) => {
+  const { uj1 } = DATA[testInfo.project.name as keyof typeof DATA];
+  await page.goto("/oppskrifter");
+  await page
+    .getByRole("link", { name: new RegExp(uj1.title) })
+    .first()
+    .click();
+  await expect(page.getByRole("heading", { level: 1, name: uj1.title })).toBeVisible();
+  await expect(page.getByText("Ikke vurdert ennå.")).toBeVisible();
+
+  await page.getByRole("button", { name: "4 av 5 stjerner" }).click();
+  await expect(page.getByText("Vurderingen er satt til 4 av 5.")).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("button", { name: "4 av 5 stjerner" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+
+  await page.goto("/oppskrifter");
+  await expect(page.getByRole("img", { name: "Vurdering: 4 av 5" })).toHaveCount(1);
+
+  await page
+    .getByRole("link", { name: new RegExp(uj1.title) })
+    .first()
+    .click();
+  await page.getByRole("button", { name: "Fjern vurdering" }).click();
+  await expect(page.getByText("Ikke vurdert ennå.")).toBeVisible();
+});
+
 test("Versjon 2: tidtaker i kokemodus fra tid i steget", async ({ page }, testInfo) => {
   // En egen oppskrift med en kort tid i steget, så testen ikke venter i minutter.
   const title = `Tidtaker ${testInfo.project.name}`;

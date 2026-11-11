@@ -206,6 +206,7 @@ describe("listRecipesInFolder", () => {
       folderName: "Hverdag",
       totalMinutes: null,
       labels: [],
+      rating: null,
     });
     expect(listRecipesInFolder(db, TEST_USER_ID, 999)).toEqual([]);
   });

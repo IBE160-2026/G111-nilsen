@@ -69,6 +69,7 @@ describe("getDb", () => {
     db.$client.exec("drop table week_checks");
     db.$client.exec("drop table meal_plan_entries");
     db.$client.exec("drop table sessions");
+    db.$client.exec("alter table recipes drop column rating");
     db.$client.exec("alter table recipes drop column fits_for");
     db.$client.exec("alter table recipes drop column cooked_count");
     db.$client.exec("alter table recipes drop column last_cooked_at");

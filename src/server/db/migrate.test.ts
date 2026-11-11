@@ -151,6 +151,7 @@ describe("migrasjon 0001 (Story 3.1: manuelle oppskrifter i samlingen)", () => {
       "0011_week_checks",
       "0012_shopping_lists",
       "0013_recipe_labels",
+      "0014_recipe_rating",
     ]);
     expect(existsSync(join(migrationsFolder(), "meta", "0001_snapshot.json"))).toBe(true);
   });
@@ -227,6 +228,7 @@ describe("migrasjon 0002 (Story 3.3: mapper)", () => {
         fits_for: null,
         last_cooked_at: null,
         cooked_count: 0,
+        rating: null,
       })),
     );
     expect(rows(db, "select * from ingredient_lines order by id")).toEqual(before.lines);
@@ -388,6 +390,7 @@ describe("migrasjon 0003 (Story 3.4: favoritter)", () => {
         fits_for: null,
         last_cooked_at: null,
         cooked_count: 0,
+        rating: null,
       })),
     );
     expect(rows(db, "select * from folders")).toEqual(

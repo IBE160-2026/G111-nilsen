@@ -8,6 +8,7 @@ import {
   markRecipeCooked,
   setRecipeFitsFor,
   addRecipeLabel,
+  setRecipeRating,
   removeRecipeLabel,
   LABELS_MAX,
   setRecipeNotes,
@@ -956,5 +957,48 @@ describe("merkelapper (Story 6.7)", () => {
     });
     db.$client.prepare("delete from recipes where id = ?").run(id);
     expect(db.$client.prepare("select count(*) as n from recipe_labels").get()).toEqual({ n: 0 });
+  });
+});
+
+describe("vurdering (Story 6.8)", () => {
+  function saved(db: ReturnType<typeof createTestDb>): number {
+    const created = createManualRecipe(TEST_USER_ID, input, db);
+    if (!created.ok) throw new Error("feil");
+    return created.value.id;
+  }
+
+  it("lagrer 1–5, kan endres og fjernes, og kommer med i oppskriften og samlingen", () => {
+    const db = createTestDb();
+    const id = saved(db);
+    const first = getRecipe(id, db);
+    expect(first.ok && first.value.rating).toBeNull();
+    expect(setRecipeRating(id, 4, db)).toEqual({ ok: true, value: { rating: 4 } });
+    const read = getRecipe(id, db);
+    expect(read.ok && read.value.rating).toBe(4);
+    const list = listCollection(TEST_USER_ID, db);
+    expect(list.ok && list.value[0]?.rating).toBe(4);
+    expect(setRecipeRating(id, 1, db)).toEqual({ ok: true, value: { rating: 1 } });
+    expect(setRecipeRating(id, null, db)).toEqual({ ok: true, value: { rating: null } });
+    const cleared = getRecipe(id, db);
+    expect(cleared.ok && cleared.value.rating).toBeNull();
+  });
+
+  it("avviser alt annet enn hele tall fra 1 til 5", () => {
+    const db = createTestDb();
+    const id = saved(db);
+    for (const bad of [0, 6, -1, 2.5, NaN, "3", undefined, true])
+      expect(setRecipeRating(id, bad, db)).toEqual({
+        ok: false,
+        error: { kind: "validation", detail: "rating" },
+      });
+  });
+
+  it("gir not_found for ukjent eller ulagret oppskrift", () => {
+    const db = createTestDb();
+    const id = saved(db);
+    expect(setRecipeRating(999, 3, db)).toMatchObject({ ok: false, error: { kind: "not_found" } });
+    expect(setRecipeRating(0, 3, db)).toMatchObject({ ok: false, error: { kind: "not_found" } });
+    db.$client.prepare("update recipes set saved_at = null").run();
+    expect(setRecipeRating(id, 3, db)).toMatchObject({ ok: false, error: { kind: "not_found" } });
   });
 });

@@ -24,6 +24,7 @@ import {
   markRecipeCooked,
   removeRecipeLabel,
   setRecipeFitsFor,
+  setRecipeRating,
   setRecipeNotes,
   saveRecipeToCollection,
   setFavorite as setFavoriteForRecipe,
@@ -342,6 +343,23 @@ export async function saveFitsFor(id: number, fitsFor: string): Promise<ActionRe
     return { ok: true };
   } catch (error) {
     console.error("Kunne ikke lagre «Passer til»", error);
+    return actionFailure("unknown");
+  }
+}
+
+/** Lagrer egen vurdering, 1–5 stjerner eller `null` for ingen (Story 6.8). */
+export async function saveRating(id: number, rating: number | null): Promise<ActionResult> {
+  if (!idSchema.safeParse(id).success) return actionFailure("not_found");
+  if (rating !== null && !(Number.isInteger(rating) && rating >= 1 && rating <= 5))
+    return actionFailure("validation");
+  try {
+    if (!(await mayChange(id))) return actionFailure("not_found");
+    const result = setRecipeRating(id, rating);
+    if (!result.ok) return actionFailure(result.error.kind);
+    revalidatePath("/oppskrifter");
+    return { ok: true };
+  } catch (error) {
+    console.error("Kunne ikke lagre vurderingen", error);
     return actionFailure("unknown");
   }
 }

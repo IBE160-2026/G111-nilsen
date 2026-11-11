@@ -391,6 +391,18 @@ export const weekMessages = {
   thisWeekShort: "denne uka",
 } as const;
 
+/** Egen vurdering med stjerner (Story 6.8). */
+export const ratingMessages = {
+  heading: "Din vurdering",
+  none: "Ikke vurdert ennå.",
+  starLabel: (n: number) => `${n} av 5 stjerner`,
+  value: (n: number) => `Du har gitt ${n} av 5 stjerner.`,
+  summary: (n: number) => `Vurdering: ${n} av 5`,
+  clear: "Fjern vurdering",
+  saved: (n: number) => `Vurderingen er satt til ${n} av 5.`,
+  cleared: "Vurderingen er fjernet.",
+} as const;
+
 /** Merkelapper på oppskriften (Story 6.7). */
 export const labelMessages = {
   heading: "Merkelapper",

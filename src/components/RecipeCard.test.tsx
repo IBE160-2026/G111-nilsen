@@ -183,4 +183,13 @@ describe("RecipeCard: tid (Story 6.2)", () => {
     rerender(<RecipeCard recipe={recipe} />);
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });
+
+  it("viser vurderingen som stjerner med tekst, og ingenting uten", () => {
+    const { rerender } = render(<RecipeCard recipe={{ ...recipe, rating: 4 }} />);
+    expect(screen.getByRole("img", { name: "Vurdering: 4 av 5" })).toHaveTextContent("★★★★☆");
+    rerender(<RecipeCard recipe={{ ...recipe, rating: null }} />);
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    rerender(<RecipeCard recipe={recipe} />);
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  });
 });

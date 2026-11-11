@@ -14,6 +14,7 @@ import {
   rememberServings,
   requestSuggestions,
   saveFitsFor,
+  saveRating,
   saveNotes,
   saveRecipe,
   setFavorite,
@@ -26,6 +27,7 @@ import FetchTimeButton from "./FetchTimeButton";
 import IngredientList from "./IngredientList";
 import PrintButton from "./PrintButton";
 import RecipeLabels from "./RecipeLabels";
+import RecipeRating from "./RecipeRating";
 import RecipeNotes from "./RecipeNotes";
 import RecipeTime from "./RecipeTime";
 import { loginHref } from "./LoginRequired";
@@ -141,6 +143,11 @@ export default function RecipeView({
           {/* Notater og «sist laget» bare for lagrede oppskrifter (Story 6.3). */}
           {recipe.savedAt !== null ? (
             <div className={styles.notes} data-print="hide">
+              <RecipeRating
+                key={`vurdering-${recipe.id}`}
+                rating={recipe.rating ?? null}
+                onSave={saveRating.bind(null, recipe.id)}
+              />
               <RecipeLabels
                 key={`merkelapper-${recipe.id}`}
                 labels={recipe.labels ?? []}

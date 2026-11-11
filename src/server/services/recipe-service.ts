@@ -30,6 +30,7 @@ import {
   setRecipeFavorite,
   updateRecipe,
   updateFitsFor,
+  updateRating,
   updateNotes,
   updateOriginalServings,
   updateSelectedServings,
@@ -350,6 +351,25 @@ export function setRecipeFitsFor(
   if (clean.length > FITS_FOR_MAX_LENGTH) return err(appError("validation", "fitsFor"));
   const value = clean === "" ? null : clean;
   return updateFitsFor(db, id, value) ? ok({ fitsFor: value }) : err(appError("not_found"));
+}
+
+/**
+ * Lagrer egen vurdering (Story 6.8): et helt tall fra 1 til 5, eller `null` for å fjerne den.
+ * Alt annet gir `validation` (felt `rating`). Ukjent eller ulagret oppskrift gir `not_found`.
+ */
+export function setRecipeRating(
+  id: number,
+  rating: unknown,
+  db: Db = getDb(),
+): Result<{ rating: number | null }> {
+  if (!isRecipeId(id)) return err(appError("not_found"));
+  const valid =
+    rating === null ||
+    (typeof rating === "number" && Number.isInteger(rating) && rating >= 1 && rating <= 5);
+  if (!valid) return err(appError("validation", "rating"));
+  return updateRating(db, id, rating as number | null)
+    ? ok({ rating: rating as number | null })
+    : err(appError("not_found"));
 }
 
 /**

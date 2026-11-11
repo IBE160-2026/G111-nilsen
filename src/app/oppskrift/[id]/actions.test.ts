@@ -47,6 +47,7 @@ const {
   fetchTimeFromSource,
   saveFitsFor,
   addLabel,
+  saveRating,
   removeLabel,
   saveNotes,
   markCookedToday,
@@ -695,5 +696,26 @@ describe("addLabel og removeLabel (Story 6.7)", () => {
     session.userId = 99;
     expect(await addLabel(id, "Hverdag")).toMatchObject({ ok: false });
     expect(await removeLabel(id, "Hverdag")).toMatchObject({ ok: false });
+  });
+});
+
+describe("saveRating (Story 6.8)", () => {
+  afterEach(() => {
+    session.userId = TEST_USER_ID;
+  });
+
+  it("lagrer og fjerner for eieren, og oppdaterer /oppskrifter", async () => {
+    revalidatePath.mockClear();
+    expect(await saveRating(id, 5)).toEqual({ ok: true });
+    expect(revalidatePath).toHaveBeenCalledWith("/oppskrifter");
+    expect(await saveRating(id, null)).toEqual({ ok: true });
+  });
+
+  it("avviser ugyldig verdi, ukjent id og en annens oppskrift", async () => {
+    for (const bad of [0, 6, 2.5, "3" as unknown as number, undefined as unknown as number])
+      expect(await saveRating(id, bad)).toMatchObject({ ok: false });
+    expect(await saveRating(0, 3)).toMatchObject({ ok: false });
+    session.userId = 99;
+    expect(await saveRating(id, 3)).toMatchObject({ ok: false });
   });
 });

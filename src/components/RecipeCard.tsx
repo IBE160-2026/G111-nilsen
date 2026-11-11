@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { setFavorite } from "@/app/oppskrift/[id]/actions";
 import type { RecipeSummary } from "@/domain";
-import { labelMessages } from "@/lib/messages";
+import { labelMessages, ratingMessages } from "@/lib/messages";
 import { sourceLabel } from "@/lib/source-label";
 import FavoriteButton from "./FavoriteButton";
 import RecipeTime from "./RecipeTime";
@@ -32,6 +32,15 @@ export default function RecipeCard({
             <>
               {" · "}
               <span>{recipe.folderName}</span>
+            </>
+          ) : null}
+          {recipe.rating != null ? (
+            <>
+              {" · "}
+              <span role="img" aria-label={ratingMessages.summary(recipe.rating)}>
+                {"★".repeat(recipe.rating)}
+                {"☆".repeat(5 - recipe.rating)}
+              </span>
             </>
           ) : null}
           {recipe.totalMinutes != null ? (

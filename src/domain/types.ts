@@ -96,6 +96,8 @@ export type Recipe = {
   fitsFor?: string | null;
   /** Merkelapper (Story 6.7), i den rekkefølgen de ble lagt til. */
   labels?: readonly string[];
+  /** Egen vurdering, 1–5 stjerner (Story 6.8); `null` eller utelatt = ikke vurdert. */
+  rating?: number | null;
   /** Sist laget, ISO-tid (Story 6.3); `null` eller utelatt = aldri. */
   lastCookedAt?: string | null;
   /** Antall ganger laget (Story 6.3). */
@@ -116,6 +118,8 @@ export type RecipeSummary = Pick<
   folderName: string | null;
   /** Merkelapper (Story 6.7). */
   labels?: readonly string[];
+  /** Egen vurdering, 1–5 stjerner (Story 6.8); `null` eller utelatt = ikke vurdert. */
+  rating?: number | null;
 };
 
 /** En mappe for oppskrifter (Story 3.3). `name` er navnet slik brukeren skrev det. */

@@ -20,6 +20,7 @@ const actions = vi.hoisted(() => ({
   saveNotes: vi.fn(),
   saveFitsFor: vi.fn(),
   addLabel: vi.fn(),
+  saveRating: vi.fn(),
   removeLabel: vi.fn(),
   markCookedToday: vi.fn(),
 }));

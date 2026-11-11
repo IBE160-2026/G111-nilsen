@@ -285,6 +285,7 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
     notes: row.notes,
     fitsFor: row.fitsFor,
     labels: labelRows.map((entry) => entry.label),
+    rating: row.rating,
     lastCookedAt: row.lastCookedAt,
     cookedCount: row.cookedCount,
     selectedServings: row.selectedServings,
@@ -334,6 +335,7 @@ function selectSavedSummaries(db: Db, userId: number, extra?: SQL): RecipeSummar
       savedAt: recipes.savedAt,
       isFavorite: recipes.isFavorite,
       totalMinutes: recipes.totalMinutes,
+      rating: recipes.rating,
       folderName: folders.name,
     })
     .from(recipes)
@@ -582,6 +584,17 @@ export function updateFitsFor(db: Db, id: number, fitsFor: string | null): boole
     db
       .update(recipes)
       .set({ fitsFor })
+      .where(and(eq(recipes.id, id), isNotNull(recipes.savedAt)))
+      .run().changes > 0
+  );
+}
+
+/** Lagrer egen vurdering (1–5, eller `null` for ingen); `false` når oppskriften ikke finnes eller ikke er lagret. */
+export function updateRating(db: Db, id: number, rating: number | null): boolean {
+  return (
+    db
+      .update(recipes)
+      .set({ rating })
       .where(and(eq(recipes.id, id), isNotNull(recipes.savedAt)))
       .run().changes > 0
   );

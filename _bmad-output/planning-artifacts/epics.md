@@ -1064,3 +1064,22 @@ slik at jeg finner dem igjen i søket og kan filtrere på dem.
 **Gitt** at jeg skriver en tom eller for lang merkelapp (over 30 tegn), eller en oppskrift allerede har 10
 **Så** får jeg en melding og ingenting lagres
 
+### Story 6.8: Egen vurdering med stjerner
+
+Som Ida,
+vil jeg gi oppskriftene mine en vurdering fra 1 til 5 stjerner,
+slik at jeg ser hvilke som er best når jeg blar i Oppskrifter.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg ser en lagret oppskrift
+**Når** jeg trykker på en stjerne
+**Så** lagres vurderingen med en gang, og den står igjen etter ny innlasting
+
+**Gitt** at oppskriften har en vurdering
+**Når** jeg trykker «Fjern vurdering»
+**Så** er den ikke lenger vurdert
+
+**Gitt** at en oppskrift er vurdert
+**Så** viser kortet i Oppskrifter stjernene, med teksten «Vurdering: N av 5» for skjermleser
+
