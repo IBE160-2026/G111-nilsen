@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ImportForm from "@/components/ImportForm";
-import { importMessages, pasteMessages } from "@/lib/messages";
+import { backupMessages, importMessages, pasteMessages } from "@/lib/messages";
 import { submitImport } from "../actions";
 import styles from "./page.module.css";
 
@@ -23,6 +23,12 @@ export default function ImporterPage() {
         {pasteMessages.linkPrompt}{" "}
         <Link href="/lim-inn" className={styles.manualLink}>
           {pasteMessages.link}
+        </Link>
+      </p>
+      <p className={styles.manual}>
+        {backupMessages.linkPrompt}{" "}
+        <Link href="/sikkerhetskopi" className={styles.manualLink}>
+          {backupMessages.link}
         </Link>
       </p>
     </section>

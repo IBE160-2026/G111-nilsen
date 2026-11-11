@@ -1,3 +1,4 @@
+import { readFileSync, writeFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 
 /**
@@ -706,6 +707,58 @@ test("Versjon 2: slettet oppskrift kan angres, hentes tilbake og slettes for god
   await page.getByRole("dialog").getByRole("button", { name: "Slett for godt" }).click();
   await expect(page.getByText(`«${title}» er slettet for godt.`)).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: title })).toHaveCount(0);
+});
+
+test("Versjon 2: eksport og import av oppskrifter som fil", async ({ page }, testInfo) => {
+  const title = `Kopi ${testInfo.project.name}`;
+  await page.goto("/ny");
+  await page.waitForLoadState("networkidle");
+  await field(page, "Tittel").fill(title);
+  await field(page, "Antall porsjoner").fill("2");
+  await field(page, "Ingredienser").fill("2 egg");
+  await page.getByRole("button", { name: "Lagre oppskrift" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+
+  await page.goto("/importer");
+  await page.getByRole("link", { name: "Eksport og import" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Eksport og import" })).toBeVisible();
+  await page.waitForLoadState("networkidle");
+
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.getByRole("link", { name: "Last ned oppskriftene" }).click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^recipemate-oppskrifter-\d{4}-\d{2}-\d{2}\.json$/);
+  const saved = testInfo.outputPath("eksport.json");
+  await download.saveAs(saved);
+  const backup = JSON.parse(readFileSync(saved, "utf8")) as {
+    recipes: { title: string }[];
+  };
+  expect(backup.recipes.map((r) => r.title)).toContain(title);
+
+  // Samme fil på nytt: alt finnes fra før.
+  await page.getByLabel("Fil med oppskrifter").setInputFiles(saved);
+  await page.getByRole("button", { name: "Importer oppskriftene" }).click();
+  await expect(page.getByRole("status")).toContainText("0 oppskrifter ble lagt til");
+
+  // En fil med en ny oppskrift legger den til.
+  const renamed = `${title} importert`;
+  backup.recipes = backup.recipes.map((r) => (r.title === title ? { ...r, title: renamed } : r));
+  const edited = testInfo.outputPath("endret.json");
+  writeFileSync(edited, JSON.stringify(backup));
+  await page.getByLabel("Fil med oppskrifter").setInputFiles(edited);
+  await page.getByRole("button", { name: "Importer oppskriftene" }).click();
+  await expect(page.getByRole("status")).toContainText("1 oppskrift ble lagt til");
+
+  // Ugyldig fil gir en melding.
+  const broken = testInfo.outputPath("ugyldig.json");
+  writeFileSync(broken, "ikke json");
+  await page.getByLabel("Fil med oppskrifter").setInputFiles(broken);
+  await page.getByRole("button", { name: "Importer oppskriftene" }).click();
+  await expect(page.getByText("Filen kunne ikke leses.")).toBeVisible();
+
+  await page.goto("/oppskrifter");
+  await expect(page.getByRole("link", { name: new RegExp(renamed) })).toBeVisible();
 });
 
 test("Versjon 2: lim inn tekst blir et utkast som kan lagres", async ({ page }, testInfo) => {

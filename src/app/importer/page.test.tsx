@@ -25,6 +25,14 @@ describe("/importer (spec 1.1, Importer-siden)", () => {
     expect(screen.getByRole("link", { name: "Lim inn tekst" })).toHaveAttribute("href", "/lim-inn");
   });
 
+  it("Importer-siden lenker til «Eksport og import» (/sikkerhetskopi, Story 6.15)", () => {
+    render(<ImporterPage />);
+    expect(screen.getByRole("link", { name: "Eksport og import" })).toHaveAttribute(
+      "href",
+      "/sikkerhetskopi",
+    );
+  });
+
   it("Importer-siden har lenkefelt med etikett, fokus og knappen «Hent oppskrift» (ikke lenger «Snart …»)", () => {
     render(<ImporterPage />);
     const field = screen.getByRole("textbox", { name: "Lenke til oppskriften" });

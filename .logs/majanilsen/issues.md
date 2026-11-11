@@ -117,3 +117,4 @@
 - 928 «Hva kan jeg lage?» ut fra «Har hjemme», gruppert etter hva som mangler. Åpent: sammensatte ord og basisvarer.
 - 927 Tilfeldig middagsforslag fra samlingen med filter for favoritter og tid. Åpent: ingen vekting etter vurdering.
 - 926 Lim inn tekst som oppskrift: utkast i «Legg inn selv». Åpent: deloverskrifter droppes, ingen LLM-tolking.
+- 925 Eksport og import av oppskrifter som JSON-fil (/sikkerhetskopi). Åpent: ukemeny og handlelister ikke med, endret tittel regnes som ny.

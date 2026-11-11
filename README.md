@@ -95,6 +95,7 @@ Kravene står i PRD §4.7 (FR-28–FR-39), og hver story har en spec i `_bmad-ou
 - **Hva kan jeg lage? (6.12):** skriv hva du har hjemme (samme liste som på handlelisten), så grupperes oppskriftene som «Kan lages nå», «Mangler 1–2 ting» og «Mangler flere ting», med hva som mangler. Lenke fra Oppskrifter.
 - **Middagsforslag (6.13):** «Foreslå en middag» trekker en tilfeldig oppskrift fra samlingen, eventuelt bare favoritter og opptil 30 eller 60 minutter; «Foreslå en annen» gir alltid en annen. Lenke fra Oppskrifter.
 - **Lim inn tekst (6.14):** på `/lim-inn` limer du inn en oppskrift som tekst. Tittel, porsjoner, tid, ingredienser og steg fylles inn i skjemaet «Legg inn selv», som du ser over og lagrer. Lenke fra Importer.
+- **Eksport og import (6.15):** på `/sikkerhetskopi` laster du ned alle lagrede oppskrifter som én JSON-fil og kan legge en slik fil inn igjen, også på en annen konto. Oppskrifter du allerede har (samme tittel og kilde) hoppes over. Lenke fra Importer.
 - **Egen variant (6.10):** «Lag egen variant» ved tittelen kopierer en lagret oppskrift til «Kopi av …» og åpner redigeringen, så originalen blir uendret.
 - **Sortering (6.9):** «Sorter etter» i Oppskrifter: sist lagret (standard), sist laget, mest laget, høyest vurdering og alfabetisk. Like oppskrifter står sist lagret først.
 - **Vurdering (6.8):** «Din vurdering» i oppskriften: trykk en stjerne fra 1 til 5, og «Fjern vurdering» tar den bort. Stjernene vises på kortet i Oppskrifter.

@@ -1204,3 +1204,26 @@ slik at jeg kan lagre oppskrifter fra meldinger, PDF-er og bøker uten å skrive
 
 **Gitt** at jeg ikke er innlogget
 **Så** blir jeg bedt om å logge inn
+
+### Story 6.15: Eksport og import av oppskrifter som fil
+
+Som Ida,
+vil jeg laste ned alle oppskriftene mine som én fil og legge dem inn igjen senere eller på en annen konto,
+slik at jeg har en sikkerhetskopi og ikke er låst til én konto.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg har lagrede oppskrifter og er på «Eksport og import» (lenke fra Importer)
+**Så** laster «Last ned oppskriftene» ned én JSON-fil med alle mine lagrede oppskrifter, med ingredienser, steg, mappe, merkelapper, notater, vurdering og favoritt
+
+**Gitt** at jeg velger en slik fil og trykker «Importer oppskriftene»
+**Så** legges oppskriftene til i samlingen min, mapper som mangler opprettes, og jeg får vite hvor mange som ble lagt til
+
+**Gitt** at jeg allerede har en oppskrift med samme tittel og kilde
+**Så** hoppes den over, slik at samme fil kan importeres flere ganger uten dubletter
+
+**Gitt** at filen er ugyldig, feil format, for stor eller ikke JSON
+**Så** får jeg en forklarende melding og ingenting lagres
+
+**Gitt** at jeg ikke er innlogget
+**Så** blir jeg bedt om å logge inn, og nedlastingen gir ingen data

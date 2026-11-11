@@ -785,3 +785,38 @@ export const pasteMessages = {
   loading: "Laster …",
   saveLabel: "Lagre oppskrift",
 } as const;
+
+/** Eksport og import av oppskrifter (Story 6.15). */
+export const backupMessages = {
+  heading: "Eksport og import",
+  tabTitle: "Eksport og import",
+  link: "Eksport og import",
+  linkPrompt: "Vil du ta sikkerhetskopi eller flytte oppskrifter?",
+  loading: "Laster …",
+  lead: "Last ned alle de lagrede oppskriftene dine som én fil, og legg dem inn igjen senere eller på en annen konto.",
+  exportHeading: "Eksporter",
+  exportText: (count: number) =>
+    count === 0
+      ? "Du har ingen lagrede oppskrifter å eksportere ennå."
+      : count === 1
+        ? "Filen får 1 oppskrift, med mappe, merkelapper, notater og vurdering."
+        : `Filen får ${count} oppskrifter, med mappe, merkelapper, notater og vurdering.`,
+  exportButton: "Last ned oppskriftene",
+  importHeading: "Importer",
+  importText:
+    "Velg en fil du har eksportert fra RecipeMate. Oppskrifter du allerede har (samme tittel og kilde) hoppes over.",
+  fileLabel: "Fil med oppskrifter",
+  importButton: "Importer oppskriftene",
+  importing: "Importerer …",
+  noFile: "Velg en fil først.",
+  tooBig: "Filen er for stor. Den kan være maks 5 MB.",
+  invalid:
+    "Filen kunne ikke leses. Velg en fil du har eksportert fra RecipeMate, og som ikke er endret.",
+  done: (imported: number, skipped: number) => {
+    const added =
+      imported === 1 ? "1 oppskrift ble lagt til" : `${imported} oppskrifter ble lagt til`;
+    if (skipped === 0) return `${added}.`;
+    return `${added}, ${skipped === 1 ? "1 fantes fra før og ble hoppet over" : `${skipped} fantes fra før og ble hoppet over`}.`;
+  },
+  openRecipes: "Åpne Oppskrifter",
+} as const;
