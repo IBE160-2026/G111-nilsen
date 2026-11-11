@@ -24,10 +24,13 @@ export { extractRecipeJsonLd } from "./extract-recipe-jsonld";
 export { normalizeRecipe } from "./normalize-recipe";
 export {
   buildSearchText,
+  COLLECTION_SORTS,
   filterCollection,
   normalizeSearch,
+  sortCollection,
   type CollectionEntry,
   type CollectionFilter,
+  type CollectionSort,
 } from "./filter-collection";
 export { convertLine, hasConvertibleUnit, type UnitSystem } from "./convert-units";
 export { ingredientsForStep } from "./step-ingredients";

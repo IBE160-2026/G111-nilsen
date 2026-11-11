@@ -1083,3 +1083,20 @@ slik at jeg ser hvilke som er best når jeg blar i Oppskrifter.
 **Gitt** at en oppskrift er vurdert
 **Så** viser kortet i Oppskrifter stjernene, med teksten «Vurdering: N av 5» for skjermleser
 
+### Story 6.9: Sortering av oppskriftene
+
+Som Ida,
+vil jeg sortere Oppskrifter etter sist lagret, sist laget, mest laget, høyest vurdering eller alfabetisk,
+slik at jeg finner det jeg leter etter og ser hva jeg bruker mest.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg åpner Oppskrifter
+**Så** står oppskriftene sist lagret først, og «Sorter etter» har valgene Sist lagret, Sist laget, Mest laget, Høyest vurdering og Alfabetisk
+
+**Gitt** at jeg velger en sortering
+**Så** endres rekkefølgen med en gang, også for treffene av et søk eller filter, og den beholdes når jeg nullstiller søket
+
+**Gitt** at flere oppskrifter er like i sorteringen (for eksempel aldri laget)
+**Så** står de i rekkefølgen sist lagret
+

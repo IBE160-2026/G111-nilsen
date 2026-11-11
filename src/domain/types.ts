@@ -120,6 +120,9 @@ export type RecipeSummary = Pick<
   labels?: readonly string[];
   /** Egen vurdering, 1–5 stjerner (Story 6.8); `null` eller utelatt = ikke vurdert. */
   rating?: number | null;
+  /** Sist laget, ISO-tid (Story 6.3), og antall ganger laget; til sortering (Story 6.9). */
+  lastCookedAt?: string | null;
+  cookedCount?: number;
 };
 
 /** En mappe for oppskrifter (Story 3.3). `name` er navnet slik brukeren skrev det. */

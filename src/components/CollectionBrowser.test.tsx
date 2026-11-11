@@ -65,7 +65,9 @@ describe("CollectionBrowser", () => {
 
   it("mappevalget har «Alle mapper» og mappene som finnes, sortert", () => {
     render(<CollectionBrowser entries={entries} />);
-    const options = screen.getAllByRole("option").map((o) => o.textContent);
+    const options = Array.from(screen.getByLabelText("Mappe").querySelectorAll("option")).map(
+      (o) => o.textContent,
+    );
     expect(options).toEqual(["Alle mapper", "Dessert", "Frokost"]);
   });
 
@@ -128,5 +130,55 @@ describe("merkelapper (Story 6.7)", () => {
   it("viser ikke merkelappvalget når ingen oppskrift har merkelapper", () => {
     render(<CollectionBrowser entries={entries} />);
     expect(screen.queryByLabelText("Merkelapp")).not.toBeInTheDocument();
+  });
+});
+
+describe("sortering (Story 6.9)", () => {
+  const sorted = [
+    {
+      ...entry(1, "Brød", null, false, []),
+      cookedCount: 1,
+      lastCookedAt: "2026-11-01T10:00:00.000Z",
+    },
+    { ...entry(2, "Ananas", null, false, []), cookedCount: 5, lastCookedAt: null },
+    {
+      ...entry(3, "Cider", null, false, []),
+      cookedCount: 0,
+      lastCookedAt: "2026-11-08T10:00:00.000Z",
+      rating: 4,
+    },
+  ];
+
+  it("starter på sist lagret, og valget endrer rekkefølgen", async () => {
+    const user = userEvent.setup();
+    render(<CollectionBrowser entries={sorted} />);
+    const select = screen.getByLabelText("Sorter etter");
+    expect(select).toHaveValue("saved");
+    expect(Array.from(select.querySelectorAll("option")).map((o) => o.textContent)).toEqual([
+      "Sist lagret",
+      "Sist laget",
+      "Mest laget",
+      "Høyest vurdering",
+      "Alfabetisk",
+    ]);
+    expect(titles()).toEqual(["Brød", "Ananas", "Cider"]);
+    await user.selectOptions(select, "Alfabetisk");
+    expect(titles()).toEqual(["Ananas", "Brød", "Cider"]);
+    await user.selectOptions(select, "Sist laget");
+    expect(titles()).toEqual(["Cider", "Brød", "Ananas"]);
+    await user.selectOptions(select, "Mest laget");
+    expect(titles()).toEqual(["Ananas", "Brød", "Cider"]);
+    await user.selectOptions(select, "Høyest vurdering");
+    expect(titles()).toEqual(["Cider", "Brød", "Ananas"]);
+  });
+
+  it("sorteringen gjelder treffene, og beholdes når søket nullstilles", async () => {
+    const user = userEvent.setup();
+    render(<CollectionBrowser entries={sorted} />);
+    await user.selectOptions(screen.getByLabelText("Sorter etter"), "Alfabetisk");
+    await user.type(search(), "zzz");
+    await user.click(screen.getByRole("button", { name: "Nullstill søk" }));
+    expect(screen.getByLabelText("Sorter etter")).toHaveValue("alpha");
+    expect(titles()).toEqual(["Ananas", "Brød", "Cider"]);
   });
 });

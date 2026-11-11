@@ -336,6 +336,8 @@ function selectSavedSummaries(db: Db, userId: number, extra?: SQL): RecipeSummar
       isFavorite: recipes.isFavorite,
       totalMinutes: recipes.totalMinutes,
       rating: recipes.rating,
+      lastCookedAt: recipes.lastCookedAt,
+      cookedCount: recipes.cookedCount,
       folderName: folders.name,
     })
     .from(recipes)

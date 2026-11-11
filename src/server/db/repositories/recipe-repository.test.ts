@@ -309,6 +309,8 @@ describe("listSavedRecipes", () => {
         totalMinutes: null,
         labels: [],
         rating: null,
+        lastCookedAt: null,
+        cookedCount: 0,
       },
     ]);
   });
@@ -543,6 +545,8 @@ describe("favoritter (Story 3.4)", () => {
       totalMinutes: null,
       labels: [],
       rating: null,
+      lastCookedAt: null,
+      cookedCount: 0,
     });
   });
 

@@ -631,6 +631,35 @@ test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
   await expect(page.getByRole("status").filter({ hasText: "Uka er lagret." })).toBeVisible();
 });
 
+test("Versjon 2: Oppskrifter kan sorteres alfabetisk og tilbake til sist lagret", async ({
+  page,
+}) => {
+  // To egne oppskrifter, så det alltid er noe å sortere; den siste lagrede står først.
+  for (const name of ["Sortering Zebra", "Sortering Ananas"]) {
+    await page.goto("/ny");
+    await page.waitForLoadState("networkidle");
+    await field(page, "Tittel").fill(name);
+    await field(page, "Antall porsjoner").fill("2");
+    await field(page, "Ingredienser").fill("2 egg");
+    await page.getByRole("button", { name: "Lagre oppskrift" }).click();
+    await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
+  }
+  await page.goto("/oppskrifter");
+  const titles = () => page.getByRole("heading", { level: 2 }).allTextContents();
+  await expect(page.getByRole("heading", { level: 2, name: "Sortering Zebra" })).toBeVisible();
+  const saved = await titles();
+  expect(saved.indexOf("Sortering Ananas")).toBeLessThan(saved.indexOf("Sortering Zebra"));
+
+  await page.getByLabel("Sorter etter").selectOption({ label: "Alfabetisk" });
+  const collator = new Intl.Collator("nb", { sensitivity: "base" });
+  const alpha = await titles();
+  expect(alpha).toEqual([...saved].sort((a, b) => collator.compare(a, b)));
+  expect(alpha.indexOf("Sortering Ananas")).toBeLessThan(alpha.indexOf("Sortering Zebra"));
+
+  await page.getByLabel("Sorter etter").selectOption({ label: "Sist lagret" });
+  expect(await titles()).toEqual(saved);
+});
+
 for (const scheme of ["light", "dark"] as const) {
   test.describe(`Tastatur i ${scheme === "light" ? "lys" : "mørk"} modus`, () => {
     test.use({ colorScheme: scheme });

@@ -3,6 +3,7 @@ import {
   buildSearchText,
   filterCollection,
   normalizeSearch,
+  sortCollection,
   type CollectionEntry,
 } from "./filter-collection";
 
@@ -123,5 +124,57 @@ describe("merkelapper (Story 6.7)", () => {
     expect(titles("finnes ikke")).toEqual([]);
     expect(titles(null)).toEqual(["Taco", "Lapskaus", "Suppe"]);
     expect(titles(undefined)).toHaveLength(3);
+  });
+});
+
+describe("sortCollection (Story 6.9)", () => {
+  const e = (
+    id: number,
+    title: string,
+    extra: { lastCookedAt?: string | null; cookedCount?: number; rating?: number | null } = {},
+  ) => ({
+    id,
+    title,
+    sourceName: null,
+    sourceUrl: null,
+    savedAt: "2026-11-10T10:00:00.000Z",
+    isFavorite: false,
+    folderName: null,
+    totalMinutes: null,
+    ...extra,
+  });
+  // Listen kommer «sist lagret først», slik den gjør fra serveren.
+  const list = [
+    e(4, "Østers", { lastCookedAt: null, cookedCount: 0, rating: null }),
+    e(3, "Ananas", { lastCookedAt: "2026-11-05T10:00:00.000Z", cookedCount: 2, rating: 3 }),
+    e(2, "Brød", { lastCookedAt: "2026-11-09T10:00:00.000Z", cookedCount: 2, rating: 5 }),
+    e(1, "Zebra"),
+  ];
+  const ids = (sort: Parameters<typeof sortCollection>[1]) =>
+    sortCollection(list, sort).map((x) => x.id);
+
+  it("sist lagret beholder rekkefølgen, uten å endre listen som kom inn", () => {
+    const before = list.map((x) => x.id);
+    expect(ids("saved")).toEqual([4, 3, 2, 1]);
+    ids("alpha");
+    expect(list.map((x) => x.id)).toEqual(before);
+  });
+
+  it("sist laget: nyeste først, aldri laget sist i rekkefølgen sist lagret", () => {
+    expect(ids("cooked")).toEqual([2, 3, 4, 1]);
+  });
+
+  it("mest laget: flest først, likt antall i rekkefølgen sist lagret, utelatt teller som 0", () => {
+    expect(ids("mostCooked")).toEqual([3, 2, 4, 1]);
+  });
+
+  it("høyest vurdering: høyest først, uvurdert sist", () => {
+    expect(ids("rating")).toEqual([2, 3, 4, 1]);
+  });
+
+  it("alfabetisk følger norsk rekkefølge (Æ, Ø og Å til slutt)", () => {
+    expect(ids("alpha")).toEqual([3, 2, 1, 4]);
+    const nb = sortCollection([e(1, "Åre"), e(2, "Ære"), e(3, "Ost"), e(4, "ost")], "alpha");
+    expect(nb.map((x) => x.title)).toEqual(["Ost", "ost", "Ære", "Åre"]);
   });
 });

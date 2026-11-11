@@ -1,7 +1,14 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
-import { filterCollection, normalizeSearch, type CollectionEntry } from "@/domain";
+import {
+  COLLECTION_SORTS,
+  filterCollection,
+  normalizeSearch,
+  sortCollection,
+  type CollectionEntry,
+  type CollectionSort,
+} from "@/domain";
 import { collectionFilterMessages as m } from "@/lib/messages";
 import RecipeCard from "./RecipeCard";
 import styles from "./CollectionBrowser.module.css";
@@ -16,6 +23,7 @@ export default function CollectionBrowser({ entries }: { entries: readonly Colle
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [folder, setFolder] = useState<string | null>(null);
   const [label, setLabel] = useState<string | null>(null);
+  const [sort, setSort] = useState<CollectionSort>("saved");
 
   const folders = useMemo(
     () =>
@@ -37,8 +45,8 @@ export default function CollectionBrowser({ entries }: { entries: readonly Colle
     return [...byKey.values()].sort((a, b) => a.localeCompare(b, "nb"));
   }, [entries]);
   const shown = useMemo(
-    () => filterCollection(entries, { query, onlyFavorites, folder, label }),
-    [entries, query, onlyFavorites, folder, label],
+    () => sortCollection(filterCollection(entries, { query, onlyFavorites, folder, label }), sort),
+    [entries, query, onlyFavorites, folder, label, sort],
   );
 
   function reset() {
@@ -110,6 +118,23 @@ export default function CollectionBrowser({ entries }: { entries: readonly Colle
               </select>
             </div>
           ) : null}
+          <div className={styles.field}>
+            <label htmlFor={`${id}-sortering`} className={styles.label}>
+              {m.sortLabel}
+            </label>
+            <select
+              id={`${id}-sortering`}
+              className={styles.input}
+              value={sort}
+              onChange={(event) => setSort(event.target.value as CollectionSort)}
+            >
+              {COLLECTION_SORTS.map((key) => (
+                <option key={key} value={key}>
+                  {m.sorts[key]}
+                </option>
+              ))}
+            </select>
+          </div>
           <label className={styles.check}>
             <input
               type="checkbox"
