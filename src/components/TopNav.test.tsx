@@ -4,6 +4,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const pathnameMock = vi.hoisted(() => ({ current: "/" as string | null }));
 
+const linkStatus = vi.hoisted(() => ({ pending: false }));
+vi.mock("next/link", () => ({
+  default: ({ href, children, ...rest }: { href: string; children: React.ReactNode }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+  useLinkStatus: () => ({ pending: linkStatus.pending }),
+}));
+
 vi.mock("next/navigation", () => ({
   usePathname: () => pathnameMock.current,
 }));
@@ -96,5 +106,27 @@ describe("TopNav med konto (Story 5.13)", () => {
       within(screen.getByRole("navigation")).queryByRole("link", { name: "Logg inn" }),
     ).toBeNull();
     expect(screen.getByRole("banner")).toContainElement(link);
+  });
+});
+
+describe("TopNav: respons mens siden åpnes", () => {
+  afterEach(() => {
+    cleanup();
+    linkStatus.pending = false;
+  });
+
+  it("viser en pulserende strek (skjult for skjermlesere) i hver lenke mens siden lastes", () => {
+    linkStatus.pending = true;
+    const { container } = render(<TopNavView pathname="/importer" />);
+    const marks = container.querySelectorAll('span[aria-hidden="true"]');
+    // Logoen og seks menypunkter.
+    expect(marks).toHaveLength(7);
+    expect(marks[0]!.className).toContain("pending");
+  });
+
+  it("viser ingen strek når ingen side lastes", () => {
+    const { container } = render(<TopNavView pathname="/importer" />);
+    for (const mark of container.querySelectorAll('span[aria-hidden="true"]'))
+      expect(mark.className).toContain("idle");
   });
 });

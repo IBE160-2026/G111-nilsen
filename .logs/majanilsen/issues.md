@@ -105,3 +105,4 @@
 - 940 Oppskriften legges på dagen ved valg, uten «Legg til». Åpent: ingen.
 - 939 «Lagre uka»-knapp, stor «Se alle uker» og egen ukeside. Åpent: samme uke i to faner, siste lagring vinner.
 - 938 Egen forside på «/», Importer flyttet til «/importer». Åpent: ingen.
+- 937 Menylenkene viser en strek fra klikket til siden er åpnet (treg respons i dev). Åpent: tregt også i produksjon?

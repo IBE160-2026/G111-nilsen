@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import styles from "./TopNav.module.css";
@@ -13,6 +13,16 @@ export const NAV_ITEMS = [
   { href: "/ukemeny", label: "Ukemeny" },
   { href: "/handleliste", label: "Handleliste" },
 ] as const;
+
+/**
+ * Viser at et klikk er mottatt mens neste side lastes: en strek som pulserer under lenken. Må
+ * ligge inne i `<Link>`. Gir en umiddelbar respons også når siden bruker litt tid på å åpne
+ * (for eksempel første gang i utviklingsserveren).
+ */
+function PendingMark() {
+  const { pending } = useLinkStatus();
+  return <span aria-hidden="true" className={pending ? styles.pending : styles.idle} />;
+}
 
 export function isActive(href: string, pathname: string | null): boolean {
   if (pathname === null) return false;
@@ -37,6 +47,7 @@ export function TopNavView({
         <div className={styles.top}>
           <Link href="/" className={styles.logo}>
             RecipeMate
+            <PendingMark />
           </Link>
           <div className={styles.account}>{account}</div>
         </div>
@@ -52,6 +63,7 @@ export function TopNavView({
                     aria-current={active ? "page" : undefined}
                   >
                     {item.label}
+                    <PendingMark />
                   </Link>
                 </li>
               );

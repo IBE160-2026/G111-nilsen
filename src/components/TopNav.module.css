@@ -32,6 +32,7 @@
   color: var(--color-accent);
   text-decoration: none;
   padding: var(--space-1) 0;
+  position: relative;
 }
 
 .list {
@@ -53,6 +54,36 @@
   color: var(--color-ink-secondary);
   text-decoration: none;
   border-bottom: 2px solid transparent;
+  position: relative;
+}
+
+/* Klikket er mottatt, siden lastes: en strek under lenken som pulserer. */
+.idle {
+  display: none;
+}
+
+.pending {
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--color-accent);
+  animation: pending-pulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes pending-pulse {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pending {
+    animation: none;
+  }
 }
 
 .link:hover {
