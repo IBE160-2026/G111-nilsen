@@ -952,5 +952,21 @@ slik at handlelisten stemmer for neste handling og jeg kan hente frem gamle uker
 
 **Gitt** at jeg har planlagt retter i flere uker
 **Når** jeg åpner Ukemeny
-**Så** viser «Dine uker» alle uker med planlagte retter, nyeste først, med rettene og antallet, og jeg kommer til hver uke og til handlelisten for uka med ett trykk
+**Så** finner jeg alle uker med planlagte retter under «Alle uker» (se Story 6.4c)
+
+### Story 6.4c: Alle uker med meny og handleliste
+
+Som Ida,
+vil jeg velge en uke (for eksempel uke 38 eller uke 39) fra én side og finne menyen og handlelisten for den uka,
+slik at jeg kan gå tilbake til tidligere uker og se hva jeg handlet.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg har planlagt retter i flere uker
+**Når** jeg trykker «Alle uker» på Ukemeny
+**Så** ser jeg hver uke (Uke 38, Uke 39 …), nyeste først, med rettene, en lenke til menyen og en til handlelisten for uka
+
+**Gitt** handlelisten for en uke
+**Når** jeg krysser av varer og åpner den igjen senere, også på en annen enhet
+**Så** står avkrysningene der, og de gjelder bare den uka
 

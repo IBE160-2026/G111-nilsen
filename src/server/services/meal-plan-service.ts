@@ -8,6 +8,8 @@ import {
   insertEntry,
   listEntries,
   listPlannedMeals,
+  listWeekChecks,
+  setWeekCheck,
   listPlannableRecipes,
   type MealPlanEntry,
   type PlannableRecipe,
@@ -111,4 +113,32 @@ export function listPlannedWeeks(userId: number, db: Db = getDb()): Result<Plann
       titles: [...new Set([...meals].reverse().map((meal) => meal.title))],
     })),
   );
+}
+
+/** Hvor lang en varenøkkel kan være (navn og enhet). */
+export const CHECK_KEY_MAX_LENGTH = 200;
+
+/** Varene brukeren har krysset av i handlelisten for en uke (Story 6.4c). Ugyldig dag gir `validation`. */
+export function listChecks(userId: number, week: unknown, db: Db = getDb()): Result<string[]> {
+  if (!isIsoDate(week)) return err(appError("validation", "day"));
+  return ok(listWeekChecks(db, userId, mondayOf(week)));
+}
+
+/**
+ * Krysser av (eller fjerner avkrysningen for) en vare i handlelisten for en uke. Dagen kan være
+ * hvilken som helst dag i uka. Ugyldig dag eller nøkkel (tom eller over 200 tegn) gir `validation`.
+ */
+export function setCheck(
+  userId: number,
+  week: unknown,
+  key: unknown,
+  checked: unknown,
+  db: Db = getDb(),
+): Result<{ checked: boolean }> {
+  if (!isIsoDate(week)) return err(appError("validation", "day"));
+  if (typeof key !== "string" || key === "" || key.length > CHECK_KEY_MAX_LENGTH)
+    return err(appError("validation", "key"));
+  if (typeof checked !== "boolean") return err(appError("validation", "checked"));
+  setWeekCheck(db, userId, mondayOf(week), key, checked);
+  return ok({ checked });
 }

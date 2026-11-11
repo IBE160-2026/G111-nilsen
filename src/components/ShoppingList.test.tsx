@@ -233,6 +233,29 @@ describe("ShoppingList", () => {
       expect(screen.getByText("Egg")).toBeInTheDocument();
     });
 
+    it("lagrer avkrysninger for en uke, husker dem og ruller tilbake når lagringen feiler", async () => {
+      const user = userEvent.setup();
+      const onChange = vi
+        .fn()
+        .mockResolvedValueOnce({ ok: true as const })
+        .mockResolvedValueOnce({ ok: false as const, message: "Kunne ikke lagre." });
+      render(
+        <ShoppingList
+          recipes={recipes}
+          initialSelection={{ 1: 4 }}
+          weekChecks={{ initial: ["egg|"], onChange }}
+        />,
+      );
+      expect(screen.getByRole("checkbox", { name: /3 egg/ })).toBeChecked();
+      await user.click(screen.getByRole("checkbox", { name: /4 dl melk/ }));
+      expect(onChange).toHaveBeenLastCalledWith("melk|dl", true);
+      expect(screen.getByRole("checkbox", { name: /4 dl melk/ })).toBeChecked();
+      await user.click(screen.getByRole("checkbox", { name: /3 egg/ }));
+      expect(onChange).toHaveBeenLastCalledWith("egg|", false);
+      expect(await screen.findByText("Kunne ikke lagre.")).toBeInTheDocument();
+      expect(screen.getByRole("checkbox", { name: /3 egg/ })).toBeChecked();
+    });
+
     it("knappen på varen veksler ikke avkryssingen", async () => {
       const user = userEvent.setup();
       render(

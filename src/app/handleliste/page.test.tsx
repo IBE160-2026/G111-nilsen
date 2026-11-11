@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import { insertRecipe, type NewRecipe } from "@/server/db/repositories/recipe-repository";
-import { addToWeek } from "@/server/services/meal-plan-service";
+import { addToWeek, setCheck } from "@/server/services/meal-plan-service";
 import { addPantryItem } from "@/server/services/pantry-service";
 
 const session = vi.hoisted(() => ({ userId: 1 as number | null }));
@@ -147,6 +147,18 @@ describe("fra ukemenyen, ?uke= (Story 6.4)", () => {
     );
     // 4 dl melk for 4 porsjoner → 5 dl for 5.
     expect(screen.getByText("5 dl melk")).toBeInTheDocument();
+  });
+
+  it("viser avkrysningene som er lagret for uka (Story 6.4c)", async () => {
+    const pancakes = insertRecipe(state.db!, recipe("Pannekaker", "2026-11-09T10:00:00.000Z"));
+    addToWeek(TEST_USER_ID, pancakes, "2026-11-09", 4, state.db!);
+    render((await renderPage("2026-11-09")).content);
+    const melk = screen.getByRole("checkbox", { name: /melk/ });
+    expect(melk).not.toBeChecked();
+    cleanup();
+    setCheck(TEST_USER_ID, "2026-11-09", "melk|dl", true, state.db!);
+    render((await renderPage("2026-11-09")).content);
+    expect(screen.getByRole("checkbox", { name: /melk/ })).toBeChecked();
   });
 
   it("ignorerer en ugyldig uke og velger ingenting", async () => {

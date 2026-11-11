@@ -470,11 +470,28 @@ test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
   // Lagret: står der etter ny innlasting.
   await page.reload();
   await expect(monday.getByRole("link", { name: title })).toBeVisible();
-  // «Dine uker»: uka med retten står i oversikten og er markert som den som vises.
-  const weeks = page
-    .getByRole("heading", { level: 2, name: "Dine uker" })
-    .locator("xpath=ancestor::section");
-  await expect(weeks.getByRole("link", { name: /Vises nå/ })).toBeVisible();
+  // «Alle uker»: uka står i oversikten med retten og en lenke til handlelisten.
+  await page.getByRole("link", { name: "Alle uker" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Alle uker" })).toBeVisible();
+  await expect(page.getByRole("list").getByText(title, { exact: false }).first()).toBeVisible();
+  await page
+    .getByRole("link", { name: /^Handleliste for Uke/ })
+    .first()
+    .click();
+  await expect(page.getByRole("heading", { level: 1, name: "Handleliste" })).toBeVisible();
+  // Avkrysninger huskes per uke, også etter ny innlasting.
+  const firstItem = page
+    .getByRole("heading", { name: "Du må kjøpe" })
+    .locator("xpath=ancestor::section")
+    .getByRole("checkbox")
+    .first();
+  await firstItem.check();
+  await page.waitForLoadState("networkidle");
+  await page.reload();
+  await expect(firstItem).toBeChecked();
+  await firstItem.uncheck();
+  await page.waitForLoadState("networkidle");
+  await page.goto("/ukemeny");
 
   await page.getByRole("link", { name: "Lag handleliste for uka" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Handleliste" })).toBeVisible();

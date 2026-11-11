@@ -8,6 +8,7 @@ import {
 } from "@/app/_shared/action-result";
 import { pantryMessages } from "@/lib/messages";
 import { addPantryItem, clearPantry, removePantryItem } from "@/server/services/pantry-service";
+import { setCheck } from "@/server/services/meal-plan-service";
 import { currentUserId } from "@/server/session";
 
 // Server Actions er offentlige endepunkter: id og navn valideres på nytt her.
@@ -69,6 +70,24 @@ export async function clearPantryItems(): Promise<ActionResult> {
     return { ok: true };
   } catch (error) {
     console.error("Kunne ikke tømme «Har hjemme»", error);
+    return actionFailure(undefined);
+  }
+}
+
+/** Krysser av eller fjerner avkrysningen for en vare i handlelisten for en uke (Story 6.4c). */
+export async function setWeekItemChecked(
+  week: string,
+  key: string,
+  checked: boolean,
+): Promise<ActionResult> {
+  try {
+    const userId = await currentUserId();
+    if (userId === null) return actionFailure("login_required");
+    const result = setCheck(userId, week, key, checked);
+    if (!result.ok) return actionFailure(result.error.kind);
+    return { ok: true };
+  } catch (error) {
+    console.error("Kunne ikke lagre avkrysningen", error);
     return actionFailure(undefined);
   }
 }

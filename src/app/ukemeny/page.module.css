@@ -32,7 +32,13 @@
   font-weight: 600;
 }
 
-/* «Dine uker»: alle uker med planlagte retter, nyeste først. */
+.weekLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+}
+
+/* «Alle uker»: alle uker med planlagte retter, nyeste først. */
 .weeks {
   display: flex;
   flex-direction: column;

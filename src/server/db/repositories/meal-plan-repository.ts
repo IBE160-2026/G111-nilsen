@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, between, desc, eq, isNotNull } from "drizzle-orm";
 import type { Db } from "../client";
-import { mealPlanEntries, recipes } from "../schema";
+import { mealPlanEntries, recipes, weekChecks } from "../schema";
 
 /** En oppføring i ukemenyen med oppskriftens tittel og opprinnelige antall. */
 export type MealPlanEntry = {
@@ -96,4 +96,38 @@ export function deleteEntry(db: Db, userId: number, id: number): boolean {
       .where(and(eq(mealPlanEntries.id, id), eq(mealPlanEntries.userId, userId)))
       .run().changes > 0
   );
+}
+
+/** Varene (nøklene) brukeren har krysset av i handlelisten for uka som starter på `week`. */
+export function listWeekChecks(db: Db, userId: number, week: string): string[] {
+  return db
+    .select({ key: weekChecks.itemKey })
+    .from(weekChecks)
+    .where(and(eq(weekChecks.userId, userId), eq(weekChecks.week, week)))
+    .orderBy(asc(weekChecks.id))
+    .all()
+    .map((row) => row.key);
+}
+
+/** Krysser av eller fjerner avkrysningen for en vare i uka. Å krysse av to ganger gir én rad. */
+export function setWeekCheck(
+  db: Db,
+  userId: number,
+  week: string,
+  itemKey: string,
+  checked: boolean,
+): void {
+  if (checked) {
+    db.insert(weekChecks).values({ userId, week, itemKey }).onConflictDoNothing().run();
+  } else {
+    db.delete(weekChecks)
+      .where(
+        and(
+          eq(weekChecks.userId, userId),
+          eq(weekChecks.week, week),
+          eq(weekChecks.itemKey, itemKey),
+        ),
+      )
+      .run();
+  }
 }

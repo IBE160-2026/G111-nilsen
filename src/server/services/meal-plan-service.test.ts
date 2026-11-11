@@ -6,7 +6,9 @@ import { recipes } from "../db/schema";
 import {
   addToWeek,
   listPlannable,
+  listChecks,
   listPlannedWeeks,
+  setCheck,
   listWeek,
   removeFromWeek,
   todayInOslo,
@@ -223,5 +225,45 @@ describe("listPlannedWeeks", () => {
     }
     const result = listPlannedWeeks(TEST_USER_ID, db);
     expect(result.ok && result.value).toHaveLength(52);
+  });
+});
+
+describe("listChecks og setCheck", () => {
+  it("husker avkrysninger per uke og per bruker, og kan fjerne dem igjen", () => {
+    const db = withOtherUser();
+    expect(setCheck(TEST_USER_ID, "2026-11-11", "melk|dl", true, db)).toEqual({
+      ok: true,
+      value: { checked: true },
+    });
+    // Samme avkrysning to ganger gir én rad, og hvilken som helst dag i uka gir samme uke.
+    setCheck(TEST_USER_ID, "2026-11-09", "melk|dl", true, db);
+    setCheck(TEST_USER_ID, "2026-11-09", "egg|", true, db);
+    setCheck(TEST_USER_ID, "2026-11-16", "smør|", true, db);
+    setCheck(OTHER_USER, "2026-11-09", "salt|", true, db);
+    expect(listChecks(TEST_USER_ID, "2026-11-12", db)).toEqual({
+      ok: true,
+      value: ["melk|dl", "egg|"],
+    });
+    expect(listChecks(TEST_USER_ID, "2026-11-16", db)).toEqual({ ok: true, value: ["smør|"] });
+    expect(listChecks(OTHER_USER, "2026-11-09", db)).toEqual({ ok: true, value: ["salt|"] });
+    setCheck(TEST_USER_ID, "2026-11-09", "melk|dl", false, db);
+    expect(listChecks(TEST_USER_ID, "2026-11-09", db)).toEqual({ ok: true, value: ["egg|"] });
+  });
+
+  it("avviser ugyldig dag, nøkkel og verdi uten å lagre", () => {
+    const db = createTestDb();
+    expect(setCheck(TEST_USER_ID, "i-morgen", "melk|dl", true, db)).toMatchObject({
+      ok: false,
+      error: { kind: "validation", detail: "day" },
+    });
+    expect(setCheck(TEST_USER_ID, "2026-11-09", "", true, db)).toMatchObject({
+      ok: false,
+      error: { kind: "validation", detail: "key" },
+    });
+    expect(setCheck(TEST_USER_ID, "2026-11-09", "x".repeat(201), true, db).ok).toBe(false);
+    expect(setCheck(TEST_USER_ID, "2026-11-09", 5, true, db).ok).toBe(false);
+    expect(setCheck(TEST_USER_ID, "2026-11-09", "melk|dl", "ja", db).ok).toBe(false);
+    expect(listChecks(TEST_USER_ID, "2026-11-09", db)).toEqual({ ok: true, value: [] });
+    expect(listChecks(TEST_USER_ID, "i-morgen", db).ok).toBe(false);
   });
 });

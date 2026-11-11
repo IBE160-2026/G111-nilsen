@@ -260,10 +260,15 @@ export const weekMessages = {
   noRecipesDescription: "Lagre oppskrifter først, så kan du legge dem på dagene i uka.",
   noRecipesAction: "Se oppskrifter",
   fromWeek: (week: string) => `Valgt fra ukemenyen: ${week}.`,
-  weeksHeading: "Dine uker",
-  weeksHint: "Uker du har planlagt. Åpne en for å se eller endre den.",
+  allWeeks: "Alle uker",
+  weeksHeading: "Alle uker",
+  weeksTitle: "Alle uker",
+  weeksHint:
+    "Ukene du har planlagt, nyeste først. Åpne en uke for å se eller endre menyen, eller handlelisten for å se hva som er krysset av.",
+  weeksEmpty: "Du har ikke planlagt noen uker ennå.",
+  weeksEmptyAction: "Planlegg en uke",
   weekMeals: (n: number) => (n === 1 ? "1 rett" : `${n} retter`),
-  currentWeek: "Vises nå",
+  thisWeekShort: "denne uka",
   weekShopping: "Handleliste",
   weekShoppingFor: (week: string) => `Handleliste for ${week}`,
 } as const;

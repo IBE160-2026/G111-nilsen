@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
+import { listChecks } from "@/server/services/meal-plan-service";
 import { listPantry } from "@/server/services/pantry-service";
 
 const session = vi.hoisted(() => ({ userId: 1 as number | null }));
@@ -16,7 +17,8 @@ vi.mock("@/server/db/client", async (importOriginal) => {
   return { ...actual, getDb: () => state.db! };
 });
 
-const { addToPantry, clearPantryItems, removeFromPantry } = await import("./actions");
+const { addToPantry, clearPantryItems, removeFromPantry, setWeekItemChecked } =
+  await import("./actions");
 
 beforeEach(() => {
   state.db = createTestDb();
@@ -90,6 +92,27 @@ describe("clearPantryItems", () => {
   it("ber om innlogging uten innlogging", async () => {
     session.userId = null;
     expect(await clearPantryItems()).toMatchObject({ ok: false });
+    session.userId = TEST_USER_ID;
+  });
+});
+
+describe("setWeekItemChecked", () => {
+  it("lagrer og fjerner en avkrysning for uka", async () => {
+    expect(await setWeekItemChecked("2026-11-09", "melk|dl", true)).toEqual({ ok: true });
+    const stored = () => {
+      const result = listChecks(TEST_USER_ID, "2026-11-09", state.db!);
+      return result.ok ? result.value : [];
+    };
+    expect(stored()).toEqual(["melk|dl"]);
+    expect(await setWeekItemChecked("2026-11-09", "melk|dl", false)).toEqual({ ok: true });
+    expect(stored()).toEqual([]);
+  });
+
+  it("avviser ugyldig input og krever innlogging", async () => {
+    expect(await setWeekItemChecked("i-morgen", "melk|dl", true)).toMatchObject({ ok: false });
+    expect(await setWeekItemChecked("2026-11-09", "", true)).toMatchObject({ ok: false });
+    session.userId = null;
+    expect(await setWeekItemChecked("2026-11-09", "melk|dl", true)).toMatchObject({ ok: false });
     session.userId = TEST_USER_ID;
   });
 });

@@ -178,3 +178,20 @@ export const mealPlanEntries = sqliteTable(
   },
   (table) => [index("meal_plan_user_day_idx").on(table.userId, table.day)],
 );
+
+/**
+ * Avkrysninger i handlelisten for en uke i ukemenyen (Story 6.4c): hvilke varer (`key`, som i
+ * handlelisten) brukeren har krysset av for uka som starter på `week` (mandag, «YYYY-MM-DD»).
+ */
+export const weekChecks = sqliteTable(
+  "week_checks",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    week: text("week").notNull(),
+    itemKey: text("item_key").notNull(),
+  },
+  (table) => [uniqueIndex("week_checks_unique_idx").on(table.userId, table.week, table.itemKey)],
+);

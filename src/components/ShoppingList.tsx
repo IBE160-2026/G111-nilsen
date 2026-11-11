@@ -41,6 +41,11 @@ type Props = {
   onClearPantry?: () => Promise<ActionResult>;
   /** Oppskrifter som er valgt fra start, med antall porsjoner (fra ukemenyen, Story 6.4). */
   initialSelection?: Readonly<Record<number, number>>;
+  /** Avkrysninger som huskes for en uke i ukemenyen (Story 6.4c); uten den huskes de ikke. */
+  weekChecks?: {
+    initial: readonly string[];
+    onChange: (key: string, checked: boolean) => Promise<ActionResult>;
+  };
 };
 
 export default function ShoppingList({
@@ -50,6 +55,7 @@ export default function ShoppingList({
   onRemovePantry,
   onClearPantry,
   initialSelection = {},
+  weekChecks,
 }: Props) {
   const id = useId();
   const [picked, setPicked] = useState<ReadonlySet<number>>(
@@ -64,7 +70,9 @@ export default function ShoppingList({
     ),
   );
   const [system, setSystem] = useState<UnitSystem>("original");
-  const [checked, setChecked] = useState<ReadonlySet<string>>(() => new Set());
+  const [checked, setChecked] = useState<ReadonlySet<string>>(
+    () => new Set(weekChecks?.initial ?? []),
+  );
   const [status, setStatus] = useState("");
   const [pantry, setPantry] = useState<readonly PantryItem[]>(initialPantry);
   const [pantryName, setPantryName] = useState("");
@@ -163,11 +171,30 @@ export default function ShoppingList({
     });
   }
   function toggleChecked(key: string) {
-    setChecked((previous) => {
-      const next = new Set(previous);
-      if (!next.delete(key)) next.add(key);
-      return next;
-    });
+    const nowChecked = !checked.has(key);
+    const apply = (value: boolean) =>
+      setChecked((previous) => {
+        const next = new Set(previous);
+        if (value) next.add(key);
+        else next.delete(key);
+        return next;
+      });
+    apply(nowChecked);
+    if (!weekChecks) return;
+    // Lagres uten å vente; feiler det, rulles avkrysningen tilbake og Ida får beskjed.
+    weekChecks.onChange(key, nowChecked).then(
+      (result) => {
+        if (!result.ok) {
+          apply(!nowChecked);
+          setStatus(result.message);
+        }
+      },
+      (error: unknown) => {
+        console.error("Kunne ikke lagre avkrysningen", error);
+        apply(!nowChecked);
+        setStatus(`${fallbackMessage.title} ${fallbackMessage.body}`);
+      },
+    );
   }
   function changeServings(recipeId: number, text: string) {
     const value = Number(text.replace(",", "."));

@@ -6,12 +6,17 @@ import EmptyState from "@/components/EmptyState";
 import ShoppingList from "@/components/ShoppingList";
 import { shoppingMessages, weekMessages } from "@/lib/messages";
 import { formatWeek, isIsoDate } from "@/domain";
-import { listWeek, weekShoppingSelection, weekStart } from "@/server/services/meal-plan-service";
+import {
+  listChecks,
+  listWeek,
+  weekShoppingSelection,
+  weekStart,
+} from "@/server/services/meal-plan-service";
 import { listPantry } from "@/server/services/pantry-service";
 import { listShoppingRecipes } from "@/server/services/recipe-service";
 import { currentUserId } from "@/server/session";
 import LoginRequired from "@/components/LoginRequired";
-import { addToPantry, clearPantryItems, removeFromPantry } from "./actions";
+import { addToPantry, clearPantryItems, removeFromPantry, setWeekItemChecked } from "./actions";
 import listStyles from "../list-page.module.css";
 
 export const metadata: Metadata = { title: shoppingMessages.heading };
@@ -62,11 +67,15 @@ async function ShoppingLoader({ searchParams }: { searchParams: SearchParams }) 
 
   let selection: Record<number, number> = {};
   let monday: string | null = null;
+  let checks: string[] = [];
   if (isIsoDate(uke)) {
     monday = weekStart(uke);
     const week = listWeek(userId, monday);
     if (!week.ok) throw new Error(`${shoppingMessages.loadFailed} (${week.error.kind})`);
     selection = weekShoppingSelection(week.value);
+    const saved = listChecks(userId, monday);
+    if (!saved.ok) throw new Error(`${shoppingMessages.loadFailed} (${saved.error.kind})`);
+    checks = saved.value;
   }
 
   return (
@@ -84,6 +93,11 @@ async function ShoppingLoader({ searchParams }: { searchParams: SearchParams }) 
         onRemovePantry={removeFromPantry}
         onClearPantry={clearPantryItems}
         initialSelection={selection}
+        weekChecks={
+          monday === null
+            ? undefined
+            : { initial: checks, onChange: setWeekItemChecked.bind(null, monday) }
+        }
       />
     </>
   );

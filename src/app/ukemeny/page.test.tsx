@@ -111,38 +111,13 @@ describe("/ukemeny", () => {
     expect(options.map((o) => o.textContent)).toEqual(["Pannekaker"]);
   });
 
-  it("lister planlagte uker i «Dine uker», og markerer uka som vises", async () => {
-    const id = insertRecipe(state.db!, recipe("Pannekaker"));
-    addToWeek(TEST_USER_ID, id, "2026-11-11", 3, state.db!);
-    addToWeek(TEST_USER_ID, id, "2026-11-12", 3, state.db!);
-    addToWeek(TEST_USER_ID, id, "2026-10-28", 2, state.db!);
-    render((await renderPage("2026-11-09")).content);
-    const section = screen
-      .getByRole("heading", { level: 2, name: "Dine uker" })
-      .closest("section")!;
-    const links = within(section)
-      .getAllByRole("link")
-      .filter((link) => link.getAttribute("href")!.startsWith("/ukemeny"));
-    expect(links.map((link) => link.getAttribute("href"))).toEqual([
-      "/ukemeny?uke=2026-11-09",
-      "/ukemeny?uke=2026-10-26",
-    ]);
-    expect(within(section).getAllByText("Pannekaker")).toHaveLength(2);
-    expect(
-      within(section)
-        .getAllByRole("link", { name: /^Handleliste for Uke/ })
-        .map((link) => link.getAttribute("href")),
-    ).toEqual(["/handleliste?uke=2026-11-09", "/handleliste?uke=2026-10-26"]);
-    expect(links[0]).toHaveTextContent("2 retter · Vises nå");
-    expect(links[0]).toHaveAttribute("aria-current", "page");
-    expect(links[1]).toHaveTextContent("1 rett");
-    expect(links[1]).not.toHaveAttribute("aria-current");
-  });
-
-  it("viser ikke «Dine uker» uten planlagte uker", async () => {
+  it("har en lenke «Alle uker» til oversikten over planlagte uker", async () => {
     insertRecipe(state.db!, recipe("Pannekaker"));
     render((await renderPage("2026-11-09")).content);
-    expect(screen.queryByRole("heading", { name: "Dine uker" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Alle uker" })).toHaveAttribute(
+      "href",
+      "/ukemeny/uker",
+    );
   });
 
   it("viser tom-tilstand uten lagrede oppskrifter", async () => {
