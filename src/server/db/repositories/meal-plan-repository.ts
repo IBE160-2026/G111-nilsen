@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, between, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { and, asc, between, desc, eq, isNotNull } from "drizzle-orm";
 import type { Db } from "../client";
 import { mealPlanEntries, recipes } from "../schema";
 
@@ -31,14 +31,14 @@ export function listEntries(db: Db, userId: number, from: string, to: string): M
     .all();
 }
 
-/** Hver dag brukeren har planlagt noe på, med antall oppføringer, nyeste dag først. */
-export function listPlannedDays(db: Db, userId: number): { day: string; count: number }[] {
+/** Alle brukerens oppføringer med dag og tittel, nyeste dag først og så rekkefølge lagt til. */
+export function listPlannedMeals(db: Db, userId: number): { day: string; title: string }[] {
   return db
-    .select({ day: mealPlanEntries.day, count: sql<number>`count(*)` })
+    .select({ day: mealPlanEntries.day, title: recipes.title })
     .from(mealPlanEntries)
+    .innerJoin(recipes, eq(mealPlanEntries.recipeId, recipes.id))
     .where(eq(mealPlanEntries.userId, userId))
-    .groupBy(mealPlanEntries.day)
-    .orderBy(desc(mealPlanEntries.day))
+    .orderBy(desc(mealPlanEntries.day), asc(mealPlanEntries.id))
     .all();
 }
 

@@ -99,3 +99,4 @@
 - 946 «Porsjoner» i stedet for «personer» i hele appen og dokumentene.
 - 945 «Passer til» ved notatene (ny kolonne fits_for). Åpent: dev-databasen på Mac migreres ved start.
 - 944 Tøm «Har hjemme» og «Dine uker» i ukemenyen. Åpent: prøv på telefon.
+- 943 Rettene og handleliste i «Dine uker». Åpent: avkrysninger lagres ikke per uke.

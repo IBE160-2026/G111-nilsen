@@ -194,11 +194,24 @@ describe("listPlannedWeeks", () => {
     expect(listPlannedWeeks(TEST_USER_ID, db)).toEqual({
       ok: true,
       value: [
-        { monday: "2026-11-09", meals: 2 },
-        { monday: "2026-11-02", meals: 1 },
+        { monday: "2026-11-09", meals: 2, titles: ["Pannekaker"] },
+        { monday: "2026-11-02", meals: 1, titles: ["Pannekaker"] },
       ],
     });
     expect(listPlannedWeeks(3, db)).toEqual({ ok: true, value: [] });
+  });
+
+  it("lister titlene i dagsrekkefølge, uten gjentakelser", () => {
+    const db = createTestDb();
+    const pancakes = insertRecipe(db, recipe("Pannekaker"));
+    const taco = insertRecipe(db, recipe("Taco"));
+    addToWeek(TEST_USER_ID, taco, "2026-11-13", 4, db);
+    addToWeek(TEST_USER_ID, pancakes, "2026-11-10", 2, db);
+    addToWeek(TEST_USER_ID, pancakes, "2026-11-15", 2, db);
+    const result = listPlannedWeeks(TEST_USER_ID, db);
+    expect(result.ok && result.value).toEqual([
+      { monday: "2026-11-09", meals: 3, titles: ["Pannekaker", "Taco"] },
+    ]);
   });
 
   it("viser høyst 52 uker", () => {

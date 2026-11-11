@@ -952,5 +952,5 @@ slik at handlelisten stemmer for neste handling og jeg kan hente frem gamle uker
 
 **Gitt** at jeg har planlagt retter i flere uker
 **Når** jeg åpner Ukemeny
-**Så** viser «Dine uker» alle uker med planlagte retter, nyeste først, med antall retter, og jeg kommer til hver uke med ett trykk
+**Så** viser «Dine uker» alle uker med planlagte retter, nyeste først, med rettene og antallet, og jeg kommer til hver uke og til handlelisten for uka med ett trykk
 

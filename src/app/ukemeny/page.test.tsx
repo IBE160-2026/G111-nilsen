@@ -120,11 +120,19 @@ describe("/ukemeny", () => {
     const section = screen
       .getByRole("heading", { level: 2, name: "Dine uker" })
       .closest("section")!;
-    const links = within(section).getAllByRole("link");
+    const links = within(section)
+      .getAllByRole("link")
+      .filter((link) => link.getAttribute("href")!.startsWith("/ukemeny"));
     expect(links.map((link) => link.getAttribute("href"))).toEqual([
       "/ukemeny?uke=2026-11-09",
       "/ukemeny?uke=2026-10-26",
     ]);
+    expect(within(section).getAllByText("Pannekaker")).toHaveLength(2);
+    expect(
+      within(section)
+        .getAllByRole("link", { name: /^Handleliste for Uke/ })
+        .map((link) => link.getAttribute("href")),
+    ).toEqual(["/handleliste?uke=2026-11-09", "/handleliste?uke=2026-10-26"]);
     expect(links[0]).toHaveTextContent("2 retter · Vises nå");
     expect(links[0]).toHaveAttribute("aria-current", "page");
     expect(links[1]).toHaveTextContent("1 rett");

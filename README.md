@@ -82,7 +82,7 @@ Kravene står i PRD §4.7 (FR-28–FR-39), og hver story har en spec i `_bmad-ou
 - **Ingrediensforslag i listen (6.1):** et forslag som innfører en ingrediens, gir også en linje i ingredienslisten.
 - **Tid (6.2):** total tid hentes fra kilden eller skrives inn selv, og vises ved hjertet og på kortene. «Hent tid fra kilden» for eldre importer.
 - **Notater og sist laget (6.3):** egne notater på oppskriften, «Laget i dag» og «Sist laget … · laget N ganger».
-- **Tøm «Har hjemme» og «Dine uker» (6.4b):** «Tøm listen» (med bekreftelse) fjerner alt i «Har hjemme» etter en handletur. Ukemenyen viser «Dine uker», alle uker med planlagte retter, nyeste først.
+- **Tøm «Har hjemme» og «Dine uker» (6.4b):** «Tøm listen» (med bekreftelse) fjerner alt i «Har hjemme» etter en handletur. Ukemenyen viser «Dine uker», alle uker med planlagte retter (med rettene og en lenke til handlelisten for uka), nyeste først.
 - **Passer til (6.6b):** feltet «Passer til» i notatkortet, for din egen vurdering («2 sultne»). Endrer ikke mengdene.
 - **Utskrift (6.6):** «Skriv ut» ved tittelen åpner utskriftsdialogen. Utskriften har tittel, kilde (med adresse), antall porsjoner, ingredienser med avkrysningsbokser og steg i én kolonne, uten meny, knapper, forslag og notater.
 - **Tidtaker i kokemodus (6.5):** tider i stegteksten («10–15 minutter», «1 time og 30 minutter», «en halv time») blir knapper som starter en nedtelling. Store knapper og tall, flere tidtakere samtidig, «−1/+1/+5 min» for å justere, og når tiden er ute: beskjed, gjentatte pip, vibrasjon, varsel fra systemet (hvis tillatt) og blinkende fanetittel.
@@ -293,7 +293,7 @@ Playwright-versjonen er låst i `package-lock.json`. Ligger nettleseren et annet
 
 ### Hva testene dekker
 
-`npm test` kjører Vitest én gang og gir i dag 111 testfiler og 2800 tester (ende-til-ende-testene kommer i tillegg, se over). Ingen test bruker nettverket (bare lokale 127.0.0.1-tjenere) eller en ekte API-nøkkel.
+`npm test` kjører Vitest én gang og gir i dag 111 testfiler og 2801 tester (ende-til-ende-testene kommer i tillegg, se over). Ingen test bruker nettverket (bare lokale 127.0.0.1-tjenere) eller en ekte API-nøkkel.
 
 - **Domenet** (`src/domain/`): tolking av mengder og ingredienslinjer og skalering og formatering, med fasittabellen fra Epic 1 (400 g mel for 6 gir 600 g, «1 egg (ca.)», og så videre) som egne tester, og lesing av oppskriftsdata fra lagrede HTML-sider (JSON-LD, normalisering, tekstrensing, ytelse for 2 MB og aldri-kaster-egenskap).
 - **Server** (`src/server/`): repositorier og tjenester mot en ekte SQLite-database i minnet, blant annet tilbakerulling ved feil, redigering, samlingen, lagring, sletting og opprydding, og datamigrasjonen (en database med bare den første migrasjonen oppgraderes).

@@ -101,7 +101,7 @@ async function WeekLoader({ searchParams }: { searchParams: SearchParams }) {
           <p className={styles.weeksHint}>{m.weeksHint}</p>
           <ul role="list" className={styles.weekList}>
             {weeks.value.map((week) => (
-              <li key={week.monday}>
+              <li key={week.monday} className={styles.weekItem}>
                 <Link
                   href={`/ukemeny?uke=${week.monday}`}
                   className={styles.weekLink}
@@ -112,6 +112,14 @@ async function WeekLoader({ searchParams }: { searchParams: SearchParams }) {
                     {m.weekMeals(week.meals)}
                     {week.monday === monday ? ` · ${m.currentWeek}` : ""}
                   </span>
+                </Link>
+                <p className={styles.weekTitles}>{week.titles.join(", ")}</p>
+                <Link
+                  href={`/handleliste?uke=${week.monday}`}
+                  className={styles.navLink}
+                  aria-label={m.weekShoppingFor(formatWeek(week.monday))}
+                >
+                  {m.weekShopping}
                 </Link>
               </li>
             ))}

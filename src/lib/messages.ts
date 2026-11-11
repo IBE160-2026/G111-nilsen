@@ -264,6 +264,8 @@ export const weekMessages = {
   weeksHint: "Uker du har planlagt. Åpne en for å se eller endre den.",
   weekMeals: (n: number) => (n === 1 ? "1 rett" : `${n} retter`),
   currentWeek: "Vises nå",
+  weekShopping: "Handleliste",
+  weekShoppingFor: (week: string) => `Handleliste for ${week}`,
 } as const;
 
 /** Notater og «sist laget» (Story 6.3). */
