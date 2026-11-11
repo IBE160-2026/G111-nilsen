@@ -108,3 +108,4 @@
 - 937 Menylenkene viser en strek fra klikket til siden er åpnet (treg respons i dev). Åpent: tregt også i produksjon?
 - 936 Forsiden med salgstekst og større klikkflate rundt logoen. Åpent: endelig tekst i designet (Epic 7).
 - 935 Søk etter oppskrift i handlelisten, og valg som ikke er lagret nullstilles når man forlater siden. Åpent: ingen.
+- 934 Lagre handlelisten, knyttet til ukemenyen (denne uka som standard) og lagrede lister. Åpent: avkrysninger og egne varer lagres ikke i listen.

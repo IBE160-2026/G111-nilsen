@@ -474,4 +474,68 @@ describe("ShoppingList", () => {
       expect(pick("Pannekaker")).not.toBeChecked();
     });
   });
+
+  describe("lagre handlelisten (Story 6.4g)", () => {
+    const nameField = () => screen.getByRole("textbox", { name: "Navn på listen" });
+
+    it("har ingen lagre-seksjon uten handling", () => {
+      render(<ShoppingList recipes={recipes} />);
+      expect(screen.queryByRole("button", { name: "Lagre handlelisten" })).not.toBeInTheDocument();
+    });
+
+    it("lagrer valgte oppskrifter og porsjoner under navnet, og melder fra", async () => {
+      const user = userEvent.setup();
+      const onSaveList = vi.fn(async () => ({ ok: true as const, id: 7, name: "Uke 46" }));
+      render(<ShoppingList recipes={recipes} onSaveList={onSaveList} listName="Uke 46" />);
+      expect(nameField()).toHaveValue("Uke 46");
+      await user.click(pick("Pannekaker"));
+      await user.click(pick("Uten antall"));
+      fireEvent.change(screen.getByLabelText("Antall porsjoner for Pannekaker"), {
+        target: { value: "6" },
+      });
+      await user.click(screen.getByRole("button", { name: "Lagre handlelisten" }));
+      expect(onSaveList).toHaveBeenCalledWith({
+        name: "Uke 46",
+        items: [
+          { recipeId: 1, servings: 6 },
+          { recipeId: 3, servings: 1 },
+        ],
+      });
+      expect(await screen.findByText("Handlelisten «Uke 46» er lagret.")).toBeInTheDocument();
+    });
+
+    it("sier fra uten valgte oppskrifter, uten å lagre", async () => {
+      const user = userEvent.setup();
+      const onSaveList = vi.fn();
+      render(<ShoppingList recipes={recipes} onSaveList={onSaveList} listName="Uke 46" />);
+      await user.click(screen.getByRole("button", { name: "Lagre handlelisten" }));
+      expect(screen.getByRole("alert")).toHaveTextContent("Velg minst én oppskrift før du lagrer.");
+      expect(onSaveList).not.toHaveBeenCalled();
+    });
+
+    it("viser meldingen fra handlingen under navnefeltet, og Enter i feltet lagrer", async () => {
+      const user = userEvent.setup();
+      const onSaveList = vi
+        .fn()
+        .mockResolvedValueOnce({ ok: false, message: "Skriv et navn på listen." })
+        .mockResolvedValueOnce({ ok: true, id: 1, name: "Taco" });
+      render(<ShoppingList recipes={recipes} onSaveList={onSaveList} />);
+      await user.click(pick("Vafler"));
+      await user.click(screen.getByRole("button", { name: "Lagre handlelisten" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent("Skriv et navn på listen.");
+      expect(nameField()).toHaveAttribute("aria-invalid", "true");
+      await user.type(nameField(), "Taco{Enter}");
+      expect(onSaveList).toHaveBeenCalledTimes(2);
+      expect(await screen.findByText("Handlelisten «Taco» er lagret.")).toBeInTheDocument();
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
+    it("starter på porsjonene fra en lagret liste, men ikke for oppskrift uten antall", () => {
+      render(
+        <ShoppingList recipes={recipes} onSaveList={vi.fn()} initialSelection={{ 2: 9, 3: 5 }} />,
+      );
+      expect(screen.getByLabelText("Antall porsjoner for Vafler")).toHaveValue(9);
+      expect(screen.queryByLabelText("Antall porsjoner for Uten antall")).not.toBeInTheDocument();
+    });
+  });
 });

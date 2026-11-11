@@ -9,6 +9,7 @@ import {
   type UnitSystem,
 } from "@/domain";
 import type { ActionResult, PantryActionResult } from "@/app/_shared/action-result";
+import type { SaveListResult } from "@/app/handleliste/actions";
 import { fallbackMessage, pantryMessages as p, shoppingMessages as m } from "@/lib/messages";
 import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import UnitChoice from "./UnitChoice";
@@ -46,6 +47,13 @@ type Props = {
   onRemovePantry?: (id: number) => Promise<ActionResult>;
   /** Tømmer «Har hjemme» (Server Action); uten den vises ikke «Tøm listen». */
   onClearPantry?: () => Promise<ActionResult>;
+  /** Lagrer valgte oppskrifter og porsjoner som en liste med navn (Story 6.4g); uten den vises ikke «Lagre handlelisten». */
+  onSaveList?: (input: {
+    name: string;
+    items: { recipeId: number; servings: number }[];
+  }) => Promise<SaveListResult>;
+  /** Navnet som står i feltet fra start: «Uke 46», eller navnet på den lagrede listen som er åpnet. */
+  listName?: string;
   /** Oppskrifter som er valgt fra start, med antall porsjoner (fra ukemenyen, Story 6.4). */
   initialSelection?: Readonly<Record<number, number>>;
   /** Avkrysninger som huskes for en uke i ukemenyen (Story 6.4c); uten den huskes de ikke. */
@@ -63,6 +71,8 @@ export default function ShoppingList({
   onClearPantry,
   initialSelection = {},
   weekChecks,
+  onSaveList,
+  listName = "",
 }: Props) {
   const id = useId();
   const [picked, setPicked] = useState<ReadonlySet<number>>(
@@ -72,7 +82,12 @@ export default function ShoppingList({
     Object.fromEntries(
       recipes.map((recipe) => {
         const chosen = initialSelection[recipe.id];
-        return [recipe.id, isSelectedServings(chosen) ? chosen : startServings(recipe)];
+        return [
+          recipe.id,
+          startServings(recipe) !== null && isSelectedServings(chosen)
+            ? chosen
+            : startServings(recipe),
+        ];
       }),
     ),
   );
@@ -82,6 +97,10 @@ export default function ShoppingList({
   );
   const [status, setStatus] = useState("");
   const [query, setQuery] = useState("");
+  const [name, setName] = useState(listName);
+  const [saveError, setSaveError] = useState("");
+  const [saveInfo, setSaveInfo] = useState("");
+  const [saving, setSaving] = useState(false);
   // Nytt tall gir nye (ukontrollerte) antallfelt, så de også nullstilles.
   const [formKey, setFormKey] = useState(0);
   const [pantry, setPantry] = useState<readonly PantryItem[]>(initialPantry);
@@ -101,13 +120,21 @@ export default function ShoppingList({
         Object.fromEntries(
           recipes.map((recipe) => {
             const chosen = initialSelection[recipe.id];
-            return [recipe.id, isSelectedServings(chosen) ? chosen : startServings(recipe)];
+            return [
+              recipe.id,
+              startServings(recipe) !== null && isSelectedServings(chosen)
+                ? chosen
+                : startServings(recipe),
+            ];
           }),
         ),
       );
       setSystem("original");
       setChecked(new Set(weekChecks?.initial ?? []));
       setQuery("");
+      setName(listName);
+      setSaveError("");
+      setSaveInfo("");
       setStatus("");
       setFormKey((key) => key + 1);
     },
@@ -209,6 +236,39 @@ export default function ShoppingList({
     } finally {
       setPantryPending(false);
       setConfirmingClear(false);
+    }
+  }
+
+  async function saveList() {
+    if (!onSaveList || saving) return;
+    const chosen = recipes
+      .filter((recipe) => picked.has(recipe.id))
+      .map((recipe) => ({ recipeId: recipe.id, servings: servings[recipe.id] ?? null }));
+    if (chosen.length === 0) {
+      setSaveError(m.saveNothing);
+      return;
+    }
+    // Oppskrifter uten antall (ikke skrevet for et antall) lagres med 1; antallet brukes ikke for dem.
+    const withServings = chosen.map((entry) => ({
+      recipeId: entry.recipeId,
+      servings: entry.servings ?? 1,
+    }));
+    setSaving(true);
+    setSaveError("");
+    setSaveInfo("");
+    try {
+      const result = await onSaveList({ name, items: withServings });
+      if (!result.ok) {
+        setSaveError(result.message);
+        return;
+      }
+      setName(result.name);
+      setSaveInfo(m.saved(result.name));
+    } catch (error) {
+      console.error("Kunne ikke lagre handlelisten", error);
+      setSaveError(`${fallbackMessage.title} ${fallbackMessage.body}`);
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -324,6 +384,49 @@ export default function ShoppingList({
           })}
         </ul>
       </section>
+
+      {onSaveList ? (
+        <section aria-labelledby={`${id}-lagre`} className={styles.card}>
+          <h2 id={`${id}-lagre`}>{m.saveHeading}</h2>
+          <p className={styles.hint}>{m.saveHint}</p>
+          <div className={styles.search}>
+            <label htmlFor={`${id}-navn`}>{m.saveNameLabel}</label>
+            <input
+              id={`${id}-navn`}
+              type="text"
+              className={styles.searchField}
+              autoComplete="off"
+              maxLength={60}
+              value={name}
+              aria-invalid={saveError !== "" ? true : undefined}
+              aria-describedby={saveError !== "" ? `${id}-lagre-feil` : undefined}
+              onChange={(event) => setName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  void saveList();
+                }
+              }}
+            />
+          </div>
+          {saveError !== "" ? (
+            <p id={`${id}-lagre-feil`} role="alert" className={styles.error}>
+              {saveError}
+            </p>
+          ) : null}
+          <button
+            type="button"
+            className={styles.saveList}
+            aria-disabled={saving ? true : undefined}
+            onClick={() => void saveList()}
+          >
+            {saving ? m.saving : m.saveButton}
+          </button>
+          <p role="status" aria-live="polite" className={styles.hint}>
+            {saveInfo}
+          </p>
+        </section>
+      ) : null}
 
       <section aria-labelledby={`${id}-liste`} className={styles.card}>
         <h2 id={`${id}-liste`}>{m.listHeading}</h2>

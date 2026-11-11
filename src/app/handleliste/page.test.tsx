@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
 import { insertRecipe, type NewRecipe } from "@/server/db/repositories/recipe-repository";
 import { addToWeek, setCheck } from "@/server/services/meal-plan-service";
 import { addPantryItem } from "@/server/services/pantry-service";
+import { saveSavedList } from "@/server/services/shopping-list-service";
 
 const session = vi.hoisted(() => ({ userId: 1 as number | null }));
 vi.mock("@/server/session", () => ({
@@ -37,8 +38,8 @@ beforeEach(() => {
 
 type AsyncComponent = (props: unknown) => Promise<ReactElement>;
 
-async function renderPage(uke?: string) {
-  const page = HandlelistePage({ searchParams: Promise.resolve({ uke }) }) as ReactElement<{
+async function renderPage(uke?: string, liste?: string) {
+  const page = HandlelistePage({ searchParams: Promise.resolve({ uke, liste }) }) as ReactElement<{
     children: ReactElement[];
   }>;
   const [heading, suspense] = page.props.children as [
@@ -175,6 +176,105 @@ describe("fra ukemenyen, ?uke= (Story 6.4)", () => {
       expect(screen.getByRole("link", { name: "Logg inn" })).toHaveAttribute(
         "href",
         "/logg-inn?neste=%2Fhandleliste%3Fuke%3D2026-11-09",
+      );
+    } finally {
+      session.userId = 1;
+    }
+  });
+});
+
+describe("uke og lagrede lister (Story 6.4g)", () => {
+  const savedAt = "2026-11-09T10:00:00.000Z";
+
+  it("er for denne uka som standard, med uke-navigasjon og lenke til ukemenyen", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-11T12:00:00Z"));
+    try {
+      const pancakes = insertRecipe(state.db!, recipe("Pannekaker", savedAt));
+      addToWeek(TEST_USER_ID, pancakes, "2026-11-10", 6, state.db!);
+      render((await renderPage()).content);
+      expect(screen.getByRole("checkbox", { name: "Pannekaker" })).toBeChecked();
+      expect(screen.getByText("Uke 46 · 9.–15. november 2026")).toBeInTheDocument();
+      expect(screen.getByRole("link", { name: "← Forrige uke" })).toHaveAttribute(
+        "href",
+        "/handleliste?uke=2026-11-02",
+      );
+      expect(screen.getByRole("link", { name: "Neste uke →" })).toHaveAttribute(
+        "href",
+        "/handleliste?uke=2026-11-16",
+      );
+      expect(screen.getByRole("link", { name: "Ukemeny" })).toHaveAttribute(
+        "href",
+        "/ukemeny?uke=2026-11-09",
+      );
+      expect(screen.getByRole("textbox", { name: "Navn på listen" })).toHaveValue("Uke 46");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("sier fra og lenker til «Planlegg uka» når uka ikke har noen retter", async () => {
+    insertRecipe(state.db!, recipe("Pannekaker", savedAt));
+    render((await renderPage("2026-11-09")).content);
+    expect(
+      screen.getByText(/Ingen retter er lagt i ukemenyen for denne uka\./),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Planlegg uka" })).toHaveAttribute(
+      "href",
+      "/ukemeny?uke=2026-11-09",
+    );
+  });
+
+  it("åpner en lagret liste med valgte oppskrifter og porsjoner, uten ukenavigasjon", async () => {
+    const pancakes = insertRecipe(state.db!, recipe("Pannekaker", savedAt));
+    insertRecipe(state.db!, recipe("Vafler", savedAt));
+    const saved = saveSavedList(
+      TEST_USER_ID,
+      "Fredagstaco",
+      [{ recipeId: pancakes, servings: 8 }],
+      state.db!,
+    );
+    const id = saved.ok ? saved.value.id : 0;
+    render((await renderPage(undefined, String(id))).content);
+    expect(screen.getByText(/Lagret liste: Fredagstaco\./)).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Pannekaker" })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: "Vafler" })).not.toBeChecked();
+    expect(screen.getByLabelText("Antall porsjoner for Pannekaker")).toHaveValue(8);
+    expect(screen.getByRole("textbox", { name: "Navn på listen" })).toHaveValue("Fredagstaco");
+    expect(screen.queryByRole("link", { name: /Forrige uke/ })).not.toBeInTheDocument();
+  });
+
+  it("viser lagrede lister nederst, med lenke til hver", async () => {
+    const pancakes = insertRecipe(state.db!, recipe("Pannekaker", savedAt));
+    saveSavedList(TEST_USER_ID, "Uke 45", [{ recipeId: pancakes, servings: 4 }], state.db!);
+    render((await renderPage("2026-11-09")).content);
+    const section = screen
+      .getByRole("heading", { name: "Lagrede handlelister" })
+      .closest("section")!;
+    expect(within(section).getByRole("link", { name: "Åpne Uke 45" })).toHaveAttribute(
+      "href",
+      expect.stringMatching(/^\/handleliste\?liste=\d+$/),
+    );
+  });
+
+  it("sier fra om en ukjent liste, og viser uka i stedet", async () => {
+    insertRecipe(state.db!, recipe("Pannekaker", savedAt));
+    for (const liste of ["999", "abc"]) {
+      render((await renderPage("2026-11-09", liste)).content);
+      if (liste === "999")
+        expect(screen.getByRole("alert")).toHaveTextContent("Fant ikke den lagrede handlelisten.");
+      expect(screen.getByRole("checkbox", { name: "Pannekaker" })).toBeInTheDocument();
+      cleanup();
+    }
+  });
+
+  it("sender tilbake til listen etter innlogging", async () => {
+    session.userId = null;
+    try {
+      render((await renderPage(undefined, "4")).content);
+      expect(screen.getByRole("link", { name: "Logg inn" })).toHaveAttribute(
+        "href",
+        "/logg-inn?neste=%2Fhandleliste%3Fliste%3D4",
       );
     } finally {
       session.userId = 1;

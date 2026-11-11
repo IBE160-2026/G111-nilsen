@@ -459,6 +459,26 @@ test("Versjon 2: handleliste fra lagret oppskrift", async ({ page }, testInfo) =
     .click();
   await expect(page.getByText("Velg minst én oppskrift for å lage en liste.")).toBeVisible();
   await expect(pickBox).not.toBeChecked();
+
+  // Lagre handlelisten: valgte oppskrifter og porsjoner lagres under et navn og kan åpnes igjen.
+  await pickBox.check();
+  await page.getByRole("textbox", { name: "Navn på listen" }).fill("E2E-liste");
+  await page.getByRole("button", { name: "Lagre handlelisten" }).click();
+  await expect(page.getByText("Handlelisten «E2E-liste» er lagret.")).toBeVisible();
+  const saved = page
+    .getByRole("heading", { name: "Lagrede handlelister" })
+    .locator("xpath=ancestor::section");
+  await expect(saved.getByRole("link", { name: "Åpne E2E-liste" })).toBeVisible();
+  await page.goto("/handleliste");
+  await saved.getByRole("link", { name: "Åpne E2E-liste" }).click();
+  await expect(page.getByText("Lagret liste: E2E-liste.")).toBeVisible();
+  await expect(pickBox).toBeChecked();
+  await saved.getByRole("button", { name: "Slett E2E-liste" }).click();
+  await page
+    .getByRole("dialog", { name: "Slette handlelisten?" })
+    .getByRole("button", { name: "Slett" })
+    .click();
+  await expect(page.getByText("Handlelisten «E2E-liste» er slettet.")).toBeVisible();
 });
 
 test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {

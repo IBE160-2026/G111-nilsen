@@ -1023,3 +1023,21 @@ slik at jeg finner oppskriften raskt og alltid starter med en tom liste.
 **Gitt** at jeg har valgt oppskrifter, endret porsjoner eller krysset av varer uten å lagre
 **Når** jeg går til en annen side og kommer tilbake
 **Så** er valgene, porsjonene, avkrysningene og søket nullstilt; lagrede avkrysninger for en uke og «Har hjemme» beholdes
+\n\n### Story 6.4g: Lagre handlelisten og knytte den til ukemenyen
+
+Som Ida,
+vil jeg lagre en handleliste og komme rett til handlelisten for gjeldende ukemeny,
+slik at ukemeny og handleliste henger sammen og jeg finner lister jeg har laget tidligere.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg åpner Handleliste
+**Så** er den for denne uka og bygget av ukemenyen, med «Forrige uke» og «Neste uke» og en lenke til ukemenyen for uka
+
+**Gitt** at jeg har valgt oppskrifter og porsjoner
+**Når** jeg skriver et navn og trykker «Lagre handlelisten»
+**Så** lagres valgene under navnet, samme navn erstatter listen som finnes, og den står under «Lagrede handlelister»
+
+**Gitt** en lagret handleliste
+**Når** jeg åpner den
+**Så** er oppskriftene og porsjonene valgt igjen, og jeg kan slette den etter en bekreftelse

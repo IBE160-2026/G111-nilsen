@@ -195,3 +195,38 @@ export const weekChecks = sqliteTable(
   },
   (table) => [uniqueIndex("week_checks_unique_idx").on(table.userId, table.week, table.itemKey)],
 );
+
+/**
+ * Lagret handleliste (Story 6.4g): et navn og de valgte oppskriftene med porsjoner. Samme navn
+ * (etter normalisering) per bruker er samme liste og erstattes ved ny lagring.
+ */
+export const shoppingLists = sqliteTable(
+  "shopping_lists",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    nameKey: text("name_key").notNull(),
+    createdAt: text("created_at").notNull(),
+    updatedAt: text("updated_at").notNull(),
+  },
+  (table) => [uniqueIndex("shopping_lists_user_name_key_unique").on(table.userId, table.nameKey)],
+);
+
+/** Oppskriftene i en lagret handleliste. Slettes med listen og med oppskriften. */
+export const shoppingListItems = sqliteTable(
+  "shopping_list_items",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    listId: integer("list_id")
+      .notNull()
+      .references(() => shoppingLists.id, { onDelete: "cascade" }),
+    recipeId: integer("recipe_id")
+      .notNull()
+      .references(() => recipes.id, { onDelete: "cascade" }),
+    servings: real("servings").notNull(),
+  },
+  (table) => [uniqueIndex("shopping_list_items_unique_idx").on(table.listId, table.recipeId)],
+);
