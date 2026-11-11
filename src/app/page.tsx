@@ -1,19 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { homeMessages as m } from "@/lib/messages";
+import { connection } from "next/server";
+import { Suspense } from "react";
+import EmptyState from "@/components/EmptyState";
+import { loginHref } from "@/components/LoginRequired";
+import { accountMessages, homeMessages as m } from "@/lib/messages";
+import { currentUserId } from "@/server/session";
 import styles from "./home.module.css";
 
 export const metadata: Metadata = { title: m.tabTitle };
 
 /**
  * Forsiden, `/`: en kort velkomst og snarveier til delene av appen. Importer-skjemaet ligger på
- * `/importer`. Siden henter ingen data, så den virker også uten innlogging.
+ * `/importer`. Uten innlogging står det øverst at man må lage konto eller logge inn.
  */
 export default function HomePage() {
   return (
     <div className={styles.root}>
       <h1>{m.heading}</h1>
       <p className={styles.lead}>{m.lead}</p>
+      <Suspense fallback={null}>
+        <GuestNotice />
+      </Suspense>
       <section aria-label={m.sectionLabel}>
         <ul role="list" className={styles.cards}>
           {m.cards.map((card, index) => (
@@ -30,5 +38,19 @@ export default function HomePage() {
         </ul>
       </section>
     </div>
+  );
+}
+
+/** Vises bare når ingen er logget inn: forklarer at det trengs konto, med knapper til begge. */
+async function GuestNotice() {
+  await connection();
+  if ((await currentUserId()) !== null) return null;
+  return (
+    <EmptyState
+      title={m.guestTitle}
+      description={m.guestBody}
+      action={{ href: loginHref("/"), label: accountMessages.login }}
+      secondaryAction={{ href: loginHref("/", "/ny-konto"), label: accountMessages.register }}
+    />
   );
 }

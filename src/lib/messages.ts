@@ -67,6 +67,9 @@ export const homeMessages = {
   heading: "RecipeMate",
   lead: "Hent oppskrifter fra nettet, skaler dem til riktig antall porsjoner, planlegg uka og få handlelisten.",
   sectionLabel: "Kom i gang",
+  guestTitle: "Du er ikke logget inn",
+  guestBody:
+    "Lag en konto eller logg inn for å lagre oppskrifter, planlegge uka og lage handleliste. Du kan hente og se en oppskrift uten konto.",
   cards: [
     {
       href: "/importer",

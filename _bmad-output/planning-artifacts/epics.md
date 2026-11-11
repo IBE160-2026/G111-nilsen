@@ -1002,5 +1002,8 @@ slik at jeg ikke starter midt i importskjemaet.
 **Gitt** at jeg åpner `/`
 **Så** ser jeg en kort velkomst og kort som leder til Hent en oppskrift, Oppskrifter, Ukemeny, Handleliste, Mapper og Favoritter
 
+**Gitt** at jeg ikke er logget inn
+**Så** står det øverst at jeg må lage konto eller logge inn, med knapper til begge
+
 **Gitt** at jeg trykker «Hent en oppskrift» eller «Importer» i menyen
 **Så** kommer jeg til importskjemaet på `/importer`
