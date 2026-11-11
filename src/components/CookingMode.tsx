@@ -3,7 +3,10 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import {
   convertLine,
+  findStepDurations,
+  formatCountdown,
   formatLine,
+  formatTimerLabel,
   ingredientsForStep,
   scaleLine,
   type RecipeLine,
@@ -15,6 +18,7 @@ import { isSelectedServings, validOriginalServings } from "@/lib/recipe-input";
 import { useGetSelectedServings, useGetUnitSystem } from "./SelectedServings";
 import { servingsText } from "./ServingStepper";
 import StepText from "./StepText";
+import { useStepTimers } from "./useStepTimers";
 import styles from "./CookingMode.module.css";
 
 type Props = {
@@ -176,6 +180,15 @@ function Session({
     lines,
   );
 
+  // Tider nevnt i steget (også i forslag som er flettet inn) blir knapper for tidtaker.
+  const stepText = [
+    ...(current.addedBefore ?? []),
+    current.text,
+    ...(current.addedAfter ?? []),
+  ].join(" ");
+  const durations = findStepDurations(stepText);
+  const { timers, now, start, remove } = useStepTimers();
+
   function previous() {
     setIndex((i) => Math.max(0, i - 1));
   }
@@ -212,10 +225,74 @@ function Session({
         aria-label={m.progress(index + 1, sorted.length)}
       />
 
+      {timers.length > 0 ? (
+        <section className={styles.timers} aria-label={m.timersLabel}>
+          {timers.map((timer) => {
+            const label = formatTimerLabel(timer.seconds);
+            const left = (timer.endsAt - now) / 1000;
+            return left > 0 ? (
+              <div key={timer.id} className={styles.timer}>
+                <span className={styles.timerFor}>{m.timerFor(timer.step, label)}</span>
+                <span role="timer" className={styles.countdown}>
+                  {formatCountdown(left)}
+                </span>
+                <button
+                  type="button"
+                  className={styles.timerButton}
+                  aria-label={m.timerCancelLabel(timer.step, label)}
+                  onClick={() => remove(timer.id)}
+                >
+                  {m.timerCancel}
+                </button>
+              </div>
+            ) : (
+              <div key={timer.id} className={`${styles.timer} ${styles.timerDone}`} role="alert">
+                <span className={styles.timerFor}>{m.timerFinished(timer.step)}</span>
+                <button
+                  type="button"
+                  className={styles.timerButton}
+                  aria-label={m.timerDismissLabel(timer.step)}
+                  onClick={() => remove(timer.id)}
+                >
+                  {m.timerDismiss}
+                </button>
+              </div>
+            );
+          })}
+        </section>
+      ) : null}
+
       <div className={styles.stepArea}>
         <p className={styles.step} aria-live="polite">
           <StepText step={sorted[index]} />
         </p>
+        {durations.length > 0 ? (
+          <ul role="list" className={styles.starts}>
+            {durations.map((duration) => {
+              const label = formatTimerLabel(duration.seconds);
+              const going = timers.some(
+                (timer) =>
+                  timer.step === index + 1 &&
+                  timer.seconds === duration.seconds &&
+                  timer.endsAt > now,
+              );
+              return (
+                <li key={duration.seconds}>
+                  <button
+                    type="button"
+                    className={styles.startTimer}
+                    aria-disabled={going ? true : undefined}
+                    onClick={() => {
+                      if (!going) start(index + 1, duration.seconds);
+                    }}
+                  >
+                    {m.timerStart(label)}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
         {stepLines.length > 0 ? (
           <section className={styles.stepIngredients} aria-labelledby="kokemodus-i-steget">
             <h3 id="kokemodus-i-steget" className={styles.stepIngredientsTitle}>

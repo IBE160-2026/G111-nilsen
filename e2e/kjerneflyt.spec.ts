@@ -327,6 +327,42 @@ test("Versjon 2: søk i Oppskrifter, halv porsjon og kokemodus", async ({ page }
   await expect(cooking).toBeHidden();
 });
 
+test("Versjon 2: tidtaker i kokemodus fra tid i steget", async ({ page }, testInfo) => {
+  // En egen oppskrift med en kort tid i steget, så testen ikke venter i minutter.
+  const title = `Tidtaker ${testInfo.project.name}`;
+  await page.goto("/ny");
+  await page.waitForLoadState("networkidle");
+  await field(page, "Tittel").fill(title);
+  await field(page, "Antall personer").fill("2");
+  await field(page, "Ingredienser").fill("2 egg\n1 dl melk");
+  await field(page, "Steg (valgfritt)").fill("Visp egg og melk.\nLa hvile i 2 sekunder.");
+  await page.getByRole("button", { name: "Lagre oppskrift" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+
+  await page.getByRole("button", { name: /^Åpne kokemodus/ }).click();
+  const cooking = page.getByRole("dialog", { name: /^Kokemodus/ });
+  await expect(cooking.getByRole("button", { name: /^Start tidtaker/ })).toHaveCount(0);
+  await cooking.getByRole("button", { name: "Neste" }).click();
+  await cooking.getByRole("button", { name: "Start tidtaker: 2 sek" }).click();
+  await expect(cooking.getByRole("timer")).toBeVisible();
+
+  // Tiden går ut: beskjeden kommer, og den kan lukkes.
+  await expect(cooking.getByRole("alert")).toHaveText(/Tiden er ute for steg 2/, {
+    timeout: 10_000,
+  });
+  await cooking.getByRole("button", { name: "Lukk beskjeden om steg 2" }).click();
+  await expect(cooking.getByRole("alert")).toHaveCount(0);
+
+  // Rydder: sletter oppskriften igjen.
+  await page.keyboard.press("Escape");
+  await expect(cooking).toBeHidden();
+  await page.getByRole("button", { name: `Slett ${title}` }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: /^Slett/ })
+    .click();
+});
+
 test("Versjon 2: handleliste fra lagret oppskrift", async ({ page }, testInfo) => {
   const data = DATA[testInfo.project.name as keyof typeof DATA];
   const { uj1 } = data;

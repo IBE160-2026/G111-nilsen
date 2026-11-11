@@ -885,3 +885,24 @@ slik at jeg planlegger middagene og handler alt på én gang.
 **Gitt** ukemenyen
 **Når** jeg trykker «Forrige uke» eller «Neste uke»
 **Så** vises den uka (mandag–søndag, norsk tid), og uten innlogging bes jeg logge inn og kommer tilbake til samme uke
+
+### Story 6.5: Tidtaker i kokemodus
+
+Som Ida,
+vil jeg starte en tidtaker fra en tid som står i steget,
+slik at jeg ikke må huske tiden eller bytte til en annen app mens jeg lager maten.
+
+**Akseptansekriterier:**
+
+**Gitt** at et steg i kokemodus nevner en tid, for eksempel «10–15 minutter», «1 time og 30 minutter» eller «30 sekunder»
+**Når** jeg trykker «Start tidtaker: …»
+**Så** teller en nedtelling ned fra tiden (den korteste ved et spenn), og den står synlig på alle steg
+
+**Gitt** at flere tider er nevnt, eller jeg starter tidtakere fra flere steg
+**Når** jeg starter dem
+**Så** kan flere gå samtidig, og jeg kan avbryte hver for seg
+
+**Gitt** at tiden er ute
+**Når** nedtellingen når null
+**Så** vises «Tiden er ute for steg N» som jeg kan lukke, og telefonen piper og vibrerer (der det støttes), og tidtakeren virker uten lyd og vibrasjon
+

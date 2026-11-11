@@ -90,3 +90,4 @@
 - [ ] 2026-11-10 [story 6.3](955-2026-11-11-01-00-00-story-6-3-notater.md) — Maja: push, start appen på nytt (migrasjon 0008), prøv notater og «Laget i dag»
 - [ ] 2026-11-10 [story 6.4](954-2026-11-11-02-30-00-story-6-4-ukemeny.md) — Maja: push, start appen på nytt (migrasjon 0009), prøv ukemenyen og handleliste for uka
 - [ ] 2026-11-10 [story 6.4 søk og meny](953-2026-11-11-03-15-00-story-6-4-sok-og-meny.md) — Maja: push, prøv søket i ukemenyen og den nye toppmenyen på mobil
+- [ ] 2026-11-11 [story 6.5](952-2026-11-11-12-30-00-story-6-5-tidtaker.md) — Maja: push, prøv tidtakeren i kokemodus på telefonen (lyd og vibrasjon)

@@ -320,6 +320,15 @@ export const cookingModeMessages = {
   inThisStep: "I dette steget",
   ingredients: "Ingredienser",
   ingredientsFor: (servings: string) => `Ingredienser for ${servings}`,
+  /** Tidtaker fra tider i steget (Story 6.5). */
+  timerStart: (label: string) => `Start tidtaker: ${label}`,
+  timersLabel: "Tidtakere",
+  timerFor: (step: number, label: string) => `Steg ${step} · ${label}`,
+  timerCancel: "Avbryt",
+  timerCancelLabel: (step: number, label: string) => `Avbryt tidtaker for steg ${step} (${label})`,
+  timerFinished: (step: number) => `Tiden er ute for steg ${step}`,
+  timerDismiss: "Lukk",
+  timerDismissLabel: (step: number) => `Lukk beskjeden om steg ${step}`,
 } as const;
 
 /** Søk og filtrering i Oppskrifter (Story 5.2). */
