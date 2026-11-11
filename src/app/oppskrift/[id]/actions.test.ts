@@ -46,6 +46,8 @@ const {
   setFavorite,
   fetchTimeFromSource,
   saveFitsFor,
+  addLabel,
+  removeLabel,
   saveNotes,
   markCookedToday,
 } = await import("./actions");
@@ -656,5 +658,42 @@ describe("saveNotes og markCookedToday (Story 6.3)", () => {
     session.userId = TEST_USER_ID;
     expect(await saveNotes(id, 5 as unknown as string)).toMatchObject({ ok: false });
     expect(await markCookedToday(0)).toMatchObject({ ok: false });
+  });
+});
+
+describe("addLabel og removeLabel (Story 6.7)", () => {
+  afterEach(() => {
+    session.userId = TEST_USER_ID;
+  });
+
+  it("legger til og fjerner for eieren, gir alle merkelappene, og oppdaterer /oppskrifter", async () => {
+    revalidatePath.mockClear();
+    expect(await addLabel(id, "Hverdag")).toEqual({ ok: true, labels: ["Hverdag"] });
+    expect(await addLabel(id, "Vegetar")).toEqual({ ok: true, labels: ["Hverdag", "Vegetar"] });
+    expect(revalidatePath).toHaveBeenCalledWith("/oppskrifter");
+    expect(await removeLabel(id, "hverdag")).toEqual({ ok: true, labels: ["Vegetar"] });
+  });
+
+  it("gir egne meldinger for tom, for lang og for mange", async () => {
+    expect(await addLabel(id, " ")).toEqual({ ok: false, message: "Skriv en merkelapp." });
+    expect(await addLabel(id, "x".repeat(31))).toEqual({
+      ok: false,
+      message: "En merkelapp kan være opptil 30 tegn.",
+    });
+    for (let i = 0; i < 10; i++) await addLabel(id, `m${i}`);
+    expect(await addLabel(id, "elleve")).toEqual({
+      ok: false,
+      message: "En oppskrift kan ha opptil 10 merkelapper. Fjern en først.",
+    });
+  });
+
+  it("avviser feil typer, ukjent id og en annens oppskrift", async () => {
+    expect(await addLabel(0, "a")).toMatchObject({ ok: false });
+    expect(await addLabel(id, 5 as unknown as string)).toMatchObject({ ok: false });
+    expect(await removeLabel(id, 5 as unknown as string)).toMatchObject({ ok: false });
+    expect(await removeLabel(0, "a")).toMatchObject({ ok: false });
+    session.userId = 99;
+    expect(await addLabel(id, "Hverdag")).toMatchObject({ ok: false });
+    expect(await removeLabel(id, "Hverdag")).toMatchObject({ ok: false });
   });
 });

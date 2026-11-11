@@ -9,7 +9,14 @@ vi.mock("@/app/oppskrift/[id]/actions", () => ({ setFavorite: vi.fn() }));
 
 afterEach(cleanup);
 
-function entry(id: number, title: string, folderName: string | null, fav: boolean, ing: string[]) {
+function entry(
+  id: number,
+  title: string,
+  folderName: string | null,
+  fav: boolean,
+  ing: string[],
+  labels: string[] = [],
+) {
   return {
     id,
     title,
@@ -18,7 +25,8 @@ function entry(id: number, title: string, folderName: string | null, fav: boolea
     savedAt: "2026-11-10T10:00:00.000Z",
     isFavorite: fav,
     folderName,
-    searchText: buildSearchText([title, folderName, ...ing]),
+    labels,
+    searchText: buildSearchText([title, folderName, ...labels, ...ing]),
   } satisfies CollectionEntry;
 }
 
@@ -84,5 +92,41 @@ describe("CollectionBrowser", () => {
     render(<CollectionBrowser entries={entries} />);
     await user.type(search(), "melk{Enter}");
     expect(titles()).toEqual(["Pannekaker", "Kjøttboller"]);
+  });
+});
+
+describe("merkelapper (Story 6.7)", () => {
+  const labelled = [
+    entry(1, "Taco", null, false, ["kjøttdeig"], ["Hverdag", "Vegetar"]),
+    entry(2, "Lapskaus", null, false, ["kjøtt"], ["Helg"]),
+    entry(3, "Suppe", null, false, ["løk"], ["hverdag"]),
+    entry(4, "Pannekaker", null, false, ["egg"]),
+  ];
+
+  it("viser merkelappene på kortene og et valg per merkelapp, hver bare én gang", () => {
+    render(<CollectionBrowser entries={labelled} />);
+    const select = screen.getByLabelText("Merkelapp");
+    expect(Array.from(select.querySelectorAll("option")).map((o) => o.textContent)).toEqual([
+      "Alle merkelapper",
+      "Helg",
+      "Hverdag",
+      "Vegetar",
+    ]);
+    expect(screen.getAllByRole("list", { name: "Merkelapper" })).toHaveLength(3);
+  });
+
+  it("søket finner merkelapper, og valget filtrerer uavhengig av store og små bokstaver", async () => {
+    const user = userEvent.setup();
+    render(<CollectionBrowser entries={labelled} />);
+    await user.type(screen.getByLabelText("Søk i oppskrifter"), "vegetar");
+    expect(titles()).toEqual(["Taco"]);
+    await user.clear(screen.getByLabelText("Søk i oppskrifter"));
+    await user.selectOptions(screen.getByLabelText("Merkelapp"), "Hverdag");
+    expect(titles()).toEqual(["Taco", "Suppe"]);
+  });
+
+  it("viser ikke merkelappvalget når ingen oppskrift har merkelapper", () => {
+    render(<CollectionBrowser entries={entries} />);
+    expect(screen.queryByLabelText("Merkelapp")).not.toBeInTheDocument();
   });
 });

@@ -7,6 +7,9 @@ import {
   createManualRecipe,
   markRecipeCooked,
   setRecipeFitsFor,
+  addRecipeLabel,
+  removeRecipeLabel,
+  LABELS_MAX,
   setRecipeNotes,
   listShoppingRecipes,
   getRecipeFor,
@@ -866,5 +869,92 @@ describe("notater og sist laget (Story 6.3)", () => {
       2,
     ]);
     expect(markRecipeCooked(999, db)).toMatchObject({ ok: false, error: { kind: "not_found" } });
+  });
+});
+
+describe("merkelapper (Story 6.7)", () => {
+  function saved(db: ReturnType<typeof createTestDb>): number {
+    const created = createManualRecipe(TEST_USER_ID, input, db);
+    if (!created.ok) throw new Error("feil");
+    return created.value.id;
+  }
+
+  it("legger til trimmet, uten dobbelt (uavhengig av store og små bokstaver), og i rekkefølge", () => {
+    const db = createTestDb();
+    const id = saved(db);
+    expect(addRecipeLabel(id, "  Hverdag ", db)).toEqual({
+      ok: true,
+      value: { labels: ["Hverdag"] },
+    });
+    expect(addRecipeLabel(id, "ekstra   god", db)).toEqual({
+      ok: true,
+      value: { labels: ["Hverdag", "ekstra god"] },
+    });
+    expect(addRecipeLabel(id, "HVERDAG", db)).toEqual({
+      ok: true,
+      value: { labels: ["Hverdag", "ekstra god"] },
+    });
+    const read = getRecipe(id, db);
+    expect(read.ok && read.value.labels).toEqual(["Hverdag", "ekstra god"]);
+  });
+
+  it("avviser tom, for lang og ikke-tekst, og for mange merkelapper", () => {
+    const db = createTestDb();
+    const id = saved(db);
+    for (const label of ["", "   ", 5, null])
+      expect(addRecipeLabel(id, label, db)).toEqual({
+        ok: false,
+        error: { kind: "validation", detail: "label_required" },
+      });
+    expect(addRecipeLabel(id, "x".repeat(31), db)).toEqual({
+      ok: false,
+      error: { kind: "validation", detail: "label_too_long" },
+    });
+    expect(addRecipeLabel(id, "x".repeat(30), db).ok).toBe(true);
+    for (let i = 1; i < LABELS_MAX; i++) expect(addRecipeLabel(id, `m${i}`, db).ok).toBe(true);
+    expect(addRecipeLabel(id, "en for mye", db)).toEqual({
+      ok: false,
+      error: { kind: "validation", detail: "limit" },
+    });
+    // En som finnes fra før gir ikke feil selv om oppskriften er full.
+    expect(addRecipeLabel(id, "M1", db).ok).toBe(true);
+  });
+
+  it("gir not_found for ukjent eller ulagret oppskrift", () => {
+    const db = createTestDb();
+    const id = saved(db);
+    expect(addRecipeLabel(999, "a", db)).toMatchObject({ ok: false, error: { kind: "not_found" } });
+    expect(addRecipeLabel(0, "a", db)).toMatchObject({ ok: false, error: { kind: "not_found" } });
+    db.$client.prepare("update recipes set saved_at = null").run();
+    expect(addRecipeLabel(id, "a", db)).toMatchObject({ ok: false, error: { kind: "not_found" } });
+  });
+
+  it("fjerner en merkelapp (uavhengig av store og små bokstaver), og ukjent skjer ingenting", () => {
+    const db = createTestDb();
+    const id = saved(db);
+    addRecipeLabel(id, "Hverdag", db);
+    addRecipeLabel(id, "Vegetar", db);
+    expect(removeRecipeLabel(id, "hverdag", db)).toEqual({
+      ok: true,
+      value: { labels: ["Vegetar"] },
+    });
+    expect(removeRecipeLabel(id, "finnes ikke", db)).toEqual({
+      ok: true,
+      value: { labels: ["Vegetar"] },
+    });
+    expect(removeRecipeLabel(0, "a", db)).toMatchObject({ ok: false });
+  });
+
+  it("merkelappene er med i samlingen og i søketeksten, og følger oppskriften når den slettes", () => {
+    const db = createTestDb();
+    const id = saved(db);
+    addRecipeLabel(id, "Vegetar", db);
+    const collection = listCollection(TEST_USER_ID, db);
+    expect(collection.ok && collection.value[0]).toMatchObject({
+      labels: ["Vegetar"],
+      searchText: expect.stringContaining("vegetar"),
+    });
+    db.$client.prepare("delete from recipes where id = ?").run(id);
+    expect(db.$client.prepare("select count(*) as n from recipe_labels").get()).toEqual({ n: 0 });
   });
 });

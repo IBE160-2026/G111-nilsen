@@ -4,6 +4,9 @@ import { createTestDb } from "../client";
 import { assignRecipeToFolder, insertFolder } from "./folder-repository";
 import {
   deleteRecipeById,
+  deleteRecipeLabel,
+  insertRecipeLabel,
+  listRecipeLabels,
   deleteStaleUnsavedRecipes,
   findRecipeById,
   findRecipeOwner,
@@ -303,6 +306,7 @@ describe("listSavedRecipes", () => {
         isFavorite: false,
         folderName: null,
         totalMinutes: null,
+        labels: [],
       },
     ]);
   });
@@ -535,6 +539,7 @@ describe("favoritter (Story 3.4)", () => {
       isFavorite: true,
       folderName: null,
       totalMinutes: null,
+      labels: [],
     });
   });
 
@@ -704,5 +709,60 @@ describe("eierskap (Story 5.13)", () => {
     const id = insertRecipe(db, { ...base, sourceUrl: url, userId: null });
     expect(findRecipeBySourceUrl(db, url, null)).toEqual({ id, saved: false });
     expect(findRecipeBySourceUrl(db, url, TEST_USER_ID)).toBeNull();
+  });
+});
+
+describe("merkelapper (Story 6.7)", () => {
+  const savedRecipe = (db: ReturnType<typeof createTestDb>, title = "Pannekaker") =>
+    insertRecipe(db, { ...base, title, savedAt: "2026-11-09T10:00:00.000Z" });
+
+  it("legger til i rekkefølge, ignorerer samme nøkkel, og leser dem tilbake", () => {
+    const db = createTestDb();
+    const id = savedRecipe(db);
+    expect(insertRecipeLabel(db, id, "Hverdag", "hverdag", 10)).toBe("ok");
+    expect(insertRecipeLabel(db, id, "Vegetar", "vegetar", 10)).toBe("ok");
+    expect(insertRecipeLabel(db, id, "HVERDAG", "hverdag", 10)).toBe("ok");
+    expect(listRecipeLabels(db, id)).toEqual(["Hverdag", "Vegetar"]);
+    expect(findRecipeById(db, id)?.labels).toEqual(["Hverdag", "Vegetar"]);
+    expect(count(db, "recipe_labels")).toBe(2);
+  });
+
+  it("stopper ved grensen, men tar imot en som finnes fra før", () => {
+    const db = createTestDb();
+    const id = savedRecipe(db);
+    insertRecipeLabel(db, id, "a", "a", 2);
+    insertRecipeLabel(db, id, "b", "b", 2);
+    expect(insertRecipeLabel(db, id, "c", "c", 2)).toBe("limit");
+    expect(insertRecipeLabel(db, id, "A", "a", 2)).toBe("ok");
+    expect(listRecipeLabels(db, id)).toEqual(["a", "b"]);
+  });
+
+  it("gir «missing» for ukjent og ulagret oppskrift", () => {
+    const db = createTestDb();
+    const unsaved = insertRecipe(db, { ...base, savedAt: null });
+    expect(insertRecipeLabel(db, 999, "a", "a", 10)).toBe("missing");
+    expect(insertRecipeLabel(db, unsaved, "a", "a", 10)).toBe("missing");
+    expect(count(db, "recipe_labels")).toBe(0);
+  });
+
+  it("fjerner på nøkkel og sier om noe ble fjernet", () => {
+    const db = createTestDb();
+    const id = savedRecipe(db);
+    insertRecipeLabel(db, id, "Hverdag", "hverdag", 10);
+    expect(deleteRecipeLabel(db, id, "finnes-ikke")).toBe(false);
+    expect(deleteRecipeLabel(db, id, "hverdag")).toBe(true);
+    expect(listRecipeLabels(db, id)).toEqual([]);
+  });
+
+  it("samlingen får merkelappene per oppskrift, tom liste uten, og de slettes sammen med oppskriften", () => {
+    const db = createTestDb();
+    const a = savedRecipe(db, "A");
+    const b = savedRecipe(db, "B");
+    insertRecipeLabel(db, a, "Helg", "helg", 10);
+    const list = listSavedRecipes(db, TEST_USER_ID);
+    expect(list.find((r) => r.id === a)?.labels).toEqual(["Helg"]);
+    expect(list.find((r) => r.id === b)?.labels).toEqual([]);
+    deleteRecipeById(db, a);
+    expect(count(db, "recipe_labels")).toBe(0);
   });
 });

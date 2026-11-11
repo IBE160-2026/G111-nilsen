@@ -1,6 +1,7 @@
 import "server-only";
 import {
   buildSearchText,
+  normalizeSearch,
   isRecipeMinutes,
   parseLine,
   type CollectionEntry,
@@ -14,11 +15,14 @@ import { appError, err, ok, type Result } from "@/lib/result";
 import { getDb, type Db } from "../db/client";
 import {
   deleteRecipeById,
+  deleteRecipeLabel,
   deleteStaleUnsavedRecipes,
   findRecipeById,
   findRecipeOwner,
   insertRecipe,
+  insertRecipeLabel,
   listFavoriteRecipes,
+  listRecipeLabels,
   listSavedIngredientNames,
   listSavedRecipes,
   markCooked,
@@ -243,7 +247,7 @@ export function getRecipe(id: number, db: Db = getDb()): Result<Recipe> {
 
 /**
  * Oppskriftene i samlingen, sist lagret først, hver med søketekst (Story 5.2): tittel, kilde,
- * mappe og ingrediensnavn.
+ * mappe, merkelapper (Story 6.7) og ingrediensnavn.
  */
 export function listCollection(userId: number, db: Db = getDb()): Result<CollectionEntry[]> {
   const names = listSavedIngredientNames(db, userId);
@@ -254,6 +258,7 @@ export function listCollection(userId: number, db: Db = getDb()): Result<Collect
         recipe.title,
         recipe.sourceName,
         recipe.folderName,
+        ...(recipe.labels ?? []),
         ...(names.get(recipe.id) ?? []),
       ]),
     })),
@@ -378,4 +383,42 @@ export function markRecipeCooked(
   const at = now().toISOString();
   const count = markCooked(db, id, at);
   return count === null ? err(appError("not_found")) : ok({ lastCookedAt: at, cookedCount: count });
+}
+
+/** Lengste merkelapp og flest merkelapper på én oppskrift (Story 6.7). */
+export const LABEL_MAX_LENGTH = 30;
+export const LABELS_MAX = 10;
+
+/**
+ * Legger en merkelapp på en lagret oppskrift (Story 6.7). Teksten trimmes (flere mellomrom blir
+ * ett). Tom tekst gir `validation` (`label_required`), over 30 tegn `label_too_long`, og en
+ * oppskrift med 10 merkelapper `limit`. Samme merkelapp (uavhengig av store og små bokstaver)
+ * en gang til endrer ingenting. Ukjent eller ulagret oppskrift gir `not_found`. Svarer med alle
+ * merkelappene.
+ */
+export function addRecipeLabel(
+  id: number,
+  label: unknown,
+  db: Db = getDb(),
+): Result<{ labels: string[] }> {
+  if (!isRecipeId(id)) return err(appError("not_found"));
+  if (typeof label !== "string") return err(appError("validation", "label_required"));
+  const clean = label.normalize("NFC").replace(/\s+/g, " ").trim();
+  if (clean === "") return err(appError("validation", "label_required"));
+  if (clean.length > LABEL_MAX_LENGTH) return err(appError("validation", "label_too_long"));
+  const outcome = insertRecipeLabel(db, id, clean, normalizeSearch(clean), LABELS_MAX);
+  if (outcome === "missing") return err(appError("not_found"));
+  if (outcome === "limit") return err(appError("validation", "limit"));
+  return ok({ labels: listRecipeLabels(db, id) });
+}
+
+/** Tar en merkelapp av en oppskrift (Story 6.7). Svarer med de som er igjen. */
+export function removeRecipeLabel(
+  id: number,
+  label: unknown,
+  db: Db = getDb(),
+): Result<{ labels: string[] }> {
+  if (!isRecipeId(id) || typeof label !== "string") return err(appError("not_found"));
+  deleteRecipeLabel(db, id, normalizeSearch(label));
+  return ok({ labels: listRecipeLabels(db, id) });
 }

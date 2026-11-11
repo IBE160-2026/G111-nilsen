@@ -94,6 +94,8 @@ export type Recipe = {
   notes?: string | null;
   /** Hvem oppskriften passer til etter brukerens egen vurdering; `null` eller utelatt = ikke oppgitt. */
   fitsFor?: string | null;
+  /** Merkelapper (Story 6.7), i den rekkefølgen de ble lagt til. */
+  labels?: readonly string[];
   /** Sist laget, ISO-tid (Story 6.3); `null` eller utelatt = aldri. */
   lastCookedAt?: string | null;
   /** Antall ganger laget (Story 6.3). */
@@ -112,6 +114,8 @@ export type RecipeSummary = Pick<
 > & {
   savedAt: string;
   folderName: string | null;
+  /** Merkelapper (Story 6.7). */
+  labels?: readonly string[];
 };
 
 /** En mappe for oppskrifter (Story 3.3). `name` er navnet slik brukeren skrev det. */

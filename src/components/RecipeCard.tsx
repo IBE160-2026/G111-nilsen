@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { setFavorite } from "@/app/oppskrift/[id]/actions";
 import type { RecipeSummary } from "@/domain";
+import { labelMessages } from "@/lib/messages";
 import { sourceLabel } from "@/lib/source-label";
 import FavoriteButton from "./FavoriteButton";
 import RecipeTime from "./RecipeTime";
@@ -40,6 +41,15 @@ export default function RecipeCard({
             </>
           ) : null}
         </p>
+        {recipe.labels !== undefined && recipe.labels.length > 0 ? (
+          <ul role="list" className={styles.labels} aria-label={labelMessages.heading}>
+            {recipe.labels.map((label) => (
+              <li key={label} className={styles.label}>
+                {label}
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </Link>
       <FavoriteButton
         className={styles.favorite}

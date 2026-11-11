@@ -11,16 +11,18 @@ import {
   type SuggestionsActionResult,
 } from "@/app/_shared/action-result";
 import { folderFailure, folderIdSchema, parseFolderName } from "@/app/_shared/folder-action";
-import { notesMessages, recipeTimeMessages } from "@/lib/messages";
+import { labelMessages, notesMessages, recipeTimeMessages } from "@/lib/messages";
 import { parseRecipeId } from "@/lib/recipe-id";
 import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import { moveRecipeToFolder, moveRecipeToNewFolder } from "@/server/services/folder-service";
 import { refreshTimeFromSource } from "@/server/services/import-service";
 import { currentUserId } from "@/server/session";
 import {
+  addRecipeLabel,
   canAccessRecipe,
   deleteRecipe,
   markRecipeCooked,
+  removeRecipeLabel,
   setRecipeFitsFor,
   setRecipeNotes,
   saveRecipeToCollection,
@@ -359,6 +361,49 @@ export async function markCookedToday(
     return { ok: true, ...result.value };
   } catch (error) {
     console.error("Kunne ikke merke oppskriften som laget", error);
+    return actionFailure("unknown");
+  }
+}
+
+/** Svaret fra merkelapp-handlingene: alle merkelappene etterpå, eller en norsk melding. */
+export type LabelActionResult = { ok: true; labels: string[] } | { ok: false; message: string };
+
+/** Legger en merkelapp på en lagret oppskrift (Story 6.7). */
+export async function addLabel(id: number, label: string): Promise<LabelActionResult> {
+  if (!idSchema.safeParse(id).success) return actionFailure("not_found");
+  if (typeof label !== "string") return { ok: false, message: labelMessages.required };
+  try {
+    if (!(await mayChange(id))) return actionFailure("not_found");
+    const result = addRecipeLabel(id, label);
+    if (!result.ok) {
+      if (result.error.kind === "validation") {
+        const detail = result.error.detail;
+        if (detail === "label_required") return { ok: false, message: labelMessages.required };
+        if (detail === "label_too_long") return { ok: false, message: labelMessages.tooLong };
+        if (detail === "limit") return { ok: false, message: labelMessages.limit };
+      }
+      return actionFailure(result.error.kind);
+    }
+    revalidatePath("/oppskrifter");
+    return { ok: true, labels: result.value.labels };
+  } catch (error) {
+    console.error("Kunne ikke legge til merkelappen", error);
+    return actionFailure("unknown");
+  }
+}
+
+/** Tar en merkelapp av en oppskrift (Story 6.7). */
+export async function removeLabel(id: number, label: string): Promise<LabelActionResult> {
+  if (!idSchema.safeParse(id).success) return actionFailure("not_found");
+  if (typeof label !== "string") return actionFailure("validation");
+  try {
+    if (!(await mayChange(id))) return actionFailure("not_found");
+    const result = removeRecipeLabel(id, label);
+    if (!result.ok) return actionFailure(result.error.kind);
+    revalidatePath("/oppskrifter");
+    return { ok: true, labels: result.value.labels };
+  } catch (error) {
+    console.error("Kunne ikke fjerne merkelappen", error);
     return actionFailure("unknown");
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
-import { filterCollection, type CollectionEntry } from "@/domain";
+import { filterCollection, normalizeSearch, type CollectionEntry } from "@/domain";
 import { collectionFilterMessages as m } from "@/lib/messages";
 import RecipeCard from "./RecipeCard";
 import styles from "./CollectionBrowser.module.css";
@@ -15,6 +15,7 @@ export default function CollectionBrowser({ entries }: { entries: readonly Colle
   const [query, setQuery] = useState("");
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [folder, setFolder] = useState<string | null>(null);
+  const [label, setLabel] = useState<string | null>(null);
 
   const folders = useMemo(
     () =>
@@ -25,15 +26,26 @@ export default function CollectionBrowser({ entries }: { entries: readonly Colle
       ].sort((a, b) => a.localeCompare(b, "nb")),
     [entries],
   );
+  // Hver merkelapp en gang, med den skrivemåten som kom først, i norsk rekkefølge.
+  const labels = useMemo(() => {
+    const byKey = new Map<string, string>();
+    for (const entry of entries)
+      for (const text of entry.labels ?? []) {
+        const key = normalizeSearch(text);
+        if (!byKey.has(key)) byKey.set(key, text);
+      }
+    return [...byKey.values()].sort((a, b) => a.localeCompare(b, "nb"));
+  }, [entries]);
   const shown = useMemo(
-    () => filterCollection(entries, { query, onlyFavorites, folder }),
-    [entries, query, onlyFavorites, folder],
+    () => filterCollection(entries, { query, onlyFavorites, folder, label }),
+    [entries, query, onlyFavorites, folder, label],
   );
 
   function reset() {
     setQuery("");
     setOnlyFavorites(false);
     setFolder(null);
+    setLabel(null);
   }
 
   return (
@@ -69,6 +81,28 @@ export default function CollectionBrowser({ entries }: { entries: readonly Colle
               >
                 <option value="">{m.allFolders}</option>
                 {folders.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
+          {labels.length > 0 ? (
+            <div className={styles.field}>
+              <label htmlFor={`${id}-merkelapp`} className={styles.label}>
+                {m.labelLabel}
+              </label>
+              <select
+                id={`${id}-merkelapp`}
+                className={styles.input}
+                value={label ?? ""}
+                onChange={(event) =>
+                  setLabel(event.target.value === "" ? null : event.target.value)
+                }
+              >
+                <option value="">{m.allLabels}</option>
+                {labels.map((name) => (
                   <option key={name} value={name}>
                     {name}
                   </option>

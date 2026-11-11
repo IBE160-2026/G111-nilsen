@@ -391,6 +391,21 @@ export const weekMessages = {
   thisWeekShort: "denne uka",
 } as const;
 
+/** Merkelapper på oppskriften (Story 6.7). */
+export const labelMessages = {
+  heading: "Merkelapper",
+  inputLabel: "Ny merkelapp",
+  inputHint: "For eksempel hverdag eller vegetar",
+  add: "Legg til",
+  none: "Ingen merkelapper ennå.",
+  removeFor: (label: string) => `Fjern merkelappen ${label}`,
+  added: (label: string) => `Merkelappen ${label} er lagt til.`,
+  removed: (label: string) => `Merkelappen ${label} er fjernet.`,
+  required: "Skriv en merkelapp.",
+  tooLong: "En merkelapp kan være opptil 30 tegn.",
+  limit: "En oppskrift kan ha opptil 10 merkelapper. Fjern en først.",
+} as const;
+
 /** Notater og «sist laget» (Story 6.3). */
 export const notesMessages = {
   heading: "Notater",
@@ -490,10 +505,12 @@ export const cookingModeMessages = {
 /** Søk og filtrering i Oppskrifter (Story 5.2). */
 export const collectionFilterMessages = {
   searchLabel: "Søk i oppskrifter",
-  searchHint: "Skriv for eksempel tittel eller ingrediens",
+  searchHint: "Skriv for eksempel tittel, merkelapp eller ingrediens",
   onlyFavorites: "Bare favoritter",
   folderLabel: "Mappe",
   allFolders: "Alle mapper",
+  labelLabel: "Merkelapp",
+  allLabels: "Alle merkelapper",
   noMatch: "Ingen oppskrifter passer.",
   noMatchHint: "Prøv et annet søkeord, eller fjern et filter.",
   reset: "Nullstill søk",

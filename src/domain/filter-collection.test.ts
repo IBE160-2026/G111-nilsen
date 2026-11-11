@@ -85,3 +85,43 @@ describe("filterCollection", () => {
     expect(all).toEqual(copy);
   });
 });
+
+describe("merkelapper (Story 6.7)", () => {
+  const withLabels = (title: string, labels: string[]) => ({
+    id: 1,
+    title,
+    sourceName: null,
+    sourceUrl: null,
+    savedAt: "2026-11-10T10:00:00.000Z",
+    isFavorite: false,
+    folderName: null,
+    totalMinutes: null,
+    labels,
+    searchText: buildSearchText([title, ...labels]),
+  });
+  const list = [
+    withLabels("Taco", ["Hverdag", "Vegetar"]),
+    withLabels("Lapskaus", ["Helg"]),
+    withLabels("Suppe", []),
+  ];
+
+  it("søket finner merkelapper", () => {
+    expect(
+      filterCollection(list, { query: "vegetar", onlyFavorites: false, folder: null }).map(
+        (e) => e.title,
+      ),
+    ).toEqual(["Taco"]);
+  });
+
+  it("filteret velger oppskrifter med merkelappen, uavhengig av store og små bokstaver", () => {
+    const titles = (label: string | null | undefined) =>
+      filterCollection(list, { query: "", onlyFavorites: false, folder: null, label }).map(
+        (e) => e.title,
+      );
+    expect(titles("HVERDAG")).toEqual(["Taco"]);
+    expect(titles("Helg")).toEqual(["Lapskaus"]);
+    expect(titles("finnes ikke")).toEqual([]);
+    expect(titles(null)).toEqual(["Taco", "Lapskaus", "Suppe"]);
+    expect(titles(undefined)).toHaveLength(3);
+  });
+});

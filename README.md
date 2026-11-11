@@ -91,6 +91,7 @@ Kravene står i PRD §4.7 (FR-28–FR-39), og hver story har en spec i `_bmad-ou
 - **Passer til (6.6b):** feltet «Passer til» i notatkortet, for din egen vurdering («2 sultne»). Endrer ikke mengdene.
 - **Utskrift (6.6):** «Skriv ut» ved tittelen åpner utskriftsdialogen. Utskriften har tittel, kilde (med adresse), antall porsjoner, ingredienser med avkrysningsbokser og steg i én kolonne, uten meny, knapper, forslag og notater.
 - **Tidtaker i kokemodus (6.5):** tider i stegteksten («10–15 minutter», «1 time og 30 minutter», «en halv time») blir knapper som starter en nedtelling. Store knapper og tall, flere tidtakere samtidig, «−1/+1/+5 min» for å justere, og når tiden er ute: beskjed, gjentatte pip, vibrasjon, varsel fra systemet (hvis tillatt) og blinkende fanetittel.
+- **Merkelapper (6.7):** i oppskriften kan du skrive egne merkelapper (høyst 10, 30 tegn hver). De vises på kortene i Oppskrifter, søket finner dem, og «Merkelapp» filtrerer.
 - **Ukemeny (6.4):** eget punkt i toppmenyen. Søk etter en lagret oppskrift og velg den, så legges den på dagen med en gang (antall porsjoner skrives først hvis det skal være annerledes), bla mellom uker og lag én handleliste for hele uka.
 
 ## Kryss av under matlaging

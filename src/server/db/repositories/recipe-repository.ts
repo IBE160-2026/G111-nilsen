@@ -10,7 +10,7 @@ import type {
   UnitKey,
 } from "@/domain";
 import type { Db } from "../client";
-import { folders, ingredientLines, recipes, steps, suggestions } from "../schema";
+import { folders, ingredientLines, recipeLabels, recipes, steps, suggestions } from "../schema";
 
 /** En ingredienslinje klar til lagring (tolket, ikke skalert). */
 export type NewIngredientLine = Omit<RecipeLine, "id">;
@@ -268,6 +268,13 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
     .orderBy(asc(suggestions.id))
     .all();
 
+  const labelRows = db
+    .select({ label: recipeLabels.label })
+    .from(recipeLabels)
+    .where(eq(recipeLabels.recipeId, id))
+    .orderBy(asc(recipeLabels.id))
+    .all();
+
   return {
     id: row.id,
     title: row.title,
@@ -277,6 +284,7 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
     totalMinutes: row.totalMinutes,
     notes: row.notes,
     fitsFor: row.fitsFor,
+    labels: labelRows.map((entry) => entry.label),
     lastCookedAt: row.lastCookedAt,
     cookedCount: row.cookedCount,
     selectedServings: row.selectedServings,
@@ -316,6 +324,7 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
  */
 function selectSavedSummaries(db: Db, userId: number, extra?: SQL): RecipeSummary[] {
   const saved = and(isNotNull(recipes.savedAt), eq(recipes.userId, userId));
+  const labels = listSavedLabels(db, userId);
   return db
     .select({
       id: recipes.id,
@@ -332,7 +341,81 @@ function selectSavedSummaries(db: Db, userId: number, extra?: SQL): RecipeSummar
     .where(extra === undefined ? saved : and(saved, extra))
     .orderBy(desc(recipes.savedAt), desc(recipes.id))
     .all()
-    .flatMap((row) => (row.savedAt === null ? [] : [{ ...row, savedAt: row.savedAt }]));
+    .flatMap((row) =>
+      row.savedAt === null
+        ? []
+        : [{ ...row, savedAt: row.savedAt, labels: labels.get(row.id) ?? [] }],
+    );
+}
+
+/** Merkelappene på alle brukerens lagrede oppskrifter i én spørring, nøklet på oppskrifts-id. */
+export function listSavedLabels(db: Db, userId: number): Map<number, string[]> {
+  const rows = db
+    .select({ recipeId: recipeLabels.recipeId, label: recipeLabels.label })
+    .from(recipeLabels)
+    .innerJoin(recipes, eq(recipeLabels.recipeId, recipes.id))
+    .where(and(isNotNull(recipes.savedAt), eq(recipes.userId, userId)))
+    .orderBy(asc(recipeLabels.recipeId), asc(recipeLabels.id))
+    .all();
+  const labels = new Map<number, string[]>();
+  for (const row of rows) {
+    const list = labels.get(row.recipeId);
+    if (list) list.push(row.label);
+    else labels.set(row.recipeId, [row.label]);
+  }
+  return labels;
+}
+
+/** Merkelappene på én lagret oppskrift, i den rekkefølgen de ble lagt til. */
+export function listRecipeLabels(db: Db, recipeId: number): string[] {
+  return db
+    .select({ label: recipeLabels.label })
+    .from(recipeLabels)
+    .where(eq(recipeLabels.recipeId, recipeId))
+    .orderBy(asc(recipeLabels.id))
+    .all()
+    .map((row) => row.label);
+}
+
+/**
+ * Legger en merkelapp på en lagret oppskrift. Finnes den fra før (samme `labelKey`), skjer
+ * ingenting. Gir `"missing"` når oppskriften ikke finnes eller ikke er lagret, `"limit"` når den
+ * allerede har `max` merkelapper, ellers `"ok"`.
+ */
+export function insertRecipeLabel(
+  db: Db,
+  recipeId: number,
+  label: string,
+  labelKey: string,
+  max: number,
+): "ok" | "missing" | "limit" {
+  return db.transaction((tx) => {
+    const recipe = tx
+      .select({ id: recipes.id })
+      .from(recipes)
+      .where(and(eq(recipes.id, recipeId), isNotNull(recipes.savedAt)))
+      .get();
+    if (!recipe) return "missing";
+    const existing = tx
+      .select({ id: recipeLabels.id, labelKey: recipeLabels.labelKey })
+      .from(recipeLabels)
+      .where(eq(recipeLabels.recipeId, recipeId))
+      .all();
+    if (existing.some((row) => row.labelKey === labelKey)) return "ok";
+    if (existing.length >= max) return "limit";
+    tx.insert(recipeLabels).values({ recipeId, label, labelKey }).run();
+    return "ok";
+  });
+}
+
+/** Tar en merkelapp av en oppskrift. `false` når den ikke fantes. */
+export function deleteRecipeLabel(db: Db, recipeId: number, labelKey: string): boolean {
+  return (
+    db
+      .delete(recipeLabels)
+      .where(and(eq(recipeLabels.recipeId, recipeId), eq(recipeLabels.labelKey, labelKey)))
+      .run().changes > 0
+  );
 }
 
 /**

@@ -329,6 +329,47 @@ test("Versjon 2: søk i Oppskrifter, halv porsjon og kokemodus", async ({ page }
   await expect(cooking).toBeHidden();
 });
 
+test("Versjon 2: merkelapper settes på oppskriften og brukes i søk og filter", async ({
+  page,
+}, testInfo) => {
+  const { uj1 } = DATA[testInfo.project.name as keyof typeof DATA];
+  const label = `Hverdagsmat ${testInfo.project.name}`.slice(0, 30);
+
+  await page.goto("/oppskrifter");
+  await page
+    .getByRole("link", { name: new RegExp(uj1.title) })
+    .first()
+    .click();
+  await expect(page.getByRole("heading", { level: 1, name: uj1.title })).toBeVisible();
+
+  const field = page.getByLabel("Ny merkelapp");
+  await field.fill(label);
+  await page.getByRole("button", { name: "Legg til", exact: true }).click();
+  await expect(page.getByRole("button", { name: `Fjern merkelappen ${label}` })).toBeVisible();
+  // En lik merkelapp med andre store og små bokstaver blir ikke lagt til to ganger.
+  await field.fill(label.toUpperCase());
+  await field.press("Enter");
+  await expect(page.getByRole("button", { name: /^Fjern merkelappen/ })).toHaveCount(1);
+
+  await page.goto("/oppskrifter");
+  await expect(page.getByRole("list", { name: "Merkelapper" }).getByText(label)).toBeVisible();
+
+  const search = page.getByLabel("Søk i oppskrifter");
+  await search.fill(label.toLowerCase());
+  await expect(page.getByRole("link", { name: new RegExp(uj1.title) })).toHaveCount(1);
+  await search.fill("");
+  await page.getByLabel("Merkelapp", { exact: true }).selectOption(label);
+  await expect(page.getByRole("link", { name: new RegExp(uj1.title) })).toHaveCount(1);
+  await page.getByLabel("Merkelapp", { exact: true }).selectOption("");
+
+  await page
+    .getByRole("link", { name: new RegExp(uj1.title) })
+    .first()
+    .click();
+  await page.getByRole("button", { name: `Fjern merkelappen ${label}` }).click();
+  await expect(page.getByText("Ingen merkelapper ennå.")).toBeVisible();
+});
+
 test("Versjon 2: tidtaker i kokemodus fra tid i steget", async ({ page }, testInfo) => {
   // En egen oppskrift med en kort tid i steget, så testen ikke venter i minutter.
   const title = `Tidtaker ${testInfo.project.name}`;

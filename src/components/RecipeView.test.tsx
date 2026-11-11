@@ -19,6 +19,8 @@ const actions = vi.hoisted(() => ({
   fetchTimeFromSource: vi.fn(),
   saveNotes: vi.fn(),
   saveFitsFor: vi.fn(),
+  addLabel: vi.fn(),
+  removeLabel: vi.fn(),
   markCookedToday: vi.fn(),
 }));
 vi.mock("@/app/oppskrift/[id]/actions", () => actions);

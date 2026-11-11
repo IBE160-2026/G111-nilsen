@@ -1041,3 +1041,26 @@ slik at ukemeny og handleliste henger sammen og jeg finner lister jeg har laget 
 **Gitt** en lagret handleliste
 **Når** jeg åpner den
 **Så** er oppskriftene og porsjonene valgt igjen, og jeg kan slette den etter en bekreftelse
+
+### Story 6.7: Merkelapper, også i søket
+
+Som Ida,
+vil jeg sette egne merkelapper på oppskriftene mine («Hverdag», «Vegetar»),
+slik at jeg finner dem igjen i søket og kan filtrere på dem.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg ser en lagret oppskrift
+**Når** jeg skriver en merkelapp og trykker «Legg til» (eller Enter)
+**Så** står den som en merkelapp i oppskriften, og en lik merkelapp (uavhengig av store og små bokstaver) legges ikke til to ganger
+
+**Gitt** en merkelapp
+**Når** jeg trykker «×» ved den
+**Så** fjernes den
+
+**Gitt** at en oppskrift har merkelapper
+**Så** vises de på kortet i Oppskrifter, søket i Oppskrifter finner dem, og «Merkelapp» velger bare oppskrifter med den
+
+**Gitt** at jeg skriver en tom eller for lang merkelapp (over 30 tegn), eller en oppskrift allerede har 10
+**Så** får jeg en melding og ingenting lagres
+

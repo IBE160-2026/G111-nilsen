@@ -230,3 +230,21 @@ export const shoppingListItems = sqliteTable(
   },
   (table) => [uniqueIndex("shopping_list_items_unique_idx").on(table.listId, table.recipeId)],
 );
+
+/**
+ * Merkelapper på en lagret oppskrift (Story 6.7), for eksempel «hverdag» eller «vegetar».
+ * `labelKey` er navnet normalisert (NFC + små bokstaver); samme merkelapp finnes bare én gang per
+ * oppskrift. Slettes med oppskriften.
+ */
+export const recipeLabels = sqliteTable(
+  "recipe_labels",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    recipeId: integer("recipe_id")
+      .notNull()
+      .references(() => recipes.id, { onDelete: "cascade" }),
+    label: text("label").notNull(),
+    labelKey: text("label_key").notNull(),
+  },
+  (table) => [uniqueIndex("recipe_labels_unique_idx").on(table.recipeId, table.labelKey)],
+);

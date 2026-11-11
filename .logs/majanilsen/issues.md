@@ -109,3 +109,4 @@
 - 936 Forsiden med salgstekst og større klikkflate rundt logoen. Åpent: endelig tekst i designet (Epic 7).
 - 935 Søk etter oppskrift i handlelisten, og valg som ikke er lagret nullstilles når man forlater siden. Åpent: ingen.
 - 934 Lagre handlelisten, knyttet til ukemenyen (denne uka som standard) og lagrede lister. Åpent: avkrysninger og egne varer lagres ikke i listen.
+- 933 Merkelapper på oppskriftene, i søket og som filter (6.7). Åpent: nytt navn og forslag fra eksisterende merkelapper.

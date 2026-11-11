@@ -67,3 +67,21 @@
     outline-color: Highlight;
   }
 }
+
+/* Merkelapper nederst i kortet: små piller, ikke egne lenker (hele kortet er lenken). */
+.labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.label {
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-full);
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}

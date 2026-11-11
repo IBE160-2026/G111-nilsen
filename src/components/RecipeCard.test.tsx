@@ -170,4 +170,17 @@ describe("RecipeCard: tid (Story 6.2)", () => {
     render(<RecipeCard recipe={recipe} />);
     expect(screen.queryByText(/^Tid:/)).not.toBeInTheDocument();
   });
+
+  it("viser merkelappene som en liste i lenken, og ingen liste uten", () => {
+    const { rerender } = render(
+      <RecipeCard recipe={{ ...recipe, labels: ["Hverdag", "Vegetar"] }} />,
+    );
+    const list = screen.getByRole("list", { name: "Merkelapper" });
+    expect(list).toHaveTextContent("HverdagVegetar");
+    expect(screen.getByRole("link")).toContainElement(list);
+    rerender(<RecipeCard recipe={{ ...recipe, labels: [] }} />);
+    expect(screen.queryByRole("list")).not.toBeInTheDocument();
+    rerender(<RecipeCard recipe={recipe} />);
+    expect(screen.queryByRole("list")).not.toBeInTheDocument();
+  });
 });
