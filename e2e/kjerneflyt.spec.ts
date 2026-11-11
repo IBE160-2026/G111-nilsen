@@ -631,6 +631,32 @@ test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
   await expect(page.getByRole("status").filter({ hasText: "Uka er lagret." })).toBeVisible();
 });
 
+test("Versjon 2: lag egen variant av en oppskrift og endre navnet", async ({ page }, testInfo) => {
+  const { uj1 } = DATA[testInfo.project.name as keyof typeof DATA];
+  await page.goto("/oppskrifter");
+  await page
+    .getByRole("link", { name: new RegExp(uj1.title) })
+    .first()
+    .click();
+  await expect(page.getByRole("heading", { level: 1, name: uj1.title })).toBeVisible();
+  const originalUrl = page.url();
+
+  await page.getByRole("button", { name: /^Lag egen variant/ }).click();
+  await expect(page).toHaveURL(/\/oppskrift\/\d+\/rediger$/);
+  await expect(field(page, "Tittel")).toHaveValue(new RegExp(`^Kopi av ${uj1.title}`));
+  const variant = `Variant ${testInfo.project.name}`;
+  await field(page, "Tittel").fill(variant);
+  await page.getByRole("button", { name: "Lagre endringer" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: variant })).toBeVisible();
+
+  // Originalen er uendret, og begge står i Oppskrifter.
+  await page.goto(originalUrl);
+  await expect(page.getByRole("heading", { level: 1, name: uj1.title })).toBeVisible();
+  await page.goto("/oppskrifter");
+  await expect(page.getByRole("heading", { level: 2, name: variant })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: uj1.title }).first()).toBeVisible();
+});
+
 test("Versjon 2: Oppskrifter kan sorteres alfabetisk og tilbake til sist lagret", async ({
   page,
 }) => {

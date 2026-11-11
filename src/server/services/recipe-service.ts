@@ -14,6 +14,7 @@ import { isSelectedServings, LIMITS, splitLines } from "@/lib/recipe-input";
 import { appError, err, ok, type Result } from "@/lib/result";
 import { getDb, type Db } from "../db/client";
 import {
+  copyRecipe,
   deleteRecipeById,
   deleteRecipeLabel,
   deleteStaleUnsavedRecipes,
@@ -182,6 +183,24 @@ export function saveRecipeToCollection(
   return markRecipeSaved(db, id, new Date().toISOString(), userId)
     ? ok({ id })
     : err(appError("not_found"));
+}
+
+/**
+ * Lager en egen variant av en lagret oppskrift (Story 6.10): en ny, lagret oppskrift med tittelen
+ * `titlePrefix` foran originalens tittel (avkortet til tittelgrensen) og samme innhold, som kan endres uten å røre
+ * originalen. Ukjent eller ulagret oppskrift gir `not_found`.
+ */
+export function copyRecipeAsVariant(
+  id: number,
+  titlePrefix: string,
+  db: Db = getDb(),
+): Result<{ id: number }> {
+  if (!isRecipeId(id)) return err(appError("not_found"));
+  const original = findRecipeById(db, id);
+  if (original === null || original.savedAt === null) return err(appError("not_found"));
+  const title = `${titlePrefix}${original.title}`.slice(0, LIMITS.titleLength).trim();
+  const newId = copyRecipe(db, id, title, new Date().toISOString());
+  return newId === null ? err(appError("not_found")) : ok({ id: newId });
 }
 
 /** Sletter oppskriften med ingredienser og steg. Ugyldig eller ukjent id gir `not_found`. */

@@ -8,6 +8,7 @@ import {
   markRecipeCooked,
   setRecipeFitsFor,
   addRecipeLabel,
+  copyRecipeAsVariant,
   setRecipeRating,
   removeRecipeLabel,
   LABELS_MAX,
@@ -1000,5 +1001,47 @@ describe("vurdering (Story 6.8)", () => {
     expect(setRecipeRating(0, 3, db)).toMatchObject({ ok: false, error: { kind: "not_found" } });
     db.$client.prepare("update recipes set saved_at = null").run();
     expect(setRecipeRating(id, 3, db)).toMatchObject({ ok: false, error: { kind: "not_found" } });
+  });
+});
+
+describe("copyRecipeAsVariant (Story 6.10)", () => {
+  it("lager en lagret kopi med prefiks i tittelen, og originalen står uendret", () => {
+    const db = createTestDb();
+    const created = createManualRecipe(TEST_USER_ID, input, db);
+    if (!created.ok) throw new Error("feil");
+    const copy = copyRecipeAsVariant(created.value.id, "Kopi av ", db);
+    expect(copy.ok).toBe(true);
+    if (!copy.ok) return;
+    expect(copy.value.id).not.toBe(created.value.id);
+    const read = getRecipe(copy.value.id, db);
+    expect(read.ok && read.value.title).toBe(`Kopi av ${input.title}`);
+    expect(read.ok && read.value.savedAt).not.toBeNull();
+    const list = listCollection(TEST_USER_ID, db);
+    expect(list.ok && list.value).toHaveLength(2);
+  });
+
+  it("avkorter tittelen til grensen på 200 tegn", () => {
+    const db = createTestDb();
+    const created = createManualRecipe(TEST_USER_ID, { ...input, title: "x".repeat(200) }, db);
+    if (!created.ok) throw new Error("feil");
+    const copy = copyRecipeAsVariant(created.value.id, "Kopi av ", db);
+    const read = copy.ok ? getRecipe(copy.value.id, db) : null;
+    expect(read?.ok && read.value.title).toHaveLength(200);
+  });
+
+  it("gir not_found for ugyldig, ukjent og ulagret oppskrift", () => {
+    const db = createTestDb();
+    const created = createManualRecipe(TEST_USER_ID, input, db);
+    if (!created.ok) throw new Error("feil");
+    for (const bad of [0, -1, 1.5, 999])
+      expect(copyRecipeAsVariant(bad, "Kopi av ", db)).toMatchObject({
+        ok: false,
+        error: { kind: "not_found" },
+      });
+    db.$client.prepare("update recipes set saved_at = null").run();
+    expect(copyRecipeAsVariant(created.value.id, "Kopi av ", db)).toMatchObject({
+      ok: false,
+      error: { kind: "not_found" },
+    });
   });
 });

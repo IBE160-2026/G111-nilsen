@@ -35,6 +35,7 @@ vi.mock("next/cache", () => ({ revalidatePath }));
 
 const {
   applySuggestion,
+  copyRecipeToVariant,
   changeOriginalServings,
   moveToFolder,
   moveToNewFolder,
@@ -717,5 +718,39 @@ describe("saveRating (Story 6.8)", () => {
     expect(await saveRating(0, 3)).toMatchObject({ ok: false });
     session.userId = 99;
     expect(await saveRating(id, 3)).toMatchObject({ ok: false });
+  });
+});
+
+describe("copyRecipeToVariant (Story 6.10)", () => {
+  afterEach(() => {
+    session.userId = TEST_USER_ID;
+  });
+
+  it("lager en kopi, revaliderer og sender brukeren til redigeringssiden for kopien", async () => {
+    const error = await copyRecipeToVariant(id).catch((e) => e);
+    expect(error).toBeInstanceOf(RedirectError);
+    const url = (error as RedirectError).url;
+    expect(url).toMatch(/^\/oppskrift\/\d+\/rediger$/);
+    expect(url).not.toBe(`/oppskrift/${id}/rediger`);
+    expect(count("recipes")).toBe(2);
+    expect(revalidatePath).toHaveBeenCalledWith("/", "layout");
+    expect(stored().title).not.toMatch(/^Kopi av /);
+  });
+
+  it.each([0, -1, 1.5, NaN])("ugyldig id %s: not_found, ingen kopi", async (bad) => {
+    expect(await copyRecipeToVariant(bad)).toEqual(failure("not_found"));
+    expect(count("recipes")).toBe(1);
+  });
+
+  it("en annens oppskrift gir not_found, og ingen kopi", async () => {
+    session.userId = 99;
+    expect(await copyRecipeToVariant(id)).toEqual(failure("not_found"));
+    expect(count("recipes")).toBe(1);
+  });
+
+  it("databasefeil: reservemelding, ingen redirect", async () => {
+    breakDatabase();
+    expect(await copyRecipeToVariant(id)).toEqual(failure(undefined));
+    expect(console.error).toHaveBeenCalled();
   });
 });

@@ -220,6 +220,14 @@ export const servingsDialogMessages = {
 } as const;
 
 /** Tekster for redigering av en oppskrift (Story 3.5). */
+/** «Lag egen variant» ved oppskriftens tittel (Story 6.10). */
+export const variantMessages = {
+  button: "Lag egen variant",
+  label: (title: string) => `Lag egen variant av ${title}`,
+  working: "Lager variant …",
+  titlePrefix: "Kopi av ",
+} as const;
+
 /** «Skriv ut» ved oppskriftens tittel (Story 6.6). */
 export const printMessages = {
   button: "Skriv ut",

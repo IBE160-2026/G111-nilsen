@@ -4,6 +4,7 @@ import { createTestDb } from "../client";
 import { assignRecipeToFolder, insertFolder } from "./folder-repository";
 import {
   deleteRecipeById,
+  copyRecipe,
   deleteRecipeLabel,
   insertRecipeLabel,
   listRecipeLabels,
@@ -19,6 +20,8 @@ import {
   markRecipeSaved,
   setRecipeFavorite,
   updateRecipe,
+  updateFitsFor,
+  updateNotes,
   updateOriginalServings,
   updateRating,
   updateSelectedServings,
@@ -787,5 +790,90 @@ describe("vurdering (Story 6.8)", () => {
     expect(updateRating(db, 999, 3)).toBe(false);
     expect(updateRating(db, id, null)).toBe(true);
     expect(findRecipeById(db, id)?.rating).toBeNull();
+  });
+});
+
+describe("copyRecipe (Story 6.10)", () => {
+  const NOW = "2026-11-11T12:00:00.000Z";
+
+  it("kopierer innhold, mappe, notater, «passer til» og merkelapper, men ikke vurdering, favoritt og telling", () => {
+    const db = createTestDb();
+    const folderId = insertFolder(db, {
+      name: "Hverdag",
+      nameKey: "hverdag",
+      createdAt: NOW,
+      userId: TEST_USER_ID,
+    });
+    const id = insertRecipe(db, {
+      ...base,
+      sourceUrl: "https://eksempel.no/pannekaker",
+      sourceName: "Eksempel",
+      selectedServings: 6,
+      totalMinutes: 30,
+      savedAt: "2026-11-09T10:00:00.000Z",
+    });
+    assignRecipeToFolder(db, TEST_USER_ID, id, folderId);
+    updateNotes(db, id, "Mer salt");
+    updateFitsFor(db, id, "Barn");
+    updateRating(db, id, 5);
+    insertRecipeLabel(db, id, "Hverdag", "hverdag", 10);
+    insertRecipeLabel(db, id, "Vegetar", "vegetar", 10);
+    db.$client.prepare("update recipes set is_favorite = 1, cooked_count = 3").run();
+
+    const copyId = copyRecipe(db, id, "Kopi av Pannekaker", NOW);
+    expect(copyId).not.toBeNull();
+    const copy = findRecipeById(db, copyId!);
+    const original = findRecipeById(db, id);
+    expect(copy).toMatchObject({
+      title: "Kopi av Pannekaker",
+      sourceUrl: null,
+      sourceName: "Eksempel",
+      originalServings: 4,
+      selectedServings: null,
+      totalMinutes: 30,
+      savedAt: NOW,
+      createdAt: NOW,
+      updatedAt: NOW,
+      folderId,
+      notes: "Mer salt",
+      fitsFor: "Barn",
+      labels: ["Hverdag", "Vegetar"],
+      rating: null,
+      isFavorite: false,
+      cookedCount: 0,
+      lastCookedAt: null,
+    });
+    const content = (lines: NonNullable<typeof copy>["ingredients"] | undefined) =>
+      lines?.map((line) => [line.position, line.original, line.name, line.unit]);
+    expect(content(copy?.ingredients)).toEqual(content(original?.ingredients));
+    expect(copy?.steps.map((s) => s.text)).toEqual(original?.steps.map((s) => s.text));
+    expect(copy?.ingredients.map((l) => l.id)).not.toEqual(original?.ingredients.map((l) => l.id));
+    // Originalen er uendret.
+    expect(original).toMatchObject({
+      title: "Pannekaker",
+      rating: 5,
+      isFavorite: true,
+      cookedCount: 3,
+    });
+    expect(count(db, "recipes")).toBe(2);
+    expect(count(db, "recipe_labels")).toBe(4);
+  });
+
+  it("kopien har samme eier, og endringer i den rører ikke originalen", () => {
+    const db = createTestDb();
+    const id = insertRecipe(db, { ...base, savedAt: "2026-11-09T10:00:00.000Z" });
+    const copyId = copyRecipe(db, id, "Kopi", NOW)!;
+    expect(listSavedRecipes(db, TEST_USER_ID).map((r) => r.id)).toEqual([copyId, id]);
+    deleteRecipeById(db, copyId);
+    expect(findRecipeById(db, id)?.ingredients).toHaveLength(base.ingredients.length);
+    expect(count(db, "ingredient_lines")).toBe(base.ingredients.length);
+  });
+
+  it("gir null for ukjent og ulagret oppskrift, og skriver ingenting", () => {
+    const db = createTestDb();
+    const unsaved = insertRecipe(db, { ...base, savedAt: null });
+    expect(copyRecipe(db, 999, "x", NOW)).toBeNull();
+    expect(copyRecipe(db, unsaved, "x", NOW)).toBeNull();
+    expect(count(db, "recipes")).toBe(1);
   });
 });

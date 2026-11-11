@@ -9,6 +9,7 @@ import type {
   SuggestionTarget,
   UnitKey,
 } from "@/domain";
+import { normalizeSearch } from "@/domain";
 import type { Db } from "../client";
 import { folders, ingredientLines, recipeLabels, recipes, steps, suggestions } from "../schema";
 
@@ -86,6 +87,64 @@ function insertRecipeRows(tx: Tx, recipe: NewRecipe): number {
   }
 
   return id;
+}
+
+/**
+ * Kopierer en lagret oppskrift til en ny lagret oppskrift med tittelen `title` (Story 6.10):
+ * ingredienser og steg slik de er lagret (uten tatt i bruk forslag), kilde, tid, antall, mappe,
+ * notater, «passer til» og merkelapper. Vurdering, favoritt, laget-telling, valgt antall og
+ * kilde-adressen (importen skal fortsatt finne originalen) følger ikke med. Alt skjer i én
+ * transaksjon. Returnerer ny id, eller `null` når originalen ikke finnes eller ikke er lagret.
+ */
+export function copyRecipe(db: Db, id: number, title: string, now: string): number | null {
+  return db.transaction((tx) => {
+    const original = findRecipeById(db, id);
+    if (original === null || original.savedAt === null) return null;
+    const newId = insertRecipeRows(tx, {
+      title,
+      sourceUrl: null,
+      sourceName: original.sourceName,
+      originalServings: original.originalServings,
+      selectedServings: null,
+      savedAt: now,
+      createdAt: now,
+      updatedAt: now,
+      ingredients: original.ingredients.map((line) => ({
+        position: line.position,
+        section: line.section,
+        original: line.original,
+        quantity: line.quantity,
+        unit: line.unit,
+        name: line.name,
+        parseable: line.parseable,
+      })),
+      steps: original.steps.map((step) => ({
+        position: step.position,
+        section: step.section,
+        text: step.text,
+      })),
+      userId:
+        db.select({ userId: recipes.userId }).from(recipes).where(eq(recipes.id, id)).get()
+          ?.userId ?? null,
+      totalMinutes: original.totalMinutes ?? null,
+    });
+    tx.update(recipes)
+      .set({
+        folderId: original.folderId,
+        notes: original.notes ?? null,
+        fitsFor: original.fitsFor ?? null,
+      })
+      .where(eq(recipes.id, newId))
+      .run();
+    const labels = original.labels ?? [];
+    if (labels.length > 0)
+      tx.insert(recipeLabels)
+        .values(
+          labels.map((label) => ({ recipeId: newId, label, labelKey: normalizeSearch(label) })),
+        )
+        .run();
+    return newId;
+  });
 }
 
 /** Lagrer oppskrift, ingredienslinjer og steg i én transaksjon og returnerer ny id. */

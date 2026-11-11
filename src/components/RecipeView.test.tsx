@@ -21,6 +21,7 @@ const actions = vi.hoisted(() => ({
   saveFitsFor: vi.fn(),
   addLabel: vi.fn(),
   saveRating: vi.fn(),
+  copyRecipeToVariant: vi.fn(),
   removeLabel: vi.fn(),
   markCookedToday: vi.fn(),
 }));
@@ -254,6 +255,16 @@ describe("RecipeView", () => {
     expect(
       screen.getByRole("region", { name: "Forslag" }).closest('[data-print="hide"]'),
     ).not.toBeNull();
+  });
+
+  it("har «Lag egen variant» ved tittelen bare for en lagret oppskrift, og skjuler den på papir (Story 6.10)", () => {
+    const { rerender } = render(
+      <RecipeView recipe={{ ...recipe, savedAt: "2026-11-09T10:00:00.000Z" }} folders={folders} />,
+    );
+    const button = screen.getByRole("button", { name: `Lag egen variant av ${recipe.title}` });
+    expect(button.closest("[data-print='hide']")).not.toBeNull();
+    rerender(<RecipeView recipe={{ ...recipe, savedAt: null }} folders={folders} />);
+    expect(screen.queryByRole("button", { name: /^Lag egen variant/ })).not.toBeInTheDocument();
   });
 
   it("skjuler steg-kortet når oppskriften ikke har steg, men viser forslagsdelen", () => {

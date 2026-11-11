@@ -91,6 +91,7 @@ Kravene står i PRD §4.7 (FR-28–FR-39), og hver story har en spec i `_bmad-ou
 - **Passer til (6.6b):** feltet «Passer til» i notatkortet, for din egen vurdering («2 sultne»). Endrer ikke mengdene.
 - **Utskrift (6.6):** «Skriv ut» ved tittelen åpner utskriftsdialogen. Utskriften har tittel, kilde (med adresse), antall porsjoner, ingredienser med avkrysningsbokser og steg i én kolonne, uten meny, knapper, forslag og notater.
 - **Tidtaker i kokemodus (6.5):** tider i stegteksten («10–15 minutter», «1 time og 30 minutter», «en halv time») blir knapper som starter en nedtelling. Store knapper og tall, flere tidtakere samtidig, «−1/+1/+5 min» for å justere, og når tiden er ute: beskjed, gjentatte pip, vibrasjon, varsel fra systemet (hvis tillatt) og blinkende fanetittel.
+- **Egen variant (6.10):** «Lag egen variant» ved tittelen kopierer en lagret oppskrift til «Kopi av …» og åpner redigeringen, så originalen blir uendret.
 - **Sortering (6.9):** «Sorter etter» i Oppskrifter: sist lagret (standard), sist laget, mest laget, høyest vurdering og alfabetisk. Like oppskrifter står sist lagret først.
 - **Vurdering (6.8):** «Din vurdering» i oppskriften: trykk en stjerne fra 1 til 5, og «Fjern vurdering» tar den bort. Stjernene vises på kortet i Oppskrifter.
 - **Merkelapper (6.7):** i oppskriften kan du skrive egne merkelapper (høyst 10, 30 tegn hver). De vises på kortene i Oppskrifter, søket finner dem, og «Merkelapp» filtrerer.

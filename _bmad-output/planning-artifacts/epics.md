@@ -1100,3 +1100,21 @@ slik at jeg finner det jeg leter etter og ser hva jeg bruker mest.
 **Gitt** at flere oppskrifter er like i sorteringen (for eksempel aldri laget)
 **Så** står de i rekkefølgen sist lagret
 
+### Story 6.10: Lag egen variant av en oppskrift
+
+Som Ida,
+vil jeg kopiere en oppskrift til min egen variant,
+slik at jeg kan endre den (mindre sukker, annen ingrediens) uten å miste originalen.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg ser en lagret oppskrift
+**Når** jeg trykker «Lag egen variant»
+**Så** lages en ny lagret oppskrift med tittelen «Kopi av …», og jeg kommer rett til redigeringssiden for kopien
+
+**Gitt** at kopien er laget
+**Så** har den samme ingredienser, steg, antall, tid, mappe, notater, «passer til» og merkelapper som originalen, og originalen er uendret
+
+**Gitt** at originalen har vurdering, er favoritt eller er laget flere ganger
+**Så** starter kopien uten vurdering, ikke som favoritt og med null ganger laget
+

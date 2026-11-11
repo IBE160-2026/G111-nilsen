@@ -11,7 +11,7 @@ import {
   type SuggestionsActionResult,
 } from "@/app/_shared/action-result";
 import { folderFailure, folderIdSchema, parseFolderName } from "@/app/_shared/folder-action";
-import { labelMessages, notesMessages, recipeTimeMessages } from "@/lib/messages";
+import { labelMessages, notesMessages, recipeTimeMessages, variantMessages } from "@/lib/messages";
 import { parseRecipeId } from "@/lib/recipe-id";
 import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import { moveRecipeToFolder, moveRecipeToNewFolder } from "@/server/services/folder-service";
@@ -20,6 +20,7 @@ import { currentUserId } from "@/server/session";
 import {
   addRecipeLabel,
   canAccessRecipe,
+  copyRecipeAsVariant,
   deleteRecipe,
   markRecipeCooked,
   removeRecipeLabel,
@@ -98,6 +99,29 @@ export async function removeRecipe(id: number): Promise<ActionResult> {
 
   // redirect() kaster et kontrollflytunntak og må ligge utenfor try/catch.
   redirect("/oppskrifter");
+}
+
+/**
+ * Lager en egen variant av en lagret oppskrift og sender brukeren til redigeringssiden for
+ * kopien, så tittelen kan endres med en gang (Story 6.10). Ved feil blir brukeren på siden med
+ * en norsk melding. Oppskrifter er endret, så alle sider revalideres.
+ */
+export async function copyRecipeToVariant(id: number): Promise<ActionResult> {
+  if (!idSchema.safeParse(id).success) return actionFailure("not_found");
+  let newId: number;
+  try {
+    if (!(await mayChange(id))) return actionFailure("not_found");
+    const result = copyRecipeAsVariant(id, variantMessages.titlePrefix);
+    if (!result.ok) return actionFailure(result.error.kind);
+    newId = result.value.id;
+    revalidatePath("/", "layout");
+  } catch (error) {
+    console.error("Kunne ikke lage en variant av oppskriften", error);
+    return actionFailure(undefined);
+  }
+
+  // redirect() kaster et kontrollflytunntak og må ligge utenfor try/catch.
+  redirect(`/oppskrift/${newId}/rediger`);
 }
 
 /**

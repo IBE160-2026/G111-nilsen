@@ -13,6 +13,7 @@ import {
   removeSuggestion,
   rememberServings,
   requestSuggestions,
+  copyRecipeToVariant,
   saveFitsFor,
   saveRating,
   saveNotes,
@@ -25,6 +26,7 @@ import { isHttpUrl } from "@/lib/source-url";
 import CookingMode from "./CookingMode";
 import FetchTimeButton from "./FetchTimeButton";
 import IngredientList from "./IngredientList";
+import CopyVariantButton from "./CopyVariantButton";
 import PrintButton from "./PrintButton";
 import RecipeLabels from "./RecipeLabels";
 import RecipeRating from "./RecipeRating";
@@ -82,6 +84,14 @@ export default function RecipeView({
             >
               {editRecipeMessages.editLink}
             </Link>
+            {recipe.savedAt !== null ? (
+              <span data-print="hide">
+                <CopyVariantButton
+                  title={recipe.title}
+                  onCopy={copyRecipeToVariant.bind(null, recipe.id)}
+                />
+              </span>
+            ) : null}
             <span data-print="hide">
               <PrintButton title={recipe.title} />
             </span>
