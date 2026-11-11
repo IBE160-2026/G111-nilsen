@@ -327,6 +327,14 @@ export const cookingModeMessages = {
   timerCancel: "Avbryt",
   timerCancelLabel: (step: number, label: string) => `Avbryt tidtaker for steg ${step} (${label})`,
   timerFinished: (step: number) => `Tiden er ute for steg ${step}`,
+  timerAdd: (minutes: number) => `+${minutes} min`,
+  timerSubtract: (minutes: number) => `−${minutes} min`,
+  timerAddLabel: (step: number, minutes: number) =>
+    `Legg til ${minutes} minutt${minutes === 1 ? "" : "er"} på tidtakeren for steg ${step}`,
+  timerSubtractLabel: (step: number, minutes: number) =>
+    `Trekk fra ${minutes} minutt${minutes === 1 ? "" : "er"} på tidtakeren for steg ${step}`,
+  timerTitle: "Tiden er ute",
+  timerNotificationBody: "Tidtakeren i kokemodus er ferdig.",
   timerDismiss: "Lukk",
   timerDismissLabel: (step: number) => `Lukk beskjeden om steg ${step}`,
 } as const;

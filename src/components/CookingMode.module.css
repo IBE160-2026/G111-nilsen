@@ -169,88 +169,109 @@
   font-weight: 600;
 }
 
-/* Tidtakere (Story 6.5): står over steget, så de er synlige på alle steg. */
+/* Tidtakere (Story 6.5): står over steget, så de er synlige på alle steg. Store flater og tall,
+   siden de leses og trykkes på med våte hender og på avstand. */
 .timers {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .timer {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-1) var(--space-3);
-  padding: var(--space-2) var(--space-4);
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border-hairline);
   border-radius: var(--radius-md);
   background: var(--color-surface-raised);
 }
 
 .timerDone {
-  border: 2px solid var(--color-accent);
-  font-weight: 600;
+  border: 3px solid var(--color-accent);
 }
 
 .timerFor {
-  flex: 1;
-  min-width: 0;
+  margin: 0;
   color: var(--color-ink-secondary);
+  font-size: 1.125rem;
   font-weight: 600;
-  white-space: nowrap;
-}
-
-/* Beskjeden om at tiden er ute er en hel setning og får brytes. */
-.timerDone .timerFor {
-  white-space: normal;
 }
 
 .timerDone .timerFor {
   color: var(--color-ink-primary);
-}
-
-.countdown {
-  font-size: 1.75rem;
-  font-variant-numeric: tabular-nums;
+  font-size: clamp(1.5rem, 6vw, 2rem);
   font-weight: 700;
 }
 
+.countdown {
+  margin: 0;
+  font-size: clamp(3.5rem, 18vw, 6rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.timerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
 .timerButton {
-  min-height: var(--tap-target-min);
-  padding: 0 var(--space-3);
-  border: none;
-  background: none;
+  min-height: 3.5rem;
+  min-width: 3.5rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
   color: var(--color-accent);
   font: inherit;
+  font-size: 1.125rem;
   font-weight: 600;
+  cursor: pointer;
+}
+
+.timerButton[aria-disabled="true"] {
+  border-color: var(--color-border-strong);
+  color: var(--color-ink-secondary);
+  cursor: not-allowed;
+}
+
+/* «Avbryt» og «Lukk» står lengst til høyre og er en rolig tekstknapp. */
+.timerEnd {
+  margin-left: auto;
+  border-color: transparent;
+  background: none;
   text-decoration: underline;
   text-underline-offset: 3px;
-  cursor: pointer;
 }
 
 .starts {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .startTimer {
-  min-height: var(--tap-target-min);
-  padding: 0 var(--space-4);
-  border: 1px solid var(--color-accent);
-  border-radius: var(--radius-full);
-  background: var(--color-surface-raised);
-  color: var(--color-accent);
+  min-height: 3.5rem;
+  padding: 0 var(--space-5);
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-surface-raised);
   font: inherit;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   cursor: pointer;
 }
 
 .startTimer[aria-disabled="true"] {
   border-color: var(--color-border-strong);
+  background: var(--color-surface-raised);
   color: var(--color-ink-secondary);
   cursor: not-allowed;
 }

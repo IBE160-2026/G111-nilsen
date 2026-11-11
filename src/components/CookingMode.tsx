@@ -187,7 +187,7 @@ function Session({
     ...(current.addedAfter ?? []),
   ].join(" ");
   const durations = findStepDurations(stepText);
-  const { timers, now, start, remove } = useStepTimers();
+  const { timers, now, start, adjust, remove } = useStepTimers();
 
   function previous() {
     setIndex((i) => Math.max(0, i - 1));
@@ -230,32 +230,57 @@ function Session({
           {timers.map((timer) => {
             const label = formatTimerLabel(timer.seconds);
             const left = (timer.endsAt - now) / 1000;
-            return left > 0 ? (
-              <div key={timer.id} className={styles.timer}>
-                <span className={styles.timerFor}>{m.timerFor(timer.step, label)}</span>
-                <span role="timer" className={styles.countdown}>
-                  {formatCountdown(left)}
-                </span>
-                <button
-                  type="button"
-                  className={styles.timerButton}
-                  aria-label={m.timerCancelLabel(timer.step, label)}
-                  onClick={() => remove(timer.id)}
-                >
-                  {m.timerCancel}
-                </button>
-              </div>
-            ) : (
-              <div key={timer.id} className={`${styles.timer} ${styles.timerDone}`} role="alert">
-                <span className={styles.timerFor}>{m.timerFinished(timer.step)}</span>
-                <button
-                  type="button"
-                  className={styles.timerButton}
-                  aria-label={m.timerDismissLabel(timer.step)}
-                  onClick={() => remove(timer.id)}
-                >
-                  {m.timerDismiss}
-                </button>
+            const running = left > 0;
+            return (
+              <div
+                key={timer.id}
+                className={`${styles.timer} ${running ? "" : styles.timerDone}`}
+                role={running ? undefined : "alert"}
+              >
+                <p className={styles.timerFor}>
+                  {running ? m.timerFor(timer.step, label) : m.timerFinished(timer.step)}
+                </p>
+                {running ? (
+                  <p role="timer" className={styles.countdown}>
+                    {formatCountdown(left)}
+                  </p>
+                ) : null}
+                <div className={styles.timerActions}>
+                  {running ? (
+                    <button
+                      type="button"
+                      className={styles.timerButton}
+                      aria-label={m.timerSubtractLabel(timer.step, 1)}
+                      aria-disabled={left <= 60 ? true : undefined}
+                      onClick={() => adjust(timer.id, -60)}
+                    >
+                      {m.timerSubtract(1)}
+                    </button>
+                  ) : null}
+                  {[1, 5].map((minutes) => (
+                    <button
+                      key={minutes}
+                      type="button"
+                      className={styles.timerButton}
+                      aria-label={m.timerAddLabel(timer.step, minutes)}
+                      onClick={() => adjust(timer.id, minutes * 60)}
+                    >
+                      {m.timerAdd(minutes)}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className={`${styles.timerButton} ${styles.timerEnd}`}
+                    aria-label={
+                      running
+                        ? m.timerCancelLabel(timer.step, label)
+                        : m.timerDismissLabel(timer.step)
+                    }
+                    onClick={() => remove(timer.id)}
+                  >
+                    {running ? m.timerCancel : m.timerDismiss}
+                  </button>
+                </div>
               </div>
             );
           })}

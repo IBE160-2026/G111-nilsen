@@ -350,8 +350,12 @@ test("Versjon 2: tidtaker i kokemodus fra tid i steget", async ({ page }, testIn
   await expect(cooking.getByRole("alert")).toHaveText(/Tiden er ute for steg 2/, {
     timeout: 10_000,
   });
-  await cooking.getByRole("button", { name: "Lukk beskjeden om steg 2" }).click();
+  // Mer tid: tidtakeren starter på nytt med ett minutt, og kan avbrytes.
+  await cooking.getByRole("button", { name: /^Legg til 1 minutt/ }).click();
   await expect(cooking.getByRole("alert")).toHaveCount(0);
+  await expect(cooking.getByRole("timer")).toHaveText(/^(1:00|0:5\d)$/);
+  await cooking.getByRole("button", { name: /^Avbryt tidtaker for steg 2/ }).click();
+  await expect(cooking.getByRole("timer")).toHaveCount(0);
 
   // Rydder: sletter oppskriften igjen.
   await page.keyboard.press("Escape");

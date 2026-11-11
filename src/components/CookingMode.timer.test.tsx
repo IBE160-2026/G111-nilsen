@@ -4,9 +4,35 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { type Step } from "@/domain";
 import CookingMode from "./CookingMode";
 
-const oscillators = vi.hoisted(() => ({ started: 0, closed: 0 }));
+const oscillators = vi.hoisted(() => ({
+  started: 0,
+  closed: 0,
+  state: "running",
+  htmlPlays: 0,
+  notifications: [] as string[],
+}));
+class FakeAudio {
+  volume = 1;
+  currentTime = 0;
+  play() {
+    // Det stille forsøket i klikket (volum 0) er ikke et signal.
+    if (this.volume > 0) oscillators.htmlPlays += 1;
+    return Promise.resolve();
+  }
+  pause() {}
+}
+class FakeNotification {
+  static permission = "granted";
+  static requestPermission = vi.fn(() => Promise.resolve("granted"));
+  constructor(title: string) {
+    oscillators.notifications.push(title);
+  }
+}
 class FakeAudioContext {
   currentTime = 0;
+  get state() {
+    return oscillators.state;
+  }
   destination = {};
   resume = () => Promise.resolve();
   close = () => {
@@ -35,7 +61,15 @@ beforeEach(() => {
   vi.useFakeTimers();
   oscillators.started = 0;
   oscillators.closed = 0;
+  oscillators.state = "running";
+  oscillators.htmlPlays = 0;
+  oscillators.notifications = [];
+  FakeNotification.permission = "granted";
+  FakeNotification.requestPermission.mockClear();
+  document.title = "Pannekaker";
   vibrate.mockClear();
+  Object.defineProperty(window, "Audio", { value: FakeAudio, configurable: true });
+  Object.defineProperty(window, "Notification", { value: FakeNotification, configurable: true });
   HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
     this.setAttribute("open", "");
   };
@@ -49,6 +83,8 @@ afterEach(() => {
   cleanup();
   vi.useRealTimers();
   Reflect.deleteProperty(window, "AudioContext");
+  Reflect.deleteProperty(window, "Audio");
+  Reflect.deleteProperty(window, "Notification");
   Reflect.deleteProperty(navigator, "vibrate");
 });
 
@@ -141,11 +177,12 @@ describe("tidtaker i kokemodus", () => {
     expect(vibrate).not.toHaveBeenCalled();
   });
 
-  it("varsler når tiden er ute: beskjed, pip og vibrasjon bare én gang, og kan lukkes", () => {
+  it("varsler når tiden er ute: beskjed, pip, vibrasjon, varsel og fanetittel, og kan lukkes", () => {
     const user = setup();
     const dialog = open(user);
     user.click(within(dialog).getByRole("button", { name: "Neste" }));
     user.click(within(dialog).getAllByRole("button", { name: /^Start tidtaker/ })[1]);
+    expect(FakeNotification.requestPermission).not.toHaveBeenCalled(); // allerede tillatt
     advance(29_000);
     expect(within(dialog).queryByRole("alert")).toBeNull();
     expect(vibrate).not.toHaveBeenCalled();
@@ -154,11 +191,95 @@ describe("tidtaker i kokemodus", () => {
     expect(within(dialog).queryByRole("timer")).toBeNull();
     expect(oscillators.started).toBe(4);
     expect(vibrate).toHaveBeenCalledTimes(1);
-    advance(10_000);
-    expect(oscillators.started).toBe(4);
-    expect(vibrate).toHaveBeenCalledTimes(1);
+    expect(oscillators.notifications).toEqual(["Tiden er ute for steg 2"]);
+    expect(document.title).toBe("⏰ Tiden er ute – Pannekaker");
+
+    // Signalet gjentas hvert tredje sekund mens beskjeden står, men varselet kommer bare én gang.
+    advance(3_000);
+    expect(oscillators.started).toBe(8);
+    expect(vibrate).toHaveBeenCalledTimes(2);
+    expect(oscillators.notifications).toHaveLength(1);
+
     user.click(within(dialog).getByRole("button", { name: "Lukk beskjeden om steg 2" }));
     expect(within(dialog).queryByRole("alert")).toBeNull();
+    expect(document.title).toBe("Pannekaker");
+    advance(30_000);
+    expect(oscillators.started).toBe(8);
+  });
+
+  it("slutter å gjenta signalet etter ti ganger", () => {
+    const user = setup();
+    const dialog = open(user);
+    user.click(within(dialog).getByRole("button", { name: "Neste" }));
+    user.click(within(dialog).getAllByRole("button", { name: /^Start tidtaker/ })[1]);
+    advance(31_000);
+    advance(120_000);
+    // Ett første signal og ti gjentakelser, ikke flere.
+    expect(oscillators.started).toBe(4 * 11);
+  });
+
+  it("ber om lov til å vise varsler første gang, og bruker lyd fra <audio> når Web Audio ikke er klar", () => {
+    FakeNotification.permission = "default";
+    oscillators.state = "suspended";
+    const user = setup();
+    const dialog = open(user);
+    user.click(within(dialog).getByRole("button", { name: "Neste" }));
+    user.click(within(dialog).getAllByRole("button", { name: /^Start tidtaker/ })[1]);
+    expect(FakeNotification.requestPermission).toHaveBeenCalledTimes(1);
+    advance(31_000);
+    expect(oscillators.started).toBe(0);
+    expect(oscillators.htmlPlays).toBe(1);
+    expect(oscillators.notifications).toEqual([]); // ikke tillatt: ingen varsel
+    expect(within(dialog).getByRole("alert")).toBeInTheDocument();
+  });
+
+  it("legger til og trekker fra tid på en tidtaker som går", () => {
+    const user = setup();
+    const dialog = open(user);
+    user.click(within(dialog).getByRole("button", { name: "Neste" }));
+    user.click(within(dialog).getAllByRole("button", { name: /^Start tidtaker/ })[0]);
+    const countdown = () => within(dialog).getByRole("timer");
+    expect(countdown()).toHaveTextContent("2:00");
+    user.click(
+      within(dialog).getByRole("button", { name: /^Legg til 5 minutter på tidtakeren for steg 2/ }),
+    );
+    expect(countdown()).toHaveTextContent("7:00");
+    user.click(
+      within(dialog).getByRole("button", { name: /^Legg til 1 minutt på tidtakeren for steg 2/ }),
+    );
+    expect(countdown()).toHaveTextContent("8:00");
+    const minus = within(dialog).getByRole("button", { name: /^Trekk fra 1 minutt/ });
+    user.click(minus);
+    expect(countdown()).toHaveTextContent("7:00");
+    // Etiketten følger den nye lengden.
+    expect(within(dialog).getByRole("region", { name: "Tidtakere" })).toHaveTextContent(
+      "Steg 2 · 7 min",
+    );
+    advance(7 * 60_000 - 30_000);
+    expect(minus).toHaveAttribute("aria-disabled", "true");
+    user.click(minus);
+    expect(countdown()).toHaveTextContent("0:30");
+  });
+
+  it("starter tidtakeren på nytt fra nå når det legges til tid etter at den er ute", () => {
+    const user = setup();
+    const dialog = open(user);
+    user.click(within(dialog).getByRole("button", { name: "Neste" }));
+    user.click(within(dialog).getAllByRole("button", { name: /^Start tidtaker/ })[1]);
+    advance(31_000);
+    expect(oscillators.started).toBe(4);
+    expect(within(dialog).queryByRole("button", { name: /^Trekk fra/ })).toBeNull();
+    user.click(
+      within(dialog).getByRole("button", { name: /^Legg til 1 minutt på tidtakeren for steg 2/ }),
+    );
+    expect(within(dialog).queryByRole("alert")).toBeNull();
+    expect(within(dialog).getByRole("timer")).toHaveTextContent("1:00");
+    expect(document.title).toBe("Pannekaker");
+    advance(30_000);
+    expect(oscillators.started).toBe(4);
+    advance(31_000);
+    expect(within(dialog).getByRole("alert")).toBeInTheDocument();
+    expect(oscillators.started).toBe(8);
   });
 
   it("fungerer uten lyd og vibrasjon", () => {

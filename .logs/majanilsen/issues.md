@@ -91,3 +91,4 @@
 - [ ] 2026-11-10 [story 6.4](954-2026-11-11-02-30-00-story-6-4-ukemeny.md) — Maja: push, start appen på nytt (migrasjon 0009), prøv ukemenyen og handleliste for uka
 - [ ] 2026-11-10 [story 6.4 søk og meny](953-2026-11-11-03-15-00-story-6-4-sok-og-meny.md) — Maja: push, prøv søket i ukemenyen og den nye toppmenyen på mobil
 - [ ] 2026-11-11 [story 6.5](952-2026-11-11-12-30-00-story-6-5-tidtaker.md) — Maja: push, prøv tidtakeren i kokemodus på telefonen (lyd og vibrasjon)
+- [ ] 2026-11-11 [story 6.5 justert](951-2026-11-11-13-10-00-story-6-5-tidtaker-justert.md) — Maja: push, prøv tidtakeren på Mac og telefon, svar «Tillat» på varsler
