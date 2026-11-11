@@ -320,6 +320,36 @@ export const pantryMessages = {
   removed: (name: string) => `${name} er lagt tilbake på listen.`,
 } as const;
 
+/** «Hva kan jeg lage?» ut fra «Har hjemme» (Story 6.12). */
+export const whatToCookMessages = {
+  heading: "Hva kan jeg lage?",
+  link: "Hva kan jeg lage?",
+  loading: "Henter oppskriftene …",
+  loadFailed: "Kunne ikke hente oppskriftene",
+  lead: "Skriv hva du har hjemme, så ser du hvilke av oppskriftene dine du kan lage, og hva som mangler.",
+  pantryHeading: "Du har hjemme",
+  fieldLabel: "Legg til noe du har hjemme",
+  fieldHint: "For eksempel egg, melk eller smør",
+  add: "Legg til",
+  nameRequired: "Skriv hva du har hjemme.",
+  nameTooLong: "Navnet kan være maks 60 tegn. Gjør det kortere.",
+  noneAtHome: "Ingenting ennå.",
+  removeFor: (name: string) => `Fjern ${name}`,
+  added: (name: string) => `${name} er lagt til.`,
+  removed: (name: string) => `${name} er fjernet.`,
+  sameList: "Dette er den samme listen som «Har hjemme» på handlelisten.",
+  startHint: "Legg til noe du har hjemme, så dukker oppskriftene opp her.",
+  noMatch: "Ingen av oppskriftene dine bruker det du har hjemme ennå.",
+  noMatchHint: "Prøv å legge til flere ting, for eksempel det du bruker ofte.",
+  groupReady: "Kan lages nå",
+  groupFew: "Mangler 1–2 ting",
+  groupMore: "Mangler flere ting",
+  haveCount: (have: number, total: number) => `Har ${have} av ${total}`,
+  missingList: (names: readonly string[]) => `Mangler: ${names.join(", ")}`,
+  nothingMissing: "Du har alt du trenger.",
+  count: (n: number) => (n === 1 ? "1 oppskrift passer" : `${n} oppskrifter passer`),
+} as const;
+
 /** Handleliste (Story 5.7). */
 export const shoppingMessages = {
   heading: "Handleliste",

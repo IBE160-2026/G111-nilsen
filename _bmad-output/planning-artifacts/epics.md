@@ -1141,3 +1141,23 @@ slik at jeg ikke mister oppskriften med alt jeg har lagt til.
 **Gitt** at jeg ikke er innlogget, eller oppskriften er slettet av en annen bruker
 **Så** ser og henter jeg ingenting
 
+
+### Story 6.12: Hva kan jeg lage? ut fra «Har hjemme»
+
+Som Ida,
+vil jeg skrive hva jeg har hjemme og se hvilke av oppskriftene mine jeg kan lage,
+slik at jeg slipper å bla gjennom alt for å finne noe som passer.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg har lagrede oppskrifter og har lagt inn ting jeg har hjemme
+**Så** viser siden «Hva kan jeg lage?» oppskriftene gruppert som «Kan lages nå», «Mangler 1–2 ting» og «Mangler flere ting», med hva jeg har og hva som mangler
+
+**Gitt** at jeg legger til eller fjerner noe jeg har hjemme
+**Så** oppdateres treffene med en gang, og listen er den samme som «Har hjemme» på handlelisten
+
+**Gitt** at ingen oppskrift har noe jeg har hjemme, eller jeg ikke har lagt inn noe
+**Så** får jeg en forklarende tekst i stedet for en tom side
+
+**Gitt** at jeg ikke er innlogget, eller ikke har oppskrifter
+**Så** blir jeg bedt om å logge inn, eller får vite at samlingen er tom

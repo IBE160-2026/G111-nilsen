@@ -33,6 +33,7 @@ export {
   type CollectionSort,
 } from "./filter-collection";
 export { convertLine, hasConvertibleUnit, type UnitSystem } from "./convert-units";
+export { ingredientLabel, matchPantry, type PantryMatch, type PantryRecipe } from "./pantry-match";
 export { ingredientsForStep } from "./step-ingredients";
 export {
   buildShoppingList,

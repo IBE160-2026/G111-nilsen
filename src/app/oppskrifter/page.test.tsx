@@ -129,7 +129,12 @@ describe("/oppskrifter", () => {
     ).toBeInTheDocument();
     const links = screen
       .getAllByRole("link")
-      .filter((a) => !["/handleliste", "/nylig-slettet"].includes(a.getAttribute("href") ?? ""));
+      .filter(
+        (a) =>
+          !["/handleliste", "/nylig-slettet", "/hva-kan-jeg-lage"].includes(
+            a.getAttribute("href") ?? "",
+          ),
+      );
     expect(links.map((a) => [a.textContent, a.getAttribute("href")])).toEqual([
       ["Legg inn selv", "/ny"],
       ["Importer din første oppskrift", "/importer"],
@@ -177,7 +182,12 @@ describe("/oppskrifter", () => {
     await show();
     const links = screen
       .getAllByRole("link")
-      .filter((a) => !["/handleliste", "/nylig-slettet"].includes(a.getAttribute("href") ?? ""));
+      .filter(
+        (a) =>
+          !["/handleliste", "/nylig-slettet", "/hva-kan-jeg-lage"].includes(
+            a.getAttribute("href") ?? "",
+          ),
+      );
     expect(links.map((a) => a.textContent)).toEqual([
       "I mappeMatprat · Hverdag",
       "Uten mappeMatprat",
@@ -225,6 +235,14 @@ describe("/oppskrifter etter en sletting (Story 6.11)", () => {
     if (!deleted.ok || deleted.value.trashId === null) throw new Error("kunne ikke slette");
     return deleted.value.trashId;
   }
+
+  it("har en lenke til «Hva kan jeg lage?» ved overskriften (Story 6.12)", async () => {
+    render((await renderPage()).heading);
+    expect(screen.getByRole("link", { name: "Hva kan jeg lage?" })).toHaveAttribute(
+      "href",
+      "/hva-kan-jeg-lage",
+    );
+  });
 
   it("har en lenke til «Nylig slettet» ved overskriften", async () => {
     render((await renderPage()).heading);

@@ -114,3 +114,4 @@
 - 931 Sortering av oppskriftene (6.9). Åpent: valget huskes ikke, rekkefølgen kan ikke snus.
 - 930 Lag egen variant av en oppskrift (6.10). Åpent: kopien viser ikke hvilken oppskrift den kom fra.
 - 929 Angre sletting, Nylig slettet i 7 dager (6.11). Åpent: gammel id virker ikke etter gjenoppretting; mapper, handlelister og ukemenyer kan ikke angres.
+- 928 «Hva kan jeg lage?» ut fra «Har hjemme», gruppert etter hva som mangler. Åpent: sammensatte ord og basisvarer.

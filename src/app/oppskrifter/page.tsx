@@ -4,7 +4,12 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import EmptyState from "@/components/EmptyState";
 import CollectionBrowser from "@/components/CollectionBrowser";
-import { collectionMessages, shoppingMessages, trashMessages } from "@/lib/messages";
+import {
+  collectionMessages,
+  shoppingMessages,
+  trashMessages,
+  whatToCookMessages,
+} from "@/lib/messages";
 import UndoDeleteBanner from "@/components/UndoDeleteBanner";
 import LoginRequired from "@/components/LoginRequired";
 import { getDeletedRecipe, listCollection } from "@/server/services/recipe-service";
@@ -29,6 +34,9 @@ export default function SamlingenPage({
       <div className={styles.titleRow}>
         <h1>{collectionMessages.heading}</h1>
         <span className={styles.titleLinks}>
+          <Link href="/hva-kan-jeg-lage" className={styles.titleLink}>
+            {whatToCookMessages.link}
+          </Link>
           <Link href="/nylig-slettet" className={styles.titleLink}>
             {trashMessages.link}
           </Link>

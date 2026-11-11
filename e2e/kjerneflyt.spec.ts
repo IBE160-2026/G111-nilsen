@@ -708,6 +708,48 @@ test("Versjon 2: slettet oppskrift kan angres, hentes tilbake og slettes for god
   await expect(page.getByRole("heading", { level: 2, name: title })).toHaveCount(0);
 });
 
+test("Versjon 2: Hva kan jeg lage? ut fra det du har hjemme", async ({ page }, testInfo) => {
+  const title = `Hjemme ${testInfo.project.name}`;
+  const unique = `sjalottløk${testInfo.project.name.replace(/\W/g, "")}`;
+  await page.goto("/ny");
+  await page.waitForLoadState("networkidle");
+  await field(page, "Tittel").fill(title);
+  await field(page, "Antall porsjoner").fill("2");
+  await field(page, "Ingredienser").fill(`2 ${unique}\n1 dl kremfløte`);
+  await page.getByRole("button", { name: "Lagre oppskrift" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+
+  await page.goto("/oppskrifter");
+  await page.getByRole("link", { name: "Hva kan jeg lage?" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Hva kan jeg lage?" })).toBeVisible();
+  await expect(page.getByLabel("Legg til noe du har hjemme")).toBeVisible();
+
+  // Ett treff: mangler én ting.
+  await page.getByLabel("Legg til noe du har hjemme").fill(unique);
+  await page.getByRole("button", { name: "Legg til", exact: true }).click();
+  const few = page.getByRole("region", { name: "Mangler 1–2 ting" });
+  await expect(few.getByRole("heading", { level: 3, name: title })).toBeVisible();
+  await expect(few).toContainText("Mangler: kremfløte");
+
+  // Begge hjemme: kan lages nå.
+  await page.getByLabel("Legg til noe du har hjemme").fill("kremfløte");
+  await page.getByRole("button", { name: "Legg til", exact: true }).click();
+  const ready = page.getByRole("region", { name: "Kan lages nå" });
+  await expect(ready.getByRole("heading", { level: 3, name: title })).toBeVisible();
+  await ready.getByRole("link", { name: new RegExp(title) }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+
+  // Listen er den samme som «Har hjemme» på handlelisten, og blir stående etter innlasting.
+  await page.goto("/hva-kan-jeg-lage");
+  await expect(page.getByRole("button", { name: `Fjern ${unique}` })).toBeVisible();
+  await page.getByRole("button", { name: `Fjern ${unique}` }).click();
+  await page.getByRole("button", { name: "Fjern kremfløte" }).click();
+  await expect(page.getByRole("button", { name: /^Fjern / })).toHaveCount(0);
+  await expect(
+    page.getByText("Legg til noe du har hjemme, så dukker oppskriftene opp her."),
+  ).toBeVisible();
+});
+
 test("Versjon 2: Oppskrifter kan sorteres alfabetisk og tilbake til sist lagret", async ({
   page,
 }) => {
