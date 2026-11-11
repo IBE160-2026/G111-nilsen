@@ -246,8 +246,8 @@ export const weekMessages = {
   noMatch: (query: string) => `Ingen lagrede oppskrifter passer «${query}».`,
   pickFromList: "Velg en oppskrift fra listen.",
   servingsLabel: "Porsjoner",
-  add: "Legg til",
-  adding: "Legger til …",
+  addHint:
+    "Velg en oppskrift fra listen for å legge den på dagen. Skriv antall porsjoner først hvis du vil ha et annet enn oppskriftens eget.",
   remove: "Fjern",
   removeFor: (title: string, day: string) => `Fjern ${title} fra ${day}`,
   portions: (n: string) => `${n} porsj.`,

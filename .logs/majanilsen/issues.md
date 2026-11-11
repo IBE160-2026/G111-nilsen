@@ -102,3 +102,4 @@
 - 943 Rettene og handleliste i «Dine uker». Åpent: avkrysninger lagres ikke per uke.
 - 942 Alle uker og lagrede avkrysninger per uke (week_checks). Åpent: fremdrift og kopiering av uke utsatt.
 - 941 Ukemenyen viser at uka er lagret (status og fast tekst). Åpent: ingen.
+- 940 Oppskriften legges på dagen ved valg, uten «Legg til». Åpent: ingen.

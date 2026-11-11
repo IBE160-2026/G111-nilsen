@@ -443,8 +443,10 @@ test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1, name: "Ukemeny" })).toBeVisible();
   await expect(page.getByText(/^Uke \d+ · /)).toBeVisible();
 
-  // Første dag i uka: velg oppskriften med 3 porsjoner.
+  // Første dag i uka: skriv antallet først, så legges oppskriften til med en gang den velges.
   const form = page.getByRole("form", { name: /^Legg til på mandag/ });
+  await expect(form.getByRole("button", { name: "Legg til" })).toHaveCount(0);
+  await form.getByLabel("Porsjoner").fill("3");
   // Søk: åpne listen og finn den første lagrede oppskriften (hvilke som er lagret avhenger av
   // tidligere tester), så skriv starten av tittelen og velg med tastaturet.
   const search = form.getByRole("combobox", { name: "Oppskrift" });
@@ -454,13 +456,10 @@ test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
   expect(title).not.toBe("");
   await search.fill(title.slice(0, 6));
   await expect(form.getByRole("option", { name: title, exact: true })).toBeVisible();
-  // Den første oppskriften er også først blant treffene, og er markert: Enter velger den.
+  // Den første oppskriften er også først blant treffene, og er markert: Enter velger og legger til.
   await search.press("ArrowDown");
   await search.press("ArrowUp");
   await search.press("Enter");
-  await expect(search).toHaveValue(title);
-  await form.getByLabel("Porsjoner").fill("3");
-  await form.getByRole("button", { name: "Legg til" }).click();
   const monday = page.locator("li", {
     has: page.getByRole("heading", { level: 2, name: /^mandag/i }),
   });

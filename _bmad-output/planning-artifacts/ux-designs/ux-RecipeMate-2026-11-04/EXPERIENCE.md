@@ -28,7 +28,7 @@ Toppmenyen har fire punkter i v1, fem fra versjon 2 (Handleliste) og seks fra St
 | **Mapper** | Liste over mapper med antall oppskrifter; opprett, gi nytt navn, slett | Toppmeny | FR-14 |
 | **Mappe** | Oppskriftene i én mappe | Mapper | FR-14, FR-16 |
 | **Favoritter** | Alle favoritter | Toppmeny | FR-15, FR-16 |
-| **Ukemeny** (6.4) | Én boks per dag med oppskrifter og antall porsjoner; søk etter lagret oppskrift og legg til; forrige/neste uke; «Lag handleliste for uka» | Toppmeny | FR-31 |
+| **Ukemeny** (6.4) | Én boks per dag med oppskrifter og antall porsjoner; søk etter lagret oppskrift, og den legges på dagen med en gang den velges (ingen «Legg til»-knapp); forrige/neste uke; «Lag handleliste for uka» | Toppmeny | FR-31 |
 | **Handleliste** (v2) | Velg oppskrifter og antall, sammenslått liste med avkrysning og «Kopier listen», «Har hjemme» | Toppmeny, Oppskrifter, Ukemeny | FR-23, FR-24, FR-31 |
 | **Kokemodus** (v2) | Fullskjerm over oppskriften: ett steg om gangen, ingrediensene i steget | Oppskrift | FR-21 |
 | **Logg inn / Lag konto** (v2) | E-post og passord; sender tilbake dit brukeren kom fra | Toppmeny, «Logg inn for å lagre», sider som krever konto | FR-27 |

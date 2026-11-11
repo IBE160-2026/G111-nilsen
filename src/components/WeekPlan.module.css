@@ -45,6 +45,7 @@
 }
 
 .empty,
+.hint,
 .status,
 .saveNote {
   margin: 0;
@@ -137,7 +138,6 @@
   text-align: center;
 }
 
-.add,
 .shopping {
   justify-self: start;
   align-self: flex-start;
@@ -152,16 +152,6 @@
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-}
-
-.add {
-  grid-area: add;
-}
-
-.add[aria-disabled="true"] {
-  color: var(--color-ink-secondary);
-  border-color: var(--color-control-border);
-  cursor: not-allowed;
 }
 
 .shopping {

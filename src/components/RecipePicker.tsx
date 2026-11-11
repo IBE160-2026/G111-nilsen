@@ -21,6 +21,8 @@ type Props = {
   /** Valgt oppskrift, eller `null`. */
   value: number | null;
   onChange: (id: number | null) => void;
+  /** Kalles når en oppskrift velges fra listen (klikk eller Enter), ikke når tittelen bare skrives. */
+  onPick?: (id: number) => void;
   /** Feilmelding som hører til feltet (id-en til meldingen). */
   errorId?: string;
   invalid?: boolean;
@@ -38,6 +40,7 @@ export default function RecipePicker({
   recipes,
   value,
   onChange,
+  onPick,
   errorId,
   invalid,
   inputId,
@@ -61,6 +64,7 @@ export default function RecipePicker({
 
   function choose(recipe: PickerRecipe) {
     onChange(recipe.id);
+    onPick?.(recipe.id);
     setQuery(recipe.title);
     setShowAll(true);
     setOpen(false);

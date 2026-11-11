@@ -52,7 +52,7 @@ describe("WeekPlan", () => {
     expect(await screen.findByText(/Uka er lagret\./)).toBeInTheDocument();
   });
 
-  it("søker etter oppskrift: skriv for å filtrere, piltaster og Enter velger uten å sende", async () => {
+  it("søker etter oppskrift: skriv for å filtrere, piltaster og Enter velger og legger til", async () => {
     const { onAdd, user } = setup();
     const form = screen.getByRole("form", { name: "Legg til på mandag 9. november" });
     const box = within(form).getByRole("combobox", { name: "Oppskrift" });
@@ -79,11 +79,10 @@ describe("WeekPlan", () => {
       within(list).getByRole("option", { name: "Taco" }).id,
     );
     await user.keyboard("{Enter}");
-    expect(box).toHaveValue("Taco");
-    expect(box).toHaveAttribute("aria-expanded", "false");
-    expect(onAdd).not.toHaveBeenCalled();
-    await user.keyboard("{Enter}");
+    // Enter i den åpne listen velger og legger til med en gang.
+    expect(onAdd).toHaveBeenCalledTimes(1);
     expect(onAdd).toHaveBeenCalledWith({ recipeId: 2, day: "2026-11-09", servings: 2.5 });
+    expect(within(form).getByRole("combobox", { name: "Oppskrift" })).toHaveValue("");
   });
 
   it("sier fra når ingen oppskrift passer, og Escape lukker listen", async () => {
@@ -118,13 +117,13 @@ describe("WeekPlan", () => {
     );
   });
 
-  it("legger til med antallet oppskriften starter på når feltet er tomt", async () => {
+  it("legger til med en gang ved valg, med antallet oppskriften starter på når feltet er tomt", async () => {
     const { onAdd, user } = setup();
     const form = screen.getByRole("form", { name: "Legg til på tirsdag 10. november" });
     await user.type(within(form).getByRole("combobox", { name: "Oppskrift" }), "ta");
+    // Å velge i listen legger til med en gang, uten «Legg til».
+    expect(within(form).queryByRole("button", { name: "Legg til" })).not.toBeInTheDocument();
     await user.click(within(form).getByRole("option", { name: "Taco" }));
-    expect(within(form).getByLabelText("Porsjoner")).toHaveAttribute("placeholder", "2,5");
-    await user.click(within(form).getByRole("button", { name: "Legg til" }));
     expect(onAdd).toHaveBeenCalledWith({ recipeId: 2, day: "2026-11-10", servings: 2.5 });
     expect(within(day("tirsdag")).getByRole("link", { name: "Taco" })).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Taco er lagt på tirsdag 10. november.");
@@ -134,10 +133,11 @@ describe("WeekPlan", () => {
   it("bruker antallet som er skrevet inn, også med komma", async () => {
     const { onAdd, user } = setup();
     const form = screen.getByRole("form", { name: "Legg til på mandag 9. november" });
-    // Skrevet helt likt en tittel regnes som valgt.
-    await user.type(within(form).getByRole("combobox", { name: "Oppskrift" }), "pannekaker");
+    // Antallet skrives først; så legger valget i listen til oppskriften med det.
     await user.type(within(form).getByLabelText("Porsjoner"), "6");
-    await user.click(within(form).getByRole("button", { name: "Legg til" }));
+    await user.type(within(form).getByRole("combobox", { name: "Oppskrift" }), "pannekaker");
+    expect(onAdd).not.toHaveBeenCalled(); // å skrive tittelen alene legger ikke til
+    await user.keyboard("{Enter}");
     expect(onAdd).toHaveBeenCalledWith({ recipeId: 1, day: "2026-11-09", servings: 6 });
   });
 
@@ -145,7 +145,8 @@ describe("WeekPlan", () => {
     const onAdd = vi.fn(async () => ({ ok: false as const, message: "Noe gikk galt." }));
     const { user } = setup({ onAdd });
     const form = screen.getByRole("form", { name: "Legg til på mandag 9. november" });
-    await user.click(within(form).getByRole("button", { name: "Legg til" }));
+    // Enter i antallfeltet uten valgt oppskrift sier fra.
+    await user.type(within(form).getByLabelText("Porsjoner"), "3{Enter}");
     expect(within(form).getByRole("alert")).toHaveTextContent("Velg en oppskrift fra listen.");
     const box = within(form).getByRole("combobox", { name: "Oppskrift" });
     expect(box).toHaveAttribute("aria-invalid", "true");
@@ -153,9 +154,8 @@ describe("WeekPlan", () => {
     expect(onAdd).not.toHaveBeenCalled();
     await user.type(box, "pann");
     await user.keyboard("{Enter}");
-    expect(box).toHaveValue("Pannekaker");
-    await user.click(within(form).getByRole("button", { name: "Legg til" }));
-    expect(within(form).getByRole("alert")).toHaveTextContent("Noe gikk galt.");
+    expect(onAdd).toHaveBeenCalledTimes(1);
+    expect(await within(form).findByRole("alert")).toHaveTextContent("Noe gikk galt.");
   });
 
   it("fjerner en oppføring", async () => {

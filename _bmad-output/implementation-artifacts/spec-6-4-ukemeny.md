@@ -23,3 +23,6 @@ Egen gjennomgang.
 - Akseptert: sju små skjemaer (ett per dag) gir en lang side på mobil, men hver dag kan fylles uten å velge dag først. Designepicen kan samle dem.
 - Akseptert: samme oppskrift flere dager med til sammen over 50 porsjoner kappes til 50 på handlelisten (handlelistens grense).
 - Utsatt: dra og slipp mellom dager, kopiere en uke, ukemeny delt med andre (6.19).
+
+## Endring: legges til ved valg
+Etter Majas ønske finnes ingen «Legg til»-knapp. Når Ida velger en oppskrift i søkelisten (klikk eller Enter), legges den på dagen med en gang, med antallet som står i «Porsjoner»-feltet, ellers oppskriftens eget antall. Å skrive en tittel helt likt legger ikke til alene; Enter i listen velger. Enter i antallfeltet legger til den valgte oppskriften, eller sier «Velg en oppskrift fra listen.». En hjelpetekst over dagene forklarer flyten. Antallfeltet står tomt til hun skriver noe, siden oppskriften ikke er valgt før den legges til.
