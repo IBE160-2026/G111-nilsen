@@ -45,7 +45,8 @@
 }
 
 .empty,
-.status {
+.status,
+.saveNote {
   margin: 0;
   color: var(--color-ink-secondary);
   font-size: var(--type-meta-size);
@@ -185,4 +186,9 @@
       "recipe servings add"
       "error error error";
   }
+}
+
+.saveLink {
+  color: var(--color-accent);
+  font-weight: 600;
 }

@@ -146,6 +146,12 @@ export default function WeekPlan({
         })}
       </ol>
 
+      <p className={styles.saveNote}>
+        {m.autoSaved}{" "}
+        <Link href="/ukemeny/uker" className={styles.saveLink}>
+          {m.viewAllWeeks}
+        </Link>
+      </p>
       <Link href={shoppingHref} className={styles.shopping}>
         {m.shopping}
       </Link>

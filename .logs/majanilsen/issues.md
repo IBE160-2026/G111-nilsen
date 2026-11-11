@@ -101,3 +101,4 @@
 - 944 Tøm «Har hjemme» og «Dine uker» i ukemenyen. Åpent: prøv på telefon.
 - 943 Rettene og handleliste i «Dine uker». Åpent: avkrysninger lagres ikke per uke.
 - 942 Alle uker og lagrede avkrysninger per uke (week_checks). Åpent: fremdrift og kopiering av uke utsatt.
+- 941 Ukemenyen viser at uka er lagret (status og fast tekst). Åpent: ingen.

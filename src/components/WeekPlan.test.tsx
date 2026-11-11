@@ -39,6 +39,19 @@ const day = (label: string) =>
   screen.getByRole("heading", { level: 2, name: new RegExp(label) }).closest("li")!;
 
 describe("WeekPlan", () => {
+  it("sier at uka lagres automatisk, med lenke til alle uker, og at den er lagret etter en endring", async () => {
+    const { user } = setup();
+    expect(
+      screen.getByText(/Ukemenyen lagres automatisk når du legger til eller fjerner en rett\./),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Se alle uker" })).toHaveAttribute(
+      "href",
+      "/ukemeny/uker",
+    );
+    await user.click(screen.getAllByRole("button", { name: /^Fjern /i })[0]!);
+    expect(await screen.findByText(/Uka er lagret\./)).toBeInTheDocument();
+  });
+
   it("søker etter oppskrift: skriv for å filtrere, piltaster og Enter velger uten å sende", async () => {
     const { onAdd, user } = setup();
     const form = screen.getByRole("form", { name: "Legg til på mandag 9. november" });

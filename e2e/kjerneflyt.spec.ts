@@ -471,7 +471,7 @@ test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
   await page.reload();
   await expect(monday.getByRole("link", { name: title })).toBeVisible();
   // «Alle uker»: uka står i oversikten med retten og en lenke til handlelisten.
-  await page.getByRole("link", { name: "Alle uker" }).click();
+  await page.getByRole("link", { name: "Alle uker", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Alle uker" })).toBeVisible();
   await expect(page.getByRole("list").getByText(title, { exact: false }).first()).toBeVisible();
   await page
