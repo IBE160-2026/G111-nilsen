@@ -276,11 +276,33 @@
   cursor: not-allowed;
 }
 
-.soundTest {
+.bottomRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.bottomRow .ingredients {
+  flex: 1 1 14rem;
+}
+
+.timerControls {
+  display: flex;
+  flex: 0 1 auto;
+  max-width: 100%;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.timerRow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-1) var(--space-3);
+  justify-content: flex-end;
+  gap: var(--space-2) var(--space-3);
 }
 
 .soundTestButton {

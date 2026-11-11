@@ -94,3 +94,4 @@
 - [ ] 2026-11-11 [story 6.5 justert](951-2026-11-11-13-10-00-story-6-5-tidtaker-justert.md) — Maja: push, prøv tidtakeren på Mac og telefon, svar «Tillat» på varsler
 - [ ] 2026-11-11 [story 6.5 test lyden](950-2026-11-11-13-45-00-story-6-5-test-lyden.md) — Maja: push, last siden på nytt, trykk «Test lyden» i kokemodus og si hva som står der og hvilken nettleser
 - 949 Ryddigere kokemodus: rolig startknapp, «Test lyden» bare ved tid i steget. Åpent: test på telefon.
+- 948 Tidtakerknapper nederst i kokemodus. Åpent: test på telefon.

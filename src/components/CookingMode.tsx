@@ -294,43 +294,6 @@ function Session({
         <p className={styles.step} aria-live="polite">
           <StepText step={sorted[index]} />
         </p>
-        {durations.length > 0 ? (
-          <ul role="list" className={styles.starts}>
-            {durations.map((duration) => {
-              const label = formatTimerLabel(duration.seconds);
-              const going = timers.some(
-                (timer) =>
-                  timer.step === index + 1 &&
-                  timer.seconds === duration.seconds &&
-                  timer.endsAt > now,
-              );
-              return (
-                <li key={duration.seconds}>
-                  <button
-                    type="button"
-                    className={styles.startTimer}
-                    aria-disabled={going ? true : undefined}
-                    onClick={() => {
-                      if (!going) start(index + 1, duration.seconds);
-                    }}
-                  >
-                    {m.timerStart(label)}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        ) : null}
-        {durations.length > 0 || timers.length > 0 ? (
-          <div className={styles.soundTest}>
-            <button type="button" className={styles.soundTestButton} onClick={testSound}>
-              {m.soundTest}
-            </button>
-            <span role="status" className={styles.soundStatus}>
-              {soundOk === true ? m.soundTestPlayed : soundOk === false ? m.soundBlocked : ""}
-            </span>
-          </div>
-        ) : null}
         {stepLines.length > 0 ? (
           <section className={styles.stepIngredients} aria-labelledby="kokemodus-i-steget">
             <h3 id="kokemodus-i-steget" className={styles.stepIngredientsTitle}>
@@ -345,16 +308,57 @@ function Session({
         ) : null}
       </div>
 
-      <details className={styles.ingredients}>
-        <summary>
-          {servings === null ? m.ingredients : m.ingredientsFor(servingsText(servings))}
-        </summary>
-        <ul role="list" className={styles.lines}>
-          {lines.map((line) => (
-            <li key={line.id}>{formatLine(convertLine(scaleLine(line, factor), units))}</li>
-          ))}
-        </ul>
-      </details>
+      <div className={styles.bottomRow}>
+        <details className={styles.ingredients}>
+          <summary>
+            {servings === null ? m.ingredients : m.ingredientsFor(servingsText(servings))}
+          </summary>
+          <ul role="list" className={styles.lines}>
+            {lines.map((line) => (
+              <li key={line.id}>{formatLine(convertLine(scaleLine(line, factor), units))}</li>
+            ))}
+          </ul>
+        </details>
+        {durations.length > 0 || timers.length > 0 ? (
+          <div className={styles.timerControls}>
+            <div className={styles.timerRow}>
+              {durations.length > 0 ? (
+                <ul role="list" className={styles.starts}>
+                  {durations.map((duration) => {
+                    const label = formatTimerLabel(duration.seconds);
+                    const going = timers.some(
+                      (timer) =>
+                        timer.step === index + 1 &&
+                        timer.seconds === duration.seconds &&
+                        timer.endsAt > now,
+                    );
+                    return (
+                      <li key={duration.seconds}>
+                        <button
+                          type="button"
+                          className={styles.startTimer}
+                          aria-disabled={going ? true : undefined}
+                          onClick={() => {
+                            if (!going) start(index + 1, duration.seconds);
+                          }}
+                        >
+                          {m.timerStart(label)}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : null}
+              <button type="button" className={styles.soundTestButton} onClick={testSound}>
+                {m.soundTest}
+              </button>
+            </div>
+            <span role="status" className={styles.soundStatus}>
+              {soundOk === true ? m.soundTestPlayed : soundOk === false ? m.soundBlocked : ""}
+            </span>
+          </div>
+        ) : null}
+      </div>
 
       <nav className={styles.nav}>
         <button
