@@ -83,7 +83,8 @@ Kravene står i PRD §4.7 (FR-28–FR-39), og hver story har en spec i `_bmad-ou
 - **Tid (6.2):** total tid hentes fra kilden eller skrives inn selv, og vises ved hjertet og på kortene. «Hent tid fra kilden» for eldre importer.
 - **Notater og sist laget (6.3):** egne notater på oppskriften, «Laget i dag» og «Sist laget … · laget N ganger».
 - **Tøm «Har hjemme» (6.4b):** «Tøm listen» (med bekreftelse) fjerner alt i «Har hjemme» etter en handletur.
-- **Alle uker (6.4c):** «Alle uker» på Ukemeny viser hver planlagte uke (Uke 38, Uke 39 …), nyeste først, med rettene og lenker til menyen og handlelisten for uka. Avkrysninger i handlelisten for en uke lagres per uke. Ukemenyen sier «Uka er lagret.» etter hver endring.
+- **Alle uker (6.4c):** «Alle uker» på Ukemeny viser hver planlagte uke (Uke 38, Uke 39 …), nyeste først, med rettene. Hver uke åpnes på en egen side (6.4d) med menyen i korte trekk, «Se handlelisten for uka» og «Endre uka». Avkrysninger i handlelisten for en uke lagres per uke.
+- **Lagre uka (6.4d):** endringene i ukemenyen samles til du trykker «Lagre uka» (da erstattes hele uka). Ulagrede endringer vises, og handlelisten for uka venter til uka er lagret. «Se alle uker» er en stor knapp under menyen.
 - **Passer til (6.6b):** feltet «Passer til» i notatkortet, for din egen vurdering («2 sultne»). Endrer ikke mengdene.
 - **Utskrift (6.6):** «Skriv ut» ved tittelen åpner utskriftsdialogen. Utskriften har tittel, kilde (med adresse), antall porsjoner, ingredienser med avkrysningsbokser og steg i én kolonne, uten meny, knapper, forslag og notater.
 - **Tidtaker i kokemodus (6.5):** tider i stegteksten («10–15 minutter», «1 time og 30 minutter», «en halv time») blir knapper som starter en nedtelling. Store knapper og tall, flere tidtakere samtidig, «−1/+1/+5 min» for å justere, og når tiden er ute: beskjed, gjentatte pip, vibrasjon, varsel fra systemet (hvis tillatt) og blinkende fanetittel.

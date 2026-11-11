@@ -16,7 +16,7 @@ vi.mock("@/server/db/client", async (importOriginal) => {
 const revalidatePath = vi.hoisted(() => vi.fn());
 vi.mock("next/cache", () => ({ revalidatePath }));
 
-const { addMeal, removeMeal } = await import("./actions");
+const { saveWeekPlan } = await import("./actions");
 
 const T0 = "2026-11-09T10:00:00.000Z";
 let recipeId = 0;
@@ -45,46 +45,73 @@ const stored = () => {
   return result.ok ? result.value.map((entry) => `${entry.day} ${entry.servings}`) : [];
 };
 
-describe("addMeal", () => {
-  it("lagrer oppføringen, gir id-en og oppdaterer /ukemeny", async () => {
-    const result = await addMeal({ recipeId, day: "2026-11-10", servings: 3 });
-    expect(result).toMatchObject({ ok: true, id: expect.any(Number) });
-    expect(stored()).toEqual(["2026-11-10 3"]);
-    expect(revalidatePath).toHaveBeenCalledWith("/ukemeny");
-  });
+const WEEK = "2026-11-09";
 
-  it("gir egne meldinger for manglende oppskrift og ugyldig antall", async () => {
-    expect(await addMeal({ recipeId: 0, day: "2026-11-10", servings: 3 })).toEqual({
-      ok: false,
-      message: "Velg en oppskrift først.",
+describe("saveWeekPlan", () => {
+  it("lagrer uka, erstatter det som var der og oppdaterer /ukemeny og /ukemeny/uker", async () => {
+    const first = await saveWeekPlan({
+      week: WEEK,
+      items: [
+        { recipeId, day: "2026-11-10", servings: 3 },
+        { recipeId, day: "2026-11-12", servings: 2 },
+      ],
     });
-    expect(await addMeal({ recipeId, day: "2026-11-10", servings: 51 })).toEqual({
-      ok: false,
-      message: "Velg mellom 0,5 og 50 porsjoner.",
-    });
+    expect(first).toEqual({ ok: true });
+    expect(stored()).toEqual(["2026-11-10 3", "2026-11-12 2"]);
+    expect(revalidatePath).toHaveBeenCalledWith("/ukemeny");
+    expect(revalidatePath).toHaveBeenCalledWith("/ukemeny/uker");
+    expect(
+      await saveWeekPlan({ week: WEEK, items: [{ recipeId, day: WEEK, servings: 4 }] }),
+    ).toEqual({ ok: true });
+    expect(stored()).toEqual(["2026-11-09 4"]);
+    expect(await saveWeekPlan({ week: WEEK, items: [] })).toEqual({ ok: true });
     expect(stored()).toEqual([]);
   });
 
-  it("avviser feil typer, ukjent oppskrift og ugyldig dag", async () => {
+  it("gir en egen melding for ugyldig antall", async () => {
+    expect(
+      await saveWeekPlan({ week: WEEK, items: [{ recipeId, day: WEEK, servings: 51 }] }),
+    ).toEqual({ ok: false, message: "Velg mellom 0,5 og 50 porsjoner." });
+    expect(stored()).toEqual([]);
+  });
+
+  it("avviser feil typer, ukjent oppskrift, dag utenfor uka og ugyldig uke", async () => {
     for (const input of [
       null,
       "x",
-      { recipeId: "1", day: "2026-11-10", servings: 3 },
-      { recipeId, day: 5, servings: 3 },
-      { recipeId, day: "2026-11-10", servings: "3" },
-      { recipeId: 999, day: "2026-11-10", servings: 3 },
-      { recipeId, day: "2026-02-30", servings: 3 },
+      { week: WEEK, items: "x" },
+      { week: 5, items: [] },
+      { week: WEEK, items: [{ recipeId: "1", day: WEEK, servings: 3 }] },
+      { week: WEEK, items: [{ recipeId: 999, day: WEEK, servings: 3 }] },
+      { week: WEEK, items: [{ recipeId, day: "2026-11-16", servings: 3 }] },
+      { week: "2026-02-30", items: [] },
     ]) {
-      const result = await addMeal(input as never);
+      const result = await saveWeekPlan(input as never);
       expect(result.ok).toBe(false);
     }
     expect(stored()).toEqual([]);
     expect(revalidatePath).not.toHaveBeenCalled();
   });
 
+  it("beholder den gamle uka når noe i den nye er ugyldig", async () => {
+    await saveWeekPlan({ week: WEEK, items: [{ recipeId, day: WEEK, servings: 4 }] });
+    const result = await saveWeekPlan({
+      week: WEEK,
+      items: [
+        { recipeId, day: WEEK, servings: 2 },
+        { recipeId: 999, day: WEEK, servings: 2 },
+      ],
+    });
+    expect(result.ok).toBe(false);
+    expect(stored()).toEqual(["2026-11-09 4"]);
+  });
+
   it("krever innlogging", async () => {
     session.userId = null;
-    const result = await addMeal({ recipeId, day: "2026-11-10", servings: 3 });
+    const result = await saveWeekPlan({
+      week: WEEK,
+      items: [{ recipeId, day: WEEK, servings: 3 }],
+    });
     expect(result.ok).toBe(false);
     expect(stored()).toEqual([]);
   });
@@ -92,30 +119,9 @@ describe("addMeal", () => {
   it("gir en generell melding og logger når databasen feiler", async () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     state.db = null;
-    const result = await addMeal({ recipeId, day: "2026-11-10", servings: 3 });
+    const result = await saveWeekPlan({ week: WEEK, items: [] });
     expect(result.ok).toBe(false);
     expect(log).toHaveBeenCalled();
     log.mockRestore();
-  });
-});
-
-describe("removeMeal", () => {
-  it("fjerner oppføringen og oppdaterer /ukemeny", async () => {
-    const added = await addMeal({ recipeId, day: "2026-11-10", servings: 3 });
-    if (!added.ok) throw new Error("feil");
-    revalidatePath.mockClear();
-    expect(await removeMeal(added.id)).toEqual({ ok: true });
-    expect(stored()).toEqual([]);
-    expect(revalidatePath).toHaveBeenCalledWith("/ukemeny");
-  });
-
-  it("gir en melding for ukjent og ugyldig id, og uten innlogging", async () => {
-    for (const id of [999, 0, -3, 1.5, "1" as unknown as number])
-      expect((await removeMeal(id)).ok).toBe(false);
-    const added = await addMeal({ recipeId, day: "2026-11-10", servings: 3 });
-    if (!added.ok) throw new Error("feil");
-    session.userId = null;
-    expect((await removeMeal(added.id)).ok).toBe(false);
-    expect(stored()).toEqual(["2026-11-10 3"]);
   });
 });

@@ -103,3 +103,4 @@
 - 942 Alle uker og lagrede avkrysninger per uke (week_checks). Åpent: fremdrift og kopiering av uke utsatt.
 - 941 Ukemenyen viser at uka er lagret (status og fast tekst). Åpent: ingen.
 - 940 Oppskriften legges på dagen ved valg, uten «Legg til». Åpent: ingen.
+- 939 «Lagre uka»-knapp, stor «Se alle uker» og egen ukeside. Åpent: samme uke i to faner, siste lagring vinner.

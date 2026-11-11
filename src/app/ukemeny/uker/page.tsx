@@ -15,8 +15,8 @@ export const metadata: Metadata = { title: m.weeksTitle };
 
 /**
  * Alle uker, `/ukemeny/uker` (Story 6.4c): hver uke brukeren har planlagt (Uke 38, Uke 39 …) med
- * rettene, en lenke til menyen og en til handlelisten for uka. Avkrysningene i handlelisten
- * lagres per uke.
+ * rettene. Hver uke lenker til en egen side med ukemenyen i korte trekk og veien videre til
+ * handlelisten (`/ukemeny/uker/[uke]`).
  */
 export default function AllWeeksPage() {
   return (
@@ -55,7 +55,7 @@ async function WeeksLoader() {
             {weeks.value.map((week) => (
               <li key={week.monday} className={styles.weekItem}>
                 <Link
-                  href={`/ukemeny?uke=${week.monday}`}
+                  href={`/ukemeny/uker/${week.monday}`}
                   className={styles.weekLink}
                   aria-current={week.monday === thisMonday ? "date" : undefined}
                 >
@@ -66,13 +66,6 @@ async function WeeksLoader() {
                   </span>
                 </Link>
                 <p className={styles.weekTitles}>{week.titles.join(", ")}</p>
-                <Link
-                  href={`/handleliste?uke=${week.monday}`}
-                  className={styles.navLink}
-                  aria-label={m.weekShoppingFor(formatWeek(week.monday))}
-                >
-                  {m.weekShopping}
-                </Link>
               </li>
             ))}
           </ul>

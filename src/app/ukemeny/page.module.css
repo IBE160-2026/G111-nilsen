@@ -103,3 +103,55 @@
   color: var(--color-ink-secondary);
   font-size: var(--type-meta-size);
 }
+
+/* Uka i korte trekk (`/ukemeny/uker/[uke]`). */
+.summaryList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: var(--content-max-width);
+}
+
+.summaryDay {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+}
+
+.summaryHeading {
+  margin: 0 0 var(--space-1);
+  font-size: 1rem;
+}
+
+.summaryMeals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bigLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.5rem;
+  max-width: 28rem;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-surface-raised);
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.weekLabel {
+  margin: 0;
+  font-weight: 600;
+}

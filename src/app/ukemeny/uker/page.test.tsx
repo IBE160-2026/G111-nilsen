@@ -73,7 +73,7 @@ describe("/ukemeny/uker", () => {
     expect(state.calls).toEqual(["connection"]);
   });
 
-  it("lister hver planlagte uke med rettene, lenke til menyen og til handlelisten", async () => {
+  it("lister hver planlagte uke med rettene, og lenke til ukas egen side", async () => {
     const id = insertRecipe(state.db!, recipe("Pannekaker"));
     const taco = insertRecipe(state.db!, recipe("Taco"));
     addToWeek(TEST_USER_ID, id, "2026-11-11", 3, state.db!);
@@ -81,22 +81,15 @@ describe("/ukemeny/uker", () => {
     addToWeek(TEST_USER_ID, id, "2026-09-16", 2, state.db!);
     render((await renderPage()).content);
     const list = screen.getByRole("list");
-    const weekLinks = within(list)
-      .getAllByRole("link")
-      .filter((link) => link.getAttribute("href")!.startsWith("/ukemeny?"));
+    const weekLinks = within(list).getAllByRole("link");
     expect(weekLinks.map((link) => link.getAttribute("href"))).toEqual([
-      "/ukemeny?uke=2026-11-09",
-      "/ukemeny?uke=2026-09-14",
+      "/ukemeny/uker/2026-11-09",
+      "/ukemeny/uker/2026-09-14",
     ]);
     expect(weekLinks[0]).toHaveTextContent("Uke 46 · 9.–15. november 2026");
     expect(weekLinks[0]).toHaveTextContent("2 retter");
     expect(weekLinks[1]).toHaveTextContent("Uke 38 · 14.–20. september 2026");
     expect(within(list).getByText("Pannekaker, Taco")).toBeInTheDocument();
-    expect(
-      within(list)
-        .getAllByRole("link", { name: /^Handleliste for Uke/ })
-        .map((link) => link.getAttribute("href")),
-    ).toEqual(["/handleliste?uke=2026-11-09", "/handleliste?uke=2026-09-14"]);
     expect(screen.getByRole("link", { name: "← Ukemeny" })).toHaveAttribute("href", "/ukemeny");
   });
 

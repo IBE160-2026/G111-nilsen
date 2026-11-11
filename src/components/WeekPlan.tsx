@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { ActionResult } from "@/app/_shared/action-result";
 import { fallbackMessage, weekMessages as m } from "@/lib/messages";
 import { formatServings, isSelectedServings, LIMITS } from "@/lib/recipe-input";
@@ -29,13 +29,24 @@ type Props = {
   recipes: readonly WeekRecipe[];
   /** Lenke til handlelisten med ukas oppskrifter valgt. */
   shoppingHref: string;
-  onAdd: (input: {
-    recipeId: number;
-    day: string;
-    servings: number;
-  }) => Promise<{ ok: true; id: number } | { ok: false; message: string }>;
-  onRemove: (id: number) => Promise<ActionResult>;
+  /** Lenke til oversikten over alle uker. */
+  allWeeksHref: string;
+  /** Lagrer hele uka: alle oppføringene erstattes med de som sendes (Server Action). */
+  onSave: (input: {
+    week: string;
+    items: { recipeId: number; day: string; servings: number }[];
+  }) => Promise<ActionResult>;
+  /** Mandagen i uka som vises. */
+  week: string;
 };
+
+/** En nøkkel for innholdet i uka, uavhengig av rekkefølge og id, til å se om noe er endret. */
+function contentKey(entries: readonly WeekEntry[]): string {
+  return entries
+    .map((entry) => `${entry.day}|${entry.recipeId}|${entry.servings}`)
+    .sort()
+    .join(";");
+}
 
 /** Antallet en oppskrift foreslås for: sist valgt, ellers antallet den er skrevet for, ellers 4. */
 function defaultServings(recipe: WeekRecipe | undefined): number {
@@ -47,60 +58,76 @@ function defaultServings(recipe: WeekRecipe | undefined): number {
 
 /**
  * Ukemeny (Story 6.4): én rad per dag med oppskriftene som er lagt der, og et lite skjema for å
- * legge til en lagret oppskrift med antall porsjoner.
+ * legge til en lagret oppskrift med antall porsjoner. Endringene samles i siden til Ida trykker
+ * «Lagre uka»; så lagres hele uka på en gang. Ulagrede endringer vises, og nettleseren spør før
+ * siden lukkes.
  */
 export default function WeekPlan({
   days,
   entries: initial,
   recipes,
   shoppingHref,
-  onAdd,
-  onRemove,
+  allWeeksHref,
+  onSave,
+  week,
 }: Props) {
   const id = useId();
   const [entries, setEntries] = useState<readonly WeekEntry[]>(initial);
+  const [savedKey, setSavedKey] = useState(() => contentKey(initial));
   const [status, setStatus] = useState("");
-  const [pending, setPending] = useState(false);
+  const [saving, setSaving] = useState(false);
+  // Nye oppføringer får negative id-er, så de ikke kolliderer med lagrede.
+  const nextId = useRef(-1);
+  const dirty = contentKey(entries) !== savedKey;
 
-  async function add(day: WeekDay, recipeId: number, servings: number): Promise<string | null> {
-    if (pending) return null;
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+
+  /** Legger oppskriften på dagen i utkastet. Returnerer en melding ved feil, ellers `null`. */
+  function add(day: WeekDay, recipeId: number, servings: number): string | null {
     const recipe = recipes.find((other) => other.id === recipeId);
     if (!recipe) return m.pickFromList;
     if (!isSelectedServings(servings)) return m.invalidServings;
-    setPending(true);
-    try {
-      const result = await onAdd({ recipeId, day: day.day, servings });
-      if (!result.ok) return result.message;
-      setEntries((previous) => [
-        ...previous,
-        { id: result.id, day: day.day, servings, recipeId, title: recipe.title },
-      ]);
-      setStatus(m.added(recipe.title, day.label));
-      return null;
-    } catch (error) {
-      console.error("Kunne ikke legge til i ukemenyen", error);
-      return `${fallbackMessage.title} ${fallbackMessage.body}`;
-    } finally {
-      setPending(false);
-    }
+    setEntries((previous) => [
+      ...previous,
+      { id: nextId.current--, day: day.day, servings, recipeId, title: recipe.title },
+    ]);
+    setStatus(m.added(recipe.title, day.label));
+    return null;
   }
 
-  async function remove(entry: WeekEntry, day: WeekDay) {
-    if (pending) return;
-    setPending(true);
+  function remove(entry: WeekEntry, day: WeekDay) {
+    setEntries((previous) => previous.filter((other) => other.id !== entry.id));
+    setStatus(m.removed(entry.title, day.label));
+  }
+
+  async function save() {
+    if (saving) return;
+    if (!dirty) {
+      setStatus(m.nothingToSave);
+      return;
+    }
+    setSaving(true);
     try {
-      const result = await onRemove(entry.id);
+      const result = await onSave({
+        week,
+        items: entries.map(({ recipeId, day, servings }) => ({ recipeId, day, servings })),
+      });
       if (!result.ok) {
         setStatus(result.message);
         return;
       }
-      setEntries((previous) => previous.filter((other) => other.id !== entry.id));
-      setStatus(m.removed(entry.title, day.label));
+      setSavedKey(contentKey(entries));
+      setStatus(m.saved);
     } catch (error) {
-      console.error("Kunne ikke fjerne fra ukemenyen", error);
+      console.error("Kunne ikke lagre ukemenyen", error);
       setStatus(`${fallbackMessage.title} ${fallbackMessage.body}`);
     } finally {
-      setPending(false);
+      setSaving(false);
     }
   }
 
@@ -132,8 +159,7 @@ export default function WeekPlan({
                         type="button"
                         className={styles.remove}
                         aria-label={m.removeFor(entry.title, day.label)}
-                        aria-disabled={pending ? true : undefined}
-                        onClick={() => void remove(entry, day)}
+                        onClick={() => remove(entry, day)}
                       >
                         {m.remove}
                       </button>
@@ -147,14 +173,32 @@ export default function WeekPlan({
         })}
       </ol>
 
-      <p className={styles.saveNote}>
-        {m.autoSaved}{" "}
-        <Link href="/ukemeny/uker" className={styles.saveLink}>
-          {m.viewAllWeeks}
-        </Link>
-      </p>
-      <Link href={shoppingHref} className={styles.shopping}>
+      <div className={styles.saveBar}>
+        <button
+          type="button"
+          className={styles.save}
+          aria-disabled={saving || !dirty ? true : undefined}
+          onClick={() => void save()}
+        >
+          {saving ? m.saving : m.save}
+        </button>
+        <p className={dirty ? styles.unsaved : styles.savedNote}>{dirty ? m.unsaved : m.saved}</p>
+      </div>
+      <Link
+        href={shoppingHref}
+        className={styles.shopping}
+        onClick={(event) => {
+          // Handlelisten lages av det som er lagret, så ulagrede endringer må lagres først.
+          if (dirty) {
+            event.preventDefault();
+            setStatus(m.saveFirst);
+          }
+        }}
+      >
         {m.shopping}
+      </Link>
+      <Link href={allWeeksHref} className={styles.bigLink}>
+        {m.allWeeksButton}
       </Link>
       <p role="status" aria-live="polite" className={styles.status}>
         {status}
@@ -170,7 +214,7 @@ function AddForm({
 }: {
   day: WeekDay;
   recipes: readonly WeekRecipe[];
-  onAdd: (day: WeekDay, recipeId: number, servings: number) => Promise<string | null>;
+  onAdd: (day: WeekDay, recipeId: number, servings: number) => string | null;
 }) {
   const id = useId();
   const [recipeId, setRecipeId] = useState<number | null>(null);
@@ -184,14 +228,13 @@ function AddForm({
     const recipe = recipes.find((other) => other.id === chosen);
     const count =
       servings.trim() === "" ? defaultServings(recipe) : Number(servings.replace(",", "."));
-    void onAdd(day, chosen ?? 0, count).then((message) => {
-      setError(message ?? "");
-      if (message === null) {
-        setRecipeId(null);
-        setServings("");
-        setPickerKey((key) => key + 1);
-      }
-    });
+    const message = onAdd(day, chosen ?? 0, count);
+    setError(message ?? "");
+    if (message === null) {
+      setRecipeId(null);
+      setServings("");
+      setPickerKey((key) => key + 1);
+    }
   }
 
   return (

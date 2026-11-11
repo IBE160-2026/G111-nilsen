@@ -10,7 +10,7 @@ import {
   listPlannedWeeks,
   setCheck,
   listWeek,
-  removeFromWeek,
+  saveWeek,
   todayInOslo,
   weekShoppingSelection,
   weekStart,
@@ -133,23 +133,58 @@ describe("addToWeek og listWeek", () => {
   });
 });
 
-describe("removeFromWeek", () => {
-  it("fjerner egen oppføring, men ikke en annens eller en ukjent", () => {
+describe("saveWeek", () => {
+  it("erstatter uka, men rører ikke andre uker eller andre brukere", () => {
     const db = withOtherUser();
     const mine = insertRecipe(db, recipe("Min"));
     const theirs = insertRecipe(db, recipe("Deres", T0, OTHER_USER));
-    const own = addToWeek(TEST_USER_ID, mine, "2026-11-09", 4, db);
-    const other = addToWeek(OTHER_USER, theirs, "2026-11-09", 4, db);
-    if (!own.ok || !other.ok) throw new Error("feil");
-    expect(removeFromWeek(TEST_USER_ID, other.value.id, db)).toMatchObject({ ok: false });
-    for (const id of [999, 0, 1.5])
-      expect(removeFromWeek(TEST_USER_ID, id, db)).toMatchObject({ ok: false });
-    expect(removeFromWeek(TEST_USER_ID, own.value.id, db)).toEqual({
-      ok: true,
-      value: { id: own.value.id },
-    });
-    expect(titles(db, TEST_USER_ID, "2026-11-09")).toEqual([]);
+    addToWeek(TEST_USER_ID, mine, "2026-11-16", 4, db);
+    addToWeek(OTHER_USER, theirs, "2026-11-09", 4, db);
+    addToWeek(TEST_USER_ID, mine, "2026-11-09", 1, db);
+    // Hvilken som helst dag i uka velger uka.
+    expect(
+      saveWeek(
+        TEST_USER_ID,
+        "2026-11-11",
+        [{ recipeId: mine, day: "2026-11-15", servings: 2 }],
+        db,
+      ),
+    ).toEqual({ ok: true, value: { count: 1 } });
+    expect(titles(db, TEST_USER_ID, "2026-11-09")).toEqual(["2026-11-15 Min 2"]);
+    expect(titles(db, TEST_USER_ID, "2026-11-16")).toEqual(["2026-11-16 Min 4"]);
     expect(titles(db, OTHER_USER, "2026-11-09")).toEqual(["2026-11-09 Deres 4"]);
+    expect(saveWeek(TEST_USER_ID, "2026-11-09", [], db)).toEqual({ ok: true, value: { count: 0 } });
+    expect(titles(db, TEST_USER_ID, "2026-11-09")).toEqual([]);
+  });
+
+  it("avviser en annens, ukjent eller ulagret oppskrift uten å endre noe", () => {
+    const db = withOtherUser();
+    const mine = insertRecipe(db, recipe("Min"));
+    const unsaved = insertRecipe(db, recipe("Ulagret", null));
+    const theirs = insertRecipe(db, recipe("Deres", T0, OTHER_USER));
+    addToWeek(TEST_USER_ID, mine, "2026-11-09", 4, db);
+    for (const recipeId of [theirs, unsaved, 999, 0, 1.5])
+      expect(
+        saveWeek(TEST_USER_ID, "2026-11-09", [{ recipeId, day: "2026-11-09", servings: 2 }], db),
+      ).toMatchObject({ ok: false });
+    expect(titles(db, TEST_USER_ID, "2026-11-09")).toEqual(["2026-11-09 Min 4"]);
+  });
+
+  it("validerer uke, dager, antall og lengde", () => {
+    const db = createTestDb();
+    const id = insertRecipe(db, recipe("Min"));
+    const item = (day: string, servings: unknown) => ({ recipeId: id, day, servings });
+    expect(saveWeek(TEST_USER_ID, "nope", [], db)).toMatchObject({ ok: false });
+    expect(saveWeek(TEST_USER_ID, "2026-11-09", "x", db)).toMatchObject({ ok: false });
+    expect(saveWeek(TEST_USER_ID, "2026-11-09", [null], db)).toMatchObject({ ok: false });
+    expect(saveWeek(TEST_USER_ID, "2026-11-09", [item("2026-11-16", 2)], db)).toMatchObject({
+      ok: false,
+    });
+    expect(saveWeek(TEST_USER_ID, "2026-11-09", [item("2026-11-09", 0)], db)).toMatchObject({
+      ok: false,
+    });
+    const many = Array.from({ length: 101 }, () => item("2026-11-09", 1));
+    expect(saveWeek(TEST_USER_ID, "2026-11-09", many, db)).toMatchObject({ ok: false });
   });
 });
 

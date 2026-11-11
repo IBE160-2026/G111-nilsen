@@ -466,17 +466,23 @@ test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
   await expect(monday.getByRole("link", { name: title })).toBeVisible();
   await expect(monday.getByText("3 porsj.")).toBeVisible();
 
-  // Lagret: står der etter ny innlasting.
+  // Ikke lagret før «Lagre uka»: handlelisten venter, og knappen lagrer hele uka.
+  await expect(page.getByText("Ikke lagret ennå. Trykk «Lagre uka».")).toBeVisible();
+  await page.getByRole("button", { name: "Lagre uka" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Uka er lagret." })).toBeVisible();
   await page.reload();
   await expect(monday.getByRole("link", { name: title })).toBeVisible();
-  // «Alle uker»: uka står i oversikten med retten og en lenke til handlelisten.
-  await page.getByRole("link", { name: "Alle uker", exact: true }).click();
+  // «Se alle uker»: uka står i oversikten; en egen side viser menyen og veien til handlelisten.
+  await page.getByRole("link", { name: "Se alle uker", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Alle uker" })).toBeVisible();
   await expect(page.getByRole("list").getByText(title, { exact: false }).first()).toBeVisible();
   await page
-    .getByRole("link", { name: /^Handleliste for Uke/ })
+    .getByRole("link", { name: /^Uke \d+/ })
     .first()
     .click();
+  await expect(page.getByRole("heading", { level: 1, name: "Ukemeny" })).toBeVisible();
+  await expect(page.getByRole("link", { name: title }).first()).toBeVisible();
+  await page.getByRole("link", { name: "Se handlelisten for uka" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Handleliste" })).toBeVisible();
   // Avkrysninger huskes per uke, også etter ny innlasting.
   const firstItem = page
@@ -502,6 +508,8 @@ test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
   await page.getByRole("link", { name: "Ukemeny", exact: true }).first().click();
   await monday.getByRole("button", { name: new RegExp(`^Fjern ${title}`) }).click();
   await expect(monday.getByText("Ingenting planlagt.")).toBeVisible();
+  await page.getByRole("button", { name: "Lagre uka" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Uka er lagret." })).toBeVisible();
 });
 
 for (const scheme of ["light", "dark"] as const) {

@@ -19,41 +19,43 @@ const entries: WeekEntry[] = [
 ];
 
 function setup(overrides: Partial<Parameters<typeof WeekPlan>[0]> = {}) {
-  const onAdd = vi.fn(async () => ({ ok: true as const, id: 11 }));
-  const onRemove = vi.fn(async () => ({ ok: true as const }));
+  const onSave = vi.fn<(input: unknown) => Promise<{ ok: true }>>(async () => ({ ok: true }));
   render(
     <WeekPlan
       days={days}
       entries={entries}
       recipes={recipes}
       shoppingHref="/handleliste?uke=2026-11-09"
-      onAdd={onAdd}
-      onRemove={onRemove}
+      allWeeksHref="/ukemeny/uker"
+      week="2026-11-09"
+      onSave={onSave}
       {...overrides}
     />,
   );
-  return { onAdd, onRemove, user: userEvent.setup() };
+  return { onSave, user: userEvent.setup() };
 }
 
 const day = (label: string) =>
   screen.getByRole("heading", { level: 2, name: new RegExp(label) }).closest("li")!;
 
+const lastSaved = (onSave: ReturnType<typeof vi.fn>) => onSave.mock.calls.at(-1)![0];
+
 describe("WeekPlan", () => {
-  it("sier at uka lagres automatisk, med lenke til alle uker, og at den er lagret etter en endring", async () => {
-    const { user } = setup();
-    expect(
-      screen.getByText(/Ukemenyen lagres automatisk når du legger til eller fjerner en rett\./),
-    ).toBeInTheDocument();
+  it("viser stor «Se alle uker»-knapp og at uka er lagret fra start", () => {
+    setup();
     expect(screen.getByRole("link", { name: "Se alle uker" })).toHaveAttribute(
       "href",
       "/ukemeny/uker",
     );
-    await user.click(screen.getAllByRole("button", { name: /^Fjern /i })[0]!);
-    expect(await screen.findByText(/Uka er lagret\./)).toBeInTheDocument();
+    expect(screen.getByText("Uka er lagret.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Lagre uka" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
   });
 
-  it("søker etter oppskrift: skriv for å filtrere, piltaster og Enter velger og legger til", async () => {
-    const { onAdd, user } = setup();
+  it("søker etter oppskrift: skriv for å filtrere, piltaster og Enter velger og legger til i utkastet", async () => {
+    const { onSave, user } = setup();
     const form = screen.getByRole("form", { name: "Legg til på mandag 9. november" });
     const box = within(form).getByRole("combobox", { name: "Oppskrift" });
     expect(box).toHaveAttribute("placeholder", "Søk etter oppskrift");
@@ -79,9 +81,9 @@ describe("WeekPlan", () => {
       within(list).getByRole("option", { name: "Taco" }).id,
     );
     await user.keyboard("{Enter}");
-    // Enter i den åpne listen velger og legger til med en gang.
-    expect(onAdd).toHaveBeenCalledTimes(1);
-    expect(onAdd).toHaveBeenCalledWith({ recipeId: 2, day: "2026-11-09", servings: 2.5 });
+    // Valget legger til i utkastet; ingenting lagres før «Lagre uka».
+    expect(onSave).not.toHaveBeenCalled();
+    expect(within(day("mandag")).getAllByRole("link", { name: "Taco" })).toHaveLength(2);
     expect(within(form).getByRole("combobox", { name: "Oppskrift" })).toHaveValue("");
   });
 
@@ -117,60 +119,96 @@ describe("WeekPlan", () => {
     );
   });
 
-  it("legger til med en gang ved valg, med antallet oppskriften starter på når feltet er tomt", async () => {
-    const { onAdd, user } = setup();
+  it("legger til ved valg, viser «ikke lagret», og lagrer hele uka med «Lagre uka»", async () => {
+    const { onSave, user } = setup();
     const form = screen.getByRole("form", { name: "Legg til på tirsdag 10. november" });
     await user.type(within(form).getByRole("combobox", { name: "Oppskrift" }), "ta");
-    // Å velge i listen legger til med en gang, uten «Legg til».
     expect(within(form).queryByRole("button", { name: "Legg til" })).not.toBeInTheDocument();
     await user.click(within(form).getByRole("option", { name: "Taco" }));
-    expect(onAdd).toHaveBeenCalledWith({ recipeId: 2, day: "2026-11-10", servings: 2.5 });
     expect(within(day("tirsdag")).getByRole("link", { name: "Taco" })).toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent("Taco er lagt på tirsdag 10. november.");
-    expect(within(form).getByRole("combobox", { name: "Oppskrift" })).toHaveValue("");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Taco er lagt på tirsdag 10. november. Husk å lagre uka.",
+    );
+    expect(screen.getByText("Ikke lagret ennå. Trykk «Lagre uka».")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Lagre uka" }));
+    expect(lastSaved(onSave)).toEqual({
+      week: "2026-11-09",
+      items: [
+        { recipeId: 2, day: "2026-11-09", servings: 2 },
+        { recipeId: 2, day: "2026-11-10", servings: 2.5 },
+      ],
+    });
+    expect(await screen.findByRole("status")).toHaveTextContent("Uka er lagret.");
+    expect(screen.queryByText("Ikke lagret ennå. Trykk «Lagre uka».")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Lagre uka" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
   });
 
-  it("bruker antallet som er skrevet inn, også med komma", async () => {
-    const { onAdd, user } = setup();
+  it("bruker antallet som er skrevet inn", async () => {
+    const { onSave, user } = setup();
     const form = screen.getByRole("form", { name: "Legg til på mandag 9. november" });
-    // Antallet skrives først; så legger valget i listen til oppskriften med det.
     await user.type(within(form).getByLabelText("Porsjoner"), "6");
     await user.type(within(form).getByRole("combobox", { name: "Oppskrift" }), "pannekaker");
-    expect(onAdd).not.toHaveBeenCalled(); // å skrive tittelen alene legger ikke til
     await user.keyboard("{Enter}");
-    expect(onAdd).toHaveBeenCalledWith({ recipeId: 1, day: "2026-11-09", servings: 6 });
+    await user.click(screen.getByRole("button", { name: "Lagre uka" }));
+    expect(lastSaved(onSave).items).toContainEqual({
+      recipeId: 1,
+      day: "2026-11-09",
+      servings: 6,
+    });
   });
 
-  it("viser en feil under skjemaet uten oppskrift, og når handlingen feiler", async () => {
-    const onAdd = vi.fn(async () => ({ ok: false as const, message: "Noe gikk galt." }));
-    const { user } = setup({ onAdd });
+  it("viser en feil under skjemaet uten oppskrift", async () => {
+    const { onSave, user } = setup();
     const form = screen.getByRole("form", { name: "Legg til på mandag 9. november" });
-    // Enter i antallfeltet uten valgt oppskrift sier fra.
     await user.type(within(form).getByLabelText("Porsjoner"), "3{Enter}");
     expect(within(form).getByRole("alert")).toHaveTextContent("Velg en oppskrift fra listen.");
     const box = within(form).getByRole("combobox", { name: "Oppskrift" });
     expect(box).toHaveAttribute("aria-invalid", "true");
     expect(box).toHaveAccessibleDescription("Velg en oppskrift fra listen.");
-    expect(onAdd).not.toHaveBeenCalled();
-    await user.type(box, "pann");
-    await user.keyboard("{Enter}");
-    expect(onAdd).toHaveBeenCalledTimes(1);
-    expect(await within(form).findByRole("alert")).toHaveTextContent("Noe gikk galt.");
+    expect(onSave).not.toHaveBeenCalled();
   });
 
-  it("fjerner en oppføring", async () => {
-    const { onRemove, user } = setup();
+  it("fjerner en oppføring i utkastet og lagrer fjerningen", async () => {
+    const { onSave, user } = setup();
     await user.click(screen.getByRole("button", { name: "Fjern Taco fra mandag 9. november" }));
-    expect(onRemove).toHaveBeenCalledWith(10);
     expect(day("mandag")).toHaveTextContent("Ingenting planlagt.");
-    expect(screen.getByRole("status")).toHaveTextContent("Taco er fjernet fra mandag 9. november.");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Taco er fjernet fra mandag 9. november. Husk å lagre uka.",
+    );
+    expect(onSave).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Lagre uka" }));
+    expect(lastSaved(onSave)).toEqual({ week: "2026-11-09", items: [] });
   });
 
-  it("beholder oppføringen og viser meldingen når fjerning feiler", async () => {
-    const onRemove = vi.fn(async () => ({ ok: false as const, message: "Fant ikke." }));
-    const { user } = setup({ onRemove });
+  it("er ikke lagret igjen når en endring angres, og lagrer ingenting uten endringer", async () => {
+    const { onSave, user } = setup();
+    await user.click(screen.getByRole("button", { name: "Lagre uka" }));
+    expect(onSave).not.toHaveBeenCalled();
+    expect(screen.getByRole("status")).toHaveTextContent("Ingen endringer å lagre.");
+  });
+
+  it("viser meldingen og beholder utkastet når lagringen feiler", async () => {
+    const onSave = vi.fn(async () => ({ ok: false as const, message: "Noe gikk galt." }));
+    const { user } = setup({ onSave });
     await user.click(screen.getByRole("button", { name: "Fjern Taco fra mandag 9. november" }));
-    expect(within(day("mandag")).getByRole("link", { name: "Taco" })).toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent("Fant ikke.");
+    await user.click(screen.getByRole("button", { name: "Lagre uka" }));
+    expect(await screen.findByText("Noe gikk galt.")).toBeInTheDocument();
+    expect(screen.getByText("Ikke lagret ennå. Trykk «Lagre uka».")).toBeInTheDocument();
+  });
+
+  it("stopper handlelisten mens noe er ulagret, og advarer før siden lukkes", async () => {
+    const { user } = setup();
+    const link = screen.getByRole("link", { name: "Lag handleliste for uka" });
+    await user.click(screen.getByRole("button", { name: "Fjern Taco fra mandag 9. november" }));
+    const event = new Event("beforeunload", { cancelable: true });
+    window.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    await user.click(link);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Lagre uka først, så lages handlelisten av det som er lagret.",
+    );
   });
 });

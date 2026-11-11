@@ -14,7 +14,7 @@ import {
   weekStart,
 } from "@/server/services/meal-plan-service";
 import { currentUserId } from "@/server/session";
-import { addMeal, removeMeal } from "./actions";
+import { saveWeekPlan } from "./actions";
 import listStyles from "../list-page.module.css";
 import styles from "./page.module.css";
 
@@ -63,16 +63,13 @@ async function WeekLoader({ searchParams }: { searchParams: SearchParams }) {
           {m.next} →
         </Link>
       </nav>
-      <div className={styles.weekLinks}>
-        {monday !== thisMonday ? (
+      {monday !== thisMonday ? (
+        <div className={styles.weekLinks}>
           <Link href="/ukemeny" className={styles.navLink}>
             {m.thisWeek}
           </Link>
-        ) : null}
-        <Link href="/ukemeny/uker" className={styles.navLink}>
-          {m.allWeeks}
-        </Link>
-      </div>
+        </div>
+      ) : null}
 
       {recipes.value.length === 0 ? (
         <EmptyState
@@ -91,8 +88,9 @@ async function WeekLoader({ searchParams }: { searchParams: SearchParams }) {
           entries={entries.value}
           recipes={recipes.value}
           shoppingHref={`/handleliste?uke=${monday}`}
-          onAdd={addMeal}
-          onRemove={removeMeal}
+          allWeeksHref="/ukemeny/uker"
+          onSave={saveWeekPlan}
+          week={monday}
         />
       )}
     </>

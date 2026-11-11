@@ -178,7 +178,62 @@
   }
 }
 
-.saveLink {
-  color: var(--color-accent);
+/* «Lagre uka»: tydelig hovedknapp med status ved siden av. */
+.saveBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.save {
+  min-height: 3.5rem;
+  padding: 0 var(--space-5);
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-surface-raised);
+  font: inherit;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.save[aria-disabled="true"] {
+  border-color: var(--color-control-border);
+  background: var(--color-surface-raised);
+  color: var(--color-ink-secondary);
+  cursor: not-allowed;
+}
+
+.savedNote,
+.unsaved {
+  margin: 0;
+  font-size: var(--type-meta-size);
+}
+
+.savedNote {
+  color: var(--color-ink-secondary);
+}
+
+.unsaved {
+  color: var(--color-ink-primary);
   font-weight: 600;
+}
+
+/* Stor knapp til oversikten over alle uker. */
+.bigLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.5rem;
+  max-width: 28rem;
+  padding: 0 var(--space-5);
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-raised);
+  color: var(--color-accent);
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-decoration: none;
 }

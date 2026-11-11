@@ -964,9 +964,29 @@ slik at jeg kan gå tilbake til tidligere uker og se hva jeg handlet.
 
 **Gitt** at jeg har planlagt retter i flere uker
 **Når** jeg trykker «Alle uker» på Ukemeny
-**Så** ser jeg hver uke (Uke 38, Uke 39 …), nyeste først, med rettene, en lenke til menyen og en til handlelisten for uka
+**Så** ser jeg hver uke (Uke 38, Uke 39 …), nyeste først, med rettene, og kan åpne uka (se Story 6.4d)
 
 **Gitt** handlelisten for en uke
 **Når** jeg krysser av varer og åpner den igjen senere, også på en annen enhet
 **Så** står avkrysningene der, og de gjelder bare den uka
 
+### Story 6.4d: Lagre uka, stor «Se alle uker» og egen side for hver uke
+
+Som Ida,
+vil jeg trykke «Lagre uka» når menyen er ferdig, og åpne en uke fra «Alle uker» på en side som kort viser menyen og går videre til handlelisten,
+slik at jeg bestemmer selv når uka lagres og raskt finner tidligere uker og handlelister.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg legger til eller fjerner retter i ukemenyen
+**Når** jeg ikke har trykket «Lagre uka»
+**Så** står det «Ikke lagret ennå», nettleseren advarer før jeg forlater siden, og handlelisten for uka venter til jeg har lagret
+
+**Gitt** at jeg trykker «Lagre uka»
+**Så** erstattes hele uka med det jeg har valgt, og det står «Uka er lagret.»
+
+**Gitt** Ukemeny
+**Så** er det en stor «Se alle uker»-knapp under menyen
+
+**Gitt** at jeg åpner en uke fra «Alle uker»
+**Så** ser jeg dagene med rettene og porsjoner, en stor «Se handlelisten for uka»-knapp og «Endre uka»

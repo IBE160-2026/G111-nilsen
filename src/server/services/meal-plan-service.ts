@@ -4,8 +4,8 @@ import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import { appError, err, ok, type Result } from "@/lib/result";
 import { getDb, type Db } from "../db/client";
 import {
-  deleteEntry,
   insertEntry,
+  replaceWeek,
   listEntries,
   listPlannedMeals,
   listWeekChecks,
@@ -67,14 +67,40 @@ export function addToWeek(
   return id === null ? err(appError("not_found")) : ok({ id });
 }
 
-/** Fjerner en oppføring fra brukerens ukemeny. Ukjent eller en annens gir `not_found`. */
-export function removeFromWeek(
+/** Hvor mange oppføringer en uke kan ha. */
+export const WEEK_ENTRIES_MAX = 100;
+
+/**
+ * Lagrer hele ukemenyen for uka som inneholder `week` (Story 6.4): alle oppføringene i uka erstattes
+ * med `items`, så fjernede retter forsvinner og nye kommer til. Ugyldig dag (også en dag utenfor
+ * uka), antall (hele og halve 0,5–50) eller for mange oppføringer gir `validation`; en ukjent,
+ * ulagret eller annens oppskrift gir `not_found`, og da endres ingenting.
+ */
+export function saveWeek(
   userId: number,
-  entryId: number,
+  week: unknown,
+  items: unknown,
   db: Db = getDb(),
-): Result<{ id: number }> {
-  if (!Number.isSafeInteger(entryId) || entryId < 1) return err(appError("not_found"));
-  return deleteEntry(db, userId, entryId) ? ok({ id: entryId }) : err(appError("not_found"));
+  now: () => Date = () => new Date(),
+): Result<{ count: number }> {
+  if (!isIsoDate(week)) return err(appError("validation", "day"));
+  if (!Array.isArray(items) || items.length > WEEK_ENTRIES_MAX)
+    return err(appError("validation", "items"));
+  const monday = mondayOf(week);
+  const sunday = addDays(monday, 6);
+  const clean: { recipeId: number; day: string; servings: number }[] = [];
+  for (const item of items as Record<string, unknown>[]) {
+    if (typeof item !== "object" || item === null) return err(appError("validation", "items"));
+    const { recipeId, day, servings } = item;
+    if (!isIsoDate(day) || day < monday || day > sunday) return err(appError("validation", "day"));
+    if (!isSelectedServings(servings)) return err(appError("validation", "servings"));
+    if (typeof recipeId !== "number" || !Number.isSafeInteger(recipeId) || recipeId < 1)
+      return err(appError("not_found"));
+    clean.push({ recipeId, day, servings });
+  }
+  return replaceWeek(db, userId, monday, sunday, clean, now().toISOString())
+    ? ok({ count: clean.length })
+    : err(appError("not_found"));
 }
 
 /**

@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, between, desc, eq, isNotNull } from "drizzle-orm";
+import { and, asc, between, desc, eq, inArray, isNotNull } from "drizzle-orm";
 import type { Db } from "../client";
 import { mealPlanEntries, recipes, weekChecks } from "../schema";
 
@@ -88,14 +88,39 @@ export function insertEntry(
   return db.insert(mealPlanEntries).values(entry).returning({ id: mealPlanEntries.id }).get().id;
 }
 
-/** Fjerner en av brukerens oppføringer. `false` når den ikke finnes eller er en annens. */
-export function deleteEntry(db: Db, userId: number, id: number): boolean {
-  return (
-    db
-      .delete(mealPlanEntries)
-      .where(and(eq(mealPlanEntries.id, id), eq(mealPlanEntries.userId, userId)))
-      .run().changes > 0
-  );
+/**
+ * Erstatter alle brukerens oppføringer fra og med `from` til og med `to` med `entries`, i én
+ * transaksjon. Alle oppskriftene må være lagret og brukerens; ellers `false` og ingenting endres.
+ */
+export function replaceWeek(
+  db: Db,
+  userId: number,
+  from: string,
+  to: string,
+  entries: readonly { recipeId: number; day: string; servings: number }[],
+  createdAt: string,
+): boolean {
+  return db.transaction((tx) => {
+    const ids = [...new Set(entries.map((entry) => entry.recipeId))];
+    if (ids.length > 0) {
+      const owned = tx
+        .select({ id: recipes.id })
+        .from(recipes)
+        .where(
+          and(eq(recipes.userId, userId), isNotNull(recipes.savedAt), inArray(recipes.id, ids)),
+        )
+        .all();
+      if (owned.length !== ids.length) return false;
+    }
+    tx.delete(mealPlanEntries)
+      .where(and(eq(mealPlanEntries.userId, userId), between(mealPlanEntries.day, from, to)))
+      .run();
+    for (const entry of entries)
+      tx.insert(mealPlanEntries)
+        .values({ ...entry, userId, createdAt })
+        .run();
+    return true;
+  });
 }
 
 /** Varene (nøklene) brukeren har krysset av i handlelisten for uka som starter på `week`. */
