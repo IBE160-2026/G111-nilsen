@@ -187,7 +187,7 @@ function Session({
     ...(current.addedAfter ?? []),
   ].join(" ");
   const durations = findStepDurations(stepText);
-  const { timers, now, start, adjust, remove } = useStepTimers();
+  const { timers, now, soundOk, start, adjust, remove, testSound } = useStepTimers();
 
   function previous() {
     setIndex((i) => Math.max(0, i - 1));
@@ -240,6 +240,9 @@ function Session({
                 <p className={styles.timerFor}>
                   {running ? m.timerFor(timer.step, label) : m.timerFinished(timer.step)}
                 </p>
+                {!running && soundOk === false ? (
+                  <p className={styles.soundWarning}>{m.soundBlocked}</p>
+                ) : null}
                 {running ? (
                   <p role="timer" className={styles.countdown}>
                     {formatCountdown(left)}
@@ -330,6 +333,15 @@ function Session({
             </ul>
           </section>
         ) : null}
+      </div>
+
+      <div className={styles.soundTest}>
+        <button type="button" className={styles.soundTestButton} onClick={testSound}>
+          {m.soundTest}
+        </button>
+        <span role="status" className={styles.soundStatus}>
+          {soundOk === true ? m.soundTestPlayed : soundOk === false ? m.soundBlocked : ""}
+        </span>
       </div>
 
       <details className={styles.ingredients}>

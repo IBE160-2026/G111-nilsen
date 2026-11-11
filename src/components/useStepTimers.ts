@@ -27,10 +27,18 @@ const MAX_REPEATS = 10;
  */
 export function useStepTimers() {
   const [timers, setTimers] = useState<readonly StepTimer[]>([]);
+  /** Om nettleseren tok imot siste lydsignal: `null` før noe er spilt. */
+  const [soundOk, setSoundOk] = useState<boolean | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const nextId = useRef(1);
   const alarm = useRef<Alarm | null>(null);
   const rung = useRef<Set<number>>(new Set());
+
+  const play = useCallback(async () => {
+    const ok = (await alarm.current?.ring()) ?? false;
+    setSoundOk(ok);
+    return ok;
+  }, []);
 
   const running = timers.some((timer) => timer.endsAt > now);
   useEffect(() => {
@@ -52,9 +60,9 @@ export function useStepTimers() {
     const due = timers.filter((timer) => timer.endsAt <= now && !rung.current.has(timer.id));
     if (due.length === 0) return;
     for (const timer of due) rung.current.add(timer.id);
-    alarm.current?.ring();
+    void play();
     notify(m.timerFinished(due[0].step), m.timerNotificationBody);
-  }, [timers, now]);
+  }, [timers, now, play]);
 
   // Gjentar signalet mens en beskjed står åpen.
   useEffect(() => {
@@ -63,10 +71,10 @@ export function useStepTimers() {
     const interval = setInterval(() => {
       count += 1;
       if (count > MAX_REPEATS) clearInterval(interval);
-      else alarm.current?.ring();
+      else void play();
     }, REPEAT_MS);
     return () => clearInterval(interval);
-  }, [finishedKey]);
+  }, [finishedKey, play]);
 
   // Fanetittelen forteller at tiden er ute også når en annen fane eller et annet vindu er foran.
   useEffect(() => {
@@ -126,10 +134,19 @@ export function useStepTimers() {
     );
   }, []);
 
+  /** «Test lyden»: spiller signalet nå, så Ida kan sjekke at hun hører det før hun trenger det. */
+  const testSound = useCallback(() => {
+    alarm.current ??= createAlarm();
+    alarm.current.unlock();
+    askForNotifications();
+    // Lydkonteksten kan trenge et øyeblikk på å komme i gang etter klikket.
+    setTimeout(() => void play(), 150);
+  }, [play]);
+
   const remove = useCallback((id: number) => {
     rung.current.delete(id);
     setTimers((previous) => previous.filter((timer) => timer.id !== id));
   }, []);
 
-  return { timers, now, start, adjust, remove };
+  return { timers, now, soundOk, start, adjust, remove, testSound };
 }

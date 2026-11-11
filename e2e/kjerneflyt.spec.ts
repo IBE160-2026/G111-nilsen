@@ -342,6 +342,9 @@ test("Versjon 2: tidtaker i kokemodus fra tid i steget", async ({ page }, testIn
   await page.getByRole("button", { name: /^Åpne kokemodus/ }).click();
   const cooking = page.getByRole("dialog", { name: /^Kokemodus/ });
   await expect(cooking.getByRole("button", { name: /^Start tidtaker/ })).toHaveCount(0);
+  // «Test lyden»: lydkonteksten kommer i gang i en ekte nettleser.
+  await cooking.getByRole("button", { name: "Test lyden" }).click();
+  await expect(cooking.getByRole("status")).toHaveText("Spilte en lyd. Hørte du den?");
   await cooking.getByRole("button", { name: "Neste" }).click();
   await cooking.getByRole("button", { name: "Start tidtaker: 2 sek" }).click();
   await expect(cooking.getByRole("timer")).toBeVisible();

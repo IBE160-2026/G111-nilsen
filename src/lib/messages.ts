@@ -335,6 +335,10 @@ export const cookingModeMessages = {
     `Trekk fra ${minutes} minutt${minutes === 1 ? "" : "er"} på tidtakeren for steg ${step}`,
   timerTitle: "Tiden er ute",
   timerNotificationBody: "Tidtakeren i kokemodus er ferdig.",
+  soundTest: "Test lyden",
+  soundTestPlayed: "Spilte en lyd. Hørte du den?",
+  soundBlocked:
+    "Nettleseren ga ikke lyd. Sjekk at fanen ikke er dempet og at lyden på maskinen er på.",
   timerDismiss: "Lukk",
   timerDismissLabel: (step: number) => `Lukk beskjeden om steg ${step}`,
 } as const;

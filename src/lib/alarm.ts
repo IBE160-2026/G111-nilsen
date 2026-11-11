@@ -42,8 +42,11 @@ function beepWav(): string {
 export type Alarm = {
   /** Må kalles fra en handling (klikk), siden nettlesere ellers nekter å spille lyd senere. */
   unlock: () => void;
-  /** Spiller signalet: fire pip og vibrasjon. */
-  ring: () => void;
+  /**
+   * Spiller signalet: fire pip og vibrasjon. Svarer `true` når nettleseren tok imot lyden, og
+   * `false` når den ble blokkert eller ikke kan spilles (dempet fane, ingen støtte).
+   */
+  ring: () => Promise<boolean>;
   close: () => void;
 };
 
@@ -91,27 +94,30 @@ export function createAlarm(): Alarm {
     }
   }
 
-  function ring() {
-    let played = false;
+  function ring(): Promise<boolean> {
+    let result: Promise<boolean> = Promise.resolve(false);
     try {
       if (context) {
         void context.resume?.();
         if (context.state === "running") {
           beepWithContext(context);
-          played = true;
+          result = Promise.resolve(true);
         }
       }
     } catch {
       // Prøver reserven under.
     }
-    if (!played) {
+    if (element && !(context && context.state === "running")) {
       try {
-        if (element) {
-          element.volume = 1;
-          element.currentTime = 0;
-          const attempt = element.play() as Promise<void> | undefined;
-          void attempt?.catch(() => undefined);
-        }
+        element.volume = 1;
+        element.currentTime = 0;
+        const attempt = element.play() as Promise<void> | undefined;
+        result = attempt
+          ? attempt.then(
+              () => true,
+              () => false,
+            )
+          : Promise.resolve(true);
       } catch {
         // Ingen lyd mulig; beskjeden i siden er der uansett.
       }
@@ -121,6 +127,7 @@ export function createAlarm(): Alarm {
     } catch {
       // Ikke støttet.
     }
+    return result;
   }
 
   function close() {

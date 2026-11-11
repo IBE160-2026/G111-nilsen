@@ -9,6 +9,7 @@ const oscillators = vi.hoisted(() => ({
   closed: 0,
   state: "running",
   htmlPlays: 0,
+  playRejects: false,
   notifications: [] as string[],
 }));
 class FakeAudio {
@@ -17,7 +18,9 @@ class FakeAudio {
   play() {
     // Det stille forsøket i klikket (volum 0) er ikke et signal.
     if (this.volume > 0) oscillators.htmlPlays += 1;
-    return Promise.resolve();
+    return oscillators.playRejects
+      ? Promise.reject(new Error("NotAllowedError"))
+      : Promise.resolve();
   }
   pause() {}
 }
@@ -63,6 +66,7 @@ beforeEach(() => {
   oscillators.closed = 0;
   oscillators.state = "running";
   oscillators.htmlPlays = 0;
+  oscillators.playRejects = false;
   oscillators.notifications = [];
   FakeNotification.permission = "granted";
   FakeNotification.requestPermission.mockClear();
@@ -231,6 +235,30 @@ describe("tidtaker i kokemodus", () => {
     expect(oscillators.htmlPlays).toBe(1);
     expect(oscillators.notifications).toEqual([]); // ikke tillatt: ingen varsel
     expect(within(dialog).getByRole("alert")).toBeInTheDocument();
+  });
+
+  it("«Test lyden» spiller signalet og sier fra at lyden ble spilt", async () => {
+    const user = setup();
+    const dialog = open(user);
+    expect(within(dialog).getByRole("status")).toHaveTextContent("");
+    user.click(within(dialog).getByRole("button", { name: "Test lyden" }));
+    await act(async () => void vi.advanceTimersByTime(200));
+    expect(oscillators.started).toBe(4);
+    expect(within(dialog).getByRole("status")).toHaveTextContent("Spilte en lyd. Hørte du den?");
+  });
+
+  it("sier fra når nettleseren blokkerer lyden, både i testen og når tiden er ute", async () => {
+    oscillators.state = "suspended";
+    oscillators.playRejects = true;
+    const user = setup();
+    const dialog = open(user);
+    user.click(within(dialog).getByRole("button", { name: "Test lyden" }));
+    await act(async () => void vi.advanceTimersByTime(200));
+    expect(within(dialog).getByRole("status")).toHaveTextContent("Nettleseren ga ikke lyd.");
+    user.click(within(dialog).getByRole("button", { name: "Neste" }));
+    user.click(within(dialog).getAllByRole("button", { name: /^Start tidtaker/ })[1]);
+    await act(async () => void vi.advanceTimersByTime(31_000));
+    expect(within(dialog).getByRole("alert")).toHaveTextContent("Nettleseren ga ikke lyd.");
   });
 
   it("legger til og trekker fra tid på en tidtaker som går", () => {
