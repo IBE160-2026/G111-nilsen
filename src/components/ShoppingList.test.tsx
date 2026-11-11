@@ -1,10 +1,19 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { parseLine, type ShoppingRecipe } from "@/domain";
 import ShoppingList from "./ShoppingList";
 
+beforeEach(() => {
+  // jsdom mangler <dialog>-metodene som «Tøm listen» bruker.
+  HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function (this: HTMLDialogElement) {
+    this.removeAttribute("open");
+  };
+});
 afterEach(cleanup);
 
 function recipe(id: number, title: string, lines: string[], extra: Partial<ShoppingRecipe> = {}) {
@@ -177,6 +186,51 @@ describe("ShoppingList", () => {
         .getByRole("heading", { level: 2, name: "Har hjemme" })
         .closest("section")!;
       expect(within(section).getByText("egg")).toBeInTheDocument();
+    });
+
+    it("«Tøm listen» spør først, tømmer «Har hjemme» og legger varene tilbake", async () => {
+      const user = userEvent.setup();
+      const onClear = vi.fn(() => Promise.resolve({ ok: true as const }));
+      render(
+        <ShoppingList
+          recipes={recipes}
+          pantry={[{ id: 1, name: "Egg" }]}
+          onAddPantry={vi.fn()}
+          onRemovePantry={vi.fn()}
+          onClearPantry={onClear}
+        />,
+      );
+      await user.click(pick("Pannekaker"));
+      expect(items().join("|")).not.toContain("egg");
+      await user.click(screen.getByRole("button", { name: "Tøm listen" }));
+      expect(onClear).not.toHaveBeenCalled();
+      await user.click(screen.getByRole("button", { name: "Tøm" }));
+      expect(onClear).toHaveBeenCalledTimes(1);
+      expect(await screen.findByText("«Har hjemme» er tømt.")).toBeInTheDocument();
+      expect(items().join("|")).toContain("egg");
+      expect(screen.getByText("Ingenting ennå.")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Tøm listen" })).not.toBeInTheDocument();
+    });
+
+    it("«Avbryt» i «Tøm listen» lar alt stå, og en feil vises", async () => {
+      const user = userEvent.setup();
+      const onClear = vi.fn(() => Promise.resolve({ ok: false as const, message: "Feil." }));
+      render(
+        <ShoppingList
+          recipes={recipes}
+          pantry={[{ id: 1, name: "Egg" }]}
+          onAddPantry={vi.fn()}
+          onRemovePantry={vi.fn()}
+          onClearPantry={onClear}
+        />,
+      );
+      await user.click(screen.getByRole("button", { name: "Tøm listen" }));
+      await user.click(screen.getByRole("button", { name: "Avbryt" }));
+      expect(onClear).not.toHaveBeenCalled();
+      await user.click(screen.getByRole("button", { name: "Tøm listen" }));
+      await user.click(screen.getByRole("button", { name: "Tøm" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent("Feil.");
+      expect(screen.getByText("Egg")).toBeInTheDocument();
     });
 
     it("knappen på varen veksler ikke avkryssingen", async () => {

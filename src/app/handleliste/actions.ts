@@ -7,7 +7,7 @@ import {
   type PantryActionResult,
 } from "@/app/_shared/action-result";
 import { pantryMessages } from "@/lib/messages";
-import { addPantryItem, removePantryItem } from "@/server/services/pantry-service";
+import { addPantryItem, clearPantry, removePantryItem } from "@/server/services/pantry-service";
 import { currentUserId } from "@/server/session";
 
 // Server Actions er offentlige endepunkter: id og navn valideres på nytt her.
@@ -55,6 +55,20 @@ export async function removeFromPantry(id: number): Promise<ActionResult> {
     return { ok: true };
   } catch (error) {
     console.error("Kunne ikke ta ut av «Har hjemme»", error);
+    return actionFailure(undefined);
+  }
+}
+
+/** Tømmer «Har hjemme» etter en handletur, så alt kommer tilbake på handlelisten. */
+export async function clearPantryItems(): Promise<ActionResult> {
+  try {
+    const userId = await currentUserId();
+    if (userId === null) return actionFailure("login_required");
+    const result = clearPantry(userId);
+    if (!result.ok) return actionFailure(result.error.kind);
+    return { ok: true };
+  } catch (error) {
+    console.error("Kunne ikke tømme «Har hjemme»", error);
     return actionFailure(undefined);
   }
 }

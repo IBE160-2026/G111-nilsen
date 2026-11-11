@@ -13,6 +13,7 @@ import { fallbackMessage, pantryMessages as p, shoppingMessages as m } from "@/l
 import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import UnitChoice from "./UnitChoice";
 import CheckRow from "./CheckRow";
+import ConfirmDialog from "./ConfirmDialog";
 import styles from "./ShoppingList.module.css";
 
 /** Antallet en oppskrift starter på: sist valgt, ellers antallet den er skrevet for, ellers `null`. */
@@ -36,6 +37,8 @@ type Props = {
   onAddPantry?: (name: string) => Promise<PantryActionResult>;
   /** Tar noe ut av «Har hjemme» (Server Action). */
   onRemovePantry?: (id: number) => Promise<ActionResult>;
+  /** Tømmer «Har hjemme» (Server Action); uten den vises ikke «Tøm listen». */
+  onClearPantry?: () => Promise<ActionResult>;
   /** Oppskrifter som er valgt fra start, med antall porsjoner (fra ukemenyen, Story 6.4). */
   initialSelection?: Readonly<Record<number, number>>;
 };
@@ -45,6 +48,7 @@ export default function ShoppingList({
   pantry: initialPantry = [],
   onAddPantry,
   onRemovePantry,
+  onClearPantry,
   initialSelection = {},
 }: Props) {
   const id = useId();
@@ -66,6 +70,7 @@ export default function ShoppingList({
   const [pantryName, setPantryName] = useState("");
   const [pantryError, setPantryError] = useState("");
   const [pantryPending, setPantryPending] = useState(false);
+  const [confirmingClear, setConfirmingClear] = useState(false);
 
   const allItems = useMemo(
     () =>
@@ -125,6 +130,27 @@ export default function ShoppingList({
       setPantryError(`${fallbackMessage.title} ${fallbackMessage.body}`);
     } finally {
       setPantryPending(false);
+    }
+  }
+
+  async function clearAllPantry() {
+    if (!onClearPantry || pantryPending) return;
+    setPantryPending(true);
+    setPantryError("");
+    try {
+      const result = await onClearPantry();
+      if (!result.ok) {
+        setPantryError(result.message);
+        return;
+      }
+      setPantry([]);
+      setStatus(p.cleared);
+    } catch (error) {
+      console.error("Kunne ikke tømme «Har hjemme»", error);
+      setPantryError(`${fallbackMessage.title} ${fallbackMessage.body}`);
+    } finally {
+      setPantryPending(false);
+      setConfirmingClear(false);
     }
   }
 
@@ -313,6 +339,26 @@ export default function ShoppingList({
               ))}
             </ul>
           )}
+          {onClearPantry && pantry.length > 0 ? (
+            <button
+              type="button"
+              className={styles.copy}
+              aria-disabled={pantryPending ? true : undefined}
+              onClick={() => setConfirmingClear(true)}
+            >
+              {p.clear}
+            </button>
+          ) : null}
+          <ConfirmDialog
+            open={confirmingClear}
+            title={p.clearTitle}
+            description={p.clearDescription}
+            confirmLabel={p.clearConfirm}
+            cancelLabel={p.clearCancel}
+            pending={pantryPending}
+            onConfirm={() => void clearAllPantry()}
+            onCancel={() => setConfirmingClear(false)}
+          />
         </section>
       ) : null}
     </div>

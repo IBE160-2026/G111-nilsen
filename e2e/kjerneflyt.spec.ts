@@ -418,6 +418,20 @@ test("Versjon 2: handleliste fra lagret oppskrift", async ({ page }, testInfo) =
   await pantry.getByRole("button", { name: `Legg tilbake på listen: ${name}` }).click();
   await expect(pantry.getByText("Ingenting ennå.")).toBeVisible();
   await expect(list.getByRole("listitem")).toHaveCount(before);
+
+  // «Tøm listen» etter handling: spør først, og varene kommer tilbake på handlelisten.
+  await list
+    .getByRole("button", { name: /^Har hjemme: / })
+    .first()
+    .click();
+  await expect(list.getByRole("listitem")).toHaveCount(before - 1);
+  await pantry.getByRole("button", { name: "Tøm listen" }).click();
+  await page
+    .getByRole("dialog", { name: "Tømme «Har hjemme»?" })
+    .getByRole("button", { name: "Tøm" })
+    .click();
+  await expect(pantry.getByText("Ingenting ennå.")).toBeVisible();
+  await expect(list.getByRole("listitem")).toHaveCount(before);
 });
 
 test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
@@ -456,6 +470,11 @@ test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
   // Lagret: står der etter ny innlasting.
   await page.reload();
   await expect(monday.getByRole("link", { name: title })).toBeVisible();
+  // «Dine uker»: uka med retten står i oversikten og er markert som den som vises.
+  const weeks = page
+    .getByRole("heading", { level: 2, name: "Dine uker" })
+    .locator("xpath=ancestor::section");
+  await expect(weeks.getByRole("link", { name: /Vises nå/ })).toBeVisible();
 
   await page.getByRole("link", { name: "Lag handleliste for uka" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Handleliste" })).toBeVisible();

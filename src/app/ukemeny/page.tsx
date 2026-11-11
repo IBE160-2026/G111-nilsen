@@ -9,6 +9,7 @@ import { addDays, formatDay, formatWeek, weekDays } from "@/domain";
 import { weekMessages as m } from "@/lib/messages";
 import {
   listPlannable,
+  listPlannedWeeks,
   listWeek,
   todayInOslo,
   weekStart,
@@ -48,6 +49,9 @@ async function WeekLoader({ searchParams }: { searchParams: SearchParams }) {
   if (!recipes.ok) throw new Error(`${m.loadFailed} (${recipes.error.kind})`);
   const entries = listWeek(userId, monday);
   if (!entries.ok) throw new Error(`${m.loadFailed} (${entries.error.kind})`);
+
+  const weeks = listPlannedWeeks(userId);
+  if (!weeks.ok) throw new Error(`${m.loadFailed} (${weeks.error.kind})`);
 
   const today = todayInOslo();
   const thisMonday = weekStart(undefined);
@@ -90,6 +94,30 @@ async function WeekLoader({ searchParams }: { searchParams: SearchParams }) {
           onRemove={removeMeal}
         />
       )}
+
+      {weeks.value.length > 0 ? (
+        <section aria-labelledby="dine-uker" className={styles.weeks}>
+          <h2 id="dine-uker">{m.weeksHeading}</h2>
+          <p className={styles.weeksHint}>{m.weeksHint}</p>
+          <ul role="list" className={styles.weekList}>
+            {weeks.value.map((week) => (
+              <li key={week.monday}>
+                <Link
+                  href={`/ukemeny?uke=${week.monday}`}
+                  className={styles.weekLink}
+                  aria-current={week.monday === monday ? "page" : undefined}
+                >
+                  <span>{formatWeek(week.monday)}</span>
+                  <span className={styles.weekMeta}>
+                    {m.weekMeals(week.meals)}
+                    {week.monday === monday ? ` · ${m.currentWeek}` : ""}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </>
   );
 }

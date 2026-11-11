@@ -4,6 +4,7 @@ import { cleanPantryName, PANTRY_NAME_MAX_LENGTH, pantryNameKey } from "@/lib/pa
 import { appError, err, ok, type Result } from "@/lib/result";
 import { getDb, type Db } from "../db/client";
 import {
+  deleteAllPantryItems,
   deletePantryItem,
   insertPantryItem,
   listPantryItems,
@@ -41,4 +42,9 @@ export function removePantryItem(
 ): Result<{ id: number }> {
   if (!Number.isSafeInteger(id) || id < 1) return err(appError("not_found"));
   return deletePantryItem(db, userId, id) ? ok({ id }) : err(appError("not_found"));
+}
+
+/** Tømmer «har hjemme» (etter en handletur), så alt kommer tilbake på handlelisten. */
+export function clearPantry(userId: number, db: Db = getDb()): Result<{ removed: number }> {
+  return ok({ removed: deleteAllPantryItems(db, userId) });
 }

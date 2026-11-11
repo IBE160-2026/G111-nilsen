@@ -37,6 +37,11 @@ export function insertPantryItem(
   });
 }
 
+/** Fjerner alt brukeren har hjemme. Returnerer hvor mange rader som ble borte. */
+export function deleteAllPantryItems(db: Db, userId: number): number {
+  return db.delete(pantryItems).where(eq(pantryItems.userId, userId)).run().changes;
+}
+
 /** Fjerner noe fra «har hjemme». Returnerer `false` når id-en ikke finnes. */
 export function deletePantryItem(db: Db, userId: number, id: number): boolean {
   return (

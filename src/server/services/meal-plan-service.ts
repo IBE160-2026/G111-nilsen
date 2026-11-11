@@ -7,6 +7,7 @@ import {
   deleteEntry,
   insertEntry,
   listEntries,
+  listPlannedDays,
   listPlannableRecipes,
   type MealPlanEntry,
   type PlannableRecipe,
@@ -87,4 +88,20 @@ export function weekShoppingSelection(entries: readonly MealPlanEntry[]): Record
     );
   }
   return selection;
+}
+
+/** En uke brukeren har planlagt noe i: mandagen og antall retter. */
+export type PlannedWeek = { monday: string; meals: number };
+
+/** Hvor mange uker «Dine uker» viser. */
+export const PLANNED_WEEKS_LIMIT = 52;
+
+/** Ukene brukeren har planlagt noe i (Story 6.4b), nyeste først, høyst ett år. */
+export function listPlannedWeeks(userId: number, db: Db = getDb()): Result<PlannedWeek[]> {
+  const weeks = new Map<string, number>();
+  for (const { day, count } of listPlannedDays(db, userId)) {
+    const monday = mondayOf(day);
+    weeks.set(monday, (weeks.get(monday) ?? 0) + count);
+  }
+  return ok([...weeks].slice(0, PLANNED_WEEKS_LIMIT).map(([monday, meals]) => ({ monday, meals })));
 }

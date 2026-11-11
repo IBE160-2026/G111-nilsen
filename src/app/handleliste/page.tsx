@@ -11,7 +11,7 @@ import { listPantry } from "@/server/services/pantry-service";
 import { listShoppingRecipes } from "@/server/services/recipe-service";
 import { currentUserId } from "@/server/session";
 import LoginRequired from "@/components/LoginRequired";
-import { addToPantry, removeFromPantry } from "./actions";
+import { addToPantry, clearPantryItems, removeFromPantry } from "./actions";
 import listStyles from "../list-page.module.css";
 
 export const metadata: Metadata = { title: shoppingMessages.heading };
@@ -82,6 +82,7 @@ async function ShoppingLoader({ searchParams }: { searchParams: SearchParams }) 
         pantry={pantry.value}
         onAddPantry={addToPantry}
         onRemovePantry={removeFromPantry}
+        onClearPantry={clearPantryItems}
         initialSelection={selection}
       />
     </>

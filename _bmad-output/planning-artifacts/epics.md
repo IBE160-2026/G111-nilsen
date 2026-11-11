@@ -938,3 +938,19 @@ slik at jeg husker hvor stor oppskriften egentlig er.
 **Når** jeg åpner oppskriften igjen
 **Så** er «Passer til» tomt, og en tekst på over 60 tegn gir en melding i stedet for å lagres
 
+### Story 6.4b: Tøm «Har hjemme» og «Dine uker» i ukemenyen
+
+Som Ida,
+vil jeg tømme «Har hjemme» etter en handletur og finne igjen ukemenyer jeg har planlagt,
+slik at handlelisten stemmer for neste handling og jeg kan hente frem gamle uker.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg har lagt inn noe i «Har hjemme»
+**Når** jeg trykker «Tøm listen» og bekrefter
+**Så** er «Har hjemme» tom, og varene står på handlelisten igjen; velger jeg «Avbryt», står alt som før
+
+**Gitt** at jeg har planlagt retter i flere uker
+**Når** jeg åpner Ukemeny
+**Så** viser «Dine uker» alle uker med planlagte retter, nyeste først, med antall retter, og jeg kommer til hver uke med ett trykk
+

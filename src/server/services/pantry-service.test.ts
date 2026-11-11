@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestDb, type Db, TEST_USER_ID } from "../db/client";
-import { addPantryItem, listPantry, removePantryItem } from "./pantry-service";
+import { addPantryItem, clearPantry, listPantry, removePantryItem } from "./pantry-service";
 
 let db: Db;
 beforeEach(() => {
@@ -67,5 +67,23 @@ describe("pantry-service", () => {
         error: { kind: "not_found" },
       });
     }
+  });
+});
+
+describe("clearPantry", () => {
+  it("tømmer bare brukerens egen liste og sier hvor mange som ble borte", () => {
+    db.$client
+      .prepare(
+        "insert into users (id, email, password_hash, created_at) values (2, 'annen@example.com', 'x', 'x')",
+      )
+      .run();
+    addPantryItem(TEST_USER_ID, "Salt", db);
+    addPantryItem(TEST_USER_ID, "Olje", db);
+    addPantryItem(2, "Sukker", db);
+    expect(clearPantry(TEST_USER_ID, db)).toEqual({ ok: true, value: { removed: 2 } });
+    expect(names()).toEqual([]);
+    const other = listPantry(2, db);
+    expect(other.ok && other.value.map((item) => item.name)).toEqual(["Sukker"]);
+    expect(clearPantry(TEST_USER_ID, db)).toEqual({ ok: true, value: { removed: 0 } });
   });
 });

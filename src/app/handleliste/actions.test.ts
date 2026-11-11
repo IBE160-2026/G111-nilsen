@@ -16,7 +16,7 @@ vi.mock("@/server/db/client", async (importOriginal) => {
   return { ...actual, getDb: () => state.db! };
 });
 
-const { addToPantry, removeFromPantry } = await import("./actions");
+const { addToPantry, clearPantryItems, removeFromPantry } = await import("./actions");
 
 beforeEach(() => {
   state.db = createTestDb();
@@ -76,5 +76,20 @@ describe("removeFromPantry", () => {
       const result = await removeFromPantry(id);
       expect(result.ok).toBe(false);
     }
+  });
+});
+
+describe("clearPantryItems", () => {
+  it("tømmer «Har hjemme» for den innloggede", async () => {
+    await addToPantry("Salt");
+    await addToPantry("Olje");
+    expect(await clearPantryItems()).toEqual({ ok: true });
+    expect(stored()).toEqual([]);
+  });
+
+  it("ber om innlogging uten innlogging", async () => {
+    session.userId = null;
+    expect(await clearPantryItems()).toMatchObject({ ok: false });
+    session.userId = TEST_USER_ID;
   });
 });

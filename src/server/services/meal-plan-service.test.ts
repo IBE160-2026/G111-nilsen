@@ -6,6 +6,7 @@ import { recipes } from "../db/schema";
 import {
   addToWeek,
   listPlannable,
+  listPlannedWeeks,
   listWeek,
   removeFromWeek,
   todayInOslo,
@@ -178,5 +179,36 @@ describe("weekShoppingSelection", () => {
     });
     expect(weekShoppingSelection([entry(1, 30), entry(1, 30)])).toEqual({ 1: 50 });
     expect(weekShoppingSelection([])).toEqual({});
+  });
+});
+
+describe("listPlannedWeeks", () => {
+  it("samler dagene i uker med antall retter, nyeste først, og bare for brukeren selv", () => {
+    const db = withOtherUser();
+    const id = insertRecipe(db, recipe("Pannekaker"));
+    const other = insertRecipe(db, recipe("Taco", T0, OTHER_USER));
+    addToWeek(TEST_USER_ID, id, "2026-11-09", 2, db);
+    addToWeek(TEST_USER_ID, id, "2026-11-15", 2, db);
+    addToWeek(TEST_USER_ID, id, "2026-11-02", 4, db);
+    addToWeek(OTHER_USER, other, "2026-12-01", 4, db);
+    expect(listPlannedWeeks(TEST_USER_ID, db)).toEqual({
+      ok: true,
+      value: [
+        { monday: "2026-11-09", meals: 2 },
+        { monday: "2026-11-02", meals: 1 },
+      ],
+    });
+    expect(listPlannedWeeks(3, db)).toEqual({ ok: true, value: [] });
+  });
+
+  it("viser høyst 52 uker", () => {
+    const db = createTestDb();
+    const id = insertRecipe(db, recipe("Pannekaker"));
+    for (let week = 0; week < 60; week++) {
+      const monday = new Date(Date.UTC(2025, 0, 6 + week * 7)).toISOString().slice(0, 10);
+      addToWeek(TEST_USER_ID, id, monday, 2, db);
+    }
+    const result = listPlannedWeeks(TEST_USER_ID, db);
+    expect(result.ok && result.value).toHaveLength(52);
   });
 });

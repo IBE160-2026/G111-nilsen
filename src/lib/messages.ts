@@ -190,6 +190,12 @@ export const pantryMessages = {
     n === 1
       ? "1 vare er skjult fordi du har den hjemme."
       : `${n} varer er skjult fordi du har dem hjemme.`,
+  clear: "Tøm listen",
+  clearTitle: "Tømme «Har hjemme»?",
+  clearDescription: "Alt du har lagt inn fjernes, og varene kommer tilbake på handlelisten.",
+  clearConfirm: "Tøm",
+  clearCancel: "Avbryt",
+  cleared: "«Har hjemme» er tømt.",
   added: (name: string) => `${name} er lagt til i «Har hjemme».`,
   removed: (name: string) => `${name} er lagt tilbake på listen.`,
 } as const;
@@ -254,6 +260,10 @@ export const weekMessages = {
   noRecipesDescription: "Lagre oppskrifter først, så kan du legge dem på dagene i uka.",
   noRecipesAction: "Se oppskrifter",
   fromWeek: (week: string) => `Valgt fra ukemenyen: ${week}.`,
+  weeksHeading: "Dine uker",
+  weeksHint: "Uker du har planlagt. Åpne en for å se eller endre den.",
+  weekMeals: (n: number) => (n === 1 ? "1 rett" : `${n} retter`),
+  currentWeek: "Vises nå",
 } as const;
 
 /** Notater og «sist laget» (Story 6.3). */
