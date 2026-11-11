@@ -766,3 +766,22 @@ export const dinnerMessages = {
   noMatch: "Ingen oppskrifter passer",
   noMatchHint: "Prøv å fjerne et filter, eller velg en lengre tid.",
 } as const;
+
+/** Lim inn tekst som oppskrift (Story 6.14). */
+export const pasteMessages = {
+  heading: "Lim inn oppskriften som tekst",
+  tabTitle: "Lim inn tekst",
+  link: "Lim inn tekst",
+  linkPrompt: "Har du oppskriften som tekst?",
+  lead: "Lim inn teksten fra en melding, en PDF eller en bok. RecipeMate legger den inn i skjemaet, så kan du se over og rette før du lagrer.",
+  label: "Oppskriften som tekst",
+  hint: "Med overskriftene «Ingredienser» og «Fremgangsmåte» blir det best.",
+  submit: "Lag utkast",
+  empty: "Lim inn teksten først.",
+  draftHeading: "Sjekk utkastet",
+  draftLead: "Rett det som ikke stemmer, og trykk «Lagre oppskrift».",
+  noIngredients: "Fant ingen ingredienser i teksten. Legg dem inn selv under «Ingredienser».",
+  noTitle: "Fant ingen tittel. Skriv en tittel.",
+  loading: "Laster …",
+  saveLabel: "Lagre oppskrift",
+} as const;

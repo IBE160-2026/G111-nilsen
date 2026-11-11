@@ -33,6 +33,7 @@ export {
   type CollectionSort,
 } from "./filter-collection";
 export { convertLine, hasConvertibleUnit, type UnitSystem } from "./convert-units";
+export { parseRecipeText, type RecipeDraft } from "./parse-recipe-text";
 export {
   dinnerCandidates,
   pickDinner,

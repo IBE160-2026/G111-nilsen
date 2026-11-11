@@ -708,6 +708,27 @@ test("Versjon 2: slettet oppskrift kan angres, hentes tilbake og slettes for god
   await expect(page.getByRole("heading", { level: 2, name: title })).toHaveCount(0);
 });
 
+test("Versjon 2: lim inn tekst blir et utkast som kan lagres", async ({ page }, testInfo) => {
+  const title = `Limt ${testInfo.project.name}`;
+  await page.goto("/importer");
+  await page.getByRole("link", { name: "Lim inn tekst" }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Lim inn oppskriften som tekst" }),
+  ).toBeVisible();
+  await page
+    .getByLabel("Oppskriften som tekst")
+    .fill(
+      `${title}\n4 porsjoner\nTid: 20 min\nIngredienser\n3 dl hvetemel\n5 dl melk\nFremgangsmåte\n1. Visp alt.\n2. Stek.`,
+    );
+  await page.getByRole("button", { name: "Lag utkast" }).click();
+  await expect(page.getByRole("heading", { name: "Sjekk utkastet" })).toBeVisible();
+  await expect(field(page, "Tittel")).toHaveValue(title);
+  await expect(field(page, "Antall porsjoner")).toHaveValue("4");
+  await page.getByRole("button", { name: "Lagre oppskrift" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+  await expect(page.getByText("3 dl hvetemel")).toBeVisible();
+});
+
 test("Versjon 2: tilfeldig middagsforslag", async ({ page }, testInfo) => {
   const title = `Middag ${testInfo.project.name}`;
   await page.goto("/ny");

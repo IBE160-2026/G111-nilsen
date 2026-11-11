@@ -1181,3 +1181,26 @@ slik at jeg slipper å bestemme hva vi skal ha til middag.
 
 **Gitt** at ingen oppskrifter passer filteret, eller jeg ikke har oppskrifter
 **Så** får jeg en forklarende tekst i stedet for en knapp, og er jeg ikke innlogget blir jeg bedt om å logge inn
+
+### Story 6.14: Lim inn tekst som oppskrift
+
+Som Ida,
+vil jeg lime inn en oppskrift som tekst,
+slik at jeg kan lagre oppskrifter fra meldinger, PDF-er og bøker uten å skrive alt om.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg er på Importer
+**Så** er det en lenke «Lim inn tekst» til siden `/lim-inn`
+
+**Gitt** at jeg limer inn en tekst og trykker «Lag utkast»
+**Så** fylles skjemaet «Legg inn selv» med tittel, porsjoner, tid, ingredienser og steg fra teksten, og ingenting lagres før jeg trykker «Lagre oppskrift»
+
+**Gitt** at teksten har overskriftene «Ingredienser» og «Fremgangsmåte»
+**Så** deles den etter dem; uten overskrifter regnes korte linjer med mengde som ingredienser og resten som steg
+
+**Gitt** at jeg trykker «Lag utkast» uten tekst, eller teksten ikke ga ingredienser eller tittel
+**Så** får jeg en forklarende melding, og jeg kan rette utkastet for hånd
+
+**Gitt** at jeg ikke er innlogget
+**Så** blir jeg bedt om å logge inn
