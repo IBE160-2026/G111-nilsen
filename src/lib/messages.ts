@@ -141,6 +141,12 @@ export const servingsDialogMessages = {
 } as const;
 
 /** Tekster for redigering av en oppskrift (Story 3.5). */
+/** «Skriv ut» ved oppskriftens tittel (Story 6.6). */
+export const printMessages = {
+  button: "Skriv ut",
+  label: (title: string) => `Skriv ut ${title}`,
+} as const;
+
 export const editRecipeMessages = {
   editLink: "Rediger",
   heading: "Rediger",

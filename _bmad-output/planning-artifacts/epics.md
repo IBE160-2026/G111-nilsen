@@ -906,3 +906,19 @@ slik at jeg ikke må huske tiden eller bytte til en annen app mens jeg lager mat
 **Når** nedtellingen når null
 **Så** vises «Tiden er ute for steg N» som jeg kan lukke, og telefonen piper og vibrerer (der det støttes), og tidtakeren virker uten lyd og vibrasjon
 
+### Story 6.6: Utskriftsvennlig oppskrift
+
+Som Ida,
+vil jeg skrive ut en oppskrift som en ren side,
+slik at jeg kan ha den på papir på kjøkkenet.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg ser en oppskrift
+**Når** jeg trykker «Skriv ut»
+**Så** åpnes utskriftsdialogen i nettleseren
+
+**Gitt** utskriftsvisningen
+**Når** siden skrives ut
+**Så** står tittel, kilde, antall personer, ingredienser og steg i én kolonne med svart tekst på hvit bakgrunn, uten meny, knapper, forslag, notater og lagre-linje, og kilden skrives ut med adressen
+

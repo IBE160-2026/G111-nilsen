@@ -240,6 +240,18 @@ describe("RecipeView", () => {
     expect(screen.getByRole("article")).toContainElement(link);
   });
 
+  it("har en «Skriv ut»-knapp ved tittelen, og skjuler det som ikke skal på papir (Story 6.6)", () => {
+    render(<RecipeView recipe={{ ...recipe, id: 7 }} folders={folders} />);
+    expect(screen.getByRole("button", { name: "Skriv ut Pannekaker" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Rediger Pannekaker" })).toHaveAttribute(
+      "data-print",
+      "hide",
+    );
+    expect(
+      screen.getByRole("region", { name: "Forslag" }).closest('[data-print="hide"]'),
+    ).not.toBeNull();
+  });
+
   it("skjuler steg-kortet når oppskriften ikke har steg, men viser forslagsdelen", () => {
     render(<RecipeView recipe={{ ...recipe, steps: [] }} folders={folders} />);
     expect(screen.getByRole("region", { name: "Forslag" })).toBeInTheDocument();

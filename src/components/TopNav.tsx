@@ -32,7 +32,7 @@ export function TopNavView({
   account?: ReactNode;
 }) {
   return (
-    <header className={styles.header}>
+    <header className={styles.header} data-print="hide">
       <div className={styles.inner}>
         <div className={styles.top}>
           <Link href="/" className={styles.logo}>

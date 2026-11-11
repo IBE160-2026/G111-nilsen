@@ -339,6 +339,16 @@ test("Versjon 2: tidtaker i kokemodus fra tid i steget", async ({ page }, testIn
   await page.getByRole("button", { name: "Lagre oppskrift" }).click();
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
 
+  // Utskrift (Story 6.6): uten meny og knapper, med tittel, ingredienser og steg.
+  await page.emulateMedia({ media: "print" });
+  await expect(page.getByRole("navigation", { name: "Hovedmeny" })).toBeHidden();
+  await expect(page.getByRole("button", { name: /^Skriv ut/ })).toBeHidden();
+  await expect(page.getByRole("link", { name: /^Rediger/ })).toBeHidden();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Slik gjør du" })).toBeVisible();
+  await page.emulateMedia({ media: "screen" });
+  await expect(page.getByRole("button", { name: /^Skriv ut/ })).toBeVisible();
+
   await page.getByRole("button", { name: /^Åpne kokemodus/ }).click();
   const cooking = page.getByRole("dialog", { name: /^Kokemodus/ });
   await expect(cooking.getByRole("button", { name: /^Start tidtaker/ })).toHaveCount(0);

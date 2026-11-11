@@ -88,3 +88,30 @@
     gap: var(--space-5);
   }
 }
+
+/* Utskrift (Story 6.6): én kolonne, ingredienser først og så stegene; stegene får brytes mellom sider. */
+@media print {
+  .root {
+    max-width: none;
+    gap: var(--space-4);
+  }
+
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "ingredients"
+      "steps";
+    gap: var(--space-4);
+  }
+
+  .source {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Kilden skrives ut med adressen, siden en lenke ikke kan trykkes på papir. */
+  .source::after {
+    content: " (" attr(href) ")";
+    font-weight: 400;
+  }
+}

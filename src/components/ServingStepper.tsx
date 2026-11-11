@@ -112,7 +112,7 @@ export default function ServingStepper({
             <span className={styles.original}>
               oppr. {original}
               {onEditOriginal ? (
-                <>
+                <span data-print="hide">
                   {" · "}
                   <button
                     type="button"
@@ -122,7 +122,7 @@ export default function ServingStepper({
                   >
                     {servingsDialogMessages.edit}
                   </button>
-                </>
+                </span>
               ) : null}
             </span>
           )}

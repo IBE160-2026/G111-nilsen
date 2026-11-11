@@ -21,6 +21,7 @@ import { isHttpUrl } from "@/lib/source-url";
 import CookingMode from "./CookingMode";
 import FetchTimeButton from "./FetchTimeButton";
 import IngredientList from "./IngredientList";
+import PrintButton from "./PrintButton";
 import RecipeNotes from "./RecipeNotes";
 import RecipeTime from "./RecipeTime";
 import { loginHref } from "./LoginRequired";
@@ -70,10 +71,14 @@ export default function RecipeView({
             <Link
               href={`/oppskrift/${recipe.id}/rediger`}
               className={styles.edit}
+              data-print="hide"
               aria-label={`${editRecipeMessages.editLink} ${recipe.title}`}
             >
               {editRecipeMessages.editLink}
             </Link>
+            <span data-print="hide">
+              <PrintButton title={recipe.title} />
+            </span>
           </div>
           <p className={styles.meta}>
             {recipe.sourceUrl !== null && isHttpUrl(recipe.sourceUrl) ? (
@@ -95,10 +100,10 @@ export default function RecipeView({
                 <RecipeTime minutes={recipe.totalMinutes} inline />
               </>
             ) : recipe.sourceUrl !== null && isHttpUrl(recipe.sourceUrl) ? (
-              <>
+              <span data-print="hide">
                 <span aria-hidden="true">{" · "}</span>
                 <FetchTimeButton onFetch={fetchTimeFromSource.bind(null, recipe.id)} />
-              </>
+              </span>
             ) : null}
           </p>
         </header>
@@ -131,7 +136,7 @@ export default function RecipeView({
 
           {/* Notater og «sist laget» bare for lagrede oppskrifter (Story 6.3). */}
           {recipe.savedAt !== null ? (
-            <div className={styles.notes}>
+            <div className={styles.notes} data-print="hide">
               <RecipeNotes
                 key={`notater-${recipe.id}`}
                 notes={recipe.notes ?? null}
@@ -143,7 +148,7 @@ export default function RecipeView({
             </div>
           ) : null}
 
-          <div className={styles.suggestions}>
+          <div className={styles.suggestions} data-print="hide">
             <SuggestionsSection
               key={`forslag-${recipe.id}`}
               onRequest={requestSuggestions.bind(null, recipe.id)}
@@ -154,20 +159,22 @@ export default function RecipeView({
           </div>
         </div>
 
-        <RecipeActions
-          title={recipe.title}
-          saved={recipe.savedAt !== null}
-          onSave={saveRecipe.bind(null, recipe.id)}
-          onDelete={removeRecipe.bind(null, recipe.id)}
-          folders={folders}
-          folderId={recipe.folderId}
-          onMoveToFolder={moveToFolder.bind(null, recipe.id)}
-          onMoveToNewFolder={moveToNewFolder.bind(null, recipe.id)}
-          isFavorite={recipe.isFavorite}
-          onSetFavorite={setFavorite.bind(null, recipe.id)}
-          loginHref={signedIn ? undefined : loginHref(`/oppskrift/${recipe.id}`)}
-          totalMinutes={recipe.totalMinutes ?? null}
-        />
+        <div data-print="hide">
+          <RecipeActions
+            title={recipe.title}
+            saved={recipe.savedAt !== null}
+            onSave={saveRecipe.bind(null, recipe.id)}
+            onDelete={removeRecipe.bind(null, recipe.id)}
+            folders={folders}
+            folderId={recipe.folderId}
+            onMoveToFolder={moveToFolder.bind(null, recipe.id)}
+            onMoveToNewFolder={moveToNewFolder.bind(null, recipe.id)}
+            isFavorite={recipe.isFavorite}
+            onSetFavorite={setFavorite.bind(null, recipe.id)}
+            loginHref={signedIn ? undefined : loginHref(`/oppskrift/${recipe.id}`)}
+            totalMinutes={recipe.totalMinutes ?? null}
+          />
+        </div>
       </article>
     </SelectedServingsProvider>
   );
