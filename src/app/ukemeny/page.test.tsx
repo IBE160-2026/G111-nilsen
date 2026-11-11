@@ -111,13 +111,16 @@ describe("/ukemeny", () => {
     expect(options.map((o) => o.textContent)).toEqual(["Pannekaker"]);
   });
 
-  it("har en stor knapp «Se alle uker» til oversikten over planlagte uker", async () => {
+  it("har en stor knapp «Se alle uker» øverst, før uka og dagene, til oversikten over planlagte uker", async () => {
     insertRecipe(state.db!, recipe("Pannekaker"));
     render((await renderPage("2026-11-09")).content);
     expect(screen.getByRole("link", { name: "Se alle uker" })).toHaveAttribute(
       "href",
       "/ukemeny/uker",
     );
+    const all = screen.getByRole("link", { name: "Se alle uker" });
+    const nav = screen.getByRole("navigation", { name: "Ukemeny" });
+    expect(all.compareDocumentPosition(nav) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it("viser tom-tilstand uten lagrede oppskrifter", async () => {

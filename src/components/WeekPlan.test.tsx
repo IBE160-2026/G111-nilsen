@@ -26,7 +26,6 @@ function setup(overrides: Partial<Parameters<typeof WeekPlan>[0]> = {}) {
       entries={entries}
       recipes={recipes}
       shoppingHref="/handleliste?uke=2026-11-09"
-      allWeeksHref="/ukemeny/uker"
       week="2026-11-09"
       onSave={onSave}
       {...overrides}
@@ -41,12 +40,8 @@ const day = (label: string) =>
 const lastSaved = (onSave: ReturnType<typeof vi.fn>) => onSave.mock.calls.at(-1)![0];
 
 describe("WeekPlan", () => {
-  it("viser stor «Se alle uker»-knapp og at uka er lagret fra start", () => {
+  it("viser at uka er lagret fra start", () => {
     setup();
-    expect(screen.getByRole("link", { name: "Se alle uker" })).toHaveAttribute(
-      "href",
-      "/ukemeny/uker",
-    );
     expect(screen.getByText("Uka er lagret.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Lagre uka" })).toHaveAttribute(
       "aria-disabled",

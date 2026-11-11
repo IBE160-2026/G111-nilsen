@@ -54,6 +54,9 @@ async function WeekLoader({ searchParams }: { searchParams: SearchParams }) {
 
   return (
     <>
+      <Link href="/ukemeny/uker" className={styles.allWeeksButton}>
+        {m.allWeeksButton}
+      </Link>
       <nav aria-label={m.heading} className={styles.weekNav}>
         <Link href={`/ukemeny?uke=${addDays(monday, -7)}`} className={styles.navLink}>
           ← {m.previous}
@@ -88,7 +91,6 @@ async function WeekLoader({ searchParams }: { searchParams: SearchParams }) {
           entries={entries.value}
           recipes={recipes.value}
           shoppingHref={`/handleliste?uke=${monday}`}
-          allWeeksHref="/ukemeny/uker"
           onSave={saveWeekPlan}
           week={monday}
         />

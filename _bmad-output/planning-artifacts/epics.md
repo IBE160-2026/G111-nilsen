@@ -986,7 +986,7 @@ slik at jeg bestemmer selv når uka lagres og raskt finner tidligere uker og han
 **Så** erstattes hele uka med det jeg har valgt, og det står «Uka er lagret.»
 
 **Gitt** Ukemeny
-**Så** er det en stor «Se alle uker»-knapp under menyen
+**Så** er det en stor «Se alle uker»-knapp øverst, uten å måtte bla
 
 **Gitt** at jeg åpner en uke fra «Alle uker»
 **Så** ser jeg dagene med rettene og porsjoner, en stor «Se handlelisten for uka»-knapp og «Endre uka»

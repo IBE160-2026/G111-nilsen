@@ -155,3 +155,20 @@
   margin: 0;
   font-weight: 600;
 }
+
+/* «Se alle uker»: stor knapp øverst på Ukemeny, så man slipper å bla ned. */
+.allWeeksButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.5rem;
+  max-width: 28rem;
+  padding: 0 var(--space-5);
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-raised);
+  color: var(--color-accent);
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-decoration: none;
+}

@@ -7,7 +7,7 @@ Epic 6. Ida vil ha en tydelig «Lagre uka»-knapp i stedet for automatisk lagrin
 - **Utkast og lagring:** `WeekPlan` samler endringene i siden (utkast). «Lagre uka» sender hele uka til Server Action `saveWeekPlan({week, items})`, som i én transaksjon erstatter alle oppføringene i uka (`replaceWeek`). Er noe ugyldig eller ikke Idas lagrede oppskrift, endres ingenting. Høyst 100 oppføringer, dag innenfor uka, antall 0,5–50. Knappen er inaktiv (`aria-disabled`) uten endringer.
 - **Status:** «Ikke lagret ennå. Trykk «Lagre uka».» ved endringer, «Uka er lagret.» etter lagring; `beforeunload` advarer ved ulagrede endringer. «Lag handleliste for uka» stoppes mens noe er ulagret («Lagre uka først …»).
 - **Fjernet:** `addMeal`, `removeMeal`, `removeFromWeek`, `deleteEntry` (erstattet av `saveWeek`/`replaceWeek`).
-- **Knapper:** «Se alle uker» er en stor outline-knapp (minst 3,5 rem) under Ukemeny; den lille lenken er fjernet.
+- **Knapper:** «Se alle uker» er en stor outline-knapp (minst 3,5 rem) øverst på Ukemeny, rett under overskriften, så den ikke krever scrolling; den lille lenken er fjernet.
 - **Ukeside:** `/ukemeny/uker/[uke]` ([uke] er mandagen; ugyldig dato eller ikke-mandag gir 404): dagene med rettene (lenke) og porsjoner, stor «Se handlelisten for uka» (`/handleliste?uke=`), «Endre uka», «← Alle uker». Tom uke: «Planlegg uka». Kortene på «Alle uker» lenker hit; «Handleliste»-lenken per kort er fjernet.
 
 ## Verifisering

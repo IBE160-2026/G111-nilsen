@@ -29,8 +29,6 @@ type Props = {
   recipes: readonly WeekRecipe[];
   /** Lenke til handlelisten med ukas oppskrifter valgt. */
   shoppingHref: string;
-  /** Lenke til oversikten over alle uker. */
-  allWeeksHref: string;
   /** Lagrer hele uka: alle oppføringene erstattes med de som sendes (Server Action). */
   onSave: (input: {
     week: string;
@@ -67,7 +65,6 @@ export default function WeekPlan({
   entries: initial,
   recipes,
   shoppingHref,
-  allWeeksHref,
   onSave,
   week,
 }: Props) {
@@ -196,9 +193,6 @@ export default function WeekPlan({
         }}
       >
         {m.shopping}
-      </Link>
-      <Link href={allWeeksHref} className={styles.bigLink}>
-        {m.allWeeksButton}
       </Link>
       <p role="status" aria-live="polite" className={styles.status}>
         {status}
