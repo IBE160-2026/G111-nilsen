@@ -708,6 +708,31 @@ test("Versjon 2: slettet oppskrift kan angres, hentes tilbake og slettes for god
   await expect(page.getByRole("heading", { level: 2, name: title })).toHaveCount(0);
 });
 
+test("Versjon 2: tilfeldig middagsforslag", async ({ page }, testInfo) => {
+  const title = `Middag ${testInfo.project.name}`;
+  await page.goto("/ny");
+  await page.waitForLoadState("networkidle");
+  await field(page, "Tittel").fill(title);
+  await field(page, "Antall porsjoner").fill("2");
+  await field(page, "Ingredienser").fill("2 egg");
+  await page.getByRole("button", { name: "Lagre oppskrift" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+
+  await page.goto("/oppskrifter");
+  await page.getByRole("link", { name: "Middagsforslag" }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Hva skal vi ha til middag?" }),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Foreslå en middag" }).click();
+  const result = page.getByRole("region", { name: "Forslag" });
+  await expect(result).toBeVisible();
+  await expect(page.getByRole("button", { name: "Foreslå en annen" })).toBeVisible();
+  const picked = await result.getByRole("heading", { level: 2 }).innerText();
+  await result.getByRole("link", { name: "Åpne oppskriften" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: picked })).toBeVisible();
+});
+
 test("Versjon 2: Hva kan jeg lage? ut fra det du har hjemme", async ({ page }, testInfo) => {
   const title = `Hjemme ${testInfo.project.name}`;
   const unique = `sjalottløk${testInfo.project.name.replace(/\W/g, "")}`;

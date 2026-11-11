@@ -744,3 +744,25 @@ export const suggestionMessages = {
   removedStatus: "Forslaget er fjernet.",
   allHandled: "Du har tatt stilling til alle forslagene.",
 } as const;
+
+/** Tilfeldig middagsforslag (Story 6.13). */
+export const dinnerMessages = {
+  heading: "Hva skal vi ha til middag?",
+  link: "Middagsforslag",
+  loading: "Henter oppskriftene …",
+  loadFailed: "Kunne ikke hente oppskriftene",
+  lead: "La appen velge en tilfeldig oppskrift fra samlingen din.",
+  onlyFavorites: "Bare favoritter",
+  timeLabel: "Tid",
+  timeAny: "Alle",
+  timeUpTo: (minutes: number) => `Opptil ${minutes} minutter`,
+  suggest: "Foreslå en middag",
+  another: "Foreslå en annen",
+  resultHeading: "Forslag",
+  open: "Åpne oppskriften",
+  count: (n: number) => (n === 1 ? "1 oppskrift å velge blant" : `${n} oppskrifter å velge blant`),
+  suggested: (title: string) => `Forslag: ${title}`,
+  onlyOne: "Dette er den eneste oppskriften som passer.",
+  noMatch: "Ingen oppskrifter passer",
+  noMatchHint: "Prøv å fjerne et filter, eller velg en lengre tid.",
+} as const;

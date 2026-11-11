@@ -1161,3 +1161,23 @@ slik at jeg slipper å bla gjennom alt for å finne noe som passer.
 
 **Gitt** at jeg ikke er innlogget, eller ikke har oppskrifter
 **Så** blir jeg bedt om å logge inn, eller får vite at samlingen er tom
+
+### Story 6.13: Tilfeldig middagsforslag
+
+Som Ida,
+vil jeg få et tilfeldig forslag fra samlingen min,
+slik at jeg slipper å bestemme hva vi skal ha til middag.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg har lagrede oppskrifter
+**Så** gir «Foreslå en middag» en tilfeldig oppskrift med tittel, tid og lenke til oppskriften
+
+**Gitt** at jeg trykker «Foreslå en annen»
+**Så** får jeg en annen oppskrift enn den jeg nettopp fikk, så lenge det finnes flere å velge blant
+
+**Gitt** at jeg velger «Bare favoritter» og/eller en høyeste tid
+**Så** trekkes forslaget bare blant oppskrifter som passer, og antallet vises
+
+**Gitt** at ingen oppskrifter passer filteret, eller jeg ikke har oppskrifter
+**Så** får jeg en forklarende tekst i stedet for en knapp, og er jeg ikke innlogget blir jeg bedt om å logge inn

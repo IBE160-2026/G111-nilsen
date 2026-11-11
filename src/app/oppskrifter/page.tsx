@@ -6,6 +6,7 @@ import EmptyState from "@/components/EmptyState";
 import CollectionBrowser from "@/components/CollectionBrowser";
 import {
   collectionMessages,
+  dinnerMessages,
   shoppingMessages,
   trashMessages,
   whatToCookMessages,
@@ -36,6 +37,9 @@ export default function SamlingenPage({
         <span className={styles.titleLinks}>
           <Link href="/hva-kan-jeg-lage" className={styles.titleLink}>
             {whatToCookMessages.link}
+          </Link>
+          <Link href="/middagsforslag" className={styles.titleLink}>
+            {dinnerMessages.link}
           </Link>
           <Link href="/nylig-slettet" className={styles.titleLink}>
             {trashMessages.link}

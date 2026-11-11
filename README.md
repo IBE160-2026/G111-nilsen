@@ -93,6 +93,7 @@ Kravene står i PRD §4.7 (FR-28–FR-39), og hver story har en spec i `_bmad-ou
 - **Tidtaker i kokemodus (6.5):** tider i stegteksten («10–15 minutter», «1 time og 30 minutter», «en halv time») blir knapper som starter en nedtelling. Store knapper og tall, flere tidtakere samtidig, «−1/+1/+5 min» for å justere, og når tiden er ute: beskjed, gjentatte pip, vibrasjon, varsel fra systemet (hvis tillatt) og blinkende fanetittel.
 - **Angre sletting (6.11):** en slettet oppskrift ligger i «Nylig slettet» i 7 dager. «Angre» rett etter slettingen eller «Hent tilbake» der gir den tilbake med alt innhold, og «Slett for godt» fjerner den med en gang.
 - **Hva kan jeg lage? (6.12):** skriv hva du har hjemme (samme liste som på handlelisten), så grupperes oppskriftene som «Kan lages nå», «Mangler 1–2 ting» og «Mangler flere ting», med hva som mangler. Lenke fra Oppskrifter.
+- **Middagsforslag (6.13):** «Foreslå en middag» trekker en tilfeldig oppskrift fra samlingen, eventuelt bare favoritter og opptil 30 eller 60 minutter; «Foreslå en annen» gir alltid en annen. Lenke fra Oppskrifter.
 - **Egen variant (6.10):** «Lag egen variant» ved tittelen kopierer en lagret oppskrift til «Kopi av …» og åpner redigeringen, så originalen blir uendret.
 - **Sortering (6.9):** «Sorter etter» i Oppskrifter: sist lagret (standard), sist laget, mest laget, høyest vurdering og alfabetisk. Like oppskrifter står sist lagret først.
 - **Vurdering (6.8):** «Din vurdering» i oppskriften: trykk en stjerne fra 1 til 5, og «Fjern vurdering» tar den bort. Stjernene vises på kortet i Oppskrifter.

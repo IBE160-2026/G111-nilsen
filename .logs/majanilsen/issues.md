@@ -115,3 +115,4 @@
 - 930 Lag egen variant av en oppskrift (6.10). Åpent: kopien viser ikke hvilken oppskrift den kom fra.
 - 929 Angre sletting, Nylig slettet i 7 dager (6.11). Åpent: gammel id virker ikke etter gjenoppretting; mapper, handlelister og ukemenyer kan ikke angres.
 - 928 «Hva kan jeg lage?» ut fra «Har hjemme», gruppert etter hva som mangler. Åpent: sammensatte ord og basisvarer.
+- 927 Tilfeldig middagsforslag fra samlingen med filter for favoritter og tid. Åpent: ingen vekting etter vurdering.

@@ -131,7 +131,7 @@ describe("/oppskrifter", () => {
       .getAllByRole("link")
       .filter(
         (a) =>
-          !["/handleliste", "/nylig-slettet", "/hva-kan-jeg-lage"].includes(
+          !["/handleliste", "/nylig-slettet", "/hva-kan-jeg-lage", "/middagsforslag"].includes(
             a.getAttribute("href") ?? "",
           ),
       );
@@ -184,7 +184,7 @@ describe("/oppskrifter", () => {
       .getAllByRole("link")
       .filter(
         (a) =>
-          !["/handleliste", "/nylig-slettet", "/hva-kan-jeg-lage"].includes(
+          !["/handleliste", "/nylig-slettet", "/hva-kan-jeg-lage", "/middagsforslag"].includes(
             a.getAttribute("href") ?? "",
           ),
       );
