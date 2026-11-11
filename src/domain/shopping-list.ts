@@ -15,7 +15,7 @@ export type ShoppingRecipe = {
   ingredients: RecipeLine[];
 };
 
-/** En valgt oppskrift og antallet personer den skal lages til. */
+/** En valgt oppskrift og antallet porsjoner den skal lages til. */
 export type ShoppingSelection = { recipe: ShoppingRecipe; servings: number | null };
 
 /** Noe brukeren har hjemme (Story 5.8). */

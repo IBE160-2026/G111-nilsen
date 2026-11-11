@@ -17,7 +17,7 @@ context:
 
 **Problem:** Mens jeg lager maten har jeg ingen måte å holde oversikt på hva som er gjort. Oppskriftssiden fra Story 1.5 viser ingredienser og steg, men ingenting kan krysses av.
 
-**Approach:** Gjør hver ingredienslinje og hvert steg til en ekte avkrysningsboks med etikett, der hele raden er trykkflate. Avkrysning er ren klienttilstand (AD-10): den nøkles på linje-id og steg-id, lagres aldri, påvirker ikke skalering og overlever endret antall personer. Fordi Next.js med Cache Components skjuler en side i stedet for å avmontere den (Activity), må tilstanden nullstilles eksplisitt når siden skjules, ellers ville avkrysningene stått igjen når jeg åpner oppskriften på nytt. Story 1.6 avslutter Epic 1, så README oppdateres med hva epicen inneholder og hvordan testene kjøres. Tastaturfokus på porsjonsvelgerens −/+ ved grensene (utsatt fra 1.5) rettes samtidig, siden den samme siden skal kunne brukes helt uten mus.
+**Approach:** Gjør hver ingredienslinje og hvert steg til en ekte avkrysningsboks med etikett, der hele raden er trykkflate. Avkrysning er ren klienttilstand (AD-10): den nøkles på linje-id og steg-id, lagres aldri, påvirker ikke skalering og overlever endret antall porsjoner. Fordi Next.js med Cache Components skjuler en side i stedet for å avmontere den (Activity), må tilstanden nullstilles eksplisitt når siden skjules, ellers ville avkrysningene stått igjen når jeg åpner oppskriften på nytt. Story 1.6 avslutter Epic 1, så README oppdateres med hva epicen inneholder og hvordan testene kjøres. Tastaturfokus på porsjonsvelgerens −/+ ved grensene (utsatt fra 1.5) rettes samtidig, siden den samme siden skal kunne brukes helt uten mus.
 
 ## Boundaries & Constraints
 
@@ -28,7 +28,7 @@ context:
 - Boksen står til venstre for mengde og navn (mockup `key-screens.html` skjerm 1), 24 px (`--checkbox-size`), hjørner fra tokens, kant `--color-border-strong` når den er tom. Hele raden er minst `--tap-target-min` (44 px) høy. Synlig fokusring på boksen (`:focus-visible`, `--focus-ring-width`).
 - Ingen hardkodede farger, størrelser eller vekter; nye verdier som tokens i `src/styles/tokens.css`. Lys og mørk palett.
 - Avkryssede ingredienser holdes i ett `Set<number>` av linje-id i `IngredientList`, avkryssede steg i ett `Set<number>` av steg-id i en ny klientkomponent `StepList`. De to settene er uavhengige, så lik id på en linje og et steg aldri kolliderer (AD-10).
-- Avkrysning overlever endret antall personer, «Tilbakestill» og ugyldig inntasting; mengdene oppdateres som vanlig.
+- Avkrysning overlever endret antall porsjoner, «Tilbakestill» og ugyldig inntasting; mengdene oppdateres som vanlig.
 - Avkrysningene nullstilles når oppskriftssiden skjules av Activity og når komponenten avmonteres. En felles hook (`useCheckedSet`) gjør dette med en `useLayoutEffect`-opprydding (se `node_modules/next/dist/docs/01-app/02-guides/preserving-ui-state.md`). Å åpne «Rediger» og gå tilbake gir ingen avkrysning.
 - `RecipeView` forblir en serverkomponent. Stegene flyttes til `StepList` (klient) med samme overskrift («Slik gjør du»), nummerering og sortering på `position`; ingredienser og steg beholder rekkefølge og oppsett fra 1.5.
 - Porsjonsvelgerens −/+ bruker `aria-disabled="true"` i stedet for `disabled` ved 1 og 50, så tastaturfokus ikke forsvinner. Klikk ved grensen gjør ingenting. Utseendet er det samme som for deaktivert i dag.
@@ -87,7 +87,7 @@ context:
 
 **Acceptance Criteria:**
 - Given oppskriftssiden, when jeg trykker hvor som helst på en ingredienslinje eller et steg, then krysses den av med fylt boks, gjennomstreking og dempet tekst, og et nytt trykk fjerner avkrysningen; boksen er en ekte avkrysningsboks med etikett som kan brukes med tastatur.
-- Given avkryssede linjer, when jeg endrer antall personer, then beholdes avkrysningene og mengdene oppdateres som vanlig.
+- Given avkryssede linjer, when jeg endrer antall porsjoner, then beholdes avkrysningene og mengdene oppdateres som vanlig.
 - Given avkryssede linjer, when jeg lukker og åpner oppskriften igjen, then er ingen linjer krysset av.
 - Given README, when sensor leser den, then står det hva Epic 1 inneholder og hvordan testene kjøres.
 

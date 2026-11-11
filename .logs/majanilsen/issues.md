@@ -96,3 +96,4 @@
 - 949 Ryddigere kokemodus: rolig startknapp, «Test lyden» bare ved tid i steget. Åpent: test på telefon.
 - 948 Tidtakerknapper nederst i kokemodus. Åpent: test på telefon.
 - 947 Story 6.6 utskriftsvennlig oppskrift. Åpent: prøv utskrift på Mac og telefon.
+- 946 «Porsjoner» i stedet for «personer» i hele appen og dokumentene.

@@ -66,7 +66,7 @@ describe("validateManualRecipe (matrisen i spec 1.4)", () => {
   });
 
   it.each(["0", "51", "2,5", "2.5", "abc", "", "-1", "1e1"])(
-    "Ugyldig antall: %j gir melding under Antall personer",
+    "Ugyldig antall: %j gir melding under Antall porsjoner",
     (servings) => {
       expect(errorsOf({ servings })).toEqual({ servings: m.servingsInvalid });
     },

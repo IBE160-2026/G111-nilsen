@@ -22,13 +22,13 @@ Toppmenyen har fire punkter i v1, fem fra versjon 2 (Handleliste) og seks fra St
 | Skjerm | Hva den gjør | Nås fra | Krav |
 |---|---|---|---|
 | **Importer** (startside) | Lenkefelt, «Hent oppskrift», lenke til manuell innlegging | Toppmeny, tom samling | FR-1, FR-2 |
-| **Manuell innlegging** | Skjema: tittel, antall personer, ingredienser og steg (én per linje) | Importer, feilmelding | FR-4 |
+| **Manuell innlegging** | Skjema: tittel, antall porsjoner, ingredienser og steg (én per linje) | Importer, feilmelding | FR-4 |
 | **Oppskrift** | Fast format, porsjonsvelger, avkrysning, forslag, lagre/mappe/favoritt/slett | Import, lister | FR-3, FR-5–FR-11, FR-13, FR-15, FR-17 |
 | **Samlingen** | Alle lagrede oppskrifter, sist brukt først | Toppmeny | FR-16 |
 | **Mapper** | Liste over mapper med antall oppskrifter; opprett, gi nytt navn, slett | Toppmeny | FR-14 |
 | **Mappe** | Oppskriftene i én mappe | Mapper | FR-14, FR-16 |
 | **Favoritter** | Alle favoritter | Toppmeny | FR-15, FR-16 |
-| **Ukemeny** (6.4) | Én boks per dag med oppskrifter og antall personer; søk etter lagret oppskrift og legg til; forrige/neste uke; «Lag handleliste for uka» | Toppmeny | FR-31 |
+| **Ukemeny** (6.4) | Én boks per dag med oppskrifter og antall porsjoner; søk etter lagret oppskrift og legg til; forrige/neste uke; «Lag handleliste for uka» | Toppmeny | FR-31 |
 | **Handleliste** (v2) | Velg oppskrifter og antall, sammenslått liste med avkrysning og «Kopier listen», «Har hjemme» | Toppmeny, Oppskrifter, Ukemeny | FR-23, FR-24, FR-31 |
 | **Kokemodus** (v2) | Fullskjerm over oppskriften: ett steg om gangen, ingrediensene i steget | Oppskrift | FR-21 |
 | **Logg inn / Lag konto** (v2) | E-post og passord; sender tilbake dit brukeren kom fra | Toppmeny, «Logg inn for å lagre», sider som krever konto | FR-27 |
@@ -98,7 +98,7 @@ Toppmenyen har fire punkter i v1, fem fra versjon 2 (Handleliste) og seks fra St
 **UJ-1. Ida lager taco til fem** (oppskrift skrevet for 4)
 1. Ida åpner RecipeMate. Importer er startsiden og lenkefeltet har fokus.
 2. Hun limer inn lenken og trykker «Hent oppskrift».
-3. Oppskriften vises i fast format med «Antall personer 4».
+3. Oppskriften vises i fast format med «Antall porsjoner 4».
 4. Hun trykker + én gang. **Klimaks:** alle mengder oppdateres med en gang, «400 g kjøttdeig» blir «500 g», og løken får merket «ca.».
 5. Hun trykker «Lagre», velger mappen «Hverdag» og trykker hjertet. Bekreftelsen «Lagret i Hverdag.» vises.
 6. Under matlagingen krysser hun av ingrediensene etter hvert.
@@ -113,7 +113,7 @@ Toppmenyen har fire punkter i v1, fem fra versjon 2 (Handleliste) og seks fra St
 
 **UJ-3. Ida finner favoritten**
 1. Ida trykker «Favoritter» i toppmenyen.
-2. **Klimaks:** tacooppskriften ligger øverst. Hun åpner den, og den står på 5 personer som sist.
+2. **Klimaks:** tacooppskriften ligger øverst. Hun åpner den, og den står på 5 porsjoner som sist.
 3. Hun endrer til 3 og lager maten.
 
 ## Versjon 2 (2026-11-10)

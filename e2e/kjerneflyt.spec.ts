@@ -7,7 +7,7 @@ import { expect, test, type Page } from "@playwright/test";
  *
  * Alle prosjektene deler databasen, så hvert prosjekt bruker egne oppskrifter og mapper og sin
  * egen konto (Story 5.13). Hver test logger inn først, bortsett fra testen av innlogging.
- * `mobil-360` følger PRD-eksemplene nærmest (4 til 5 personer).
+ * `mobil-360` følger PRD-eksemplene nærmest (4 til 5 porsjoner).
  */
 const DATA = {
   "mobil-360": {
@@ -50,7 +50,7 @@ async function importRecipe(page: Page, url: string, title: string) {
 }
 
 async function setServings(page: Page, count: number) {
-  const input = page.getByLabel("Antall personer", { exact: true });
+  const input = page.getByLabel("Antall porsjoner", { exact: true });
   await input.fill(String(count));
   await input.press("Enter");
   await expect(input).toHaveValue(String(count));
@@ -175,15 +175,15 @@ test("UJ-1: importer, skaler til ett flere, lagre i mappe og gjør til favoritt"
   const { uj1 } = data;
 
   await importRecipe(page, uj1.url, uj1.title);
-  await expect(page.getByLabel("Antall personer", { exact: true })).toHaveValue(
+  await expect(page.getByLabel("Antall porsjoner", { exact: true })).toHaveValue(
     String(uj1.original),
   );
   // Tiden fra kilden vises under tittelen og ved lagre-linjen (Story 6.2).
   await expect(page.getByText(/^Tid: /)).toHaveCount(2);
   const before = await ingredientsText(page);
 
-  await page.getByRole("button", { name: "Flere personer" }).click();
-  await expect(page.getByLabel("Antall personer", { exact: true })).toHaveValue(
+  await page.getByRole("button", { name: "Flere porsjoner" }).click();
+  await expect(page.getByLabel("Antall porsjoner", { exact: true })).toHaveValue(
     String(uj1.original + 1),
   );
   expect(await ingredientsText(page)).not.toBe(before);
@@ -281,11 +281,11 @@ test("UJ-3: finn igjen favoritten under Favoritter og endre antallet", async ({
 
   // Antallet fra forrige gang huskes: UJ-1 valgte ett flere enn det oppskriften er laget for,
   // før den ble lagret (issue 009).
-  await expect(page.getByLabel("Antall personer", { exact: true })).toHaveValue(
+  await expect(page.getByLabel("Antall porsjoner", { exact: true })).toHaveValue(
     String(uj1.original + 1),
   );
   await setServings(page, 3);
-  await expect(page.getByLabel("Antall personer", { exact: true })).toHaveValue("3");
+  await expect(page.getByLabel("Antall porsjoner", { exact: true })).toHaveValue("3");
 });
 
 test("Versjon 2: søk i Oppskrifter, halv porsjon og kokemodus", async ({ page }, testInfo) => {
@@ -306,7 +306,7 @@ test("Versjon 2: søk i Oppskrifter, halv porsjon og kokemodus", async ({ page }
 
   await setServings(page, 4);
   await page.getByRole("button", { name: "Legg til en halv porsjon" }).click();
-  await expect(page.getByLabel("Antall personer", { exact: true })).toHaveValue("4,5");
+  await expect(page.getByLabel("Antall porsjoner", { exact: true })).toHaveValue("4,5");
 
   // Mål: gram og dl endrer mengdene, og «Som i oppskriften» gir tilbake originalen.
   const before = await ingredientsText(page);
@@ -320,7 +320,7 @@ test("Versjon 2: søk i Oppskrifter, halv porsjon og kokemodus", async ({ page }
   await page.getByRole("button", { name: /^Åpne kokemodus/ }).click();
   const cooking = page.getByRole("dialog", { name: /^Kokemodus/ });
   await expect(cooking.getByText(/^Steg 1 av \d+$/)).toBeVisible();
-  await expect(cooking.getByText("Ingredienser for 4,5 personer")).toBeVisible();
+  await expect(cooking.getByText("Ingredienser for 4,5 porsjoner")).toBeVisible();
   await cooking.getByRole("button", { name: "Neste" }).click();
   await expect(cooking.getByText(/^Steg 2 av \d+$/)).toBeVisible();
   await page.keyboard.press("Escape");
@@ -333,7 +333,7 @@ test("Versjon 2: tidtaker i kokemodus fra tid i steget", async ({ page }, testIn
   await page.goto("/ny");
   await page.waitForLoadState("networkidle");
   await field(page, "Tittel").fill(title);
-  await field(page, "Antall personer").fill("2");
+  await field(page, "Antall porsjoner").fill("2");
   await field(page, "Ingredienser").fill("2 egg\n1 dl melk");
   await field(page, "Steg (valgfritt)").fill("Visp egg og melk.\nLa hvile i 2 sekunder.");
   await page.getByRole("button", { name: "Lagre oppskrift" }).click();
@@ -427,7 +427,7 @@ test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1, name: "Ukemeny" })).toBeVisible();
   await expect(page.getByText(/^Uke \d+ · /)).toBeVisible();
 
-  // Første dag i uka: velg oppskriften med 3 personer.
+  // Første dag i uka: velg oppskriften med 3 porsjoner.
   const form = page.getByRole("form", { name: /^Legg til på mandag/ });
   // Søk: åpne listen og finn den første lagrede oppskriften (hvilke som er lagret avhenger av
   // tidligere tester), så skriv starten av tittelen og velg med tastaturet.
@@ -443,13 +443,13 @@ test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
   await search.press("ArrowUp");
   await search.press("Enter");
   await expect(search).toHaveValue(title);
-  await form.getByLabel("Personer").fill("3");
+  await form.getByLabel("Porsjoner").fill("3");
   await form.getByRole("button", { name: "Legg til" }).click();
   const monday = page.locator("li", {
     has: page.getByRole("heading", { level: 2, name: /^mandag/i }),
   });
   await expect(monday.getByRole("link", { name: title })).toBeVisible();
-  await expect(monday.getByText("3 pers.")).toBeVisible();
+  await expect(monday.getByText("3 porsj.")).toBeVisible();
 
   // Lagret: står der etter ny innlasting.
   await page.reload();
@@ -459,7 +459,7 @@ test("Versjon 2: ukemeny og handleliste for uka", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1, name: "Handleliste" })).toBeVisible();
   await expect(page.getByText(/^Valgt fra ukemenyen: Uke \d+/)).toBeVisible();
   await expect(page.getByRole("checkbox", { name: title, exact: true })).toBeChecked();
-  await expect(page.getByLabel(`Antall personer for ${title}`)).toHaveValue("3");
+  await expect(page.getByLabel(`Antall porsjoner for ${title}`)).toHaveValue("3");
 
   // Rydder, så andre kjøringer starter med en tom uke.
   await page.getByRole("link", { name: "Ukemeny", exact: true }).first().click();
@@ -499,7 +499,7 @@ for (const scheme of ["light", "dark"] as const) {
         expect(info.visible, `fokus synlig på «${info.name}»`).toBe(true);
         reached.add(info.name);
       }
-      for (const name of ["Flere personer", "Færre personer", "Få forslag"]) {
+      for (const name of ["Flere porsjoner", "Færre porsjoner", "Få forslag"]) {
         expect(
           [...reached].some((n) => n.includes(name)),
           `«${name}» nås med Tab`,

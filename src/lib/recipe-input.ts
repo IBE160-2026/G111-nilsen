@@ -27,7 +27,7 @@ export function validOriginalServings(value: number | null): number | null {
 }
 
 /**
- * Gyldig valgt antall personer (Story 5.1, 5.3): hele eller halve tall fra 0,5 til 50 (4, 4,5, 5 …).
+ * Gyldig valgt antall porsjoner (Story 5.1, 5.3): hele eller halve tall fra 0,5 til 50 (4, 4,5, 5 …).
  * Antallet oppskriften er skrevet for (`originalServings`) er fortsatt bare hele tall.
  */
 export function isSelectedServings(value: unknown): value is number {

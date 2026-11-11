@@ -7,7 +7,7 @@ Epic 6. Oppskriften skal vise hvor lang tid den tar, ved favoritthjertet, så ma
 - **Data:** kolonnen `recipes.total_minutes` (heltall, `null` = ikke oppgitt), migrasjon `0007_recipe_time`. `Recipe.totalMinutes` er valgfri i typen.
 - **Grenser:** hele minutter fra 1 til 1440 (`isRecipeMinutes`, `MAX_RECIPE_MINUTES`).
 - **Import:** `totalTime` fra oppskriftsdata; ellers summen av `prepTime` og `cookTime` når minst én kan leses (`parseIsoDuration`: «PT45M», «PT1H15M», «P0DT2H», «PT90M»; sekunder rundes opp). Ugyldig, 0 eller over et døgn gir ingen tid. Eksempel: Rundstykker (Matprat) `PT80M` → 80.
-- **Skjema:** «Legg inn selv» og «Rediger» har feltet «Tid (minutter)» (valgfritt, med forklaring) etter antall personer. Tomt = ingen tid. Ugyldig gir «Skriv tiden i hele minutter, fra 1 til 1440, eller la feltet stå tomt.» under feltet. Redigering fyller inn lagret tid; tømt felt fjerner den. Tjenesten validerer på nytt (`validation`, `minutes`).
+- **Skjema:** «Legg inn selv» og «Rediger» har feltet «Tid (minutter)» (valgfritt, med forklaring) etter antall porsjoner. Tomt = ingen tid. Ugyldig gir «Skriv tiden i hele minutter, fra 1 til 1440, eller la feltet stå tomt.» under feltet. Redigering fyller inn lagret tid; tømt felt fjerner den. Tjenesten validerer på nytt (`validation`, `minutes`).
 - **Visning:** `RecipeTime` i lagre-linjen, rett etter hjertet (eller først når oppskriften ikke er lagret): klokke og «45 min», «1 t», «1 t 15 min» (`formatMinutes`); skjermlesere hører «Tid: 45 min». Under 400 px skjules klokka og avstandene i linjen er tettere, så hjerte, tid, mappe og slett står på én linje ved 360 px.
 
 ## Matrise

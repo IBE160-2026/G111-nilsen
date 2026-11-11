@@ -26,7 +26,7 @@
   evidence: Story 2.1 beholder seksjonsnavn fra `HowToSection`, men oppskriftssiden viser stegene som én liste. Funn E5.
 - source_spec: `spec-3-5-rediger-oppskrift.md`
   summary: Redigering av kilde, mappe, favoritt og seksjoner (ingredienser og steg) i redigeringsskjemaet.
-  evidence: Skjemaet har bare tittel, antall personer, ingredienser og steg. Ingredienser og steg lagres uten seksjon, så seksjoner fra import forsvinner når oppskriften redigeres. Tas når seksjoner, kilde og mapper kan redigeres.
+  evidence: Skjemaet har bare tittel, antall porsjoner, ingredienser og steg. Ingredienser og steg lagres uten seksjon, så seksjoner fra import forsvinner når oppskriften redigeres. Tas når seksjoner, kilde og mapper kan redigeres.
 - source_spec: `spec-3-5-rediger-oppskrift.md`
   summary: Rad-id for ingredienser og steg er ikke stabil mellom redigeringer.
   evidence: Redigering sletter og setter inn linjer og steg på nytt. Ingen funksjon bruker rad-id ennå (avkrysning er klienttilstand); vurder oppdatering på plass hvis noe begynner å lagre mot rad-id.
@@ -70,7 +70,7 @@
   summary: Ny import (Epic 2) skal bruke samme `savedAt = null`-regel.
   evidence: Importerte oppskrifter lagres først uten `savedAt` og legges i samlingen med «Lagre»; uten det ryddes de bort etter et døgn. Import må også skrive `createdAt` med `new Date().toISOString()`; opprydding sammenligner ISO-tekst, og et annet format (for eksempel mellomrom i stedet for «T») kan gi feil sletting.
 - source_spec: `spec-3-2-lagre-og-slett.md`
-  summary: Valgt antall personer huskes ikke når det velges før oppskriften er lagret; etter «Lagre» åpnes den på opprinnelig antall ved neste besøk.
+  summary: Valgt antall porsjoner huskes ikke når det velges før oppskriften er lagret; etter «Lagre» åpnes den på opprinnelig antall ved neste besøk.
   evidence: Spesifikasjonen lagrer bare antall for oppskrifter i samlingen. Gjelder først importerte oppskrifter (Epic 2); løses der, for eksempel ved at «Lagre» tar med valgt antall.
 - source_spec: `spec-3-2-lagre-og-slett.md`
   summary: `env(safe-area-inset-bottom)` på lagre-linjen har ingen effekt fordi viewport mangler `viewportFit: "cover"`; dimmingen bak dialogen lysner siden i mørk palett.

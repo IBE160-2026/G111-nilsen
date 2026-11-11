@@ -97,7 +97,7 @@ describe("WeekPlan", () => {
       "href",
       "/oppskrift/2",
     );
-    expect(monday).toHaveTextContent("2 pers.");
+    expect(monday).toHaveTextContent("2 porsj.");
     expect(day("tirsdag")).toHaveTextContent("Ingenting planlagt.");
     expect(screen.getByRole("link", { name: "Lag handleliste for uka" })).toHaveAttribute(
       "href",
@@ -110,7 +110,7 @@ describe("WeekPlan", () => {
     const form = screen.getByRole("form", { name: "Legg til på tirsdag 10. november" });
     await user.type(within(form).getByRole("combobox", { name: "Oppskrift" }), "ta");
     await user.click(within(form).getByRole("option", { name: "Taco" }));
-    expect(within(form).getByLabelText("Personer")).toHaveAttribute("placeholder", "2,5");
+    expect(within(form).getByLabelText("Porsjoner")).toHaveAttribute("placeholder", "2,5");
     await user.click(within(form).getByRole("button", { name: "Legg til" }));
     expect(onAdd).toHaveBeenCalledWith({ recipeId: 2, day: "2026-11-10", servings: 2.5 });
     expect(within(day("tirsdag")).getByRole("link", { name: "Taco" })).toBeInTheDocument();
@@ -123,7 +123,7 @@ describe("WeekPlan", () => {
     const form = screen.getByRole("form", { name: "Legg til på mandag 9. november" });
     // Skrevet helt likt en tittel regnes som valgt.
     await user.type(within(form).getByRole("combobox", { name: "Oppskrift" }), "pannekaker");
-    await user.type(within(form).getByLabelText("Personer"), "6");
+    await user.type(within(form).getByLabelText("Porsjoner"), "6");
     await user.click(within(form).getByRole("button", { name: "Legg til" }));
     expect(onAdd).toHaveBeenCalledWith({ recipeId: 1, day: "2026-11-09", servings: 6 });
   });

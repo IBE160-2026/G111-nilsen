@@ -41,7 +41,7 @@ context:
 
 | Scenario | State / handling | Forventet | Feil |
 |----------|------------------|-----------|------|
-| Åpne | «Rediger» på oppskrift med 4 personer og 3 ingredienser | Skjema forhåndsutfylt; knappen «Lagre endringer» og lenken «Avbryt» | N/A |
+| Åpne | «Rediger» på oppskrift med 4 porsjoner og 3 ingredienser | Skjema forhåndsutfylt; knappen «Lagre endringer» og lenken «Avbryt» | N/A |
 | Lagre endret ingrediens | «0,5 ts salt» → «1 ts salt» | Oppskriftssiden viser 1 ts salt; linjen tolket på nytt | N/A |
 | Fjern «Tips» fra steg | Slett siste steg | Oppskriften har ett steg færre | N/A |
 | Endre porsjoner | 4 → 6 med `selectedServings` satt | `originalServings` 6, `selectedServings` `null` | N/A |
@@ -78,7 +78,7 @@ context:
 - [x] README og deferred-work.
 
 **Acceptance Criteria:**
-- Given en lagret oppskrift, when jeg trykker «Rediger», then vises samme skjema forhåndsutfylt med tittel, antall personer, ingredienser og steg (FR-18).
+- Given en lagret oppskrift, when jeg trykker «Rediger», then vises samme skjema forhåndsutfylt med tittel, antall porsjoner, ingredienser og steg (FR-18).
 - Given endringer, when jeg trykker «Lagre endringer», then lagres de med samme validering og tolking som ny oppskrift, og jeg sendes tilbake til oppskriften.
 - Given en valideringsfeil eller «Avbryt», then er den lagrede oppskriften uendret, og skrevne verdier beholdes ved feil.
 - Alle eksisterende tester passerer; lint, typecheck, format:check og build er grønne; `package-lock.json` uendret.

@@ -24,7 +24,7 @@ Dette dokumentet deler kravene fra PRD, UX (DESIGN.md og EXPERIENCE.md) og arkit
 - FR-4: Manuell innlegging via skjema (tittel, porsjonsantall, ingredienser og steg én per linje) med samme tolking, visning, skalering og lagring som import; validering med forklarende meldinger.
 - FR-5: Fast format: tittel, kilde som lenke, porsjonsvelger, ingredienser per seksjon, nummererte steg, forslag.
 - FR-6: Utolkbare ingredienslinjer vises med originaltekst og skaleres ikke; linjer med mengde men uten navn vises og skaleres.
-- FR-7: Brukeren velger antall personer 1–50 med −/+ og inntasting; umiddelbar oppdatering; ugyldig verdi avvises; tilbakestill til opprinnelig.
+- FR-7: Brukeren velger antall porsjoner 1–50 med −/+ og inntasting; umiddelbar oppdatering; ugyldig verdi avvises; tilbakestill til opprinnelig.
 - FR-8: Skaleringsregler (enhet beholdes, brøktegn innen 5 %, ellers én desimal med komma, udelelige rundes og merkes «ca.», g/ml over 100 til to gjeldende sifre, områder i begge ender, tekst uten tall uendret) med 10 eksempler som fasit.
 - FR-9: Tolking av mengder (heltall, desimal med komma/punktum, brøk, brøktegn, blandet tall, områder, enhet uten mellomrom) og norske og engelske enheter.
 - FR-10: Brukeren kan be om 1–3 forslag på norsk, knyttet til oppskriften, med begrunnelse; feil eller ugyldig svar gir melding uten å påvirke resten.
@@ -70,7 +70,7 @@ Dette dokumentet deler kravene fra PRD, UX (DESIGN.md og EXPERIENCE.md) og arkit
 - UX-DR1: Designtokens fra DESIGN.md som CSS-variabler i `src/styles/tokens.css`, lys og mørk palett som følger `prefers-color-scheme`; ingen hardkodede farger i komponenter.
 - UX-DR2: Typografi: Georgia for tittel (28 px) og overskrifter (20 px), systemfont 17 px brødtekst, halvfete tabulære tall for mengder, etiketter 12 px store bokstaver, meta 14 px.
 - UX-DR3: Toppmeny (Importer, Samlingen, Mapper, Favoritter) med aktiv markering; under 768 px logo på egen linje og menyen fordelt over bredden; punkter minst 44 px høye.
-- UX-DR4: Porsjonsvelger: «Antall personer», runde −/+ (44 px), tall i Georgia 24 px, «oppr. N · endre», «Tilbakestill til N», feilmelding under feltet ved ugyldig verdi.
+- UX-DR4: Porsjonsvelger: «Antall porsjoner», runde −/+ (44 px), tall i Georgia 24 px, «oppr. N · endre», «Tilbakestill til N», feilmelding under feltet ved ugyldig verdi.
 - UX-DR5: Ingredienslinje: mengde i egen kolonne, navn, «ca.»-merke i aksentfarge, utolkbare linjer i kursiv dempet tekst; ingrediensseksjoner som etiketter.
 - UX-DR6: Avkrysning: ekte avkrysningsboks med etikett, trykk på hele linjen, gjennomstreking og dempet tekst når krysset av; også for steg.
 - UX-DR7: Forslagskort: tint bakgrunn, forslag halvfet, begrunnelse i meta, «Ta i bruk»/«Hopp over», merket «Tatt i bruk» med «Fjern», «Eksempelforslag» i demomodus, plassholdere og «Lager forslag …» ved lasting, feilmelding ved feil.
@@ -93,7 +93,7 @@ Dette dokumentet deler kravene fra PRD, UX (DESIGN.md og EXPERIENCE.md) og arkit
 - FR-4: Epic 1 – manuell innlegging
 - FR-5: Epic 1 – fast format
 - FR-6: Epic 1 – utolkbare ingredienslinjer
-- FR-7: Epic 1 – velge antall personer
+- FR-7: Epic 1 – velge antall porsjoner
 - FR-8: Epic 1 – skaleringsregler
 - FR-9: Epic 1 – tolking av mengder og enheter
 - FR-10: Epic 4 – be om forslag
@@ -111,7 +111,7 @@ Dette dokumentet deler kravene fra PRD, UX (DESIGN.md og EXPERIENCE.md) og arkit
 ## Epic-liste
 
 ### Epic 1: Les og skaler en oppskrift
-Brukeren kan legge inn en oppskrift selv, se den i fast format, skalere den til et annet antall personer og krysse av ingredienser og steg under matlaging. Epicen setter også opp prosjektet, designtokens, toppmeny, database og testoppsett.
+Brukeren kan legge inn en oppskrift selv, se den i fast format, skalere den til et annet antall porsjoner og krysse av ingredienser og steg under matlaging. Epicen setter også opp prosjektet, designtokens, toppmeny, database og testoppsett.
 **Krav:** FR-4, FR-5, FR-6, FR-7, FR-8, FR-9, FR-17
 
 ### Epic 2: Importer oppskrift fra lenke
@@ -143,7 +143,7 @@ NFR og UX-DR dekkes i storiene som trenger dem. README oppdateres i siste story 
 
 ## Epic 1: Les og skaler en oppskrift
 
-Brukeren kan legge inn en oppskrift selv, se den i fast format, skalere den til et annet antall personer og krysse av ingredienser og steg under matlaging.
+Brukeren kan legge inn en oppskrift selv, se den i fast format, skalere den til et annet antall porsjoner og krysse av ingredienser og steg under matlaging.
 
 ### Story 1.1: Start appen med toppmeny og visuell profil
 
@@ -211,8 +211,8 @@ slik at jeg kan stole på tallene uten å regne selv.
 **Akseptansekriterier:**
 
 **Gitt** domenefunksjonene `scaleLine(line, factor)` og `formatQuantity` i `src/domain/`
-**Når** de brukes på de 10 eksemplene i PRD FR-8 (opprinnelig 4 personer)
-**Så** blir resultatet nøyaktig som i tabellen, for eksempel «750 g potet» til 3 personer gir «560 g potet» og «1 egg» til 3 gir «1 egg (ca.)» (FR-8)
+**Når** de brukes på de 10 eksemplene i PRD FR-8 (opprinnelig 4 porsjoner)
+**Så** blir resultatet nøyaktig som i tabellen, for eksempel «750 g potet» til 3 porsjoner gir «560 g potet» og «1 egg» til 3 gir «1 egg (ca.)» (FR-8)
 
 **Gitt** et resultat innenfor 5 % av ½, ¼, ¾, ⅓ eller ⅔
 **Når** det formateres
@@ -241,10 +241,10 @@ slik at jeg kan bruke appen også når en oppskrift ikke finnes på nett.
 **Akseptansekriterier:**
 
 **Gitt** siden «Legg inn selv» (nås fra Importer)
-**Når** jeg fyller inn tittel, antall personer, ingredienser (én per linje) og steg (én per linje) og trykker «Lagre oppskrift»
+**Når** jeg fyller inn tittel, antall porsjoner, ingredienser (én per linje) og steg (én per linje) og trykker «Lagre oppskrift»
 **Så** lagres oppskriften med originaltekst og tolkede felt for hver linje (AD-2), og jeg sendes til oppskriftssiden (FR-4)
 
-**Gitt** at tittel mangler, antall personer ikke er et heltall på 1 eller mer, eller ingen ingredienslinjer er fylt inn
+**Gitt** at tittel mangler, antall porsjoner ikke er et heltall på 1 eller mer, eller ingen ingredienslinjer er fylt inn
 **Når** jeg sender skjemaet
 **Så** vises en forklarende melding under feltet med feil, koblet med `aria-describedby`, og ingenting lagres (UX-DR16, UX-DR17)
 
@@ -254,7 +254,7 @@ slik at jeg kan bruke appen også når en oppskrift ikke finnes på nett.
 **Og** oppskriften er lagret som «ikke i samlingen» (Epic 3 legger den i samlingen)
 **Og** skriving skjer via en Server Action med zod-validering (AD-3), og feil returneres som `Result` med melding fra `src/lib/messages.ts` (AD-7)
 
-### Story 1.5: Se oppskriften i fast format og velg antall personer
+### Story 1.5: Se oppskriften i fast format og velg antall porsjoner
 
 Som Ida,
 vil jeg se oppskriften ryddig og velge hvor mange jeg lager mat til,
@@ -297,7 +297,7 @@ slik at jeg ikke mister oversikten på kjøkkenbenken.
 **Og** avkrysning er en ekte avkrysningsboks med etikett, som kan brukes med tastatur (UX-DR16)
 
 **Gitt** avkryssede linjer
-**Når** jeg endrer antall personer
+**Når** jeg endrer antall porsjoner
 **Så** beholdes avkrysningene, og mengdene oppdateres som vanlig
 
 **Gitt** avkryssede linjer
@@ -450,7 +450,7 @@ slik at samlingen min bare inneholder det jeg vil ha.
 **Så** legges den i samlingen, og «Lagret.» vises i 3 sekunder og leses opp av skjermleser (FR-13, UX-DR9, UX-DR12)
 
 **Gitt** en lagret oppskrift
-**Når** jeg endrer antall personer og senere åpner den igjen, også etter at appen er startet på nytt
+**Når** jeg endrer antall porsjoner og senere åpner den igjen, også etter at appen er startet på nytt
 **Så** vises sist valgte antall (FR-13)
 
 **Gitt** en lagret oppskrift
@@ -624,14 +624,14 @@ Lagt til 2026-11-10 etter at Epic 1–4 var levert (`sprint-change-proposal-2026
 ### Story 5.1: Halve porsjoner
 
 Som Ida,
-vil jeg kunne velge 4,5 eller 6,5 personer,
+vil jeg kunne velge 4,5 eller 6,5 porsjoner,
 slik at mengdene passer når noen spiser lite.
 
 **Akseptansekriterier:**
 
 **Gitt** en oppskrift med opprinnelig antall
 **Når** jeg trykker «+ ½» eller skriver «4,5»
-**Så** skaleres mengdene til 4,5 personer, og valget huskes for en lagret oppskrift (FR-19)
+**Så** skaleres mengdene til 4,5 porsjoner, og valget huskes for en lagret oppskrift (FR-19)
 **Og** antallet oppskriften er skrevet for er fortsatt et helt tall
 
 ### Story 5.2: Søk og filtrering i Oppskrifter
@@ -647,7 +647,7 @@ slik at jeg finner en oppskrift raskt når samlingen er stor.
 **Så** vises bare oppskriftene der alle ordene finnes i tittel, kilde, mappe eller ingredienser, og treffantallet leses opp (FR-20)
 **Og** ingen treff gir «Ingen oppskrifter passer.» med «Nullstill søk»
 
-### Story 5.3: Glidebryter for antall personer
+### Story 5.3: Glidebryter for antall porsjoner
 
 Som Ida,
 vil jeg dra en glidebryter fra 0,5 til 50,
@@ -705,7 +705,7 @@ slik at jeg handler alt på én tur.
 **Akseptansekriterier:**
 
 **Gitt** lagrede oppskrifter
-**Når** jeg velger oppskrifter og antall personer for hver under «Handleliste»
+**Når** jeg velger oppskrifter og antall porsjoner for hver under «Handleliste»
 **Så** får jeg én sortert liste der samme vare med samme enhet er lagt sammen, med «Til <oppskrifter>», avkrysning og «Kopier listen» (FR-23)
 **Og** «Handleliste» er et eget punkt i toppmenyen
 
@@ -875,12 +875,12 @@ slik at jeg planlegger middagene og handler alt på én gang.
 **Akseptansekriterier:**
 
 **Gitt** at jeg er logget inn og har lagrede oppskrifter
-**Når** jeg åpner «Ukemeny» i toppmenyen, søker etter en oppskrift og velger den og antall personer på en dag
+**Når** jeg åpner «Ukemeny» i toppmenyen, søker etter en oppskrift og velger den og antall porsjoner på en dag
 **Så** står oppskriften på dagen, også etter ny innlasting, og kan fjernes igjen
 
 **Gitt** en uke med oppskrifter
 **Når** jeg trykker «Lag handleliste for uka»
-**Så** åpnes handlelisten med ukas oppskrifter valgt, og antall personer for samme oppskrift flere dager er lagt sammen
+**Så** åpnes handlelisten med ukas oppskrifter valgt, og antall porsjoner for samme oppskrift flere dager er lagt sammen
 
 **Gitt** ukemenyen
 **Når** jeg trykker «Forrige uke» eller «Neste uke»
@@ -920,5 +920,5 @@ slik at jeg kan ha den på papir på kjøkkenet.
 
 **Gitt** utskriftsvisningen
 **Når** siden skrives ut
-**Så** står tittel, kilde, antall personer, ingredienser og steg i én kolonne med svart tekst på hvit bakgrunn, uten meny, knapper, forslag, notater og lagre-linje, og kilden skrives ut med adressen
+**Så** står tittel, kilde, antall porsjoner, ingredienser og steg i én kolonne med svart tekst på hvit bakgrunn, uten meny, knapper, forslag, notater og lagre-linje, og kilden skrives ut med adressen
 

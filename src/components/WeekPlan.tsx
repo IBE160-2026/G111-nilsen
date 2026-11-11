@@ -47,7 +47,7 @@ function defaultServings(recipe: WeekRecipe | undefined): number {
 
 /**
  * Ukemeny (Story 6.4): én rad per dag med oppskriftene som er lagt der, og et lite skjema for å
- * legge til en lagret oppskrift med antall personer.
+ * legge til en lagret oppskrift med antall porsjoner.
  */
 export default function WeekPlan({
   days,
@@ -125,7 +125,7 @@ export default function WeekPlan({
                         {entry.title}
                       </Link>
                       <span className={styles.servings}>
-                        {m.persons(formatServings(entry.servings))}
+                        {m.portions(formatServings(entry.servings))}
                       </span>
                       <button
                         type="button"
@@ -211,11 +211,11 @@ function AddForm({
           }}
         />
       </div>
-      <label htmlFor={`${id}-personer`} className={styles.label}>
+      <label htmlFor={`${id}-porsjoner`} className={styles.label}>
         {m.servingsLabel}
       </label>
       <input
-        id={`${id}-personer`}
+        id={`${id}-porsjoner`}
         type="number"
         inputMode="decimal"
         min={LIMITS.selectedServingsMin}

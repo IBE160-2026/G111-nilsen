@@ -5,7 +5,7 @@ Versjon 2, etter at Maja så kokemodus: i kokemodus skal mengden og ingrediensen
 
 ## Frosset
 - Ren funksjon `ingredientsForStep(stegtekst, linjer)` i domenet. Et treff er at et ord fra ingrediensnavnet (≥3 bokstaver, uten tilberedningsord som «finhakket», «til», «steking») står i steget: samme ord, bestemt form eller flertall («melken», «eggene», «løken»), eller sammensetning («mel» ↔ «hvetemel», «melet» ↔ «hvetemel»). «mel» treffer ikke «melken».
-- Regelen er enkel og uten ordliste: den kan overse en ingrediens, men viser aldri en ingrediens uten ordtreff. Hele ingredienslisten ligger fortsatt i «Ingredienser for N personer» under steget.
+- Regelen er enkel og uten ordliste: den kan overse en ingrediens, men viser aldri en ingrediens uten ordtreff. Hele ingredienslisten ligger fortsatt i «Ingredienser for N porsjoner» under steget.
 - Visningen «I dette steget» står under stegteksten, i stor skrift, og bare når det er treff. Mengdene er skalert til valgt antall og regnet om i metrisk hvis det er valgt (som i listen). Det vises full mengde for hele oppskriften, også når steget bare bruker en del («halvparten av melken»).
 - Ingen databaseendring og ingenting lagres.
 

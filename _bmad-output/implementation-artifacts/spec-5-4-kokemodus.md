@@ -7,7 +7,7 @@ Versjon 2. Når brukeren står og lager maten (mobil på kjøkkenbenken), viser 
 - Knappen «Kokemodus» står i oppskriftens overskrift (ved «Rediger»), bare når oppskriften har steg.
 - Kokemodus er en fullskjerms modal `<dialog>` (`showModal()`): fokusfelle, Escape og `aria-modal` fra nettleseren. «Avslutt» og Escape lukker; fokus går tilbake til knappen.
 - Visning: tittel, «Steg N av M» med fremdriftsstolpe, stegteksten i stor skrift, og «Forrige» / «Neste» (siste steg: «Ferdig», som lukker). Piltaster venstre/høyre bytter steg. «Forrige» er `aria-disabled` på første steg. Steget leses opp (`aria-live="polite"`).
-- «Ingredienser» er en sammenleggbar liste (lukket fra start) med mengdene skalert til antallet som er valgt akkurat nå: sist valgt på siden (via `SelectedServings`), ellers lagret valgt antall, ellers opprinnelig. Listen viser antallet («for 4,5 personer») når oppskriften har et gyldig opprinnelig antall.
+- «Ingredienser» er en sammenleggbar liste (lukket fra start) med mengdene skalert til antallet som er valgt akkurat nå: sist valgt på siden (via `SelectedServings`), ellers lagret valgt antall, ellers opprinnelig. Listen viser antallet («for 4,5 porsjoner») når oppskriften har et gyldig opprinnelig antall.
 - Steget starter på 1 hver gang kokemodus åpnes. Ingenting lagres.
 - Skjermen holdes våken med Screen Wake Lock mens kokemodus er åpen; lås slippes ved lukking og tas på nytt når fanen blir synlig igjen. Støttes den ikke, eller feiler den, virker kokemodus uansett (ingen melding).
 - Avkrysning på siden bak er uendret og urørt.

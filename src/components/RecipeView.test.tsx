@@ -113,7 +113,7 @@ describe("RecipeView", () => {
     render(<RecipeView recipe={recipe} folders={folders} />);
     const title = screen.getByRole("heading", { level: 1, name: "Pannekaker" });
     const source = screen.getByText("Lagt inn selv");
-    const stepper = screen.getByLabelText("Antall personer");
+    const stepper = screen.getByLabelText("Antall porsjoner");
     const ingredients = screen.getByRole("region", { name: "Ingredienser" });
     const steps = screen.getByRole("region", { name: "Slik gjør du" });
 
@@ -345,7 +345,7 @@ describe("RecipeView", () => {
         />,
       );
       await user.click(screen.getByRole("button", { name: "Avbryt" }));
-      expect(screen.queryByLabelText("Antall personer")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("Antall porsjoner")).not.toBeInTheDocument();
       expect(screen.getByText("1 ½ dl")).toBeInTheDocument();
       expect(document.body.textContent).not.toMatch(/NaN|undefined/);
     });
@@ -354,8 +354,8 @@ describe("RecipeView", () => {
   it("nullstiller valgt antall når komponenten får en annen oppskrift", async () => {
     const user = userEvent.setup();
     const { rerender } = render(<RecipeView recipe={recipe} folders={folders} />);
-    await user.click(screen.getByRole("button", { name: "Flere personer" }));
-    expect(screen.getByLabelText("Antall personer")).toHaveValue("5");
+    await user.click(screen.getByRole("button", { name: "Flere porsjoner" }));
+    expect(screen.getByLabelText("Antall porsjoner")).toHaveValue("5");
 
     rerender(
       <RecipeView
@@ -363,14 +363,14 @@ describe("RecipeView", () => {
         folders={folders}
       />,
     );
-    expect(screen.getByLabelText("Antall personer")).toHaveValue("2");
+    expect(screen.getByLabelText("Antall porsjoner")).toHaveValue("2");
     expect(screen.queryByRole("button", { name: /Tilbakestill/ })).not.toBeInTheDocument();
   });
 
   it("nullstiller valgt antall og avkrysning når samme oppskrift er lagret på nytt (updatedAt endret)", async () => {
     const user = userEvent.setup();
     const { rerender } = render(<RecipeView recipe={recipe} folders={folders} />);
-    await user.click(screen.getByRole("button", { name: "Flere personer" }));
+    await user.click(screen.getByRole("button", { name: "Flere porsjoner" }));
     await user.click(screen.getByText("Stek."));
     await user.click(screen.getByText("melk"));
 
@@ -380,7 +380,7 @@ describe("RecipeView", () => {
         folders={folders}
       />,
     );
-    expect(screen.getByLabelText("Antall personer")).toHaveValue("2");
+    expect(screen.getByLabelText("Antall porsjoner")).toHaveValue("2");
     for (const checkbox of screen.getAllByRole("checkbox")) expect(checkbox).not.toBeChecked();
   });
 
@@ -442,9 +442,9 @@ describe("RecipeView", () => {
     it("ulagret oppskrift: antallet valgt før «Lagre» sendes med (issue 009)", async () => {
       const user = userEvent.setup();
       render(<RecipeView recipe={{ ...recipe, id: 7 }} folders={folders} />);
-      const input = screen.getByLabelText("Antall personer");
+      const input = screen.getByLabelText("Antall porsjoner");
       const original = Number((input as HTMLInputElement).value);
-      await user.click(screen.getByRole("button", { name: "Flere personer" }));
+      await user.click(screen.getByRole("button", { name: "Flere porsjoner" }));
       await user.click(screen.getByRole("button", { name: "Lagre" }));
       expect(actions.saveRecipe).toHaveBeenCalledExactlyOnceWith(7, original + 1);
     });
@@ -461,15 +461,15 @@ describe("RecipeView", () => {
     it("lagret oppskrift: endret antall sendes til rememberServings med id og antall", async () => {
       const user = userEvent.setup();
       render(<RecipeView recipe={saved} folders={folders} />);
-      await user.click(screen.getByRole("button", { name: "Flere personer" }));
+      await user.click(screen.getByRole("button", { name: "Flere porsjoner" }));
       expect(actions.rememberServings).toHaveBeenCalledExactlyOnceWith(7, 5);
     });
 
     it("ulagret oppskrift: endret antall gir ingen lagring", async () => {
       const user = userEvent.setup();
       render(<RecipeView recipe={{ ...recipe, id: 7 }} folders={folders} />);
-      await user.click(screen.getByRole("button", { name: "Flere personer" }));
-      expect(screen.getByLabelText("Antall personer")).toHaveValue("5");
+      await user.click(screen.getByRole("button", { name: "Flere porsjoner" }));
+      expect(screen.getByLabelText("Antall porsjoner")).toHaveValue("5");
       expect(actions.rememberServings).not.toHaveBeenCalled();
     });
 
@@ -520,7 +520,7 @@ describe("RecipeView", () => {
 
     it("åpner på sist valgte antall, med mengdene skalert", () => {
       render(<RecipeView recipe={{ ...saved, selectedServings: 6 }} folders={folders} />);
-      expect(screen.getByLabelText("Antall personer")).toHaveValue("6");
+      expect(screen.getByLabelText("Antall porsjoner")).toHaveValue("6");
       const ingredients = screen.getByRole("region", { name: "Ingredienser" });
       expect(within(ingredients).getAllByRole("listitem")[0]).toHaveTextContent("2 ¼ dl melk");
     });

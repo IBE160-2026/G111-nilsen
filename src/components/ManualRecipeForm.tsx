@@ -96,7 +96,7 @@ export default function ManualRecipeForm({
 
       <div className={styles.field}>
         <label htmlFor={idOf("servings")} className={styles.label}>
-          Antall personer
+          Antall porsjoner
         </label>
         <p id={`${idOf("servings")}-hint`} className={styles.hint}>
           Hvor mange oppskriften er til, et helt tall fra 1 til 50.

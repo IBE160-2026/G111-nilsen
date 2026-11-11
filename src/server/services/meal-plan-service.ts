@@ -75,7 +75,7 @@ export function removeFromWeek(
 }
 
 /**
- * Antall personer per oppskrift for hele uka, til handlelisten: samme oppskrift flere dager
+ * Antall porsjoner per oppskrift for hele uka, til handlelisten: samme oppskrift flere dager
  * legges sammen. Summen holdes innenfor det handlelisten godtar (maks 50).
  */
 export function weekShoppingSelection(entries: readonly MealPlanEntry[]): Record<number, number> {

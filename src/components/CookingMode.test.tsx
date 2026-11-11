@@ -126,7 +126,7 @@ describe("CookingMode", () => {
     renderCooking({ selectedServings: 8 });
     await user.click(openButton());
     const d = within(dialog());
-    expect(d.getByText("Ingredienser for 8 personer")).toBeInTheDocument();
+    expect(d.getByText("Ingredienser for 8 porsjoner")).toBeInTheDocument();
     expect(d.getAllByText("800 g mel").length).toBeGreaterThan(0);
     expect(d.getAllByText("4 egg").length).toBeGreaterThan(0);
   });
@@ -148,7 +148,7 @@ describe("CookingMode", () => {
     await user.click(screen.getByRole("button", { name: "Legg til en halv porsjon" }));
     await user.click(openButton());
     const d = within(dialog());
-    expect(d.getByText("Ingredienser for 4,5 personer")).toBeInTheDocument();
+    expect(d.getByText("Ingredienser for 4,5 porsjoner")).toBeInTheDocument();
     expect(d.getAllByText("450 g mel").length).toBeGreaterThan(0);
   });
 

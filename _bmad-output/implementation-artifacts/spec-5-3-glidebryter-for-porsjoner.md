@@ -1,10 +1,10 @@
 # Spec 5.3: glidebryter for porsjoner
 
 ## Intent
-Versjon 2. Brukeren kan dra en glidebryter fra 0,5 til 50 personer, i halve steg, for å endre antall porsjoner raskt (bygger på Story 5.1).
+Versjon 2. Brukeren kan dra en glidebryter fra 0,5 til 50 porsjoner, i halve steg, for å endre antall porsjoner raskt (bygger på Story 5.1).
 
 ## Frosset
-- Glidebryteren (`<input type="range">`, min 0,5, maks 50, steg 0,5) ligger i porsjonsvelgeren på oppskriftssiden (`allowHalf`), under feltet. Etikett «Skyv for å velge antall personer»; `aria-valuetext` «6,5 personer». Piltaster flytter ett halvt steg.
+- Glidebryteren (`<input type="range">`, min 0,5, maks 50, steg 0,5) ligger i porsjonsvelgeren på oppskriftssiden (`allowHalf`), under feltet. Etikett «Skyv for å velge antall porsjoner»; `aria-valuetext` «6,5 porsjoner». Piltaster flytter ett halvt steg.
 - Valgt antall kan nå være **0,5–50** (hele og halve). `LIMITS.selectedServingsMin = 0.5` brukes av `isSelectedServings`, så komponenten, Server Actions og tjenesten har samme regel. Antallet oppskriften er skrevet for er fortsatt minst 1 og et heltall.
 - Feltet, −/+ og «+ ½» virker som før; −/+ stopper på 0,5 og 50. «+ ½» ved 0,5 gir 1.
 - Hver endring på glidebryteren går gjennom samme `change` som knappene: skalerer, melder valgt antall (utkast og lagre) og husker det for lagrede oppskrifter. Server Actions kjøres i rekkefølge, så siste verdi vinner.

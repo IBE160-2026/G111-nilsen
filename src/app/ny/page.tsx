@@ -15,7 +15,7 @@ export default function NewRecipePage() {
       <header className={styles.intro}>
         <h1>Legg inn en oppskrift</h1>
         <p className={styles.lead}>
-          Skriv tittel, antall personer, ingredienser og steg. Oppskriften vises etterpå i fast
+          Skriv tittel, antall porsjoner, ingredienser og steg. Oppskriften vises etterpå i fast
           format.
         </p>
       </header>

@@ -14,9 +14,9 @@ context:
 
 ## Intent
 
-**Problem:** En oppskrift kan ikke legges i samlingen etter at den er hentet (gjelder importerte oppskrifter fra Epic 2), valgt antall personer glemmes når siden lukkes, ingen oppskrift kan slettes, og oppskrifter som aldri ble lagret blir liggende for alltid (FR-13, UX-DR9, UX-DR12, UX-DR13, deferred-work fra Story 1.4).
+**Problem:** En oppskrift kan ikke legges i samlingen etter at den er hentet (gjelder importerte oppskrifter fra Epic 2), valgt antall porsjoner glemmes når siden lukkes, ingen oppskrift kan slettes, og oppskrifter som aldri ble lagret blir liggende for alltid (FR-13, UX-DR9, UX-DR12, UX-DR13, deferred-work fra Story 1.4).
 
-**Approach:** En lagre-linje nederst på oppskriftssiden: «Lagre» når oppskriften ikke er i samlingen (`savedAt = null`), «Slett» når den er det. «Lagre» setter `savedAt` og viser «Lagret.» i 3 sekunder i et `aria-live`-område. «Slett» åpner dialogen «Slette oppskriften?»; bekreftelse sletter oppskriften med ingredienser og steg og sender brukeren til Samlingen. For en lagret oppskrift lagres hvert valgt antall personer, og siden åpnes med sist valgte antall. Oppskrifter som aldri ble lagret og er eldre enn et døgn ryddes bort ved oppstart og deretter hver time.
+**Approach:** En lagre-linje nederst på oppskriftssiden: «Lagre» når oppskriften ikke er i samlingen (`savedAt = null`), «Slett» når den er det. «Lagre» setter `savedAt` og viser «Lagret.» i 3 sekunder i et `aria-live`-område. «Slett» åpner dialogen «Slette oppskriften?»; bekreftelse sletter oppskriften med ingredienser og steg og sender brukeren til Samlingen. For en lagret oppskrift lagres hvert valgt antall porsjoner, og siden åpnes med sist valgte antall. Oppskrifter som aldri ble lagret og er eldre enn et døgn ryddes bort ved oppstart og deretter hver time.
 
 ## Boundaries & Constraints
 
@@ -102,7 +102,7 @@ context:
 
 **Acceptance Criteria:**
 - Given en oppskrift som ikke er i samlingen, when jeg trykker «Lagre» i lagre-linjen, then legges den i samlingen, og «Lagret.» vises i 3 sekunder og leses opp av skjermleser (FR-13, UX-DR9, UX-DR12).
-- Given en lagret oppskrift, when jeg endrer antall personer og senere åpner den igjen, også etter omstart, then vises sist valgte antall (FR-13).
+- Given en lagret oppskrift, when jeg endrer antall porsjoner og senere åpner den igjen, også etter omstart, then vises sist valgte antall (FR-13).
 - Given en lagret oppskrift, when jeg velger «Slett» og bekrefter i dialogen «Slette oppskriften?», then fjernes den fra samlingen; avbryter jeg, skjer ingenting (UX-DR13).
 - Given oppskrifter som aldri ble lagret i samlingen, then ryddes de bort etter et døgn.
 - Alle eksisterende tester passerer; lint, typecheck, format:check og build er grønne; `package-lock.json` uendret.

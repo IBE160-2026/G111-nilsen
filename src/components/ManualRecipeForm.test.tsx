@@ -25,7 +25,7 @@ describe("ManualRecipeForm", () => {
   it("har synlige etiketter for alle felt og knappen «Lagre oppskrift»", () => {
     render(<ManualRecipeForm action={failingAction({})} />);
     expect(screen.getByLabelText("Tittel")).toHaveAttribute("name", "title");
-    expect(screen.getByLabelText("Antall personer")).toHaveAttribute("name", "servings");
+    expect(screen.getByLabelText("Antall porsjoner")).toHaveAttribute("name", "servings");
     expect(screen.getByLabelText("Ingredienser")).toHaveAttribute("name", "ingredients");
     expect(screen.getByLabelText("Steg (valgfritt)")).toHaveAttribute("name", "steps");
     expect(screen.getByRole("button", { name: "Lagre oppskrift" })).toBeEnabled();
@@ -43,11 +43,11 @@ describe("ManualRecipeForm", () => {
     render(<ManualRecipeForm action={action} />);
 
     await user.type(screen.getByLabelText("Tittel"), "Pannekaker");
-    await user.type(screen.getByLabelText("Antall personer"), "2,5");
+    await user.type(screen.getByLabelText("Antall porsjoner"), "2,5");
     await user.type(screen.getByLabelText("Steg (valgfritt)"), "Stek");
     await user.click(screen.getByRole("button", { name: "Lagre oppskrift" }));
 
-    const servings = screen.getByLabelText("Antall personer");
+    const servings = screen.getByLabelText("Antall porsjoner");
     await waitFor(() => expect(servings).toHaveFocus());
     expect(action).toHaveBeenCalledTimes(1);
 
@@ -129,7 +129,7 @@ describe("ManualRecipeForm", () => {
       />,
     );
     expect(screen.getByLabelText("Tittel")).toHaveValue("Vafler");
-    expect(screen.getByLabelText("Antall personer")).toHaveValue("6");
+    expect(screen.getByLabelText("Antall porsjoner")).toHaveValue("6");
     expect(screen.getByLabelText("Ingredienser")).toHaveValue("1 egg\n2 dl melk");
     expect(screen.getByLabelText("Steg (valgfritt)")).toHaveValue("Rør.");
     expect(screen.getByRole("button", { name: "Lagre endringer" })).toBeEnabled();
@@ -154,11 +154,11 @@ describe("ManualRecipeForm", () => {
       />,
     );
     await user.clear(screen.getByLabelText("Tittel"));
-    await user.type(screen.getByLabelText("Antall personer"), "0");
+    await user.type(screen.getByLabelText("Antall porsjoner"), "0");
     await user.click(screen.getByRole("button", { name: "Lagre endringer" }));
     await waitFor(() => expect(screen.getByLabelText("Tittel")).toHaveFocus());
     expect(screen.getByLabelText("Tittel")).toHaveValue("");
-    expect(screen.getByLabelText("Antall personer")).toHaveValue("60");
+    expect(screen.getByLabelText("Antall porsjoner")).toHaveValue("60");
   });
 
   it("«Avbryt» er deaktivert mens lagringen pågår og navigerer ikke bort", async () => {

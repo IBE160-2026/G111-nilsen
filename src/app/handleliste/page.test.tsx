@@ -126,7 +126,7 @@ describe("/handleliste", () => {
 });
 
 describe("fra ukemenyen, ?uke= (Story 6.4)", () => {
-  it("velger ukas oppskrifter med antall personer lagt sammen, og ikke de andre", async () => {
+  it("velger ukas oppskrifter med antall porsjoner lagt sammen, og ikke de andre", async () => {
     const pancakes = insertRecipe(state.db!, recipe("Pannekaker", "2026-11-09T10:00:00.000Z"));
     insertRecipe(state.db!, recipe("Vafler", "2026-11-09T10:00:00.000Z"));
     const outside = insertRecipe(state.db!, recipe("Taco", "2026-11-09T10:00:00.000Z"));
@@ -142,10 +142,10 @@ describe("fra ukemenyen, ?uke= (Story 6.4)", () => {
     expect(screen.getByRole("checkbox", { name: "Pannekaker" })).toBeChecked();
     expect(screen.getByRole("checkbox", { name: "Vafler" })).not.toBeChecked();
     expect(screen.getByRole("checkbox", { name: "Taco" })).not.toBeChecked();
-    expect(screen.getByRole("spinbutton", { name: "Antall personer for Pannekaker" })).toHaveValue(
+    expect(screen.getByRole("spinbutton", { name: "Antall porsjoner for Pannekaker" })).toHaveValue(
       5,
     );
-    // 4 dl melk for 4 personer → 5 dl for 5.
+    // 4 dl melk for 4 porsjoner → 5 dl for 5.
     expect(screen.getByText("5 dl melk")).toBeInTheDocument();
   });
 

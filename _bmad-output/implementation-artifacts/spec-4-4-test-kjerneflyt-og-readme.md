@@ -6,7 +6,7 @@ En sensor skal kunne installere, kjøre og teste appen ved å følge README (NFR
 ## Frosset
 - `@playwright/test` 1.59.0 som devDependency (låst i `package-lock.json`); `npm run test:e2e` = `playwright test`. Nettleser installeres med `npx playwright install chromium` (ikke en del av `npm install`).
 - `playwright.config.ts`: `webServer` sletter `.e2e/`, bygger og starter `next start` på port 3100 med `DATABASE_PATH=.e2e/recipemate.db`, `IMPORT_SOURCE=fixtures`, tom `LLM_API_KEY`. Én arbeider, to prosjekter (360 px og 1280 px). `E2E_CHROMIUM_PATH` kan peke på en annen nettleser (bare for e2e, leses ikke av appen).
-- Prosjektene deler databasen, så hvert prosjekt bruker egne oppskrifter og mappenavn: `mobil-360` følger PRD-eksemplene nærmest (4 til 5 personer), `desktop-1280` bruker andre lagrede sider.
+- Prosjektene deler databasen, så hvert prosjekt bruker egne oppskrifter og mappenavn: `mobil-360` følger PRD-eksemplene nærmest (4 til 5 porsjoner), `desktop-1280` bruker andre lagrede sider.
 - E2E fant at antall valgt før «Lagre» ikke ble husket ([issue 009](../../issues/009-valgt-antall-glemmes-ved-lagring.md)); rettet etter Story 4.4, og testen følger nå PRD (UJ-1: ett flere før lagring, UJ-3: antallet huskes).
 - Kontrastkravene (NFR-5) er ikke automatisert; tastaturtesten sjekker at hvert fokusert element har synlig fokus (outline eller skygge), i lys og mørk modus.
 - `.e2e/`, `test-results/` og `playwright-report/` ligger i `.gitignore`. Vitest tar bare `src/**/*.test.*`, så e2e-filene kjøres ikke av `npm test`.
@@ -14,8 +14,8 @@ En sensor skal kunne installere, kjøre og teste appen ved å følge README (NFR
 ## Matrise
 | Tilfelle | Utfall | Test |
 |---|---|---|
-| UJ-1: importer, ett flere personer, lagre i ny mappe, favoritt | mengder endres, mappenavn på knappen, favoritt trykket | `e2e/kjerneflyt.spec.ts` |
-| UJ-2: 5 personer, forslag, ta i bruk og hopp over, lagre i mappe, last på nytt | 1–3 eksempelforslag, valgt forslag huskes, ingredienser uendret | `e2e/kjerneflyt.spec.ts` |
+| UJ-1: importer, ett flere porsjoner, lagre i ny mappe, favoritt | mengder endres, mappenavn på knappen, favoritt trykket | `e2e/kjerneflyt.spec.ts` |
+| UJ-2: 5 porsjoner, forslag, ta i bruk og hopp over, lagre i mappe, last på nytt | 1–3 eksempelforslag, valgt forslag huskes, ingredienser uendret | `e2e/kjerneflyt.spec.ts` |
 | UJ-2 kanttilfelle: oversiktsside | «Fant ingen oppskrift på siden.» og «Legg inn selv» | `e2e/kjerneflyt.spec.ts` |
 | UJ-3: Favoritter, åpne, antall huskes, endre | antall = valgt etter lagring | `e2e/kjerneflyt.spec.ts` |
 | Tastatur, lys og mørk | Tab når antall og «Få forslag», synlig fokus | `e2e/kjerneflyt.spec.ts` |

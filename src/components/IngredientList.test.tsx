@@ -21,9 +21,9 @@ function lines(...specs: (string | [string, string | null])[]): RecipeLine[] {
 
 const basic = lines("400 g mel", "1 egg", "salt og pepper");
 
-const field = () => screen.getByLabelText("Antall personer");
-const plus = () => screen.getByRole("button", { name: "Flere personer" });
-const minus = () => screen.getByRole("button", { name: "Færre personer" });
+const field = () => screen.getByLabelText("Antall porsjoner");
+const plus = () => screen.getByRole("button", { name: "Flere porsjoner" });
+const minus = () => screen.getByRole("button", { name: "Færre porsjoner" });
 const shown = () =>
   within(screen.getByRole("region", { name: "Ingredienser" }))
     .getAllByRole("listitem")
@@ -37,7 +37,7 @@ describe("IngredientList", () => {
     expect(screen.queryByRole("button", { name: /Tilbakestill/ })).not.toBeInTheDocument();
   });
 
-  it("Pluss: 5 personer skalerer mengdene, merker «ca.» og lar utolkbare linjer stå", async () => {
+  it("Pluss: 5 porsjoner skalerer mengdene, merker «ca.» og lar utolkbare linjer stå", async () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch");
     const user = userEvent.setup();
     render(<IngredientList ingredients={basic} originalServings={4} />);
@@ -46,7 +46,7 @@ describe("IngredientList", () => {
     expect(field()).toHaveValue("5");
     expect(shown()).toEqual(["500 g mel", "1 egg ca.", "salt og pepper"]);
     expect(screen.getByText("ca.")).toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent("5 personer");
+    expect(screen.getByRole("status")).toHaveTextContent("5 porsjoner");
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
@@ -113,8 +113,8 @@ describe("IngredientList", () => {
 
   it("Ingen porsjoner: uten opprinnelig antall vises ingen porsjonsvelger og mengdene uskalert", () => {
     render(<IngredientList ingredients={basic} originalServings={null} />);
-    expect(screen.queryByLabelText("Antall personer")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /personer/ })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Antall porsjoner")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /porsjoner/ })).not.toBeInTheDocument();
     expect(shown()).toEqual(["400 g mel", "1 egg", "salt og pepper"]);
   });
 
@@ -191,7 +191,7 @@ describe("IngredientList", () => {
     "ugyldig opprinnelig antall %s behandles som manglende: ingen velger, uskalerte mengder",
     (original) => {
       render(<IngredientList ingredients={basic} originalServings={original} />);
-      expect(screen.queryByLabelText("Antall personer")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("Antall porsjoner")).not.toBeInTheDocument();
       expect(shown()).toEqual(["400 g mel", "1 egg", "salt og pepper"]);
     },
   );
@@ -346,7 +346,7 @@ describe("IngredientList", () => {
     it("Ingen porsjoner: avkrysning virker som ellers, uten porsjonsvelger", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={basic} originalServings={null} />);
-      expect(screen.queryByLabelText("Antall personer")).not.toBeInTheDocument();
+      expect(screen.queryByLabelText("Antall porsjoner")).not.toBeInTheDocument();
       await user.click(screen.getByText("mel"));
       expect(box("400 g mel")).toBeChecked();
     });
@@ -460,7 +460,7 @@ describe("IngredientList", () => {
   });
 
   describe("halve porsjoner (Story 5.1)", () => {
-    it("4,5 personer gir 1,125 ganger mengdene, og tall med halv porsjon vises riktig", async () => {
+    it("4,5 porsjoner gir 1,125 ganger mengdene, og tall med halv porsjon vises riktig", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={lines("400 g mel", "2 egg")} originalServings={4} />);
       await user.click(screen.getByRole("button", { name: "Legg til en halv porsjon" }));
@@ -486,7 +486,7 @@ describe("IngredientList", () => {
   });
 
   describe("glidebryter (Story 5.3)", () => {
-    const slider = () => screen.getByRole("slider", { name: "Skyv for å velge antall personer" });
+    const slider = () => screen.getByRole("slider", { name: "Skyv for å velge antall porsjoner" });
 
     it("går fra 0,5 til 50 i halve steg og viser valgt antall", () => {
       render(<IngredientList ingredients={basic} originalServings={4} selectedServings={6.5} />);
@@ -494,7 +494,7 @@ describe("IngredientList", () => {
       expect(slider()).toHaveAttribute("max", "50");
       expect(slider()).toHaveAttribute("step", "0.5");
       expect(slider()).toHaveValue("6.5");
-      expect(slider()).toHaveAttribute("aria-valuetext", "6,5 personer");
+      expect(slider()).toHaveAttribute("aria-valuetext", "6,5 porsjoner");
     });
 
     it("endring på glidebryteren skalerer, oppdaterer feltet og husker antallet", () => {

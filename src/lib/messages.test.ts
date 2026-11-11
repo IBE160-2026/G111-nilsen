@@ -57,7 +57,7 @@ describe("messageFor", () => {
 });
 
 describe("servingStepperMessages", () => {
-  it("bygger grensene for antall personer fra LIMITS", () => {
+  it("bygger grensene for antall porsjoner fra LIMITS", () => {
     expect(servingStepperMessages.invalid).toContain(
       `${LIMITS.servingsMin} til ${LIMITS.servingsMax}`,
     );

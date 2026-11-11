@@ -104,7 +104,7 @@ describe("/ukemeny", () => {
       .getByRole("heading", { level: 2, name: /onsdag 11\. november/ })
       .closest("li")!;
     expect(within(wednesday).getByRole("link", { name: "Pannekaker" })).toBeInTheDocument();
-    expect(wednesday).toHaveTextContent("3 pers.");
+    expect(wednesday).toHaveTextContent("3 porsj.");
     const options = within(
       screen.getByRole("form", { name: "Legg til på mandag 9. november" }),
     ).getAllByRole("option", { hidden: true });

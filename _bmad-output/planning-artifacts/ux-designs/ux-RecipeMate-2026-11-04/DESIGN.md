@@ -137,7 +137,7 @@ Ingen skygger for hierarki. Kort skilles fra bakgrunnen med farge og en tynn kan
 ## Components
 
 - **Toppmeny** — Logo «RecipeMate» til venstre og lenkene Importer, Samlingen, Mapper og Favoritter. Aktiv side har understrek i aksentfargen.
-- **Porsjonsvelger** — Kort med teksten «Antall personer», runde −/+-knapper (44 px) i aksentfarge og tallet i Georgia 24 px.
+- **Porsjonsvelger** — Kort med teksten «Antall porsjoner», runde −/+-knapper (44 px) i aksentfarge og tallet i Georgia 24 px.
 - **Ingredienslinje** — Mengde i `quantity` til venstre, navn til høyre, tynn skillelinje. «ca.» i aksentfarge, 12 px. Utolkbare linjer i kursiv dempet tekst.
 - **Avkrysset linje** — Tekst i `ink-secondary` med gjennomstreking og en fylt avkrysningsboks i aksentfarge.
 - **Forslagskort** — `surface-tint`-bakgrunn, forslaget i halvfet, begrunnelse i `meta`, knappene «Ta i bruk» (primær) og «Hopp over» (sekundær). Valgt forslag får merket «Tatt i bruk».

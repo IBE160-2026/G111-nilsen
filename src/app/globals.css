@@ -118,7 +118,7 @@ a {
     break-inside: avoid;
   }
 
-  /* Antall personer står som tekst uten ramme. */
+  /* Antall porsjoner står som tekst uten ramme. */
   main input[type="text"] {
     border: none;
     background: none;

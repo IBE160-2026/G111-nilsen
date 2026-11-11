@@ -4,7 +4,7 @@
 
 ## Goal
 
-Brukeren kan legge inn en oppskrift selv, se den i et fast og ryddig format, velge hvor mange personer maten skal lages til og krysse av ingredienser og steg under matlaging. Skalering er appens viktigste regel og må være forutsigbar og fullt testet, fordi brukeren skal kunne stole på tallene uten å regne selv. Epicen legger også grunnmuren resten av appen bygger på: Next.js-prosjektet med lagdeling, designtokens, toppmeny, SQLite med migrasjoner, `Result`-typen, felles feilmeldinger og testoppsett. Import fra lenke, samling/mapper/favoritter og forslag kommer i senere epics.
+Brukeren kan legge inn en oppskrift selv, se den i et fast og ryddig format, velge hvor mange porsjoner maten skal lages til og krysse av ingredienser og steg under matlaging. Skalering er appens viktigste regel og må være forutsigbar og fullt testet, fordi brukeren skal kunne stole på tallene uten å regne selv. Epicen legger også grunnmuren resten av appen bygger på: Next.js-prosjektet med lagdeling, designtokens, toppmeny, SQLite med migrasjoner, `Result`-typen, felles feilmeldinger og testoppsett. Import fra lenke, samling/mapper/favoritter og forslag kommer i senere epics.
 
 ## Stories
 
@@ -12,7 +12,7 @@ Brukeren kan legge inn en oppskrift selv, se den i et fast og ryddig format, vel
 - Story 1.2: Tolk mengder og ingredienslinjer
 - Story 1.3: Skaler og formater mengder
 - Story 1.4: Legg inn en oppskrift manuelt
-- Story 1.5: Se oppskriften i fast format og velg antall personer
+- Story 1.5: Se oppskriften i fast format og velg antall porsjoner
 - Story 1.6: Kryss av under matlaging
 
 ## Requirements & Constraints
@@ -62,7 +62,7 @@ Brukeren kan legge inn en oppskrift selv, se den i et fast og ryddig format, vel
 - **Typografi og form:** Georgia for tittel (28 px) og kortoverskrifter (20 px); systemfont 17 px brødtekst; mengder halvfete med tabulære tall; seksjonsetiketter 12 px store bokstaver; meta 14 px. Avstand 4/8/12/16/24/32 px; hjørner 10 px (knapper, felt), 14 px (kort), runde stepper-knapper. Kort skilles med farge og tynn kant.
 - **Toppmeny:** Importer (startside), Samlingen, Mapper, Favoritter; aktiv side med understrek i aksentfarge. Under 768 px logo på egen linje og menypunktene fordelt over bredden under, hvert minst 44 px høyt. De tre siste viser tom-tilstand med forklaring og vei videre.
 - **Manuell innlegging:** nås fra Importer; synlige etiketter, feil under feltet koblet med `aria-describedby`, knappen «Lagre oppskrift».
-- **Porsjonsvelger:** kort «Antall personer», runde −/+ (44 px) i aksentfarge, tall i Georgia 24 px, «Tilbakestill til N» når valgt ≠ opprinnelig, feilmelding under feltet. Endret antall annonseres for skjermleser.
+- **Porsjonsvelger:** kort «Antall porsjoner», runde −/+ (44 px) i aksentfarge, tall i Georgia 24 px, «Tilbakestill til N» når valgt ≠ opprinnelig, feilmelding under feltet. Endret antall annonseres for skjermleser.
 - **Ingredienslinje:** mengde i egen kolonne til venstre, navn til høyre, tynn skillelinje, «ca.» i aksentfarge 12 px, utolkbare linjer i kursiv dempet tekst; seksjoner som etiketter.
 - **Avkrysning:** ekte avkrysningsboks med etikett; trykk hvor som helst på linjen/steget; avkrysset gir fylt boks i aksentfarge, gjennomstreking og dempet tekst. Virker med tastatur.
 - **Oppsett:** under 768 px én kolonne; fra 768 px ingredienser og porsjonsvelger til venstre, steg til høyre, maks 1040 px.

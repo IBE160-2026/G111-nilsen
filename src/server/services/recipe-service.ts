@@ -185,7 +185,7 @@ export function deleteRecipe(id: number, db: Db = getDb()): Result<{ id: number 
 }
 
 /**
- * Husker valgt antall personer for en lagret oppskrift. Gyldig er hele og halve tall fra 1 til
+ * Husker valgt antall porsjoner for en lagret oppskrift. Gyldig er hele og halve tall fra 1 til
  * 50 (Story 5.1); alt annet gir `validation` (felt `servings`). Ukjent id gir `not_found`.
  */
 export function setSelectedServings(

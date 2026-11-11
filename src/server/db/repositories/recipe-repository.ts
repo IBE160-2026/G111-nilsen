@@ -433,7 +433,7 @@ export function deleteRecipeById(db: Db, id: number): boolean {
 }
 
 /**
- * Lagrer valgt antall personer, bare for en lagret oppskrift (`savedAt` satt). `updatedAt`
+ * Lagrer valgt antall porsjoner, bare for en lagret oppskrift (`savedAt` satt). `updatedAt`
  * røres ikke: avkrysning på siden er nøklet på `updatedAt`, og en endring ville nullstilt
  * den. Returnerer `false` når id-en ikke finnes eller oppskriften ikke er lagret.
  */

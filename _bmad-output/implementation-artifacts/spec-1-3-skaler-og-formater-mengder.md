@@ -14,7 +14,7 @@ context:
 
 ## Intent
 
-**Problem:** Brukeren skal kunne lage en oppskrift for et annet antall personer uten å regne selv. Skaleringsreglene i PRD FR-8 er appens viktigste regel og må gi nøyaktig samme resultat hver gang, med fasit i 10 eksempler.
+**Problem:** Brukeren skal kunne lage en oppskrift for et annet antall porsjoner uten å regne selv. Skaleringsreglene i PRD FR-8 er appens viktigste regel og må gi nøyaktig samme resultat hver gang, med fasit i 10 eksempler.
 
 **Approach:** Rene domenefunksjoner som tar en tolket ingredienslinje (`ParsedLine` fra Story 1.2) og en faktor, regner om mengden fra originalen og formaterer den for visning etter FR-8, med avgjørelsen fra 2026-11-04: g og ml under 100 avrundes til hele tall.
 
@@ -34,7 +34,7 @@ context:
 
 ## I/O & Edge-Case Matrix
 
-Opprinnelig 4 personer der ikke annet står. «Visning» er `formatLine(scaleLine(parseLine(input), valgt/4))`.
+Opprinnelig 4 porsjoner der ikke annet står. «Visning» er `formatLine(scaleLine(parseLine(input), valgt/4))`.
 
 | Scenario | Input → valgt | Visning | Feil |
 |----------|--------------|---------|------|

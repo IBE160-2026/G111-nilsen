@@ -155,7 +155,7 @@ export const pantryItems = sqliteTable(
 );
 
 /**
- * Ukemenyen (Story 6.4): en oppskrift på en dag, for et antall personer. Slettes med brukeren og
+ * Ukemenyen (Story 6.4): en oppskrift på en dag, for et antall porsjoner. Slettes med brukeren og
  * med oppskriften.
  */
 export const mealPlanEntries = sqliteTable(
@@ -170,7 +170,7 @@ export const mealPlanEntries = sqliteTable(
       .references(() => recipes.id, { onDelete: "cascade" }),
     /** Dato «YYYY-MM-DD». */
     day: text("day").notNull(),
-    /** Antall personer, hele og halve (som valgt antall). Lagres som tall i SQLite. */
+    /** Antall porsjoner, hele og halve (som valgt antall). Lagres som tall i SQLite. */
     servings: real("servings").notNull(),
     createdAt: text("created_at").notNull(),
   },

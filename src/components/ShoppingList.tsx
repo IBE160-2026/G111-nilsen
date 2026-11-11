@@ -25,7 +25,7 @@ function startServings(recipe: ShoppingRecipe): number | null {
 }
 
 /**
- * Handleliste (Story 5.7): velg oppskrifter og antall personer, så slås ingrediensene sammen til
+ * Handleliste (Story 5.7): velg oppskrifter og antall porsjoner, så slås ingrediensene sammen til
  * én liste som kan krysses av i butikken. Alt er tilstand i nettleseren; ingenting lagres.
  */
 type Props = {
@@ -36,7 +36,7 @@ type Props = {
   onAddPantry?: (name: string) => Promise<PantryActionResult>;
   /** Tar noe ut av «Har hjemme» (Server Action). */
   onRemovePantry?: (id: number) => Promise<ActionResult>;
-  /** Oppskrifter som er valgt fra start, med antall personer (fra ukemenyen, Story 6.4). */
+  /** Oppskrifter som er valgt fra start, med antall porsjoner (fra ukemenyen, Story 6.4). */
   initialSelection?: Readonly<Record<number, number>>;
 };
 

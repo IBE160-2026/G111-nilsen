@@ -97,7 +97,7 @@ export async function removeRecipe(id: number): Promise<ActionResult> {
 }
 
 /**
- * Husker valgt antall personer for en lagret oppskrift. Kalles ved hver endring i
+ * Husker valgt antall porsjoner for en lagret oppskrift. Kalles ved hver endring i
  * porsjonsvelgeren og revaliderer ikke (siden skal ikke lastes på nytt).
  */
 export async function rememberServings(id: number, servings: number): Promise<ActionResult> {

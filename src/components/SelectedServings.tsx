@@ -6,7 +6,7 @@ import type { UnitSystem } from "@/domain";
 /**
  * Siste valg brukeren har gjort på oppskriftssiden, delt mellom komponentene som ikke har noe
  * annet til felles. To refs, ingen gjengivelse, ingen lagring:
- * - antall personer (issue 009): porsjonsvelgeren (`IngredientList`) melder fra, «Lagre»
+ * - antall porsjoner (issue 009): porsjonsvelgeren (`IngredientList`) melder fra, «Lagre»
  *   (`RecipeActions`) sender det med, og kokemodus (Story 5.4) leser det, så et antall valgt
  *   *før* lagring huskes og vises riktig.
  * - målsystem (Story 5.5): «Metriske mål» i `IngredientList`, lest av kokemodus.

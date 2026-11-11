@@ -27,9 +27,9 @@ function HalfHarness({ start, original }: { start: number; original: number }) {
   return <ServingStepper allowHalf value={value} original={original} onChange={setValue} />;
 }
 
-const field = () => screen.getByLabelText("Antall personer");
-const minus = () => screen.getByRole("button", { name: "Færre personer" });
-const plus = () => screen.getByRole("button", { name: "Flere personer" });
+const field = () => screen.getByLabelText("Antall porsjoner");
+const minus = () => screen.getByRole("button", { name: "Færre porsjoner" });
+const plus = () => screen.getByRole("button", { name: "Flere porsjoner" });
 
 describe("ServingStepper", () => {
   it("viser etikett, antall, «oppr. N» og ingen tilbakestilling ved opprinnelig antall", () => {
@@ -37,7 +37,7 @@ describe("ServingStepper", () => {
     expect(field()).toHaveValue("4");
     expect(screen.getByText("oppr. 4")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Tilbakestill/ })).not.toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent("4 personer");
+    expect(screen.getByRole("status")).toHaveTextContent("4 porsjoner");
   });
 
   it("+ øker med 1 og annonserer nytt antall", async () => {
@@ -45,7 +45,7 @@ describe("ServingStepper", () => {
     render(<Harness start={4} original={4} />);
     await user.click(plus());
     expect(field()).toHaveValue("5");
-    expect(screen.getByRole("status")).toHaveTextContent("5 personer");
+    expect(screen.getByRole("status")).toHaveTextContent("5 porsjoner");
     expect(screen.getByRole("button", { name: "Tilbakestill til 4" })).toBeInTheDocument();
   });
 
@@ -57,7 +57,7 @@ describe("ServingStepper", () => {
     expect(minus()).toHaveAttribute("aria-disabled", "true");
     expect(minus()).not.toBeDisabled();
     expect(plus()).not.toHaveAttribute("aria-disabled");
-    expect(screen.getByRole("status")).toHaveTextContent("1 person");
+    expect(screen.getByRole("status")).toHaveTextContent("1 porsjon");
     unmount();
 
     render(<Harness start={50} original={4} />);
@@ -114,11 +114,11 @@ describe("ServingStepper", () => {
     render(<Harness start={4} original={4} spy={spy} />);
     await user.clear(field());
     await user.type(field(), "12");
-    expect(screen.getByRole("status")).toHaveTextContent("4 personer");
+    expect(screen.getByRole("status")).toHaveTextContent("4 porsjoner");
     expect(spy).not.toHaveBeenCalled();
     await user.keyboard("{Enter}");
     expect(spy).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole("status")).toHaveTextContent("12 personer");
+    expect(screen.getByRole("status")).toHaveTextContent("12 porsjoner");
   });
 
   it.each(["0", "51", "2,5", "", "abc"])(
@@ -175,8 +175,8 @@ describe("ServingStepper", () => {
   });
 
   it("servingsText bruker entall for 1", () => {
-    expect(servingsText(1)).toBe("1 person");
-    expect(servingsText(2)).toBe("2 personer");
+    expect(servingsText(1)).toBe("1 porsjon");
+    expect(servingsText(2)).toBe("2 porsjoner");
   });
 
   it("feilmeldingen er en live-region som leses opp etter at fokus har forlatt feltet", async () => {
@@ -214,8 +214,8 @@ describe("ServingStepper", () => {
     });
 
     it("servingsText bruker komma", () => {
-      expect(servingsText(4.5)).toBe("4,5 personer");
-      expect(servingsText(1)).toBe("1 person");
+      expect(servingsText(4.5)).toBe("4,5 porsjoner");
+      expect(servingsText(1)).toBe("1 porsjon");
     });
 
     it("«+ ½» legger til og fjerner en halv porsjon", async () => {
@@ -223,7 +223,7 @@ describe("ServingStepper", () => {
       render(<HalfHarness start={4} original={4} />);
       await user.click(half(false));
       expect(field()).toHaveValue("4,5");
-      expect(screen.getByRole("status")).toHaveTextContent("4,5 personer");
+      expect(screen.getByRole("status")).toHaveTextContent("4,5 porsjoner");
       expect(half(true)).toHaveAttribute("aria-pressed", "true");
       await user.click(half(true));
       expect(field()).toHaveValue("4");

@@ -9,9 +9,9 @@ const MIN = LIMITS.servingsMin;
 const MAX = LIMITS.servingsMax;
 const HALF_MIN = LIMITS.selectedServingsMin;
 
-/** «1 person» / «N personer» (halve tall med komma: «4,5 personer»). */
+/** «1 porsjon» / «N porsjoner» (halve tall med komma: «4,5 porsjoner»). */
 export function servingsText(servings: number): string {
-  return servings === 1 ? "1 person" : `${formatServings(servings)} personer`;
+  return servings === 1 ? "1 porsjon" : `${formatServings(servings)} porsjoner`;
 }
 
 /**
@@ -33,7 +33,7 @@ export function parseServings(text: string, allowHalf = false): number | null {
 }
 
 type Props = {
-  /** Valgt antall personer (alltid gyldig, 1–50). */
+  /** Valgt antall porsjoner (alltid gyldig, 1–50). */
   value: number;
   /** Kalles bare med gyldige verdier. */
   onChange: (value: number) => void;
@@ -106,7 +106,7 @@ export default function ServingStepper({
       <div className={styles.row}>
         <div className={styles.labels}>
           <label htmlFor={inputId} className={styles.label}>
-            Antall personer
+            Antall porsjoner
           </label>
           {bare ? null : (
             <span className={styles.original}>
@@ -131,7 +131,7 @@ export default function ServingStepper({
           <button
             type="button"
             className={styles.button}
-            aria-label="Færre personer"
+            aria-label="Færre porsjoner"
             aria-controls={inputId}
             aria-disabled={value <= lowest ? true : undefined}
             onClick={() => {
@@ -156,7 +156,7 @@ export default function ServingStepper({
           <button
             type="button"
             className={styles.button}
-            aria-label="Flere personer"
+            aria-label="Flere porsjoner"
             aria-controls={inputId}
             aria-disabled={value >= MAX ? true : undefined}
             onClick={() => {

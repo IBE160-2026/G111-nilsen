@@ -28,14 +28,14 @@ function setup(overrides: Partial<React.ComponentProps<typeof ServingsDialog>> =
   return props;
 }
 
-const field = () => screen.getByRole("textbox", { name: "Antall personer" });
+const field = () => screen.getByRole("textbox", { name: "Antall porsjoner" });
 
 describe("ServingsDialog", () => {
   it("er en navngitt dialog med spørsmålet, forklaring og porsjonsvelger uten «oppr.»", () => {
     setup();
     const dialog = screen.getByRole("dialog", { name: m.title });
     expect(dialog).toHaveAccessibleDescription(m.description);
-    expect(within(dialog).getByRole("textbox", { name: "Antall personer" })).toHaveValue("4");
+    expect(within(dialog).getByRole("textbox", { name: "Antall porsjoner" })).toHaveValue("4");
     expect(within(dialog).queryByText(/oppr\./)).toBeNull();
     expect(within(dialog).queryByRole("button", { name: /Tilbakestill/ })).toBeNull();
   });
@@ -53,9 +53,9 @@ describe("ServingsDialog", () => {
   it("+ og − endrer antallet, «Lagre» sender det valgte tallet", async () => {
     const user = userEvent.setup();
     const props = setup();
-    await user.click(screen.getByRole("button", { name: "Flere personer" }));
-    await user.click(screen.getByRole("button", { name: "Flere personer" }));
-    await user.click(screen.getByRole("button", { name: "Færre personer" }));
+    await user.click(screen.getByRole("button", { name: "Flere porsjoner" }));
+    await user.click(screen.getByRole("button", { name: "Flere porsjoner" }));
+    await user.click(screen.getByRole("button", { name: "Færre porsjoner" }));
     await user.click(screen.getByRole("button", { name: m.save }));
     expect(props.onSave).toHaveBeenCalledWith(5);
     await waitFor(() => expect(props.onSaved).toHaveBeenCalledWith(5));

@@ -13,7 +13,7 @@ Denne PRD-en beskriver hva første versjon (v1) av RecipeMate skal gjøre, og (�
 
 ## 1. Visjon
 
-RecipeMate gjør oppskrifter brukeren allerede har funnet på nettet enklere å bruke. Brukeren limer inn en lenke, og appen viser oppskriften i et fast og ryddig format, uansett hvilken side den kommer fra. Brukeren velger hvor mange personer maten skal lages til, og alle mengder regnes om automatisk etter faste, forutsigbare regler.
+RecipeMate gjør oppskrifter brukeren allerede har funnet på nettet enklere å bruke. Brukeren limer inn en lenke, og appen viser oppskriften i et fast og ryddig format, uansett hvilken side den kommer fra. Brukeren velger hvor mange porsjoner maten skal lages til, og alle mengder regnes om automatisk etter faste, forutsigbare regler.
 
 RecipeMate gir også konkrete forslag som kan gjøre akkurat denne retten bedre, og brukeren velger selv hva som tas i bruk. Oppskrifter lagres i mapper og som favoritter, slik at de er lette å finne igjen.
 
@@ -22,7 +22,7 @@ Målet er at veien fra lenke til en tilpasset, lagret oppskrift tar under et min
 ## 2. Målgruppe
 
 ### 2.1 Jobber brukeren vil få gjort
-- Lage en oppskrift fra nettet for et annet antall personer enn den er skrevet for, uten å regne selv.
+- Lage en oppskrift fra nettet for et annet antall porsjoner enn den er skrevet for, uten å regne selv.
 - Lese oppskriften raskt på kjøkkenbenken, på mobil eller nettbrett, uten reklame og rot.
 - Få et konkret tips som passer akkurat denne retten, og selv bestemme om det skal brukes.
 - Finne igjen en oppskrift man likte, uten å lete i bokmerker, skjermbilder og faner.
@@ -35,13 +35,13 @@ Målet er at veien fra lenke til en tilpasset, lagret oppskrift tar under et min
 ### 2.3 Brukerreiser
 
 - **UJ-1. Ida lager taco til fem i stedet for fire.**
-  Ida (22) er student og lager middag til seg selv og noen venner, men antallet varierer. Hun har funnet en tacooppskrift på en norsk matside og åpner RecipeMate på mobilen. Hun limer inn lenken og trykker «Hent oppskrift». Oppskriften vises med ingredienser og steg i fast format, laget for 4 personer. Hun endrer antall til 5, og alle mengder oppdateres med en gang: «400 g kjøttdeig» blir «500 g kjøttdeig». Hun lagrer oppskriften i mappen «Hverdag» og markerer den som favoritt. **Kanttilfelle:** siden oppgir ikke antall porsjoner. RecipeMate spør da hvor mange oppskriften er laget for før den skalerer.
+  Ida (22) er student og lager middag til seg selv og noen venner, men antallet varierer. Hun har funnet en tacooppskrift på en norsk matside og åpner RecipeMate på mobilen. Hun limer inn lenken og trykker «Hent oppskrift». Oppskriften vises med ingredienser og steg i fast format, laget for 4 porsjoner. Hun endrer antall til 5, og alle mengder oppdateres med en gang: «400 g kjøttdeig» blir «500 g kjøttdeig». Hun lagrer oppskriften i mappen «Hverdag» og markerer den som favoritt. **Kanttilfelle:** siden oppgir ikke antall porsjoner. RecipeMate spør da hvor mange oppskriften er laget for før den skalerer.
 
 - **UJ-2. Tor tilpasser fiskesuppe til familien på fem og prøver et forslag.**
-  Tor er forelder i en familie på fem og vil lage fiskesuppe fra en engelsk matblogg skrevet for 2 personer. Han importerer oppskriften, setter antall til 5 og ser at «1 egg» blir «3 egg (ca.)». Han ber om forslag og får tre korte tips knyttet til oppskriften, blant annet «Tilsett litt sitronsaft rett før servering for friskere smak». Han tar i bruk ett forslag og hopper over de andre. Det valgte forslaget vises merket i oppskriften og huskes når han lagrer den i mappen «Helg». **Kanttilfelle:** lenken er en oversiktsside med mange oppskrifter. RecipeMate sier at den ikke fant en oppskrift på siden og foreslår å lime inn lenken til selve oppskriften, eller å legge den inn manuelt.
+  Tor er forelder i en familie på fem og vil lage fiskesuppe fra en engelsk matblogg skrevet for 2 porsjoner. Han importerer oppskriften, setter antall til 5 og ser at «1 egg» blir «3 egg (ca.)». Han ber om forslag og får tre korte tips knyttet til oppskriften, blant annet «Tilsett litt sitronsaft rett før servering for friskere smak». Han tar i bruk ett forslag og hopper over de andre. Det valgte forslaget vises merket i oppskriften og huskes når han lagrer den i mappen «Helg». **Kanttilfelle:** lenken er en oversiktsside med mange oppskrifter. RecipeMate sier at den ikke fant en oppskrift på siden og foreslår å lime inn lenken til selve oppskriften, eller å legge den inn manuelt.
 
 - **UJ-3. Ida finner igjen favoritten en uke senere.**
-  Ida åpner RecipeMate, går til «Favoritter» og finner tacooppskriften øverst. Hun åpner den og ser at den sist ble laget for 5 personer. Hun endrer til 3 og lager maten.
+  Ida åpner RecipeMate, går til «Favoritter» og finner tacooppskriften øverst. Hun åpner den og ser at den sist ble laget for 5 porsjoner. Hun endrer til 3 og lager maten.
 
 ## 3. Begreper
 
@@ -56,8 +56,8 @@ Målet er at veien fra lenke til en tilpasset, lagret oppskrift tar under et min
 - **Mengde** — Tallverdien i en ingredienslinje. Kan være et heltall, desimaltall, brøk, blandet tall eller et område (f.eks. 2–3).
 - **Enhet** — Måleenheten i en ingredienslinje (f.eks. g, dl, ss, ts, stk). Kan mangle.
 - **Udelelig ingrediens** — En ingrediens som telles i hele enheter (f.eks. egg, løk, hvitløksfedd, stk).
-- **Opprinnelig porsjonsantall** — Hvor mange personer oppskriften er skrevet for.
-- **Valgt porsjonsantall** — Hvor mange personer brukeren vil lage oppskriften til.
+- **Opprinnelig porsjonsantall** — Hvor mange porsjoner oppskriften er skrevet for.
+- **Valgt porsjonsantall** — Hvor mange porsjoner brukeren vil lage oppskriften til.
 - **Skalering** — Omregning av mengder fra opprinnelig til valgt porsjonsantall.
 - **Forslag** — Et konkret forbedringsforslag knyttet til én oppskrift, med en kort begrunnelse.
 - **Valgt forslag** — Et forslag brukeren har tatt i bruk. Lagres på oppskriften.
@@ -132,9 +132,9 @@ Brukeren kan krysse av ingredienslinjer og steg mens maten lages, for å holde o
 
 ### 4.3 Skalering
 
-**Beskrivelse:** Brukeren velger antall personer, og alle tolkbare mengder regnes om med en gang. Skalering er appens viktigste regel og skal være forutsigbar og fullt testet. Realiserer UJ-1, UJ-2, UJ-3.
+**Beskrivelse:** Brukeren velger antall porsjoner, og alle tolkbare mengder regnes om med en gang. Skalering er appens viktigste regel og skal være forutsigbar og fullt testet. Realiserer UJ-1, UJ-2, UJ-3.
 
-#### FR-7: Velge antall personer
+#### FR-7: Velge antall porsjoner
 Brukeren kan velge valgt porsjonsantall som et heltall fra 1 til 50 `[ANTAKELSE: øvre grense 50 holder for hjemmebruk]`, med knapper for pluss og minus og ved å skrive tallet.
 
 **Konsekvenser (testbare):**
@@ -252,7 +252,7 @@ Brukeren kan se samlingen, én mappe om gangen og favoritter, sortert med sist l
 **Beskrivelse:** Funksjoner som kom etter v1, fra «hvis tid»-listen i §7.2 og fra bruk. Hver har en egen spec (`_bmad-output/implementation-artifacts/spec-5-N-*.md`) med full oppførsel og testmatrise.
 
 #### FR-19: Halve porsjoner og glidebryter
-Valgt antall personer kan være hele og halve tall fra 0,5 til 50, med «+ ½», feltet («4,5») og en glidebryter i halve steg. Antallet oppskriften er skrevet for er fortsatt et heltall 1–50. (Story 5.1, 5.3)
+Valgt antall porsjoner kan være hele og halve tall fra 0,5 til 50, med «+ ½», feltet («4,5») og en glidebryter i halve steg. Antallet oppskriften er skrevet for er fortsatt et heltall 1–50. (Story 5.1, 5.3)
 
 #### FR-20: Søk og filtrering i Oppskrifter
 Brukeren kan søke i tittel, kilde, mappe og ingredienser (alle ord må finnes) og filtrere på mappe og favoritter. Treffantallet leses opp; ingen treff gir «Nullstill søk». (Story 5.2)
@@ -264,7 +264,7 @@ Fullskjerm med ett steg om gangen i stor tekst, ingrediensene for steget og for 
 Mengder kan vises «som i oppskriften», som volum (dl) eller som vekt (gram). Kopper, unser og pund regnes om til norske mål; vanlige varer (mel, sukker, smør, melk m.fl.) regnes mellom dl og gram med faste kjøkkenverdier og merkes «ca.». Gjelder oppskrift, kokemodus og handleliste. (Story 5.5, 5.9)
 
 #### FR-23: Handleliste
-Brukeren velger lagrede oppskrifter og antall personer for hver og får én sammenslått liste (samme navn og enhet legges sammen) som kan krysses av og kopieres. Eget punkt i toppmenyen. (Story 5.7)
+Brukeren velger lagrede oppskrifter og antall porsjoner for hver og får én sammenslått liste (samme navn og enhet legges sammen) som kan krysses av og kopieres. Eget punkt i toppmenyen. (Story 5.7)
 
 #### FR-24: Har hjemme
 Brukeren kan merke varer som «Har hjemme» (fra listen eller ved å skrive dem inn); de skjules fra handlelisten og kopien og huskes. (Story 5.8)
@@ -340,7 +340,7 @@ Målt i en brukertest med 5 testbrukere og de samme fem lagrede oppskriftslenken
 
 **Primære**
 - **SM-1:** Importere en oppskrift via lenke. Validerer FR-1, FR-5.
-- **SM-2:** Skalere oppskriften til et annet antall personer med riktige mengder. Validerer FR-7, FR-8.
+- **SM-2:** Skalere oppskriften til et annet antall porsjoner med riktige mengder. Validerer FR-7, FR-8.
 - **SM-3:** Finne, forstå og ta i bruk et forslag. Validerer FR-10, FR-11.
 - **SM-4:** Lagre oppskriften i en mappe og markere den som favoritt. Validerer FR-13–FR-15.
 - **SM-5:** Finne igjen en lagret oppskrift via mappe eller favoritter. Validerer FR-16.

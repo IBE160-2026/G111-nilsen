@@ -17,7 +17,7 @@ context:
 
 **Problem:** Brukeren kan ikke få en oppskrift inn i appen ennå. Manuell innlegging gir Epic 1 en egen vei inn (uavhengig av import i Epic 2), og krever appens første database.
 
-**Approach:** Et skjema på `/ny` (lenket fra Importer) der brukeren skriver tittel, antall personer, ingredienser og steg. En Server Action validerer med zod, tolker hver ingredienslinje med `parseLine`, lagrer i SQLite via Drizzle og sender brukeren til `/oppskrift/[id]`, som i denne storyen viser oppskriften enkelt (full visning kommer i 1.5).
+**Approach:** Et skjema på `/ny` (lenket fra Importer) der brukeren skriver tittel, antall porsjoner, ingredienser og steg. En Server Action validerer med zod, tolker hver ingredienslinje med `parseLine`, lagrer i SQLite via Drizzle og sender brukeren til `/oppskrift/[id]`, som i denne storyen viser oppskriften enkelt (full visning kommer i 1.5).
 
 ## Boundaries & Constraints
 
@@ -43,14 +43,14 @@ context:
 
 | Scenario | Input | Forventet | Feil |
 |----------|-------|-----------|------|
-| Gyldig | Tittel «Pannekaker», 4 personer, 3 ingredienslinjer, 2 steg | Lagret; redirect til `/oppskrift/{id}` som viser tittel, «Lagt inn selv», «4 personer», ingredienser og nummererte steg | N/A |
+| Gyldig | Tittel «Pannekaker», 4 porsjoner, 3 ingredienslinjer, 2 steg | Lagret; redirect til `/oppskrift/{id}` som viser tittel, «Lagt inn selv», «4 porsjoner», ingredienser og nummererte steg | N/A |
 | Tomme linjer | Ingredienser/steg med tomme linjer og mellomrom | Tomme linjer ignoreres; hver linje trimmes; rekkefølgen beholdes | N/A |
 | Utolkbar linje | `salt og pepper` | Lagres med `parseable = false`, vises med originaltekst | N/A |
 | Mengde uten navn | `2 ss` | Lagres med tomt navn (`""`), `parseable = true` | N/A |
 | Uten steg | Ingen steg | Lagres (steg er valgfrie) | N/A |
 | Antall med mellomrom | `4 ` | Godtas som 4 | N/A |
 | Mangler tittel | Tom/bare mellomrom | Ingenting lagres; melding under Tittel; verdier beholdt | validation |
-| Ugyldig antall | `0`, `51`, `2,5`, `abc`, tomt | Ingenting lagres; melding under Antall personer (heltall 1–50) | validation |
+| Ugyldig antall | `0`, `51`, `2,5`, `abc`, tomt | Ingenting lagres; melding under Antall porsjoner (heltall 1–50) | validation |
 | Ingen ingredienser | Bare tomme linjer | Ingenting lagres; melding under Ingredienser | validation |
 | For lang input | Tittel > 200 tegn; > 100 ikke-tomme linjer i et felt; en ingredienslinje > 300 tegn; et steg > 2000 tegn | Ingenting lagres; melding under feltet | validation |
 | Ukjent oppskrift | `/oppskrift/999999` eller `/oppskrift/abc` | Norsk 404-side (også i `npm start`) | not_found |
@@ -106,7 +106,7 @@ Implementert i arbeidskopien i commit `32a08ec` (Story 1.4) og `0122c5c` (låsef
 - zod-skjemaet ligger i `src/app/ny/manual-recipe-schema.ts` (en `"use server"`-fil kan bare eksportere async-funksjoner); feltlisten og typene i `src/app/ny/form-fields.ts`, så klientkomponenten ikke drar med zod. Feltmeldinger i `messages.ts` (`manualRecipeFieldMessages`).
 - `src/lib/result.ts` fikk `ERROR_KINDS` (typen `ErrorKind` avledes av den), så testen av `messageFor` dekker alle kinds. `messageFor` gir `fallbackMessage` for ukjente verdier.
 - Actionen fanger uventede feil fra tjenesten og returnerer reservemeldingen i `formError` (aria-live), med verdiene beholdt. `redirect()` ligger utenfor `try/catch`.
-- `ManualRecipeForm` får actionen som prop fra `/ny` (enklere å teste). Antall personer er `type="text" inputMode="numeric"` og skjemaet har `noValidate`, slik at serverens norske meldinger alltid vises. Fokus flyttes via `form.elements.namedItem` i en effect.
+- `ManualRecipeForm` får actionen som prop fra `/ny` (enklere å teste). Antall porsjoner er `type="text" inputMode="numeric"` og skjemaet har `noValidate`, slik at serverens norske meldinger alltid vises. Fokus flyttes via `form.elements.namedItem` i en effect.
 - Visningen av oppskriften ligger i `src/components/RecipeView.tsx` og id-tolkingen i `src/lib/recipe-id.ts`, fordi Next ikke tillater ekstra eksporter fra `page.tsx`.
 - Tester: `manual-recipe-schema.test.ts`, `actions.test.ts`, `recipe-service.test.ts`, `recipe-repository.test.ts`, `migrate.test.ts`, `drizzle-imports.test.ts` (AD-6), `lockfile.test.ts`, `ManualRecipeForm.test.tsx`, `RecipeView.test.tsx`, `messages.test.ts`, `recipe-id.test.ts`, og lenken i `pages.test.tsx`. Vitest har alias `server-only` → `server-only/empty.js`.
 
@@ -117,7 +117,7 @@ Implementert i arbeidskopien i commit `32a08ec` (Story 1.4) og `0122c5c` (låsef
 - `npm run lint`, `typecheck`, `test` (25 filer, 366 tester), `format:check`, `build`: grønne.
 - Ren klone: `npm ci` uten feil, `npm run db:migrate` lager `data/recipemate.db`, `package-lock.json` uendret.
 - `npm run build` uten `data/`: bygget lykkes, ingen databasefil. `/oppskrift/[id]` er Partial Prerender (◐), `/ny` statisk.
-- `npm start` med tom `DATABASE_PATH`, testet med curl mot skjemaets innsending uten JavaScript: ugyldig input gir 200 med meldinger under feltene, `aria-invalid`/`aria-describedby` og beholdte verdier, og ingen rader; gyldig input gir 303 til `/oppskrift/1`, som viser tittel, «Lagt inn selv · 4 personer», ingredienser og nummererte steg. Etter omstart vises oppskriften fortsatt. `next dev` ga ingen advarsler fra Cache Components.
+- `npm start` med tom `DATABASE_PATH`, testet med curl mot skjemaets innsending uten JavaScript: ugyldig input gir 200 med meldinger under feltene, `aria-invalid`/`aria-describedby` og beholdte verdier, og ingen rader; gyldig input gir 303 til `/oppskrift/1`, som viser tittel, «Lagt inn selv · 4 porsjoner», ingredienser og nummererte steg. Etter omstart vises oppskriften fortsatt. `next dev` ga ingen advarsler fra Cache Components.
 - Skjermbilde (360 px) er ikke tatt: Playwright-Chromium kan ikke lastes ned i KI-miljøet, og ingen annen nettleser er installert der. Må tas manuelt.
 
 **Kjent begrensning**

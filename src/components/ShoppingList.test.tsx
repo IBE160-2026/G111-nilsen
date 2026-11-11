@@ -60,11 +60,11 @@ describe("ShoppingList", () => {
     ]);
   });
 
-  it("endrer antall personer per oppskrift, også halve, og ignorerer ugyldig inntasting", async () => {
+  it("endrer antall porsjoner per oppskrift, også halve, og ignorerer ugyldig inntasting", async () => {
     const user = userEvent.setup();
     render(<ShoppingList recipes={recipes} />);
     await user.click(pick("Pannekaker"));
-    const number = screen.getByLabelText("Antall personer for Pannekaker");
+    const number = screen.getByLabelText("Antall porsjoner for Pannekaker");
     expect(number).toHaveValue(4);
     fireEvent.change(number, { target: { value: "8" } });
     expect(items()).toContain("8 dl melkTil Pannekaker");
@@ -84,10 +84,10 @@ describe("ShoppingList", () => {
       />,
     );
     await user.click(pick("A"));
-    expect(screen.getByLabelText("Antall personer for A")).toHaveValue(6);
+    expect(screen.getByLabelText("Antall porsjoner for A")).toHaveValue(6);
     expect(items()).toEqual(["6 dl melkTil A"]);
     await user.click(pick("Uten antall"));
-    expect(screen.queryByLabelText("Antall personer for Uten antall")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Antall porsjoner for Uten antall")).not.toBeInTheDocument();
   });
 
   it("avkrysning består når utvalget endres", async () => {

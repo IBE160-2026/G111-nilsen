@@ -10,16 +10,16 @@ Repoet inneholder applikasjonen og dokumentasjon av utvikling, testing og kvalit
 
 ## Om appen
 
-**RecipeMate** er en matlagingsassistent for oppskrifter fra nettet. Du limer inn en lenke (eller skriver inn oppskriften selv), og appen viser oppskriften i et fast og ryddig format der du kan velge antall personer, slik at alle mengder regnes om med en gang. Oppskrifter kan lagres i Oppskrifter, i mapper og som favoritter.
+**RecipeMate** er en matlagingsassistent for oppskrifter fra nettet. Du limer inn en lenke (eller skriver inn oppskriften selv), og appen viser oppskriften i et fast og ryddig format der du kan velge antall porsjoner, slik at alle mengder regnes om med en gang. Oppskrifter kan lagres i Oppskrifter, i mapper og som favoritter.
 
-![RecipeMate: en oppskrift skalert til 5 personer, med et valgt forslag](docs/skjermbilde-oppskrift.png)
+![RecipeMate: en oppskrift skalert til 5 porsjoner, med et valgt forslag](docs/skjermbilde-oppskrift.png)
 
 **For hvem:** alle som lager mat fra oppskrifter på nettet og må regne om mengdene når det varierer hvor mange som skal spise.
 
 **Hva appen gjør:**
 
 - Importerer en oppskrift fra en lenke (JSON-LD på siden), eller du skriver den inn selv.
-- Viser den i fast format og regner om alle mengder når du velger antall personer.
+- Viser den i fast format og regner om alle mengder når du velger antall porsjoner.
 - Lagrer oppskriftene på kontoen din (e-post og passord), i mapper og som favoritter, og du kan krysse av under matlaging.
 - Gir 1–3 forslag til hvordan retten kan bli bedre. Uten nøkkel er det enkle forslag laget av regler ut fra ingrediensene og stegene (merket «Enkle forslag»); med nøkkel lager en språkmodell forslag til akkurat denne oppskriften. Forslag du tar i bruk lagres med oppskriften og vises i ingredienslisten eller ved riktig steg, merket «Forslag» (også i kokemodus og handlelisten); originalen endres ikke, og «Fjern» tar dem bort igjen.
 
@@ -34,8 +34,8 @@ Appen er bygget i fem epics, én story om gangen. Hver story har en spec i `_bma
 - **Story 1.1, Start appen:** Next.js-prosjektet med toppmeny, visuell profil som designtokens i lys og mørk palett, felles feilmeldinger og testoppsett.
 - **Story 1.2, Tolk ingredienslinjer:** «400 g mel», «1 ½ dl melk» og «2–3 ss sukker» deles i mengde, enhet og navn. Linjer uten mengde («salt og pepper») vises som de står.
 - **Story 1.3, Skaler og formater mengder:** mengder regnes om med fast avrunding, brøktegn (½, ¼, ¾) og «ca.» for udelelige ting som egg og løk.
-- **Story 1.4, Legg inn en oppskrift manuelt:** tittel, antall personer, ingredienser og steg lagres i databasen. Ved feil lagres ingenting.
-- **Story 1.5, Se oppskriften og velg antall personer:** fast format med tittel, kilde, porsjonsvelger, ingredienser per seksjon og nummererte steg.
+- **Story 1.4, Legg inn en oppskrift manuelt:** tittel, antall porsjoner, ingredienser og steg lagres i databasen. Ved feil lagres ingenting.
+- **Story 1.5, Se oppskriften og velg antall porsjoner:** fast format med tittel, kilde, porsjonsvelger, ingredienser per seksjon og nummererte steg.
 - **Story 1.6, Kryss av under matlaging:** hver ingrediens og hvert steg kan krysses av (se «Kryss av under matlaging»).
 
 ### Epic 2: Importer oppskrift fra lenke
@@ -66,7 +66,7 @@ Versjon 2 (Epic 5) kom etter at v1 var levert. Endringene i planen står i [`spr
 
 ![RecipeMate versjon 2: forslag flettet inn i stegene, valg av mål og et ingrediensforslag i listen](docs/skjermbilde-versjon-2.png)
 
-- **Halve porsjoner og glidebryter (5.1, 5.3):** 0,5–50 personer i halve steg med «+ ½», feltet («4,5») eller glidebryteren.
+- **Halve porsjoner og glidebryter (5.1, 5.3):** 0,5–50 porsjoner i halve steg med «+ ½», feltet («4,5») eller glidebryteren.
 - **Søk og filtrering (5.2):** søk i tittel, kilde, mappe og ingredienser på Oppskrifter, med «Bare favoritter» og mappevalg.
 - **Kokemodus (5.4, 5.6):** ett steg om gangen i stor tekst, med ingrediensene steget bruker og skjermen holdt våken.
 - **Velg mål (5.5, 5.9):** «Vis mengder i» som i oppskriften, volum (dl) eller vekt (gram). Kopper, unser og pund regnes om, og vanlige varer regnes mellom dl og gram (merket «ca.»).
@@ -82,19 +82,19 @@ Kravene står i PRD §4.7 (FR-28–FR-39), og hver story har en spec i `_bmad-ou
 - **Ingrediensforslag i listen (6.1):** et forslag som innfører en ingrediens, gir også en linje i ingredienslisten.
 - **Tid (6.2):** total tid hentes fra kilden eller skrives inn selv, og vises ved hjertet og på kortene. «Hent tid fra kilden» for eldre importer.
 - **Notater og sist laget (6.3):** egne notater på oppskriften, «Laget i dag» og «Sist laget … · laget N ganger».
-- **Utskrift (6.6):** «Skriv ut» ved tittelen åpner utskriftsdialogen. Utskriften har tittel, kilde (med adresse), antall personer, ingredienser med avkrysningsbokser og steg i én kolonne, uten meny, knapper, forslag og notater.
+- **Utskrift (6.6):** «Skriv ut» ved tittelen åpner utskriftsdialogen. Utskriften har tittel, kilde (med adresse), antall porsjoner, ingredienser med avkrysningsbokser og steg i én kolonne, uten meny, knapper, forslag og notater.
 - **Tidtaker i kokemodus (6.5):** tider i stegteksten («10–15 minutter», «1 time og 30 minutter», «en halv time») blir knapper som starter en nedtelling. Store knapper og tall, flere tidtakere samtidig, «−1/+1/+5 min» for å justere, og når tiden er ute: beskjed, gjentatte pip, vibrasjon, varsel fra systemet (hvis tillatt) og blinkende fanetittel.
-- **Ukemeny (6.4):** eget punkt i toppmenyen. Søk etter en lagret oppskrift og legg den på en dag med antall personer, bla mellom uker og lag én handleliste for hele uka.
+- **Ukemeny (6.4):** eget punkt i toppmenyen. Søk etter en lagret oppskrift og legg den på en dag med antall porsjoner, bla mellom uker og lag én handleliste for hele uka.
 
 ## Kryss av under matlaging
 
 På oppskriftssiden er hver ingredienslinje og hvert steg en avkrysningsboks. Trykk hvor som helst på raden, eller sett fokus på boksen med Tab og trykk mellomrom. Avkrysset rad har fylt boks med hake, gjennomstreket og dempet tekst, og nummeret på steget står igjen. Det gjelder også linjer som appen ikke kan tolke, som «salt og pepper».
 
 - Avkrysningen er bare tilstand i nettleseren. Den lagres ikke (ikke i databasen, `localStorage`, adressen eller en cookie), og det sendes ingen forespørsel til serveren.
-- Avkrysningen påvirker ikke skaleringen og består når du endrer antall personer eller trykker «Tilbakestill til N».
+- Avkrysningen påvirker ikke skaleringen og består når du endrer antall porsjoner eller trykker «Tilbakestill til N».
 - Når du forlater oppskriften eller åpner «Rediger» og går tilbake, er alt tomt igjen. Next.js med Cache Components skjuler en side i stedet for å fjerne den, så `useCheckedSet` (`src/components/use-checked-set.ts`) tømmer avkrysningene i en `useLayoutEffect`-opprydding.
 - Ingredienser og steg har hvert sitt sett av id-er, så en ingrediens og et steg med samme id aldri påvirker hverandre.
-- Ved 1 og 50 personer er −/+ merket med `aria-disabled` i stedet for `disabled`. Knappen beholder tastaturfokus, og et trykk gjør ingenting.
+- Ved 1 og 50 porsjoner er −/+ merket med `aria-disabled` i stedet for `disabled`. Knappen beholder tastaturfokus, og et trykk gjør ingenting.
 - Koden ligger i `CheckRow.tsx` (rad, boks og hake med CSS), `IngredientList.tsx` og `StepList.tsx`. Fargene og størrelsene kommer fra `src/styles/tokens.css`.
 
 ## Krav
@@ -146,7 +146,7 @@ Menypunktet og overskriften heter «Oppskrifter». Adressen er fortsatt `/oppskr
 
 Nederst på oppskriftssiden står en lagre-linje som følger med når du ruller. Er oppskriften ikke i samlingen (`savedAt` er `null`), står det «Lagre». Etter lagring sier «Lagret.» fra i tre sekunder (skjermleseren leser det opp), og linjen viser «Slett». «Slett» åpner dialogen «Slette oppskriften?» med «Avbryt» som startfokus; bekrefter du, slettes oppskriften med ingredienser og steg, og du sendes til Samlingen. «Avbryt» eller Escape lukker dialogen uten å endre noe, og fokus går tilbake til «Slett».
 
-- **Sist valgte antall:** for en lagret oppskrift huskes antall personer ved hver endring (også «Tilbakestill»), og siden åpnes med sist valgte antall, også etter omstart. Skaleringen regner fortsatt fra originalmengdene. Et antall som velges før «Lagre» sendes med når oppskriften lagres (issue 009). Valgt antall og lagring i samlingen endrer ikke `updatedAt`, så avkrysningen står. Avkrysning lagres fortsatt aldri.
+- **Sist valgte antall:** for en lagret oppskrift huskes antall porsjoner ved hver endring (også «Tilbakestill»), og siden åpnes med sist valgte antall, også etter omstart. Skaleringen regner fortsatt fra originalmengdene. Et antall som velges før «Lagre» sendes med når oppskriften lagres (issue 009). Valgt antall og lagring i samlingen endrer ikke `updatedAt`, så avkrysningen står. Avkrysning lagres fortsatt aldri.
 - **Opprydding:** oppskrifter som aldri ble lagret i samlingen og er eldre enn et døgn slettes (med ingredienser og steg) når appen starter og deretter hver time mens den kjører (`src/instrumentation.ts`). Lagrede oppskrifter slettes aldri av dette, og rydding skjer ikke når en side vises.
 - Koden ligger i `src/app/oppskrift/[id]/actions.ts` (Server Actions), `RecipeActions.tsx` og `ConfirmDialog.tsx`, tjenestene `saveRecipeToCollection`, `deleteRecipe`, `setSelectedServings` og `purgeStaleUnsavedRecipes` i `src/server/services/recipe-service.ts` og tilsvarende funksjoner i `recipe-repository.ts`.
 - Testes med `npm test`: repository og tjenester mot en ekte SQLite-database i minnet (blant annet at sletting kaskaderer og at `updatedAt` er uendret), handlinger, dialog og lagre-linje (falske tidtakere for tresekundersregelen) og opprydding med falske tidtakere.
@@ -176,9 +176,9 @@ Hver oppskrift i samlingen har et hjerte. Trykk på hjertet for å markere eller
 
 ## Redigere en oppskrift
 
-På oppskriftssiden (`/oppskrift/{id}`) står «Rediger» ved tittelen. Den åpner `/oppskrift/{id}/rediger` med samme skjema som «Legg inn selv», forhåndsutfylt med tittel, antall personer, ingredienser (én per linje, slik de ble skrevet) og steg. «Lagre endringer» bruker samme validering og tolking som ny oppskrift, erstatter ingredienser og steg i én databasetransaksjon og sender deg tilbake til oppskriften. «Avbryt» går tilbake uten å endre noe.
+På oppskriftssiden (`/oppskrift/{id}`) står «Rediger» ved tittelen. Den åpner `/oppskrift/{id}/rediger` med samme skjema som «Legg inn selv», forhåndsutfylt med tittel, antall porsjoner, ingredienser (én per linje, slik de ble skrevet) og steg. «Lagre endringer» bruker samme validering og tolking som ny oppskrift, erstatter ingredienser og steg i én databasetransaksjon og sender deg tilbake til oppskriften. «Avbryt» går tilbake uten å endre noe.
 
-- Endres antall personer, nullstilles et tidligere valgt antall. Kilde og samlingsstatus røres ikke.
+- Endres antall porsjoner, nullstilles et tidligere valgt antall. Kilde og samlingsstatus røres ikke.
 - Redigering virker på alle oppskrifter og beholder mappen. Kilde og seksjonsoverskrifter kan ikke redigeres ennå; mappe og favoritt velges fra lagre-linjen, og redigering beholder begge.
 - Koden ligger i `src/app/oppskrift/[id]/rediger/` (side og Server Action), `updateManualRecipe` i `src/server/services/recipe-service.ts` og `updateRecipe` i `src/server/db/repositories/recipe-repository.ts`.
 - Testes med `npm test`: repository og tjeneste mot en ekte SQLite-database i minnet (blant annet tilbakerulling ved feil midt i oppdateringen), og skjema, side og handling med Testing Library.
@@ -279,13 +279,13 @@ npm run test:e2e
 `e2e/kjerneflyt.spec.ts` kjører hver gang ved 360 px og 1280 px (22 tester). Hver test logger inn med en egen testkonto per skjermbredde (kontoen lages første gang):
 
 - **Innlogging:** hent en oppskrift uten konto, «Logg inn for å lagre», lag konto (med feil passord først), lagre, se at en annen nettleser ikke finner oppskriften, og logg ut.
-- **UJ-1:** importer en oppskrift, velg ett flere personer, lagre i en ny mappe og gjør den til favoritt.
-- **UJ-2:** velg 5 personer, få forslag, ta i bruk ett og hopp over resten, lagre i mappe og se at forslaget huskes etter at siden lastes på nytt. Kanttilfelle: en oversiktsside gir «Fant ingen oppskrift på siden».
+- **UJ-1:** importer en oppskrift, velg ett flere porsjoner, lagre i en ny mappe og gjør den til favoritt.
+- **UJ-2:** velg 5 porsjoner, få forslag, ta i bruk ett og hopp over resten, lagre i mappe og se at forslaget huskes etter at siden lastes på nytt. Kanttilfelle: en oversiktsside gir «Fant ingen oppskrift på siden».
 - **UJ-3:** finn oppskriften igjen under Favoritter, se at antallet huskes, og endre det.
 - **Tidtaker:** legg inn en oppskrift med et steg som «La hvile i 2 sekunder», åpne kokemodus, start tidtakeren, la nettleseren vise varsler, og hør at det piper og at «Tiden er ute» kommer. Legg til tid med «+1 min».
-- **Ukemeny:** åpne Ukemeny fra toppmenyen, søk etter en oppskrift og velg den med tastaturet, legg den på mandag med 3 personer, se at den står der etter ny innlasting, lag handleliste for uka (oppskriften er valgt med 3 personer) og fjern den igjen.
+- **Ukemeny:** åpne Ukemeny fra toppmenyen, søk etter en oppskrift og velg den med tastaturet, legg den på mandag med 3 porsjoner, se at den står der etter ny innlasting, lag handleliste for uka (oppskriften er valgt med 3 porsjoner) og fjern den igjen.
 - **Gammel adresse:** `/samlingen` sendes videre til `/oppskrifter`.
-- **Tastatur:** Tab når «Færre personer», «Flere personer» og «Få forslag», og fokus er synlig overalt, i lys og mørk modus.
+- **Tastatur:** Tab når «Færre porsjoner», «Flere porsjoner» og «Få forslag», og fokus er synlig overalt, i lys og mørk modus.
 
 Playwright-versjonen er låst i `package-lock.json`. Ligger nettleseren et annet sted enn Playwright forventer, eller lar `npx playwright install chromium` seg ikke fullføre, sett `E2E_CHROMIUM_PATH` til en Chrome du har fra før. På en Mac: `E2E_CHROMIUM_PATH="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" npm run test:e2e`.
 

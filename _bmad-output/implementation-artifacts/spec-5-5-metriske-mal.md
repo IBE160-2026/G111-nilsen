@@ -10,7 +10,7 @@ Versjon 2. Oppskrifter fra engelske sider bruker kopper, unser og pund. Brukeren
 - Regler: 1 cup = 2,4 dl, 1 oz = 28,35 g, 1 lb = 453,6 g (avrundet som g/ml ellers), 1 tbsp = 1 ss, 1 tsp = 1 ts. Kopper, unser og pund merkes «ca.»; skjeer gjør ikke det. Gram fra 1000 vises som kg (én desimal), dl fra 10 som l. dl får én desimal. Områder («1–2 cups») regnes om i begge ender.
 - Ikke omregnet: norske enheter, `can`, `pinch`, stykk, linjer uten enhet og ikke tolkbare linjer. Fahrenheit og mål inne i stegteksten og forslag regnes ikke om.
 - Avkrysning «Vis i metriske mål» ligger øverst i ingredienslisten og vises bare når minst én linje har en amerikansk enhet. Standard er av. Valget gjelder bare denne visningen (ingen lagring) og følger med inn i kokemodus.
-- Valget deles via `SelectedServings`-leverandøren (egen ref for målsystem), som antall personer.
+- Valget deles via `SelectedServings`-leverandøren (egen ref for målsystem), som antall porsjoner.
 
 ## Matrise
 | Tilfelle | Utfall |
@@ -20,7 +20,7 @@ Versjon 2. Oppskrifter fra engelske sider bruker kopper, unser og pund. Brukeren
 | «3 lb potatoes» | «1,4 kg potatoes ca.» |
 | «5 cups water» | «1,2 l water ca.» |
 | «2 tbsp butter» | «2 ss butter» (ikke ca.) |
-| «1 cup milk» ved 5 personer av 4 → «1 ¼ cup» | regnes om etter skalering |
+| «1 cup milk» ved 5 porsjoner av 4 → «1 ¼ cup» | regnes om etter skalering |
 | «4 dl melk», «3 egg», «2 cans …» | uendret |
 | Ingen amerikanske enheter | ingen avkrysning |
 | På i kokemodus | ingrediensene vises metrisk |

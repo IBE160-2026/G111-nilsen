@@ -1,7 +1,7 @@
 # Spec 5.1: halve porsjoner
 
 ## Intent
-Versjon 2, første story. Brukeren kan velge halve porsjoner (4,5 eller 6,5 personer) når hun endrer antallet på en oppskrift, så mengdene regnes riktig om og valget huskes.
+Versjon 2, første story. Brukeren kan velge halve porsjoner (4,5 eller 6,5 porsjoner) når hun endrer antallet på en oppskrift, så mengdene regnes riktig om og valget huskes.
 
 ## Frosset
 - Valgt antall (`selectedServings`) kan være hele eller halve tall fra 1 til 50. Antallet oppskriften er skrevet for (`originalServings`, «oppr.», dialogen og «Legg inn selv») er fortsatt bare hele tall.
@@ -13,7 +13,7 @@ Versjon 2, første story. Brukeren kan velge halve porsjoner (4,5 eller 6,5 pers
 ## Matrise
 | Tilfelle | Utfall |
 |---|---|
-| Trykk «+ ½» ved 4 | felt «4,5», opplesing «4,5 personer», knappen trykket |
+| Trykk «+ ½» ved 4 | felt «4,5», opplesing «4,5 porsjoner», knappen trykket |
 | Trykk «+ ½» ved 4,5 | tilbake til 4 |
 | −/+ ved 4,5 | 5,5 / 3,5; ved 1,5 gir − 1 og deaktivert − |
 | Ved 50 | «+ ½» deaktivert |

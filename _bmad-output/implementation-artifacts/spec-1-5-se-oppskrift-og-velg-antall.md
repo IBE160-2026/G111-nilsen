@@ -1,5 +1,5 @@
 ---
-title: 'Story 1.5: Se oppskriften i fast format og velg antall personer'
+title: 'Story 1.5: Se oppskriften i fast format og velg antall porsjoner'
 type: 'feature'
 created: '2026-11-09'
 status: 'done'
@@ -15,7 +15,7 @@ context:
 
 ## Intent
 
-**Problem:** Oppskriftssiden fra Story 1.4 viser bare originalteksten. Brukeren kan ikke velge antall personer, og mengdene står ikke i egen kolonne slik DESIGN.md beskriver.
+**Problem:** Oppskriftssiden fra Story 1.4 viser bare originalteksten. Brukeren kan ikke velge antall porsjoner, og mengdene står ikke i egen kolonne slik DESIGN.md beskriver.
 
 **Approach:** Bygg oppskriftsvisningen i fast format med porsjonsvelger. Skalering og formatering skjer i nettleseren med domenefunksjonene fra Story 1.2–1.3 (`scaleLine`, `formatQuantity`), alltid fra originalmengdene. Valgt antall lagres ikke i denne storyen (Story 3.2).
 
@@ -24,7 +24,7 @@ context:
 **Always:**
 - Rekkefølge: tittel, kilde (`sourceLabel`), porsjonsvelger, ingredienser gruppert per ingrediensseksjon, nummererte steg (FR-5, UX-DR15).
 - Skalering beregnes fra `RecipeLine` (originalmengde) med faktor valgt/opprinnelig (AD-1, AD-2); ingenting skalert lagres eller sendes til serveren.
-- Porsjonsvelger (UX-DR4): etikett «Antall personer», runde −/+ (44 px), tallfelt for heltall 1–50, «oppr. N» som tekst, knappen «Tilbakestill til N» når valgt ≠ opprinnelig. Ugyldig inntasting (0, 51, 2,5, tom, bokstaver) gir melding under feltet når feltet mister fokus eller Enter trykkes, og forrige gyldige verdi beholdes. −/+ er deaktivert ved 1/50.
+- Porsjonsvelger (UX-DR4): etikett «Antall porsjoner», runde −/+ (44 px), tallfelt for heltall 1–50, «oppr. N» som tekst, knappen «Tilbakestill til N» når valgt ≠ opprinnelig. Ugyldig inntasting (0, 51, 2,5, tom, bokstaver) gir melding under feltet når feltet mister fokus eller Enter trykkes, og forrige gyldige verdi beholdes. −/+ er deaktivert ved 1/50.
 - Endret antall annonseres for skjermleser (`aria-live="polite"`), uten at hver tastetrykk leses opp.
 - Ingredienslinje (UX-DR5): mengde og enhet i egen kolonne (halvfet, tabulære tall), navn ved siden av, «ca.» i aksentfarge når `approximate`; utolkbare linjer i kursiv dempet tekst over hele bredden og uendret ved alle antall.
 - Oppsett (UX-DR15): én kolonne under 768 px; fra 768 px ingredienser og porsjonsvelger til venstre og steg til høyre, maks 1040 px.
@@ -40,8 +40,8 @@ context:
 
 | Scenario | State / handling | Forventet | Feil |
 |----------|------------------|-----------|------|
-| Åpne | Oppskrift for 4 med «400 g mel», «1 egg», «salt og pepper» | «Antall personer» viser 4; mengder som original; ingen «Tilbakestill» | N/A |
-| Pluss | Trykk + én gang | 5; «500 g mel», «1 egg ca.» ; «salt og pepper» uendret; skjermleser hører «5 personer» | N/A |
+| Åpne | Oppskrift for 4 med «400 g mel», «1 egg», «salt og pepper» | «Antall porsjoner» viser 4; mengder som original; ingen «Tilbakestill» | N/A |
+| Pluss | Trykk + én gang | 5; «500 g mel», «1 egg ca.» ; «salt og pepper» uendret; skjermleser hører «5 porsjoner» | N/A |
 | Minus til grense | Fra 2, trykk − to ganger | 1; − er deaktivert | N/A |
 | Skriv gyldig | Skriv 8 og forlat feltet | Mengder for 8; «Tilbakestill til 4» vises | N/A |
 | Skriv ugyldig | Skriv 0, 51, 2,5, tomt eller «abc» og forlat feltet | Melding under feltet; antall og mengder fra forrige gyldige verdi | validation |
@@ -68,7 +68,7 @@ context:
 - [x] `src/components/IngredientList.tsx` (+ CSS, test) -- klientkomponent som holder valgt antall, viser `ServingStepper` og skalerte linjer gruppert per seksjon.
 - [x] `src/components/RecipeView.tsx` -- bruk `IngredientList`; to kolonner fra 768 px; steg nummerert.
 - [x] `src/app/oppskrift/[id]/page.tsx` -- `generateMetadata` med oppskriftens tittel (ukjent id gir standardtittel).
-- [x] `src/lib/messages.ts` -- melding for ugyldig antall personer.
+- [x] `src/lib/messages.ts` -- melding for ugyldig antall porsjoner.
 - [x] Tester -- én per matrise-rad (Testing Library i jsdom), pluss at mengdene alltid regnes fra originalen etter flere endringer.
 
 **Acceptance Criteria:**
@@ -79,15 +79,15 @@ context:
 
 Implementert i commit `31abf37` (arbeidskopi, ikke flettet eller pushet).
 
-- **ServingStepper** (`src/components/ServingStepper.tsx`): kontrollert (`value`, `onChange`, `original`). Feltet holder en kladd mens brukeren skriver; den valideres ved blur eller Enter (`parseServings`: bare sifre, 1–50 fra `LIMITS` i `src/lib/recipe-input.ts`). Ugyldig verdi gir meldingen under feltet (`aria-describedby`, `aria-invalid`), feltet går tilbake til forrige gyldige tall og `onChange` kalles ikke. −/+ er `disabled` ved 1/50. «oppr. N» står under etiketten; «Tilbakestill til N» er en tekstknapp (44 px høy) som bare vises når valgt ≠ opprinnelig. En skjult `role="status"`/`aria-live="polite"` viser «N personer» og endres bare når verdien tas i bruk, ikke per tastetrykk.
+- **ServingStepper** (`src/components/ServingStepper.tsx`): kontrollert (`value`, `onChange`, `original`). Feltet holder en kladd mens brukeren skriver; den valideres ved blur eller Enter (`parseServings`: bare sifre, 1–50 fra `LIMITS` i `src/lib/recipe-input.ts`). Ugyldig verdi gir meldingen under feltet (`aria-describedby`, `aria-invalid`), feltet går tilbake til forrige gyldige tall og `onChange` kalles ikke. −/+ er `disabled` ved 1/50. «oppr. N» står under etiketten; «Tilbakestill til N» er en tekstknapp (44 px høy) som bare vises når valgt ≠ opprinnelig. En skjult `role="status"`/`aria-live="polite"` viser «N porsjoner» og endres bare når verdien tas i bruk, ikke per tastetrykk.
 - **IngredientList** (`src/components/IngredientList.tsx`, klient): valgt antall er React-tilstand; hver visning kaller `scaleLine(line, valgt/opprinnelig)` på de lagrede `RecipeLine`-ene, så det regnes aldri fra en tidligere skalert verdi og ingenting sendes til serveren. `groupBySection` sorterer på `position`, legger linjer uten seksjon (eller med tom seksjon) først og deretter seksjonene i rekkefølgen de først dukker opp. Seksjonsetiketten er en `h3` (12 px, store bokstaver via CSS, så DOM-teksten er «Saus»), og listen er koblet til den med `aria-labelledby`. `originalServings = null` gir ingen porsjonsvelger og faktor 1.
 - **Ingredienslinje:** mengde + enhet i egen grid-kolonne (halvfet, tabulære tall), navn ved siden av, «ca.» (12 px, aksentfarge) etter navnet. Utolkbare linjer er én kursiv, dempet blokk over hele bredden.
-- **RecipeView:** meta-linjen viser nå bare kilden (antall personer står i porsjonsvelgeren). Under 768 px én kolonne i rekkefølgen tittel, kilde, porsjonsvelger, ingredienser, steg; fra 768 px grid `5fr / 6fr` innenfor `.page` (maks 1040 px). Stegene sorteres på `position` og vises i `<ol>`.
+- **RecipeView:** meta-linjen viser nå bare kilden (antall porsjoner står i porsjonsvelgeren). Under 768 px én kolonne i rekkefølgen tittel, kilde, porsjonsvelger, ingredienser, steg; fra 768 px grid `5fr / 6fr` innenfor `.page` (maks 1040 px). Stegene sorteres på `position` og vises i `<ol>`.
 - **Fanetittel:** `generateMetadata` i `src/app/oppskrift/[id]/page.tsx` avventer `params` og `connection()` og leser oppskriften (siden er allerede dynamisk, så Cache Components krever ingen ekstra markør). Oppslaget er pakket i React `cache`, så metadata og side deler én lesing per forespørsel. Ukjent/ugyldig id gir standardtittelen «Oppskrift» (→ «Oppskrift · RecipeMate»).
 - **Melding:** `servingStepperMessages.invalid` i `src/lib/messages.ts` («Skriv et helt tall fra 1 til 50. Antallet er ikke endret.»), dekket av testen mot utropstegn.
 - **Tester:** `ServingStepper.test.tsx` (22), `IngredientList.test.tsx` (15, én per matriserad + «alltid fra originalen» etter mange endringer + at `fetch` ikke kalles), oppdatert `RecipeView.test.tsx` (rekkefølge i fast format, null-porsjoner) og `page.test.tsx` (fanetittel for kjent og ukjent id). Ingen nye pakker; `package-lock.json` er uendret.
 
-**Verifisering:** `npm run lint`, `npm run typecheck`, `npm test` (30 filer, 472 tester), `npm run format:check` og `npm run build` er grønne. Manuelt: `next build && next start` mot en midlertidig database med «Pannekaker» (4 personer) — HTML-en har `<title>Pannekaker · RecipeMate</title>`, porsjonsvelgeren, `aria-live` og mengdene; ukjent id gir `<title>Oppskrift · RecipeMate</title>`. Klikk og tastatur i ekte nettleser er bare testet i jsdom.
+**Verifisering:** `npm run lint`, `npm run typecheck`, `npm test` (30 filer, 472 tester), `npm run format:check` og `npm run build` er grønne. Manuelt: `next build && next start` mot en midlertidig database med «Pannekaker» (4 porsjoner) — HTML-en har `<title>Pannekaker · RecipeMate</title>`, porsjonsvelgeren, `aria-live` og mengdene; ukjent id gir `<title>Oppskrift · RecipeMate</title>`. Klikk og tastatur i ekte nettleser er bare testet i jsdom.
 
 **Ikke gjort:** skjermbilder på 360 og 1280 px i lys og mørk modus (Playwright-Chromium kan ikke lastes ned i utviklingsmiljøet) må tas på Macen, sammen med en rask sjekk av oppsettet ved 768 px og 200 % tekststørrelse.
 

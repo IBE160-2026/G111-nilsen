@@ -163,7 +163,7 @@ describe("listPlannable", () => {
 });
 
 describe("weekShoppingSelection", () => {
-  it("legger sammen antall personer per oppskrift, maks 50", () => {
+  it("legger sammen antall porsjoner per oppskrift, maks 50", () => {
     const entry = (recipeId: number, servings: number) => ({
       id: 1,
       day: "2026-11-09",

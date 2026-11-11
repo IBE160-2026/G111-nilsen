@@ -38,9 +38,9 @@ describe("IngredientList: antallet oppskriften er laget for (Story 2.4)", () => 
     );
     expect(dialog()).toBeInTheDocument();
     expect(
-      screen.queryByRole("textbox", { name: "Antall personer", hidden: false }),
+      screen.queryByRole("textbox", { name: "Antall porsjoner", hidden: false }),
     ).toBeInTheDocument();
-    await user.click(within(dialog()!).getByRole("button", { name: "Flere personer" }));
+    await user.click(within(dialog()!).getByRole("button", { name: "Flere porsjoner" }));
     await user.click(within(dialog()!).getByRole("button", { name: m.save }));
     expect(save).toHaveBeenCalledWith(5);
     // Dialogen lukkes, velgeren vises med «oppr. 5», og mengdene er som skrevet.
@@ -77,7 +77,7 @@ describe("IngredientList: antallet oppskriften er laget for (Story 2.4)", () => 
     expect(dialog()).toBeNull();
     expect(screen.getByText(/oppr\. 4/)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: m.editLabel }));
-    expect(within(dialog()!).getByRole("textbox", { name: "Antall personer" })).toHaveValue("4");
+    expect(within(dialog()!).getByRole("textbox", { name: "Antall porsjoner" })).toHaveValue("4");
   });
 
   it("nytt opprinnelig antall regner alle mengder om fra det", async () => {
@@ -90,14 +90,14 @@ describe("IngredientList: antallet oppskriften er laget for (Story 2.4)", () => 
       />,
     );
     await user.click(screen.getByRole("button", { name: m.editLabel }));
-    const box = within(dialog()!).getByRole("textbox", { name: "Antall personer" });
+    const box = within(dialog()!).getByRole("textbox", { name: "Antall porsjoner" });
     await user.clear(box);
     await user.type(box, "8");
     await user.click(within(dialog()!).getByRole("button", { name: m.save }));
     expect(await screen.findByText(/oppr\. 8/)).toBeInTheDocument();
     // Mengdene står som skrevet for 8 (valgt antall = nytt opprinnelig), og skalerer derfra.
     expect(screen.getByText("400 g")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Færre personer" }));
+    await user.click(screen.getByRole("button", { name: "Færre porsjoner" }));
     expect(screen.getByText("350 g")).toBeInTheDocument();
   });
 

@@ -60,7 +60,7 @@ describe("addMeal", () => {
     });
     expect(await addMeal({ recipeId, day: "2026-11-10", servings: 51 })).toEqual({
       ok: false,
-      message: "Velg mellom 0,5 og 50 personer.",
+      message: "Velg mellom 0,5 og 50 porsjoner.",
     });
     expect(stored()).toEqual([]);
   });

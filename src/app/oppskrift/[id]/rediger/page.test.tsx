@@ -83,7 +83,7 @@ describe("/oppskrift/[id]/rediger", () => {
 
     expect(screen.getByRole("heading", { level: 1, name: "Rediger «Pannekaker»" })).toBeVisible();
     expect(screen.getByLabelText("Tittel")).toHaveValue("Pannekaker");
-    expect(screen.getByLabelText("Antall personer")).toHaveValue("4");
+    expect(screen.getByLabelText("Antall porsjoner")).toHaveValue("4");
     expect(screen.getByLabelText("Ingredienser")).toHaveValue(
       "3 dl hvetemel\n0,5 ts salt\nsalt og pepper",
     );
@@ -99,7 +99,7 @@ describe("/oppskrift/[id]/rediger", () => {
     const id = create();
     state.db!.$client.prepare("update recipes set original_servings = null where id = ?").run(id);
     render(await renderPage(String(id)));
-    expect(screen.getByLabelText("Antall personer")).toHaveValue("");
+    expect(screen.getByLabelText("Antall porsjoner")).toHaveValue("");
   });
 
   it("sorterer ingredienser og steg på position", async () => {

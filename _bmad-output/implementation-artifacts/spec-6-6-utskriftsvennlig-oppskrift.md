@@ -6,7 +6,7 @@ Epic 6 (FR-33). Ida kan skrive ut en oppskrift som en ren side til kjøkkenet.
 ## Frosset
 - **Knapp:** «Skriv ut» (`PrintButton`, tekstknapp lik «Rediger») ved tittelen kaller `window.print()`. Tilgjengelig navn: «Skriv ut <tittel>».
 - **Utskriftsstil:** ren CSS med `@media print`, ingen egen utskriftsside. Det som ikke hører hjemme på papir får `data-print="hide"` (toppmeny, «Rediger», «Skriv ut», «Hent tid», notater, forslag, lagre-linjen, «Endre» ved opprinnelig antall); i tillegg skjules alle knapper i `main`, glidebryteren, enhetsvelgeren (`fieldset`) og dialoger.
-- **Utseende på papir:** hvit bakgrunn, svart tekst, 12 pt, ingen sidemarg i siden (marg settes av utskriftsdialogen). Én kolonne: ingredienser først, så stegene. Antall personer står som tekst uten ramme. Avkrysningsboksene beholdes, så de kan brukes med penn. Rader og overskrifter brytes ikke midt i.
+- **Utseende på papir:** hvit bakgrunn, svart tekst, 12 pt, ingen sidemarg i siden (marg settes av utskriftsdialogen). Én kolonne: ingredienser først, så stegene. Antall porsjoner står som tekst uten ramme. Avkrysningsboksene beholdes, så de kan brukes med penn. Rader og overskrifter brytes ikke midt i.
 - **Kilde:** lenken skrives som vanlig tekst med adressen bak, siden en lenke ikke kan trykkes på papir.
 - **Forslag som er tatt i bruk** står i ingredienser og steg som ellers; selve forslagsdelen skrives ikke ut.
 - Ingen databaseendringer, ingen nye avhengigheter.

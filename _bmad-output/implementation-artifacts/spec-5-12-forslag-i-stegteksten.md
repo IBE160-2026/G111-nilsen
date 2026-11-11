@@ -26,5 +26,5 @@ lint, typecheck, format:check og build grønne; 91 filer og 2536 tester; 16 e2e 
 ## Review Triage Log
 Egen gjennomgang, ingen underagenter.
 - Første versjon pakket setningene i `<span>`, og jsdom (og enkelte skjermlesere) slo sammen ordene uten mellomrom i navnet på boksen; nå er mellomrommene egne tekstnoder ved siden av `<mark>`.
-- Setningene i steget hadde først mengde («1 ts»), som ikke skaleres med antall personer; mengden står nå bare i ingredienslisten.
+- Setningene i steget hadde først mengde («1 ts»), som ikke skaleres med antall porsjoner; mengden står nå bare i ingredienslisten.
 - Utsatt: be språkmodellen om plassering, la brukeren flytte en setning, skalere mengder i stegteksten.
