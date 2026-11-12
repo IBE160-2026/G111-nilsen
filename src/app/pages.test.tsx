@@ -74,7 +74,28 @@ describe("forsiden og 404-siden", () => {
       "/handleliste",
       "/mapper",
       "/favoritter",
+      // «Og dessuten»: sidene som ellers bare nås fra overskriften i Oppskrifter (Story 6.18b).
+      "/hva-kan-jeg-lage",
+      "/middagsforslag",
+      "/delt",
+      "/sikkerhetskopi",
+      "/nylig-slettet",
     ]);
+  });
+
+  it("forsiden har «Og dessuten»-raden med de mindre sidene", () => {
+    render(<HomePage />);
+    const heading = screen.getByRole("heading", { level: 3, name: "Og dessuten" });
+    expect(heading).toBeInTheDocument();
+    for (const [navn, href] of [
+      ["Hva kan jeg lage?", "/hva-kan-jeg-lage"],
+      ["Middagsforslag", "/middagsforslag"],
+      ["Deling", "/delt"],
+      ["Eksport og import", "/sikkerhetskopi"],
+      ["Nylig slettet", "/nylig-slettet"],
+    ] as const) {
+      expect(screen.getByRole("link", { name: navn })).toHaveAttribute("href", href);
+    }
   });
 
   it("forsiden har ikke selv importskjemaet (det ligger på /importer)", () => {

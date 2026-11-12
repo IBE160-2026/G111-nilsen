@@ -1109,7 +1109,15 @@ test("Forsiden har snarveier, og «Hent en oppskrift» går til Importer", async
   await expect(page.getByRole("link", { name: "Logg inn", exact: true }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: "Lag konto" }).first()).toBeVisible();
   const shortcuts = page.getByRole("region", { name: "Gå rett til" });
-  await expect(shortcuts.getByRole("link")).toHaveCount(6);
+  // Seks kort pluss «Og dessuten»-raden med de mindre sidene (Story 6.18b).
+  await expect(shortcuts.getByRole("link")).toHaveCount(11);
+  await expect(page.getByRole("heading", { level: 3, name: "Og dessuten" })).toBeVisible();
+  await shortcuts.getByRole("link", { name: "Middagsforslag" }).click();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Hva skal vi ha til middag?" }),
+  ).toBeVisible();
+
+  await page.goto("/");
   await shortcuts.getByRole("link", { name: /Hent en oppskrift/ }).click();
   await expect(page).toHaveURL(/\/importer$/);
   await expect(page.getByRole("heading", { level: 1, name: "Hent en oppskrift" })).toBeVisible();

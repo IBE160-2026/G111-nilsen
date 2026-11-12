@@ -126,3 +126,4 @@
 - 919 Nye skjermbilder i README, og rettet at «la røren hvile» ble foreslått selv om oppskriften sa «la røren svelle». Åpent: slett docs/skjermbilde-versjon-2.png.
 - 918 Designet middagsforslag-siden på nytt: sentrert kort, pillefiltre. Åpent: pille-mønsteret bør gjenbrukes i den samlede designrunden.
 - 917 Mappefilter på middagsforslag (flere mapper samtidig, «Uten mappe»). Åpent: valget huskes ikke mellom besøk.
+- 916 Snarveier («Og dessuten») til de mindre sidene på forsiden. Åpent: ikke mulig å velge hvilke som vises.

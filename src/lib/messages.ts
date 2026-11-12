@@ -103,6 +103,18 @@ export const homeMessages = {
     },
   ],
   sectionLabel: "Gå rett til",
+  /**
+   * Snarveier til sidene som ellers bare står ved overskriften i Oppskrifter (Story 6.18b).
+   * Handlelisten er ikke med: den har sitt eget kort over, og står i toppmenyen.
+   */
+  shortcutsLabel: "Og dessuten",
+  shortcuts: [
+    { href: "/hva-kan-jeg-lage", title: "Hva kan jeg lage?" },
+    { href: "/middagsforslag", title: "Middagsforslag" },
+    { href: "/delt", title: "Deling" },
+    { href: "/sikkerhetskopi", title: "Eksport og import" },
+    { href: "/nylig-slettet", title: "Nylig slettet" },
+  ],
   guestTitle: "Du er ikke logget inn",
   guestBody:
     "Lag en konto eller logg inn for å lagre oppskrifter, planlegge uka og lage handleliste. Du kan hente og se en oppskrift uten konto.",

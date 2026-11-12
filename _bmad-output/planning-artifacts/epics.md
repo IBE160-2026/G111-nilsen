@@ -1293,3 +1293,20 @@ slik at vi slipper å legge inn de samme oppskriftene hver for oss.
 
 **Gitt** at en av oss avslutter delingen
 **Så** forsvinner tilgangen begge veier, og oppskriftene er ikke synlige lenger
+
+### Story 6.18b: Snarveier til de mindre sidene på forsiden
+
+Som Ida,
+vil jeg finne «Hva kan jeg lage?», middagsforslag, deling, eksport og «Nylig slettet» uten å gå via Oppskrifter,
+slik at jeg ikke må huske hvor de ligger.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg er på forsiden
+**Så** står det en rad med snarveier under «Gå rett til», merket «Og dessuten», til «Hva kan jeg lage?», Middagsforslag, Deling, Eksport og import og Nylig slettet
+
+**Gitt** at jeg trykker på en av snarveiene
+**Så** kommer jeg til den siden
+
+**Gitt** at jeg er på Oppskrifter
+**Så** står lenkene fortsatt ved overskriften, som før

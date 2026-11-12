@@ -67,6 +67,18 @@ export default function HomePage() {
             </li>
           ))}
         </ul>
+
+        {/* Sidene som ellers bare nås fra overskriften i Oppskrifter, som en rad med snarveier. */}
+        <h3 className={styles.shortcutsHeading}>{m.shortcutsLabel}</h3>
+        <ul role="list" className={styles.shortcuts}>
+          {m.shortcuts.map((shortcut) => (
+            <li key={shortcut.href}>
+              <Link href={shortcut.href} className={styles.shortcut}>
+                {shortcut.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
     </div>
   );
