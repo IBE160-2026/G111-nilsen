@@ -47,6 +47,18 @@ const BASIC_WORDS = new Set([
   "lunkent",
 ]);
 
+/**
+ * Ord som også passer som siste del av et sammensatt ord (Story 6.27b): «mel» passer til
+ * «hvetemel» og «maismel», «olje» til «olivenolje», «sukker» til «rørsukker». Listen er kort med
+ * vilje: «melk» skal ikke passe til «kokosmelk», og «mel» ikke til «melis» (ordet slutter ikke på mel).
+ */
+const COMPOUND_ENDINGS = new Set(["mel", "olje", "sukker"]);
+
+/** Om `word` er et sammensatt ord som slutter på et av ordene i `COMPOUND_ENDINGS` som `ending`. */
+function endsWithCompound(word: string, ending: string): boolean {
+  return COMPOUND_ENDINGS.has(ending) && word.length > ending.length && word.endsWith(ending);
+}
+
 function isBasic(labelWords: ReadonlySet<string>): boolean {
   return labelWords.size > 0 && [...labelWords].every((word) => BASIC_WORDS.has(word));
 }
@@ -54,7 +66,8 @@ function isBasic(labelWords: ReadonlySet<string>): boolean {
 /**
  * Finner hvilke oppskrifter som kan lages av det brukeren har hjemme (Story 6.12). En ingrediens
  * er hjemme når alle ordene i noe brukeren har hjemme står i ingrediensen («smør» passer til
- * «usaltet smør», men «mel» passer ikke til «melis», og «melk» ikke til «kokosmelk»). Hver
+ * «usaltet smør», men «mel» passer ikke til «melis», og «melk» ikke til «kokosmelk»). Unntak: «mel», «olje» og «sukker» passer også til sammensatte ord
+ * som slutter på dem («hvetemel», «olivenolje»). Hver
  * ingrediens teller én gang per oppskrift (uavhengig av store og små bokstaver). Vann, salt og
  * pepper regnes som at man alltid har dem og mangler aldri. Oppskrifter
  * uten ingredienser eller uten noen ingrediens hjemme tas ikke med. Sortert på færrest som
@@ -77,7 +90,13 @@ export function matchPantry(
       if (key === "" || seen.has(key)) continue;
       seen.add(key);
       const labelWords = new Set(words(label));
-      const atHome = owned.some((entry) => entry.every((word) => labelWords.has(word)));
+      const atHome = owned.some((entry) =>
+        entry.every(
+          (word) =>
+            labelWords.has(word) ||
+            (entry.length === 1 && [...labelWords].some((other) => endsWithCompound(other, word))),
+        ),
+      );
       if (atHome) have.push(label);
       else if (!isBasic(labelWords)) missing.push(label);
     }

@@ -118,4 +118,28 @@ describe("matchPantry", () => {
     const [b] = matchPantry([recipe(1, "R", ["salt", "egg"])], pantry("salt"));
     expect(b?.have).toEqual(["salt"]);
   });
+
+  it("«mel», «olje» og «sukker» passer også til sammensatte ord, men «melk» passer ikke til «kokosmelk» (Story 6.27b)", () => {
+    const [match] = matchPantry(
+      [
+        recipe(1, "R", [
+          "hvetemel",
+          "sammalt hvetemel",
+          "olivenolje",
+          "rørsukker",
+          "melis",
+          "kokosmelk",
+          "melke",
+        ]),
+      ],
+      pantry("mel", "olje", "sukker", "melk"),
+    );
+    expect(match?.have).toEqual(["hvetemel", "sammalt hvetemel", "olivenolje", "rørsukker"]);
+    expect(match?.missing).toEqual(["melis", "kokosmelk", "melke"]);
+  });
+
+  it("«hvetemel» hjemme gir ikke «mel» i oppskriften, og flere ord må fortsatt alle passe", () => {
+    expect(matchPantry([recipe(1, "R", ["mel"])], pantry("hvetemel"))).toEqual([]);
+    expect(matchPantry([recipe(1, "R", ["hvetemel"])], pantry("fint mel"))).toEqual([]);
+  });
 });

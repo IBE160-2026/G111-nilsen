@@ -128,7 +128,7 @@ Kravene står i PRD §4.7 (FR-28–FR-43), med status på hvert krav i PRD §4.0
 - **Statistikk (6.20b):** `/statistikk` viser nøkkeltall (oppskrifter, ganger laget, favoritter, planlagte middager), «Laget oftest», «Sist laget», «Best vurdert», hvor mange du aldri har laget, og fordelingen på mapper, merkelapper og kilder. Alt regnes ut av data som allerede finnes.
 - **Angre «Laget i dag» (6.21b):** etter at du har trykket «Laget i dag», kommer det en «Angre»-knapp som setter antall og dato tilbake. Under «Sist laget» står også en lenke «Se statistikk».
 - **Små forbedringer (6.22b–6.25b):** middagsforslag husker filteret ditt; «Angre» finnes på merkelapper og i ukemenyen; statistikken kan vises for siste 30 dager, i år eller alt; og når språkmodellen er opptatt får du enkle forslag i stedet for en feil.
-- **Rettinger (6.26b):** innloggingsskjemaet mister ikke lenger det du skriver rett etter at siden åpnes (sak 011), og «Hva kan jeg lage?» sier ikke at du mangler vann, salt eller pepper.
+- **Rettinger (6.26b):** innloggingsskjemaet mister ikke lenger det du skriver rett etter at siden åpnes (sak 011), og «Hva kan jeg lage?» sier ikke at du mangler vann, salt eller pepper. «mel» passer også til «hvetemel», «olje» til «olivenolje» og «sukker» til «rørsukker».
 
 Ikke bygget ennå: offentlig lenke til én oppskrift, glemt passord og delt handleliste (kandidater), og stemmestyring i kokemodus (utsatt). Designrunden tas samlet til slutt.
 
