@@ -4,11 +4,19 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import EmptyState from "@/components/EmptyState";
 import LoginRequired from "@/components/LoginRequired";
-import { collectionStats, type NameCount, type RankedRecipe } from "@/domain";
+import {
+  collectionStats,
+  parseStatsPeriod,
+  periodStart,
+  STATS_PERIODS,
+  type NameCount,
+  type RankedRecipe,
+  type StatsPeriod,
+} from "@/domain";
 import { dinnerMessages, statsMessages as m } from "@/lib/messages";
 import { sourceLabel } from "@/lib/source-label";
 import { listPlannedTitles } from "@/server/services/meal-plan-service";
-import { listCollection } from "@/server/services/recipe-service";
+import { listCollection, listCookedInPeriod } from "@/server/services/recipe-service";
 import { currentUserId } from "@/server/session";
 import listStyles from "../list-page.module.css";
 import styles from "./page.module.css";
@@ -27,19 +35,34 @@ function formatDate(iso: string): string {
  * ut inne i grensen, etter `connection()`. Alt bygger på data som allerede finnes: «Laget i dag»,
  * vurderinger, mapper, merkelapper, kilder og ukemenyen.
  */
-export default function StatsPage() {
+export default function StatsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ periode?: string | string[] }>;
+} = {}) {
   return (
     <div className={styles.root}>
       <h1>{m.heading}</h1>
       <Suspense fallback={<p className={listStyles.loading}>{m.loading}</p>}>
-        <StatsLoader />
+        <StatsLoader searchParams={searchParams} />
       </Suspense>
     </div>
   );
 }
 
-async function StatsLoader() {
+const PERIOD_LABELS: Record<StatsPeriod, string> = {
+  alt: m.periodAll,
+  "30": m.periodMonth,
+  aar: m.periodYear,
+};
+
+async function StatsLoader({
+  searchParams,
+}: {
+  searchParams?: Promise<{ periode?: string | string[] }>;
+}) {
   await connection();
+  const period = parseStatsPeriod((await searchParams)?.periode);
   const userId = await currentUserId();
   if (userId === null) return <LoginRequired next="/statistikk" />;
 
@@ -55,6 +78,14 @@ async function StatsLoader() {
     );
   }
 
+  // I en periode regnes «laget» ut fra loggen; ellers står tallene på oppskriften (Story 6.24b).
+  const since = periodStart(period, new Date());
+  const inPeriod = new Map<number, { count: number; last: string }>();
+  if (since !== null) {
+    const cooked = listCookedInPeriod(userId, since);
+    if (cooked.ok) for (const row of cooked.value) inPeriod.set(row.recipeId, row);
+  }
+
   const planned = listPlannedTitles(userId);
   const stats = collectionStats(
     recipes.value.map((recipe) => ({
@@ -63,8 +94,10 @@ async function StatsLoader() {
       source: sourceLabel(recipe),
       folderName: recipe.folderName,
       isFavorite: recipe.isFavorite,
-      cookedCount: recipe.cookedCount ?? 0,
-      lastCookedAt: recipe.lastCookedAt ?? null,
+      cookedCount:
+        since === null ? (recipe.cookedCount ?? 0) : (inPeriod.get(recipe.id)?.count ?? 0),
+      lastCookedAt:
+        since === null ? (recipe.lastCookedAt ?? null) : (inPeriod.get(recipe.id)?.last ?? null),
       rating: recipe.rating ?? null,
       totalMinutes: recipe.totalMinutes ?? null,
       labels: recipe.labels ?? [],
@@ -76,6 +109,20 @@ async function StatsLoader() {
   return (
     <>
       <p className={styles.lead}>{m.lead}</p>
+
+      <nav aria-label={m.periodLabel} className={styles.periods}>
+        {STATS_PERIODS.map((option) => (
+          <Link
+            key={option}
+            href={option === "alt" ? "/statistikk" : `/statistikk?periode=${option}`}
+            className={styles.period}
+            aria-current={option === period ? "page" : undefined}
+          >
+            {PERIOD_LABELS[option]}
+          </Link>
+        ))}
+      </nav>
+      {period !== "alt" ? <p className={styles.note}>{m.periodNote[period]}</p> : null}
 
       <ul className={styles.keyFigures} aria-label={m.keyHeading}>
         <KeyFigure value={stats.total} label={stats.total === 1 ? m.recipesOne : m.recipes} />
@@ -109,8 +156,16 @@ async function StatsLoader() {
           title={m.mostCooked}
           rows={stats.mostCooked}
           value={(row) => m.times(row.value)}
-          note={stats.neverCooked > 0 ? m.neverCooked(stats.neverCooked) : m.neverCookedNone}
-          hint={m.neverCookedHint}
+          note={
+            period === "alt"
+              ? stats.neverCooked > 0
+                ? m.neverCooked(stats.neverCooked)
+                : m.neverCookedNone
+              : stats.neverCooked > 0
+                ? m.neverCookedIn(stats.neverCooked)
+                : m.neverCookedInNone
+          }
+          hint={period === "alt" ? m.neverCookedHint : undefined}
         />
         <RecipeCard
           title={m.recentlyCooked}

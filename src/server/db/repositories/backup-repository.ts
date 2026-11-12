@@ -1,7 +1,7 @@
 import "server-only";
 import { and, asc, eq, isNotNull } from "drizzle-orm";
 import type { Db } from "../client";
-import { folders, ingredientLines, recipeLabels, recipes, steps } from "../schema";
+import { cookedLog, folders, ingredientLines, recipeLabels, recipes, steps } from "../schema";
 import { insertRecipeRows, type NewRecipe } from "./recipe-repository";
 
 /**
@@ -158,6 +158,8 @@ export function insertBackupItems(
         })
         .where(eq(recipes.id, id))
         .run();
+      if (item.cookedCount > 0 && item.lastCookedAt !== null)
+        tx.insert(cookedLog).values({ recipeId: id, cookedAt: item.lastCookedAt }).run();
       if (item.labels.length > 0)
         tx.insert(recipeLabels)
           .values(item.labels.map((label) => ({ recipeId: id, ...label })))

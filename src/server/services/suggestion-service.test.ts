@@ -101,6 +101,27 @@ describe("getSuggestions", () => {
     });
   });
 
+  it("bruker de enkle forslagene når språkmodellen er opptatt (Story 6.25b)", async () => {
+    const provider: SuggestionProvider = {
+      suggest: async () => err(appError("suggestion_failed", "rate_limited")),
+    };
+    const result = await getSuggestions(id, db, provider);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toMatchObject({ isExample: true, busy: true });
+    expect(result.value.suggestions.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("andre feil fra språkmodellen gir fortsatt feil, ikke enkle forslag", async () => {
+    const provider: SuggestionProvider = {
+      suggest: async () => err(appError("suggestion_failed", "http_500")),
+    };
+    expect(await getSuggestions(id, db, provider)).toEqual({
+      ok: false,
+      error: { kind: "suggestion_failed", detail: "http_500" },
+    });
+  });
+
   it("gir suggestion_failed når leverandøren kaster", async () => {
     const provider: SuggestionProvider = {
       suggest: async () => {

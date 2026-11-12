@@ -446,6 +446,8 @@ export const weekMessages = {
   portions: (n: string) => `${n} porsj.`,
   added: (title: string, day: string) => `${title} er lagt på ${day}. Husk å lagre uka.`,
   removed: (title: string, day: string) => `${title} er fjernet fra ${day}. Husk å lagre uka.`,
+  undo: "Angre",
+  restored: (title: string, day: string) => `${title} er lagt tilbake på ${day}.`,
   save: "Lagre uka",
   saving: "Lagrer …",
   saved: "Uka er lagret.",
@@ -497,6 +499,8 @@ export const labelMessages = {
   removeFor: (label: string) => `Fjern merkelappen ${label}`,
   added: (label: string) => `Merkelappen ${label} er lagt til.`,
   removed: (label: string) => `Merkelappen ${label} er fjernet.`,
+  undo: "Angre",
+  restored: (label: string) => `Merkelappen ${label} er lagt tilbake.`,
   required: "Skriv en merkelapp.",
   tooLong: "En merkelapp kan være opptil 30 tegn.",
   limit: "En oppskrift kan ha opptil 10 merkelapper. Fjern en først.",
@@ -748,6 +752,9 @@ export const suggestionMessages = {
   exampleLabel: "Enkle forslag",
   exampleNote:
     "Laget ut fra ingrediensene og stegene i oppskriften. Koble til en språkmodell for forslag som er skrevet spesielt for oppskriften.",
+  /** Når språkmodellen er opptatt og de enkle forslagene brukes i stedet (Story 6.25b). */
+  busyNote:
+    "Språkmodellen er opptatt akkurat nå, så dette er enkle forslag laget ut fra ingrediensene og stegene. Prøv igjen om litt for forslag skrevet spesielt for oppskriften.",
   /** Overskrift over forslagene brukeren har tatt i bruk (Story 4.2). */
   chosenHeading: "Dine valgte forslag",
   /** Merket på et valgt forslag. */
@@ -921,6 +928,20 @@ export const statsMessages = {
   link: "Statistikk",
   loading: "Regner ut …",
   lead: "Tall om samlingen din: hva du lager oftest, hva du aldri har laget, og hvordan oppskriftene fordeler seg.",
+  periodLabel: "Periode",
+  periodAll: "Alt",
+  periodMonth: "Siste 30 dager",
+  periodYear: "I år",
+  periodNote: {
+    "30": "Tallene for «laget» gjelder de siste 30 dagene.",
+    aar: "Tallene for «laget» gjelder dette året.",
+  },
+  neverCookedIn: (n: number) =>
+    n === 1
+      ? "1 oppskrift er ikke laget i perioden."
+      : `${n} oppskrifter er ikke laget i perioden.`,
+  neverCookedInNone: "Du har laget alle oppskriftene dine i perioden.",
+  nothingInPeriod: "Ingenting laget i perioden.",
   keyHeading: "Kort fortalt",
   recipes: "oppskrifter",
   recipesOne: "oppskrift",

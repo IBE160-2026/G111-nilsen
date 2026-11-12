@@ -69,4 +69,18 @@ describe("RecipeLabels", () => {
       screen.queryByRole("button", { name: "Fjern merkelappen Hverdag" }),
     ).not.toBeInTheDocument();
   });
+
+  it("«Angre» legger den fjernede merkelappen tilbake (Story 6.23b)", async () => {
+    const user = userEvent.setup();
+    const onRemove = vi.fn().mockResolvedValue({ ok: true, labels: ["Vegetar"] });
+    const onAdd = vi.fn().mockResolvedValue({ ok: true, labels: ["Vegetar", "Hverdag"] });
+    render(<RecipeLabels labels={["Hverdag", "Vegetar"]} onAdd={onAdd} onRemove={onRemove} />);
+    expect(screen.queryByRole("button", { name: "Angre" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Fjern merkelappen Hverdag" }));
+    await user.click(await screen.findByRole("button", { name: "Angre" }));
+    expect(onAdd).toHaveBeenCalledWith("Hverdag");
+    expect(await screen.findByText("Merkelappen Hverdag er lagt tilbake.")).toBeInTheDocument();
+    expect(screen.getByText("Hverdag")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Angre" })).not.toBeInTheDocument();
+  });
 });

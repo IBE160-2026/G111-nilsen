@@ -6,6 +6,7 @@ import type { Db } from "../client";
 import {
   deletedRecipes,
   folders,
+  cookedLog,
   ingredientLines,
   mealPlanEntries,
   recipeLabels,
@@ -291,6 +292,8 @@ export function restoreRecipe(
       .where(eq(recipes.id, newId))
       .run();
 
+    if (data.cookedCount > 0 && data.lastCookedAt !== null)
+      tx.insert(cookedLog).values({ recipeId: newId, cookedAt: data.lastCookedAt }).run();
     if (data.labels.length > 0)
       tx.insert(recipeLabels)
         .values(data.labels.map((label) => ({ recipeId: newId, ...label })))

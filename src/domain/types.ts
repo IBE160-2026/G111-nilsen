@@ -144,8 +144,13 @@ export type Suggestion = {
 /** Et forslag brukeren har tatt i bruk og som er lagret med oppskriften (Story 4.2). */
 export type AppliedSuggestion = Suggestion & { id: number };
 
-/** Forslag for en oppskrift. `isExample` er sant når de er eksempelforslag (demomodus). */
+/**
+ * Forslag for en oppskrift. `isExample` er sant når de er eksempelforslag (demomodus). `busy` er
+ * sant når språkmodellen var opptatt (for mange kall) og de enkle forslagene ble brukt i stedet
+ * (Story 6.25b).
+ */
 export type SuggestionSet = {
   suggestions: Suggestion[];
   isExample: boolean;
+  busy?: boolean;
 };

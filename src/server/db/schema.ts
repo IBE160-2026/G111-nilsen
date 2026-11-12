@@ -293,3 +293,23 @@ export const shares = sqliteTable(
     index("shares_member_idx").on(table.memberId, table.status),
   ],
 );
+
+/**
+ * Hver gang en oppskrift er laget (Story 6.24b): ett tidspunkt per trykk på «Laget i dag», så
+ * statistikken kan vise en periode. `cookedCount` og `lastCookedAt` på oppskriften er fortsatt
+ * sannheten for «i alt»; denne loggen følger dem, og slettes sammen med oppskriften.
+ */
+export const cookedLog = sqliteTable(
+  "cooked_log",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    recipeId: integer("recipe_id")
+      .notNull()
+      .references(() => recipes.id, { onDelete: "cascade" }),
+    cookedAt: text("cooked_at").notNull(),
+  },
+  (table) => [
+    index("cooked_log_recipe_idx").on(table.recipeId),
+    index("cooked_log_at_idx").on(table.cookedAt),
+  ],
+);

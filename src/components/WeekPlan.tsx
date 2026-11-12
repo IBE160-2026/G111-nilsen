@@ -73,6 +73,8 @@ export default function WeekPlan({
   const [savedKey, setSavedKey] = useState(() => contentKey(initial));
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
+  // Oppføringen som ble fjernet sist, så den kan legges tilbake (Story 6.23b).
+  const [removed, setRemoved] = useState<{ entry: WeekEntry; day: WeekDay } | null>(null);
   // Nye oppføringer får negative id-er, så de ikke kolliderer med lagrede.
   const nextId = useRef(-1);
   const dirty = contentKey(entries) !== savedKey;
@@ -94,16 +96,27 @@ export default function WeekPlan({
       { id: nextId.current--, day: day.day, servings, recipeId, title: recipe.title },
     ]);
     setStatus(m.added(recipe.title, day.label));
+    setRemoved(null);
     return null;
   }
 
   function remove(entry: WeekEntry, day: WeekDay) {
     setEntries((previous) => previous.filter((other) => other.id !== entry.id));
     setStatus(m.removed(entry.title, day.label));
+    setRemoved({ entry, day });
+  }
+
+  function undoRemove() {
+    if (!removed) return;
+    const { entry, day } = removed;
+    setEntries((previous) => [...previous, entry]);
+    setStatus(m.restored(entry.title, day.label));
+    setRemoved(null);
   }
 
   async function save() {
     if (saving) return;
+    setRemoved(null);
     if (!dirty) {
       setStatus(m.nothingToSave);
       return;
@@ -197,6 +210,11 @@ export default function WeekPlan({
       <p role="status" aria-live="polite" className={styles.status}>
         {status}
       </p>
+      {removed ? (
+        <button type="button" className={styles.undo} onClick={undoRemove}>
+          {m.undo}
+        </button>
+      ) : null}
     </div>
   );
 }

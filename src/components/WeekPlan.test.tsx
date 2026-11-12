@@ -178,6 +178,24 @@ describe("WeekPlan", () => {
     expect(lastSaved(onSave)).toEqual({ week: "2026-11-09", items: [] });
   });
 
+  it("«Angre» legger en fjernet oppføring tilbake, og forsvinner når uka lagres", async () => {
+    const { onSave, user } = setup();
+    expect(screen.queryByRole("button", { name: "Angre" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Fjern Taco fra mandag 9. november" }));
+    await user.click(screen.getByRole("button", { name: "Angre" }));
+    expect(day("mandag")).toHaveTextContent("Taco");
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Taco er lagt tilbake på mandag 9. november.",
+    );
+    expect(screen.queryByRole("button", { name: "Angre" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Lagre uka" }));
+    expect(onSave).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Fjern Taco fra mandag 9. november" }));
+    await user.click(screen.getByRole("button", { name: "Lagre uka" }));
+    expect(screen.queryByRole("button", { name: "Angre" })).not.toBeInTheDocument();
+  });
+
   it("er ikke lagret igjen når en endring angres, og lagrer ingenting uten endringer", async () => {
     const { onSave, user } = setup();
     await user.click(screen.getByRole("button", { name: "Lagre uka" }));

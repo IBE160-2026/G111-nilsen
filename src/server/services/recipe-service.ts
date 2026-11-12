@@ -31,6 +31,8 @@ import {
   listSavedRecipes,
   markCooked,
   undoCooked,
+  listCookedSince,
+  type CookedInPeriod,
   markRecipeSaved,
   setRecipeFavorite,
   updateRecipe,
@@ -570,6 +572,18 @@ export function markRecipeCooked(
   const at = now().toISOString();
   const count = markCooked(db, id, at);
   return count === null ? err(appError("not_found")) : ok({ lastCookedAt: at, cookedCount: count });
+}
+
+/**
+ * Hva brukerens oppskrifter er laget fra og med `since` (Story 6.24b): antall og siste gang, per
+ * oppskrift. Oppskrifter som ikke er laget i perioden mangler.
+ */
+export function listCookedInPeriod(
+  userId: number,
+  since: string,
+  db: Db = getDb(),
+): Result<CookedInPeriod[]> {
+  return ok(listCookedSince(db, userId, since));
 }
 
 /**

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo, useState, useSyncExternalStore } from "react";
 import {
   dinnerCandidates,
   dinnerFolders,
@@ -9,6 +9,13 @@ import {
   pickDinner,
   type DinnerCandidate,
 } from "@/domain";
+import {
+  DINNER_FILTER_EVENT,
+  parseDinnerFilter,
+  readDinnerFilterRaw,
+  writeDinnerFilter,
+  type DinnerFilterChoice,
+} from "@/lib/dinner-filter";
 import { dinnerMessages as m, ratingMessages } from "@/lib/messages";
 import styles from "./DinnerSuggester.module.css";
 
@@ -26,6 +33,15 @@ const TIMES = [
   { value: 60, label: m.timeMedium },
 ] as const;
 
+function subscribe(onChange: () => void): () => void {
+  window.addEventListener(DINNER_FILTER_EVENT, onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener(DINNER_FILTER_EVENT, onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
+
 /**
  * Tilfeldig middagsforslag (Story 6.13): trekker en oppskrift fra samlingen, eventuelt bare
  * favoritter og opptil en gitt tid. Trekningen skjer ved klikk, ikke ved visning, så siden er
@@ -33,15 +49,21 @@ const TIMES = [
  */
 export default function DinnerSuggester({ recipes }: Props) {
   const id = useId();
-  const [onlyFavorites, setOnlyFavorites] = useState(false);
-  const [maxMinutes, setMaxMinutes] = useState<number | null>(null);
-  // Mappene det trekkes fra (Story 6.13b). Tom = alle.
-  const [folders, setFolders] = useState<readonly (string | null)[]>([]);
+  // Filteret huskes i nettleseren (Story 6.22b). Før lageret er lest (og på serveren) gjelder
+  // standardvalget, så første visning er den samme overalt.
+  const raw = useSyncExternalStore(subscribe, readDinnerFilterRaw, () => null);
+  const stored = useMemo(() => parseDinnerFilter(raw), [raw]);
+  const { onlyFavorites, maxMinutes } = stored;
   const [picked, setPicked] = useState<DinnerRecipe | null>(null);
   // Teller opp for hver trekning, så kortet kan tones inn på nytt selv om samme rett kommer igjen.
   const [draws, setDraws] = useState(0);
 
   const folderOptions = useMemo(() => dinnerFolders(recipes), [recipes]);
+  // Mappene det trekkes fra (Story 6.13b). Tom = alle. Mapper som er slettet siden sist, droppes.
+  const folders = useMemo(
+    () => stored.folders.filter((name) => folderOptions.includes(name)),
+    [stored.folders, folderOptions],
+  );
   const candidates = useMemo(
     () => dinnerCandidates(recipes, { onlyFavorites, maxMinutes, folders }),
     [recipes, onlyFavorites, maxMinutes, folders],
@@ -50,10 +72,16 @@ export default function DinnerSuggester({ recipes }: Props) {
   const shown = picked !== null && candidates.some((c) => c.id === picked.id) ? picked : null;
   const empty = candidates.length === 0;
 
+  function choose(change: Partial<DinnerFilterChoice>) {
+    writeDinnerFilter({ onlyFavorites, maxMinutes, folders, ...change });
+  }
+
   function toggleFolder(name: string | null) {
-    setFolders((chosen) =>
-      chosen.includes(name) ? chosen.filter((other) => other !== name) : [...chosen, name],
-    );
+    choose({
+      folders: folders.includes(name)
+        ? folders.filter((other) => other !== name)
+        : [...folders, name],
+    });
   }
 
   function suggest() {
@@ -69,7 +97,7 @@ export default function DinnerSuggester({ recipes }: Props) {
           type="checkbox"
           className={styles.toggleInput}
           checked={onlyFavorites}
-          onChange={(event) => setOnlyFavorites(event.target.checked)}
+          onChange={(event) => choose({ onlyFavorites: event.target.checked })}
         />
         <label htmlFor={`${id}-fav`} className={styles.toggle}>
           {m.onlyFavorites}
@@ -87,7 +115,7 @@ export default function DinnerSuggester({ recipes }: Props) {
                   name={`${id}-tid`}
                   className={styles.toggleInput}
                   checked={maxMinutes === time.value}
-                  onChange={() => setMaxMinutes(time.value)}
+                  onChange={() => choose({ maxMinutes: time.value })}
                 />
                 <label htmlFor={`${id}-tid-${value}`} className={styles.toggle}>
                   {time.label}
@@ -107,7 +135,7 @@ export default function DinnerSuggester({ recipes }: Props) {
               type="checkbox"
               className={styles.toggleInput}
               checked={folders.length === 0}
-              onChange={() => setFolders([])}
+              onChange={() => choose({ folders: [] })}
             />
             <label htmlFor={`${id}-mapper-alle`} className={styles.toggle}>
               {m.allFolders}

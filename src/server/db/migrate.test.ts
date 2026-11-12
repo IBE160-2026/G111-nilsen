@@ -154,6 +154,7 @@ describe("migrasjon 0001 (Story 3.1: manuelle oppskrifter i samlingen)", () => {
       "0014_recipe_rating",
       "0015_deleted_recipes",
       "0016_shares",
+      "0017_cooked_log",
     ]);
     expect(existsSync(join(migrationsFolder(), "meta", "0001_snapshot.json"))).toBe(true);
   });

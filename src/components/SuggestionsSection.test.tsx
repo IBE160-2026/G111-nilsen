@@ -127,6 +127,13 @@ describe("SuggestionsSection: hente forslag (Story 4.1)", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
+  it("når språkmodellen er opptatt står det, i stedet for forklaringen om å koble til (Story 6.25b)", async () => {
+    const { user } = setup({ onRequest: async () => ({ ...success(true), busy: true }) });
+    await user.click(screen.getByRole("button", { name: suggestionMessages.request }));
+    expect(await screen.findByText(suggestionMessages.busyNote)).toBeInTheDocument();
+    expect(screen.queryByText(suggestionMessages.exampleNote)).not.toBeInTheDocument();
+  });
+
   it("forslag som ikke er eksempler får ikke merket", async () => {
     const { user } = setup({ onRequest: async () => success(false) });
     await user.click(requestButton());

@@ -65,7 +65,11 @@ export default function SuggestionsSection({ onRequest, applied, onApply, onRemo
     try {
       const response = await onRequest();
       if (response.ok) {
-        setResult({ suggestions: response.suggestions, isExample: response.isExample });
+        setResult({
+          suggestions: response.suggestions,
+          isExample: response.isExample,
+          busy: response.busy,
+        });
         setStatus("done");
       } else {
         setStatus("failed");
@@ -219,7 +223,7 @@ export default function SuggestionsSection({ onRequest, applied, onApply, onRemo
           {result.isExample ? (
             <p className={styles.example}>
               <span className={styles.exampleLabel}>{suggestionMessages.exampleLabel}</span>{" "}
-              {suggestionMessages.exampleNote}
+              {result.busy ? suggestionMessages.busyNote : suggestionMessages.exampleNote}
             </p>
           ) : null}
           {candidates.length > 0 ? (

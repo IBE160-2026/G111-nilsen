@@ -64,13 +64,27 @@ export async function getSuggestions(
   } catch {
     return err(appError("suggestion_failed", "provider_threw"));
   }
+  // For mange kall til språkmodellen: bruk de enkle forslagene i stedet for en feil (Story 6.25b).
+  let busy = false;
+  if (!raw.ok && raw.error.detail === "rate_limited") {
+    try {
+      raw = await createMockSuggestionProvider().suggest(recipe.value);
+      busy = true;
+    } catch {
+      return err(appError("suggestion_failed", "provider_threw"));
+    }
+  }
   if (!raw.ok) return err(appError("suggestion_failed", raw.error.detail));
 
   const parsed = suggestionsSchema.safeParse(raw.value.suggestions);
   if (!parsed.success || typeof raw.value.isExample !== "boolean") {
     return err(appError("suggestion_failed", "invalid_response"));
   }
-  return ok({ suggestions: parsed.data, isExample: raw.value.isExample });
+  return ok({
+    suggestions: parsed.data,
+    isExample: raw.value.isExample,
+    ...(busy ? { busy: true } : {}),
+  });
 }
 
 /**

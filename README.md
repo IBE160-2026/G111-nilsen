@@ -127,6 +127,7 @@ Kravene står i PRD §4.7 (FR-28–FR-43), med status på hvert krav i PRD §4.0
 - **Snarveier på forsiden (6.18b):** «Og dessuten»-raden under «Gå rett til» på forsiden lenker til «Hva kan jeg lage?», Middagsforslag, Deling, Eksport og import og Nylig slettet, som ellers bare nås fra overskriften i Oppskrifter.
 - **Statistikk (6.20b):** `/statistikk` viser nøkkeltall (oppskrifter, ganger laget, favoritter, planlagte middager), «Laget oftest», «Sist laget», «Best vurdert», hvor mange du aldri har laget, og fordelingen på mapper, merkelapper og kilder. Alt regnes ut av data som allerede finnes.
 - **Angre «Laget i dag» (6.21b):** etter at du har trykket «Laget i dag», kommer det en «Angre»-knapp som setter antall og dato tilbake. Under «Sist laget» står også en lenke «Se statistikk».
+- **Små forbedringer (6.22b–6.25b):** middagsforslag husker filteret ditt; «Angre» finnes på merkelapper og i ukemenyen; statistikken kan vises for siste 30 dager, i år eller alt; og når språkmodellen er opptatt får du enkle forslag i stedet for en feil.
 
 Ikke bygget ennå: offentlig lenke til én oppskrift, glemt passord og delt handleliste (kandidater), og stemmestyring i kokemodus (utsatt). Designrunden tas samlet til slutt.
 

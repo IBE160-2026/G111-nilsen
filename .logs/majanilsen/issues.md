@@ -129,3 +129,4 @@
 - 916 Snarveier («Og dessuten») til de mindre sidene på forsiden. Åpent: ikke mulig å velge hvilke som vises.
 - 915 Statistikkside over samlingen (laget oftest, sist laget, best vurdert, fordelinger). Åpent: ingen grafer eller tidsrom.
 - 914 Angre «Laget i dag» og lenke «Se statistikk» på oppskriften. Åpent: angre finnes bare til siden lastes på nytt.
+- 913 Små forbedringer: middagsforslag husker filter, angre på merkelapper/ukemeny, statistikk for periode, enkle forslag når språkmodellen er opptatt. Åpent: eldre «laget» mangler enkeltdatoer; mappesletting kan ikke angres.

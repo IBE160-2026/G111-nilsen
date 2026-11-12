@@ -63,6 +63,7 @@ describe("getDb", () => {
     db.$client.exec(
       "delete from __drizzle_migrations where created_at > (select min(created_at) from __drizzle_migrations)",
     ); // bare 0000 er igjen
+    db.$client.exec("drop table cooked_log");
     db.$client.exec("drop table shares");
     db.$client.exec("drop table deleted_recipes");
     db.$client.exec("drop table recipe_labels");

@@ -1350,3 +1350,23 @@ slik at en feil ikke ødelegger tallene og jeg raskt ser hva jeg har laget.
 
 **Gitt** at jeg ser «Sist laget …» på oppskriften
 **Så** står det en lenke «Se statistikk» under, som åpner statistikksiden
+
+### Story 6.22b–6.25b: Små forbedringer etter statistikken
+
+Som Ida,
+vil jeg at valgene mine huskes, at jeg kan angre små feil, at statistikken kan vise en periode, og at forslagene virker selv når språkmodellen er opptatt,
+slik at siden føles ferdig i hverdagen.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg har valgt filter på middagsforslag
+**Så** er de samme valgene på plass neste gang jeg åpner siden på samme enhet
+
+**Gitt** at jeg nettopp har fjernet en merkelapp eller en oppføring i ukemenyen
+**Så** står det en «Angre»-knapp som legger den tilbake
+
+**Gitt** at jeg ser statistikken
+**Så** kan jeg velge «Siste 30 dager», «I år» eller «Alt», og tallene for «laget» følger valget
+
+**Gitt** at språkmodellen er opptatt
+**Så** får jeg enkle forslag og en forklaring i stedet for en feilmelding

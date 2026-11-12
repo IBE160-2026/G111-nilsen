@@ -24,12 +24,15 @@ export default function RecipeLabels({ labels: initial, onAdd, onRemove }: Props
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
+  // Merkelappen som ble fjernet sist, så den kan legges tilbake (Story 6.23b).
+  const [removed, setRemoved] = useState<string | null>(null);
 
   async function run(action: () => Promise<LabelActionResult>, done: string, after?: () => void) {
     if (pending) return;
     setPending(true);
     setError("");
     setStatus("");
+    setRemoved(null);
     try {
       const result = await action();
       if (!result.ok) {
@@ -77,7 +80,13 @@ export default function RecipeLabels({ labels: initial, onAdd, onRemove }: Props
                 className={styles.remove}
                 aria-label={m.removeFor(label)}
                 aria-disabled={pending ? true : undefined}
-                onClick={() => void run(() => onRemove(label), m.removed(label))}
+                onClick={() =>
+                  void run(
+                    () => onRemove(label),
+                    m.removed(label),
+                    () => setRemoved(label),
+                  )
+                }
               >
                 ×
               </button>
@@ -126,6 +135,16 @@ export default function RecipeLabels({ labels: initial, onAdd, onRemove }: Props
       <p role="status" aria-live="polite" className={styles.status}>
         {status}
       </p>
+      {removed !== null ? (
+        <button
+          type="button"
+          className={styles.undo}
+          aria-disabled={pending ? true : undefined}
+          onClick={() => void run(() => onAdd(removed), m.restored(removed))}
+        >
+          {m.undo}
+        </button>
+      ) : null}
     </section>
   );
 }

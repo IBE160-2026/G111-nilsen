@@ -3,7 +3,10 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import { afterEach, describe, expect, it } from "vitest";
 import DinnerSuggester from "./DinnerSuggester";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  window.localStorage.clear();
+});
 
 const recipes = [
   { id: 1, title: "Suppe", totalMinutes: 20, isFavorite: true, folderName: "Hverdag" },
@@ -141,5 +144,33 @@ describe("DinnerSuggester", () => {
     expect(screen.queryByRole("region", { name: "Forslag" })).toBeNull();
     expect(screen.getByRole("heading", { name: "Ingen oppskrifter passer" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Foreslå/ })).toBeNull();
+  });
+
+  it("husker filteret til neste gang (Story 6.22b)", () => {
+    const { unmount } = render(<DinnerSuggester recipes={recipes} />);
+    fireEvent.click(screen.getByLabelText("Bare favoritter"));
+    fireEvent.click(screen.getByLabelText("Hverdag"));
+    expect(screen.getByText("1 oppskrift å velge blant")).toBeInTheDocument();
+    unmount();
+
+    render(<DinnerSuggester recipes={recipes} />);
+    expect(screen.getByLabelText("Bare favoritter")).toBeChecked();
+    expect(screen.getByLabelText("Hverdag")).toBeChecked();
+    expect(screen.getByLabelText("Alle mapper")).not.toBeChecked();
+    expect(screen.getByText("1 oppskrift å velge blant")).toBeInTheDocument();
+  });
+
+  it("ignorerer en lagret mappe som ikke finnes lenger, og ødelagt innhold", () => {
+    window.localStorage.setItem(
+      "recipemate-dinner-filter",
+      JSON.stringify({ onlyFavorites: false, maxMinutes: null, folders: ["Slettet"] }),
+    );
+    const { unmount } = render(<DinnerSuggester recipes={recipes} />);
+    expect(screen.getByText("2 oppskrifter å velge blant")).toBeInTheDocument();
+    unmount();
+
+    window.localStorage.setItem("recipemate-dinner-filter", "{ikke json");
+    render(<DinnerSuggester recipes={recipes} />);
+    expect(screen.getByText("2 oppskrifter å velge blant")).toBeInTheDocument();
   });
 });

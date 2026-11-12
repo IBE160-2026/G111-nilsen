@@ -369,6 +369,9 @@ test("Versjon 2: merkelapper settes på oppskriften og brukes i søk og filter",
     .click();
   await page.getByRole("button", { name: `Fjern merkelappen ${label}` }).click();
   await expect(page.getByText("Ingen merkelapper ennå.")).toBeVisible();
+  // «Angre» legger merkelappen tilbake (Story 6.23b).
+  await page.getByRole("button", { name: "Angre", exact: true }).click();
+  await expect(page.getByRole("button", { name: `Fjern merkelappen ${label}` })).toBeVisible();
 });
 
 test("Versjon 2: stjernevurdering settes på oppskriften og vises på kortet", async ({
@@ -955,6 +958,12 @@ test("Versjon 2: statistikk viser hva som er laget oftest", async ({ page }, tes
   const mest = page.getByRole("region", { name: "Laget oftest" });
   await expect(mest.getByRole("link", { name: title })).toBeVisible();
   await expect(mest).toContainText("3 ganger");
+
+  // Bare siste 30 dager (Story 6.24b): alt er laget i dag, så tallet er det samme.
+  await page.getByRole("link", { name: "Siste 30 dager" }).click();
+  await expect(page).toHaveURL(/periode=30/);
+  await expect(page.getByText("Tallene for «laget» gjelder de siste 30 dagene.")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Laget oftest" })).toContainText("3 ganger");
   await expect(
     page.getByRole("region", { name: "Sist laget" }).getByRole("link", { name: title }),
   ).toBeVisible();
@@ -997,6 +1006,12 @@ test("Versjon 2: tilfeldig middagsforslag", async ({ page }, testInfo) => {
     .click();
   await expect(page.getByRole("checkbox", { name: folder })).toBeChecked();
   await expect(page.getByRole("checkbox", { name: "Alle mapper" })).not.toBeChecked();
+  await expect(page.getByText("1 oppskrift å velge blant")).toBeVisible();
+
+  // Valget huskes til neste besøk (Story 6.22b).
+  await page.reload();
+  await page.waitForLoadState("networkidle");
+  await expect(page.getByRole("checkbox", { name: folder })).toBeChecked();
   await expect(page.getByText("1 oppskrift å velge blant")).toBeVisible();
 
   await page.getByRole("button", { name: "Foreslå en middag" }).click();

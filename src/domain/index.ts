@@ -41,6 +41,7 @@ export {
   type RankedRecipe,
   type StatsRecipe,
 } from "./collection-stats";
+export { parseStatsPeriod, periodStart, STATS_PERIODS, type StatsPeriod } from "./stats-period";
 export { parseRecipeText, type RecipeDraft } from "./parse-recipe-text";
 export {
   dinnerCandidates,

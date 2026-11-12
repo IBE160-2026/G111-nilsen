@@ -47,8 +47,14 @@ function parts() {
   return { heading, suspense };
 }
 
-async function show() {
-  const { heading, suspense } = parts();
+async function show(periode?: string) {
+  const page = StatsPage({
+    searchParams: periode === undefined ? undefined : Promise.resolve({ periode }),
+  }) as ReactElement<{ children: ReactElement[] }>;
+  const [heading, suspense] = page.props.children as [
+    ReactElement,
+    ReactElement<{ children: ReactElement; fallback: ReactElement }>,
+  ];
   const loader = suspense.props.children;
   render(
     <>
@@ -160,5 +166,43 @@ describe("/statistikk", () => {
     session.userId = null;
     await show();
     expect(screen.getByRole("link", { name: /logg inn/i })).toBeInTheDocument();
+  });
+
+  it("kan vise bare siste 30 dager, og «alt» er standard (Story 6.24b)", async () => {
+    const taco = recipe("Taco");
+    const suppe = recipe("Suppe");
+    markRecipeCooked(taco, state.db!, () => new Date("2020-01-05T17:00:00.000Z"));
+    markRecipeCooked(taco, state.db!, () => new Date());
+    markRecipeCooked(suppe, state.db!, () => new Date("2020-01-06T17:00:00.000Z"));
+
+    await show("30");
+    const key = screen.getByRole("list", { name: "Kort fortalt" });
+    expect(within(key).getAllByRole("listitem")[1]).toHaveTextContent("1gang laget");
+    expect(within(card("Laget oftest")).getAllByRole("link")).toHaveLength(1);
+    expect(card("Laget oftest")).toHaveTextContent("1 oppskrift er ikke laget i perioden.");
+    expect(screen.getByRole("link", { name: "Siste 30 dager" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.getByRole("link", { name: "Alt" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByText("Tallene for «laget» gjelder de siste 30 dagene.")).toBeInTheDocument();
+  });
+
+  it("ukjent periode gir alt, og «I år» teller bare i år", async () => {
+    const taco = recipe("Taco");
+    markRecipeCooked(taco, state.db!, () => new Date("2020-01-05T17:00:00.000Z"));
+    markRecipeCooked(taco, state.db!, () => new Date());
+
+    await show("noe-rart");
+    expect(screen.getByRole("link", { name: "Alt" })).toHaveAttribute("aria-current", "page");
+    expect(card("Laget oftest")).toHaveTextContent("2 ganger");
+    cleanup();
+
+    await show("aar");
+    expect(card("Laget oftest")).toHaveTextContent("1 gang");
+    expect(screen.getByRole("link", { name: "I år" })).toHaveAttribute(
+      "href",
+      "/statistikk?periode=aar",
+    );
   });
 });

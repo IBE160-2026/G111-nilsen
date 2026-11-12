@@ -11,7 +11,15 @@ import type {
 } from "@/domain";
 import { normalizeSearch } from "@/domain";
 import type { Db } from "../client";
-import { folders, ingredientLines, recipeLabels, recipes, steps, suggestions } from "../schema";
+import {
+  cookedLog,
+  folders,
+  ingredientLines,
+  recipeLabels,
+  recipes,
+  steps,
+  suggestions,
+} from "../schema";
 
 /** En ingredienslinje klar til lagring (tolket, ikke skalert). */
 export type NewIngredientLine = Omit<RecipeLine, "id">;
@@ -666,13 +674,45 @@ export function updateRating(db: Db, id: number, rating: number | null): boolean
  * Returnerer det nye antallet, eller `null` når oppskriften ikke finnes eller ikke er lagret.
  */
 export function markCooked(db: Db, id: number, at: string): number | null {
-  const row = db
-    .update(recipes)
-    .set({ lastCookedAt: at, cookedCount: sql`${recipes.cookedCount} + 1` })
-    .where(and(eq(recipes.id, id), isNotNull(recipes.savedAt)))
-    .returning({ cookedCount: recipes.cookedCount })
-    .get();
-  return row?.cookedCount ?? null;
+  return db.transaction((tx) => {
+    const row = tx
+      .update(recipes)
+      .set({ lastCookedAt: at, cookedCount: sql`${recipes.cookedCount} + 1` })
+      .where(and(eq(recipes.id, id), isNotNull(recipes.savedAt)))
+      .returning({ cookedCount: recipes.cookedCount })
+      .get();
+    if (!row) return null;
+    // Loggen gir statistikken en periode å regne i (Story 6.24b).
+    tx.insert(cookedLog).values({ recipeId: id, cookedAt: at }).run();
+    return row.cookedCount;
+  });
+}
+
+/** Hva en oppskrift er laget i en periode: antall ganger og siste gang (Story 6.24b). */
+export type CookedInPeriod = { recipeId: number; count: number; last: string };
+
+/**
+ * Hvor mange ganger hver av brukerens lagrede oppskrifter er laget fra og med `since` (ISO-tid),
+ * og siste gang i perioden. Oppskrifter som ikke er laget i perioden er ikke med.
+ */
+export function listCookedSince(db: Db, userId: number, since: string): CookedInPeriod[] {
+  return db
+    .select({
+      recipeId: cookedLog.recipeId,
+      count: sql<number>`count(*)`,
+      last: sql<string>`max(${cookedLog.cookedAt})`,
+    })
+    .from(cookedLog)
+    .innerJoin(recipes, eq(recipes.id, cookedLog.recipeId))
+    .where(
+      and(
+        eq(recipes.userId, userId),
+        isNotNull(recipes.savedAt),
+        sql`${cookedLog.cookedAt} >= ${since}`,
+      ),
+    )
+    .groupBy(cookedLog.recipeId)
+    .all();
 }
 
 /**
@@ -688,10 +728,21 @@ export function undoCooked(db: Db, id: number, previousAt: string | null): numbe
     .get();
   if (!row || row.cookedCount < 1) return null;
   const count = row.cookedCount - 1;
-  db.update(recipes)
-    .set({ cookedCount: count, lastCookedAt: count === 0 ? null : previousAt })
-    .where(eq(recipes.id, id))
-    .run();
+  db.transaction((tx) => {
+    tx.update(recipes)
+      .set({ cookedCount: count, lastCookedAt: count === 0 ? null : previousAt })
+      .where(eq(recipes.id, id))
+      .run();
+    // Den siste loggraden hører til trykket som angres.
+    const latest = tx
+      .select({ id: cookedLog.id })
+      .from(cookedLog)
+      .where(eq(cookedLog.recipeId, id))
+      .orderBy(desc(cookedLog.id))
+      .limit(1)
+      .get();
+    if (latest) tx.delete(cookedLog).where(eq(cookedLog.id, latest.id)).run();
+  });
   return count;
 }
 

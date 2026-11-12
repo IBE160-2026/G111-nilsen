@@ -7,6 +7,7 @@ import {
   createManualRecipe,
   markRecipeCooked,
   undoRecipeCooked,
+  listCookedInPeriod,
   setRecipeFitsFor,
   addRecipeLabel,
   deleteDeletedRecipeForGood,
@@ -901,6 +902,33 @@ describe("notater og sist laget (Story 6.3)", () => {
     });
     const recipe = getRecipe(id, db);
     expect(recipe.ok && [recipe.value.lastCookedAt, recipe.value.cookedCount]).toEqual([null, 0]);
+  });
+
+  it("loggen gir antall og siste gang i en periode, og «Angre» fjerner siste loggrad (Story 6.24b)", () => {
+    const db = createTestDb();
+    const id = saved(db);
+    const other = saved(db);
+    markRecipeCooked(id, db, () => new Date("2026-10-01T18:00:00.000Z"));
+    markRecipeCooked(id, db, () => new Date("2026-11-05T18:00:00.000Z"));
+    markRecipeCooked(id, db, () => new Date("2026-11-09T18:00:00.000Z"));
+    markRecipeCooked(other, db, () => new Date("2026-09-01T18:00:00.000Z"));
+    expect(listCookedInPeriod(TEST_USER_ID, "2026-11-01T00:00:00.000Z", db)).toEqual({
+      ok: true,
+      value: [{ recipeId: id, count: 2, last: "2026-11-09T18:00:00.000Z" }],
+    });
+    undoRecipeCooked(id, "2026-11-05T18:00:00.000Z", db);
+    expect(listCookedInPeriod(TEST_USER_ID, "2026-11-01T00:00:00.000Z", db)).toEqual({
+      ok: true,
+      value: [{ recipeId: id, count: 1, last: "2026-11-05T18:00:00.000Z" }],
+    });
+    expect(listCookedInPeriod(TEST_USER_ID, "2020-01-01T00:00:00.000Z", db)).toMatchObject({
+      value: expect.arrayContaining([expect.objectContaining({ recipeId: other, count: 1 })]),
+    });
+    // En annen konto ser ikke loggen.
+    expect(listCookedInPeriod(TEST_USER_ID + 1, "2020-01-01T00:00:00.000Z", db)).toEqual({
+      ok: true,
+      value: [],
+    });
   });
 
   it("«Angre» går ikke under null og avviser ukjent oppskrift og ugyldig dato", () => {
