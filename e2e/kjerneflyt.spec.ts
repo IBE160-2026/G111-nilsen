@@ -709,6 +709,36 @@ test("Versjon 2: slettet oppskrift kan angres, hentes tilbake og slettes for god
   await expect(page.getByRole("heading", { level: 2, name: title })).toHaveCount(0);
 });
 
+test("Versjon 2: appen kan installeres og viser en egen side uten nett", async ({
+  page,
+  context,
+  request,
+}) => {
+  const manifest = await request.get("/manifest.webmanifest");
+  expect(manifest.ok()).toBe(true);
+  expect(await manifest.json()).toMatchObject({
+    name: "RecipeMate",
+    display: "standalone",
+    start_url: "/oppskrifter",
+  });
+  for (const icon of ["/icons/icon-192.png", "/icons/icon-512.png", "/icons/maskable-512.png"]) {
+    expect((await request.get(icon)).ok(), icon).toBe(true);
+  }
+
+  await page.goto("/");
+  await expect(page.locator('link[rel="manifest"]')).toHaveAttribute(
+    "href",
+    "/manifest.webmanifest",
+  );
+  await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined));
+
+  await context.setOffline(true);
+  await page.goto("/oppskrifter");
+  await expect(page.getByRole("heading", { level: 1, name: "Du er frakoblet" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Prøv igjen" })).toBeVisible();
+  await context.setOffline(false);
+});
+
 test("Versjon 2: eksport og import av oppskrifter som fil", async ({ page }, testInfo) => {
   const title = `Kopi ${testInfo.project.name}`;
   await page.goto("/ny");

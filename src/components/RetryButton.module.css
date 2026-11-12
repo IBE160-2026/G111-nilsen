@@ -1,0 +1,12 @@
+.button {
+  align-self: flex-start;
+  min-height: var(--tap-target-min);
+  padding: 0 var(--space-5);
+  border: none;
+  border-radius: var(--radius-pill, 999px);
+  background: var(--color-accent);
+  color: var(--color-on-accent, #fff);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}

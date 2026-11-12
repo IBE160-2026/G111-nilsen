@@ -820,3 +820,14 @@ export const backupMessages = {
   },
   openRecipes: "Åpne Oppskrifter",
 } as const;
+
+/** Installerbar app og frakoblet side (Story 6.16). */
+export const pwaMessages = {
+  appName: "RecipeMate",
+  appDescription: "Oppskrifter, porsjoner og handleliste, rett fra telefonen.",
+  offlineTab: "Du er frakoblet",
+  offlineHeading: "Du er frakoblet",
+  offlineTitle: "Ingen nettilkobling akkurat nå.",
+  offlineDescription: "Siden du ba om trenger nett. Sjekk at du er på nett, og prøv igjen.",
+  offlineAction: "Prøv igjen",
+} as const;

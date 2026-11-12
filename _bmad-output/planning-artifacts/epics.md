@@ -1227,3 +1227,23 @@ slik at jeg har en sikkerhetskopi og ikke er låst til én konto.
 
 **Gitt** at jeg ikke er innlogget
 **Så** blir jeg bedt om å logge inn, og nedlastingen gir ingen data
+
+### Story 6.16: Installerbar app (PWA)
+
+Som Ida,
+vil jeg legge RecipeMate på hjemskjermen og åpne den som en egen app,
+slik at den er like rask å finne som andre apper, også når nettet er dårlig.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg åpner RecipeMate i en nettleser som støtter det
+**Så** kan jeg legge appen til på hjemskjermen, med norsk navn, ikon (også maskerbart), farger fra designet og åpning uten nettleserlinje
+
+**Gitt** at appen er installert eller åpnet i produksjonsbygg
+**Så** lagres statiske filer, så appen starter raskt
+
+**Gitt** at jeg åpner en side uten nett
+**Så** får jeg siden «Du er frakoblet» med en «Prøv igjen»-knapp, ikke nettleserens feilside
+
+**Gitt** at jeg er innlogget
+**Så** lagres ingen av sidene mine, oppskrifter eller svar fra serveren på telefonen

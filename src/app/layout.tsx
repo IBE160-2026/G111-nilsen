@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import AccountLink from "@/components/AccountLink";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import TopNav, { TopNavView } from "@/components/TopNav";
+import { config } from "@/server/config";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,6 +17,11 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Adresselinjen på telefonen følger fargene i appen (Story 6.16).
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#b8432f" },
+    { media: "(prefers-color-scheme: dark)", color: "#1c1814" },
+  ],
 };
 
 export default function RootLayout({
@@ -37,6 +44,7 @@ export default function RootLayout({
           />
         </Suspense>
         <main className="page">{children}</main>
+        <ServiceWorkerRegister enabled={config.isProduction} />
       </body>
     </html>
   );
