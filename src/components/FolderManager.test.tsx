@@ -97,4 +97,73 @@ describe("FolderManager", () => {
     await user.type(field, "Fest{Enter}");
     expect(onRename).toHaveBeenCalledExactlyOnceWith(1, "Fest");
   });
+
+  describe("angre sletting (Story 6.30b)", () => {
+    function setupUndo(
+      onUndoDelete: NonNullable<React.ComponentProps<typeof FolderManager>["onUndoDelete"]>,
+    ) {
+      const onDelete = vi.fn().mockResolvedValue({
+        ok: true,
+        restore: { name: "Hverdag", recipeIds: [4, 5, 6] },
+      });
+      render(
+        <FolderManager
+          folders={folders}
+          onCreate={vi.fn()}
+          onRename={vi.fn()}
+          onDelete={onDelete}
+          onUndoDelete={onUndoDelete}
+        />,
+      );
+    }
+
+    async function deleteHverdag(user: ReturnType<typeof userEvent.setup>) {
+      await user.click(screen.getByRole("button", { name: "Slett Hverdag" }));
+      await user.click(screen.getByRole("button", { name: "Slett", description: "" }));
+    }
+
+    it("viser «Angre» etter sletting, og lager mappen på nytt med oppskriftene", async () => {
+      const user = userEvent.setup();
+      const onUndoDelete = vi.fn().mockResolvedValue({ ok: true, name: "Hverdag", restored: 3 });
+      setupUndo(onUndoDelete);
+      expect(screen.queryByRole("button", { name: /Angre/ })).not.toBeInTheDocument();
+      await deleteHverdag(user);
+      expect(
+        await screen.findByText(/Mappen «Hverdag» er slettet\. Oppskriftene ligger fortsatt/),
+      ).toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: "Angre slettingen av Hverdag" }));
+      expect(onUndoDelete).toHaveBeenCalledExactlyOnceWith("Hverdag", [4, 5, 6]);
+      expect(
+        await screen.findByText("Mappen «Hverdag» er gjenopprettet med 3 oppskrifter."),
+      ).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /Angre/ })).not.toBeInTheDocument();
+    });
+
+    it("viser meldingen og lar deg prøve igjen når navnet er tatt", async () => {
+      const user = userEvent.setup();
+      const onUndoDelete = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: false,
+          field: "name",
+          message: "Du har allerede en mappe med dette navnet.",
+        })
+        .mockResolvedValueOnce({ ok: true, name: "Hverdag", restored: 0 });
+      setupUndo(onUndoDelete);
+      await deleteHverdag(user);
+      await user.click(await screen.findByRole("button", { name: /Angre/ }));
+      expect(await screen.findByRole("alert")).toHaveTextContent("allerede en mappe");
+      await user.click(screen.getByRole("button", { name: /Angre/ }));
+      expect(await screen.findByText("Mappen «Hverdag» er gjenopprettet.")).toBeInTheDocument();
+    });
+
+    it("uten onUndoDelete vises ingen «Angre»", async () => {
+      const user = userEvent.setup();
+      setup();
+      await user.click(screen.getByRole("button", { name: "Slett Hverdag" }));
+      await user.click(screen.getByRole("button", { name: "Slett", description: "" }));
+      await waitFor(() => expect(screen.getByRole("textbox", { name: "Ny mappe" })).toHaveFocus());
+      expect(screen.queryByRole("button", { name: /Angre/ })).not.toBeInTheDocument();
+    });
+  });
 });

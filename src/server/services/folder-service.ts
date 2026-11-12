@@ -18,6 +18,7 @@ import {
   listFolders as listFolderRows,
   listRecipesInFolder,
   renameFolder as renameFolderRow,
+  restoreFolder as restoreFolderRows,
 } from "../db/repositories/folder-repository";
 
 /** Feilkoder i `detail` når et mappenavn avvises (`validation`). */
@@ -72,10 +73,44 @@ export function renameFolder(
   return ok({ id, name: checked.value.name });
 }
 
-/** Sletter mappen; oppskriftene blir liggende i samlingen uten mappe. Ukjent id gir `not_found`. */
-export function deleteFolder(userId: number, id: number, db: Db = getDb()): Result<{ id: number }> {
+/**
+ * Sletter mappen; oppskriftene blir liggende i samlingen uten mappe. Ukjent id gir `not_found`.
+ * Svaret har det som trengs for å angre (Story 6.30b): navnet og id-ene til oppskriftene som lå i mappen.
+ */
+export function deleteFolder(
+  userId: number,
+  id: number,
+  db: Db = getDb(),
+): Result<{ id: number; name: string; recipeIds: number[] }> {
   if (!isId(id)) return err(appError("not_found"));
-  return deleteFolderRow(db, userId, id) ? ok({ id }) : err(appError("not_found"));
+  const folder = findFolderById(db, userId, id);
+  if (!folder) return err(appError("not_found"));
+  const recipeIds = listRecipesInFolder(db, userId, id).map((recipe) => recipe.id);
+  return deleteFolderRow(db, userId, id)
+    ? ok({ id, name: folder.name, recipeIds })
+    : err(appError("not_found"));
+}
+
+/**
+ * Angrer en mappesletting (Story 6.30b): lager mappen på nytt med samme navn og legger oppskriftene
+ * tilbake. Navnet valideres som ved `createFolder` (er det tatt av en ny mappe, gir det `validation`).
+ * Oppskrifter som er slettet eller flyttet til en annen mappe siden, røres ikke.
+ */
+export function undoDeleteFolder(
+  userId: number,
+  name: string,
+  recipeIds: readonly number[],
+  db: Db = getDb(),
+): Result<{ id: number; name: string; restored: number }> {
+  const checked = checkName(db, userId, name);
+  if (!checked.ok) return checked;
+  const ids = recipeIds.filter(isId);
+  const { id, restored } = restoreFolderRows(
+    db,
+    { ...checked.value, createdAt: new Date().toISOString(), userId },
+    ids,
+  );
+  return ok({ id, name: checked.value.name, restored });
 }
 
 const collator = new Intl.Collator("nb");

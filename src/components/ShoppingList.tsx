@@ -3,6 +3,8 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import {
   buildShoppingList,
+  capitalizeFirst,
+  capitalizeName,
   splitByPantry,
   type PantryItem,
   type ShoppingRecipe,
@@ -184,7 +186,7 @@ export default function ShoppingList({
       savedAt: new Date().toISOString(),
       items: items.map((item) => ({
         key: item.key,
-        text: item.text,
+        text: capitalizeName(item.text, item.name),
         from: item.recipes.join(", "),
       })),
       checked: items.filter((item) => checked.has(item.key)).map((item) => item.key),
@@ -336,7 +338,7 @@ export default function ShoppingList({
   async function copy() {
     const text = items
       .filter((item) => !checked.has(item.key))
-      .map((item) => `- ${item.text}`)
+      .map((item) => `- ${capitalizeName(item.text, item.name)}`)
       .join("\n");
     try {
       await navigator.clipboard.writeText(text);
@@ -476,7 +478,7 @@ export default function ShoppingList({
                     ) : null
                   }
                 >
-                  <span className={styles.itemText}>{item.text}</span>
+                  <span className={styles.itemText}>{capitalizeName(item.text, item.name)}</span>
                   <span className={styles.from}>
                     {m.fromPrefix} {item.recipes.join(", ")}
                   </span>
@@ -542,7 +544,7 @@ export default function ShoppingList({
             <ul role="list" className={styles.pantryList}>
               {pantry.map((entry) => (
                 <li key={entry.id} className={styles.pantryItem}>
-                  <span>{entry.name}</span>
+                  <span>{capitalizeFirst(entry.name)}</span>
                   <button
                     type="button"
                     className={styles.home}

@@ -147,19 +147,19 @@ describe("fra ukemenyen, ?uke= (Story 6.4)", () => {
       5,
     );
     // 4 dl melk for 4 porsjoner → 5 dl for 5.
-    expect(screen.getByText("5 dl melk")).toBeInTheDocument();
+    expect(screen.getByText("5 dl Melk")).toBeInTheDocument();
   });
 
   it("viser avkrysningene som er lagret for uka (Story 6.4c)", async () => {
     const pancakes = insertRecipe(state.db!, recipe("Pannekaker", "2026-11-09T10:00:00.000Z"));
     addToWeek(TEST_USER_ID, pancakes, "2026-11-09", 4, state.db!);
     render((await renderPage("2026-11-09")).content);
-    const melk = screen.getByRole("checkbox", { name: /melk/ });
+    const melk = screen.getByRole("checkbox", { name: /Melk/ });
     expect(melk).not.toBeChecked();
     cleanup();
     setCheck(TEST_USER_ID, "2026-11-09", "melk|dl", true, state.db!);
     render((await renderPage("2026-11-09")).content);
-    expect(screen.getByRole("checkbox", { name: /melk/ })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: /Melk/ })).toBeChecked();
   });
 
   it("ignorerer en ugyldig uke og velger ingenting", async () => {

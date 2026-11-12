@@ -10,6 +10,7 @@ import {
   moveRecipeToFolder,
   moveRecipeToNewFolder,
   renameFolder,
+  undoDeleteFolder,
 } from "./folder-service";
 import { createManualRecipe } from "./recipe-service";
 
@@ -160,7 +161,10 @@ describe("deleteFolder", () => {
     createFolder(TEST_USER_ID, "Hverdag", db);
     const id = insertRecipe(db, recipe("R", T0));
     moveRecipeToFolder(TEST_USER_ID, id, 1, db);
-    expect(deleteFolder(TEST_USER_ID, 1, db)).toEqual({ ok: true, value: { id: 1 } });
+    expect(deleteFolder(TEST_USER_ID, 1, db)).toEqual({
+      ok: true,
+      value: { id: 1, name: "Hverdag", recipeIds: [id] },
+    });
     expect(findFolderById(db, TEST_USER_ID, 1)).toBeNull();
     expect(findRecipeById(db, id)).toMatchObject({ folderId: null, updatedAt: T0 });
   });
@@ -336,5 +340,59 @@ describe("moveRecipeToNewFolder", () => {
     );
     expect(() => moveRecipeToNewFolder(TEST_USER_ID, id, "Fest", db)).toThrow();
     expect(count(db, "folders")).toBe(0);
+  });
+});
+
+describe("undoDeleteFolder (Story 6.30b)", () => {
+  it("lager mappen på nytt med samme navn og legger oppskriftene tilbake", () => {
+    const db = createTestDb();
+    createFolder(TEST_USER_ID, "Hverdag", db);
+    const a = insertRecipe(db, recipe("A", T0));
+    const b = insertRecipe(db, recipe("B", T0));
+    moveRecipeToFolder(TEST_USER_ID, a, 1, db);
+    moveRecipeToFolder(TEST_USER_ID, b, 1, db);
+    const deleted = deleteFolder(TEST_USER_ID, 1, db);
+    if (!deleted.ok) throw new Error("kunne ikke slette");
+    const result = undoDeleteFolder(TEST_USER_ID, deleted.value.name, deleted.value.recipeIds, db);
+    expect(result).toMatchObject({ ok: true, value: { name: "Hverdag", restored: 2 } });
+    expect(names(db)).toEqual(["Hverdag"]);
+    expect(findRecipeById(db, a)).toMatchObject({ updatedAt: T0 });
+    const folder = getFolderWithRecipes(TEST_USER_ID, result.ok ? result.value.id : 0, db);
+    expect(folder.ok && folder.value.recipes.map((r) => r.id).sort()).toEqual([a, b].sort());
+  });
+
+  it("legger ikke tilbake oppskrifter som er flyttet til en annen mappe siden", () => {
+    const db = createTestDb();
+    createFolder(TEST_USER_ID, "Hverdag", db);
+    createFolder(TEST_USER_ID, "Helg", db);
+    const a = insertRecipe(db, recipe("A", T0));
+    const b = insertRecipe(db, recipe("B", T0));
+    moveRecipeToFolder(TEST_USER_ID, a, 1, db);
+    moveRecipeToFolder(TEST_USER_ID, b, 1, db);
+    deleteFolder(TEST_USER_ID, 1, db);
+    moveRecipeToFolder(TEST_USER_ID, a, 2, db);
+    expect(undoDeleteFolder(TEST_USER_ID, "Hverdag", [a, b], db)).toMatchObject({
+      ok: true,
+      value: { restored: 1 },
+    });
+    expect(findRecipeById(db, a)).toMatchObject({ folderId: 2 });
+  });
+
+  it("tatt navn gir validation og ingenting endres", () => {
+    const db = createTestDb();
+    createFolder(TEST_USER_ID, "Hverdag", db);
+    const a = insertRecipe(db, recipe("A", T0));
+    expect(undoDeleteFolder(TEST_USER_ID, "hverdag", [a], db)).toEqual(invalid("name_taken"));
+    expect(names(db)).toEqual(["Hverdag"]);
+  });
+
+  it("røre ikke oppskrifter som ikke er lagret, og ignorerer ugyldige id-er", () => {
+    const db = createTestDb();
+    const unsaved = insertRecipe(db, recipe("U", null));
+    expect(undoDeleteFolder(TEST_USER_ID, "Ny", [unsaved, 0, -1, 999], db)).toMatchObject({
+      ok: true,
+      value: { restored: 0 },
+    });
+    expect(findRecipeById(db, unsaved)).toMatchObject({ folderId: null });
   });
 });

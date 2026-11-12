@@ -11,6 +11,7 @@ import {
   listFolders,
   listRecipesInFolder,
   renameFolder,
+  restoreFolder,
   type NewFolder,
 } from "./folder-repository";
 import {
@@ -331,5 +332,33 @@ describe("mappe og andre oppskriftshandlinger", () => {
       ["I mappe", "Hverdag"],
       ["Uten", null],
     ]);
+  });
+});
+
+describe("restoreFolder", () => {
+  it("lager mappen på nytt og legger bare ledige, lagrede oppskrifter tilbake", () => {
+    const db = createTestDb();
+    const a = insertRecipe(db, recipe("A", T0));
+    const b = insertRecipe(db, recipe("B", T0));
+    const moved = insertRecipe(db, recipe("Flyttet", T0));
+    const unsaved = insertRecipe(db, recipe("Ikke lagret", null));
+    const other = insertFolder(db, folder("Helg"));
+    assignRecipeToFolder(db, TEST_USER_ID, moved, other);
+
+    const result = restoreFolder(db, folder("Hverdag"), [a, b, moved, unsaved, 999]);
+
+    expect(result.restored).toBe(2);
+    expect(findFolderById(db, TEST_USER_ID, result.id)?.name).toBe("Hverdag");
+    expect(findRecipeById(db, a)?.folderId).toBe(result.id);
+    expect(findRecipeById(db, b)?.folderId).toBe(result.id);
+    expect(findRecipeById(db, moved)?.folderId).toBe(other);
+    expect(findRecipeById(db, unsaved)?.folderId).toBeNull();
+  });
+
+  it("virker med tom liste og med flere enn 200 oppskrifter", () => {
+    const db = createTestDb();
+    expect(restoreFolder(db, folder("Tom"), []).restored).toBe(0);
+    const ids = Array.from({ length: 250 }, (_, i) => insertRecipe(db, recipe(`R${i}`, T0)));
+    expect(restoreFolder(db, folder("Stor"), ids).restored).toBe(250);
   });
 });

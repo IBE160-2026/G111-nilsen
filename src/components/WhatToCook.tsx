@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { useId, useMemo, useState } from "react";
 import type { ActionResult, PantryActionResult } from "@/app/_shared/action-result";
-import { matchPantry, type PantryItem, type PantryMatch, type PantryRecipe } from "@/domain";
+import {
+  capitalizeFirst,
+  matchPantry,
+  type PantryItem,
+  type PantryMatch,
+  type PantryRecipe,
+} from "@/domain";
 import { fallbackMessage, whatToCookMessages as m } from "@/lib/messages";
 import styles from "./WhatToCook.module.css";
 
@@ -144,7 +150,7 @@ export default function WhatToCook({
           <ul role="list" className={styles.chips}>
             {pantry.map((entry) => (
               <li key={entry.id} className={styles.chip}>
-                <span>{entry.name}</span>
+                <span>{capitalizeFirst(entry.name)}</span>
                 <button
                   type="button"
                   className={styles.remove}
@@ -203,7 +209,9 @@ function MatchCard({ match }: { match: PantryMatch }) {
       <h3 className={styles.cardTitle}>{match.title}</h3>
       <p className={styles.meta}>{m.haveCount(match.have.length, total)}</p>
       <p className={styles.missing}>
-        {match.missing.length === 0 ? m.nothingMissing : m.missingList(match.missing)}
+        {match.missing.length === 0
+          ? m.nothingMissing
+          : m.missingList(match.missing.map(capitalizeFirst))}
       </p>
     </Link>
   );

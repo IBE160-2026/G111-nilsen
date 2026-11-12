@@ -133,3 +133,4 @@
 - 912 Rettet sak 011 (konto-skjemaet står i ferdig side) og basisvarer i «Hva kan jeg lage?». Åpent: årsak til 011 ikke bevist; sammensatte ord matches ikke.
 - 911 «mel» passer til sammensatte ord (hvetemel) i «Hva kan jeg lage?». Åpent: kort liste, utvides ved behov.
 - 910 Stor forbokstav i ingredienser og steg (ved visning). Åpent: kokemodus, handleliste og «Har hjemme» ikke endret.
+- 909 Stor forbokstav overalt (6.29b), angre på mappesletting (6.30b), valgfrie snarveier (6.31b). Åpent: angre gjelder til siden lastes på nytt; snarveivalget er per enhet.

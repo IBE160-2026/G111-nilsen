@@ -3,6 +3,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import EmptyState from "@/components/EmptyState";
+import HomeShortcuts from "@/components/HomeShortcuts";
 import { loginHref } from "@/components/LoginRequired";
 import { accountMessages, homeMessages as m } from "@/lib/messages";
 import { currentUserId } from "@/server/session";
@@ -68,17 +69,8 @@ export default function HomePage() {
           ))}
         </ul>
 
-        {/* Sidene som ellers bare nås fra overskriften i Oppskrifter, som en rad med snarveier. */}
-        <h3 className={styles.shortcutsHeading}>{m.shortcutsLabel}</h3>
-        <ul role="list" className={styles.shortcuts}>
-          {m.shortcuts.map((shortcut) => (
-            <li key={shortcut.href}>
-              <Link href={shortcut.href} className={styles.shortcut}>
-                {shortcut.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        {/* Sidene som ellers bare nås fra overskriften i Oppskrifter. Kan skjules (Story 6.31b). */}
+        <HomeShortcuts shortcuts={m.shortcuts} />
       </section>
     </div>
   );

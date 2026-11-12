@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { capitalizeFirst, capitalizeSentences } from "./capitalize";
+import { capitalizeFirst, capitalizeName, capitalizeSentences } from "./capitalize";
 
 describe("capitalizeFirst", () => {
   it("gjør første bokstav stor, også æ, ø og å", () => {
@@ -35,5 +35,21 @@ describe("capitalizeSentences", () => {
   it("endrer ikke tekst som allerede er riktig", () => {
     const ok = "Stek i 10 min. Server med ris.";
     expect(capitalizeSentences(ok)).toBe(ok);
+  });
+});
+
+describe("capitalizeName", () => {
+  it("gjør navnet i en mengdelinje stort, også med «(ca.)» bak", () => {
+    expect(capitalizeName("2 dl melk", "melk")).toBe("2 dl Melk");
+    expect(capitalizeName("1 egg (ca.)", "egg")).toBe("1 Egg (ca.)");
+    expect(capitalizeName("2 ss", "")).toBe("2 ss");
+  });
+  it("uten mengde, eller når navnet ikke står i teksten, blir første bokstav stor", () => {
+    expect(capitalizeName("salt og pepper", "salt og pepper")).toBe("Salt og pepper");
+    expect(capitalizeName("salt og pepper", "")).toBe("Salt og pepper");
+    expect(capitalizeName("2 dl melk", "fløte")).toBe("2 dl melk");
+  });
+  it("bruker siste forekomst av navnet", () => {
+    expect(capitalizeName("1 l l", "l")).toBe("1 l L");
   });
 });

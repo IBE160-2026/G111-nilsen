@@ -45,11 +45,11 @@ describe("WhatToCook", () => {
     const few = screen.getByRole("region", { name: "Mangler 1–2 ting" });
     expect(few).toHaveTextContent("Pannekaker");
     expect(few).toHaveTextContent("Har 1 av 3");
-    expect(few).toHaveTextContent("Mangler: mel, melk");
+    expect(few).toHaveTextContent("Mangler: Mel, Melk");
 
     const more = screen.getByRole("region", { name: "Mangler flere ting" });
     expect(more).toHaveTextContent("Stor gryte");
-    expect(more).toHaveTextContent("Mangler: løk, gulrot, kjøttdeig");
+    expect(more).toHaveTextContent("Mangler: Løk, Gulrot, Kjøttdeig");
     expect(screen.queryByText("Ingen treff")).not.toBeInTheDocument();
   });
 
@@ -83,7 +83,7 @@ describe("WhatToCook", () => {
     expect(screen.getByRole("button", { name: "Fjern melk" })).toBeInTheDocument();
     const few = screen.getByRole("region", { name: "Mangler 1–2 ting" });
     expect(few).toHaveTextContent("Har 2 av 3");
-    expect(few).toHaveTextContent("Mangler: mel");
+    expect(few).toHaveTextContent("Mangler: Mel");
   });
 
   it("viser meldingen fra handlingen under feltet og beholder teksten", async () => {

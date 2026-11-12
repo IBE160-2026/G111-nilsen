@@ -58,16 +58,16 @@ describe("ShoppingList", () => {
     await user.click(pick("Pannekaker"));
     await user.click(pick("Vafler"));
     expect(items()).toEqual([
-      "5 eggTil Pannekaker, Vafler",
-      "400 g melTil Pannekaker",
-      "6 dl melkTil Pannekaker, Vafler",
+      "5 EggTil Pannekaker, Vafler",
+      "400 g MelTil Pannekaker",
+      "6 dl MelkTil Pannekaker, Vafler",
     ]);
     expect(screen.getByText("3 varer")).toBeInTheDocument();
     await user.click(pick("Vafler"));
     expect(items()).toEqual([
-      "3 eggTil Pannekaker",
-      "400 g melTil Pannekaker",
-      "4 dl melkTil Pannekaker",
+      "3 EggTil Pannekaker",
+      "400 g MelTil Pannekaker",
+      "4 dl MelkTil Pannekaker",
     ]);
   });
 
@@ -78,13 +78,13 @@ describe("ShoppingList", () => {
     const number = screen.getByLabelText("Antall porsjoner for Pannekaker");
     expect(number).toHaveValue(4);
     fireEvent.change(number, { target: { value: "8" } });
-    expect(items()).toContain("8 dl melkTil Pannekaker");
+    expect(items()).toContain("8 dl MelkTil Pannekaker");
     fireEvent.change(number, { target: { value: "4.5" } });
-    expect(items()).toContain("4 ½ dl melkTil Pannekaker");
+    expect(items()).toContain("4 ½ dl MelkTil Pannekaker");
     fireEvent.change(number, { target: { value: "4.3" } });
-    expect(items()).toContain("4 ½ dl melkTil Pannekaker");
+    expect(items()).toContain("4 ½ dl MelkTil Pannekaker");
     fireEvent.change(number, { target: { value: "0" } });
-    expect(items()).toContain("4 ½ dl melkTil Pannekaker");
+    expect(items()).toContain("4 ½ dl MelkTil Pannekaker");
   });
 
   it("starter på sist valgte antall, og oppskrift uten antall har ingen antallsfelt", async () => {
@@ -96,7 +96,7 @@ describe("ShoppingList", () => {
     );
     await user.click(pick("A"));
     expect(screen.getByLabelText("Antall porsjoner for A")).toHaveValue(6);
-    expect(items()).toEqual(["6 dl melkTil A"]);
+    expect(items()).toEqual(["6 dl MelkTil A"]);
     await user.click(pick("Uten antall"));
     expect(screen.queryByLabelText("Antall porsjoner for Uten antall")).not.toBeInTheDocument();
   });
@@ -105,10 +105,10 @@ describe("ShoppingList", () => {
     const user = userEvent.setup();
     render(<ShoppingList recipes={recipes} />);
     await user.click(pick("Pannekaker"));
-    await user.click(screen.getByRole("checkbox", { name: /400 g mel/ }));
+    await user.click(screen.getByRole("checkbox", { name: /400 g Mel/ }));
     await user.click(pick("Vafler"));
-    expect(screen.getByRole("checkbox", { name: /400 g mel/ })).toBeChecked();
-    expect(screen.getByRole("checkbox", { name: /6 dl melk/ })).not.toBeChecked();
+    expect(screen.getByRole("checkbox", { name: /400 g Mel/ })).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: /6 dl Melk/ })).not.toBeChecked();
   });
 
   it("dl-visning regner om før sammenslåing", async () => {
@@ -119,7 +119,7 @@ describe("ShoppingList", () => {
     await user.click(pick("A"));
     await user.click(pick("B"));
     await user.click(screen.getByRole("radio", { name: "Volum (dl)" }));
-    expect(items()).toEqual(["3,4 dl milk (ca.)Til A, B"]);
+    expect(items()).toEqual(["3,4 dl Milk (ca.)Til A, B"]);
   });
 
   it("gram-visning slår sammen dl og gram av samme vare", async () => {
@@ -130,7 +130,7 @@ describe("ShoppingList", () => {
     await user.click(pick("A"));
     await user.click(pick("B"));
     await user.click(screen.getByRole("radio", { name: "Vekt (gram)" }));
-    expect(items()).toEqual(["520 g mel (ca.)Til A, B"]);
+    expect(items()).toEqual(["520 g Mel (ca.)Til A, B"]);
   });
 
   it("«Kopier listen» kopierer bare det som ikke er krysset av, og melder fra", async () => {
@@ -139,9 +139,9 @@ describe("ShoppingList", () => {
     Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
     render(<ShoppingList recipes={recipes} />);
     await user.click(pick("Pannekaker"));
-    await user.click(screen.getByRole("checkbox", { name: /3 egg/ }));
+    await user.click(screen.getByRole("checkbox", { name: /3 Egg/ }));
     await user.click(screen.getByRole("button", { name: "Kopier listen" }));
-    expect(writeText).toHaveBeenCalledWith("- 400 g mel\n- 4 dl melk");
+    expect(writeText).toHaveBeenCalledWith("- 400 g Mel\n- 4 dl Melk");
     expect(await screen.findByText("Listen er kopiert.")).toBeInTheDocument();
 
     writeText.mockRejectedValueOnce(new Error("nei"));
@@ -170,7 +170,7 @@ describe("ShoppingList", () => {
         />,
       );
       await user.click(pick("Pannekaker"));
-      expect(items().join("|")).not.toContain("egg");
+      expect(items().join("|")).not.toContain("Egg");
       expect(screen.getByText("1 vare er skjult fordi du har den hjemme.")).toBeInTheDocument();
       expect(screen.getByText("2 varer")).toBeInTheDocument();
     });
@@ -182,12 +182,12 @@ describe("ShoppingList", () => {
       await user.click(pick("Pannekaker"));
       await user.click(screen.getByRole("button", { name: "Har hjemme: egg" }));
       expect(onAdd).toHaveBeenCalledWith("egg");
-      expect(items().join("|")).not.toContain("egg");
+      expect(items().join("|")).not.toContain("Egg");
       expect(await screen.findByText("egg er lagt til i «Har hjemme».")).toBeInTheDocument();
       const section = screen
         .getByRole("heading", { level: 2, name: "Har hjemme" })
         .closest("section")!;
-      expect(within(section).getByText("egg")).toBeInTheDocument();
+      expect(within(section).getByText("Egg")).toBeInTheDocument();
     });
 
     it("«Tøm listen» spør først, tømmer «Har hjemme» og legger varene tilbake", async () => {
@@ -203,13 +203,13 @@ describe("ShoppingList", () => {
         />,
       );
       await user.click(pick("Pannekaker"));
-      expect(items().join("|")).not.toContain("egg");
+      expect(items().join("|")).not.toContain("Egg");
       await user.click(screen.getByRole("button", { name: "Tøm listen" }));
       expect(onClear).not.toHaveBeenCalled();
       await user.click(screen.getByRole("button", { name: "Tøm" }));
       expect(onClear).toHaveBeenCalledTimes(1);
       expect(await screen.findByText("«Har hjemme» er tømt.")).toBeInTheDocument();
-      expect(items().join("|")).toContain("egg");
+      expect(items().join("|")).toContain("Egg");
       expect(screen.getByText("Ingenting ennå.")).toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "Tøm listen" })).not.toBeInTheDocument();
     });
@@ -248,14 +248,14 @@ describe("ShoppingList", () => {
           weekChecks={{ initial: ["egg|"], onChange }}
         />,
       );
-      expect(screen.getByRole("checkbox", { name: /3 egg/ })).toBeChecked();
-      await user.click(screen.getByRole("checkbox", { name: /4 dl melk/ }));
+      expect(screen.getByRole("checkbox", { name: /3 Egg/ })).toBeChecked();
+      await user.click(screen.getByRole("checkbox", { name: /4 dl Melk/ }));
       expect(onChange).toHaveBeenLastCalledWith("melk|dl", true);
-      expect(screen.getByRole("checkbox", { name: /4 dl melk/ })).toBeChecked();
-      await user.click(screen.getByRole("checkbox", { name: /3 egg/ }));
+      expect(screen.getByRole("checkbox", { name: /4 dl Melk/ })).toBeChecked();
+      await user.click(screen.getByRole("checkbox", { name: /3 Egg/ }));
       expect(onChange).toHaveBeenLastCalledWith("egg|", false);
       expect(await screen.findByText("Kunne ikke lagre.")).toBeInTheDocument();
-      expect(screen.getByRole("checkbox", { name: /3 egg/ })).toBeChecked();
+      expect(screen.getByRole("checkbox", { name: /3 Egg/ })).toBeChecked();
     });
 
     it("knappen på varen veksler ikke avkryssingen", async () => {
@@ -269,7 +269,7 @@ describe("ShoppingList", () => {
       );
       await user.click(pick("Pannekaker"));
       await user.click(screen.getByRole("button", { name: "Har hjemme: egg" }));
-      expect(screen.getByRole("checkbox", { name: /3 egg/ })).not.toBeChecked();
+      expect(screen.getByRole("checkbox", { name: /3 Egg/ })).not.toBeChecked();
     });
 
     it("legger til selv med navnefeltet, tømmer feltet og sorterer listen", async () => {
@@ -330,7 +330,7 @@ describe("ShoppingList", () => {
       await user.click(pick("Pannekaker"));
       await user.click(screen.getByRole("button", { name: "Legg tilbake på listen: Egg" }));
       expect(onRemove).toHaveBeenCalledWith(4);
-      expect(items().join("|")).toContain("3 egg");
+      expect(items().join("|")).toContain("3 Egg");
       expect(await screen.findByText("Egg er lagt tilbake på listen.")).toBeInTheDocument();
     });
 
@@ -381,7 +381,7 @@ describe("ShoppingList", () => {
       );
       await user.click(pick("Pannekaker"));
       await user.click(screen.getByRole("button", { name: "Kopier listen" }));
-      expect(writeText).toHaveBeenCalledWith("- 3 egg\n- 400 g mel");
+      expect(writeText).toHaveBeenCalledWith("- 3 Egg\n- 400 g Mel");
     });
   });
 
@@ -415,7 +415,7 @@ describe("ShoppingList", () => {
       await user.type(search, "pann");
       expect(visible()).toEqual(["Pannekaker", "Vafler"]);
       // Listen «Du må kjøpe» påvirkes ikke av søket.
-      expect(items()).toEqual(["2 eggTil Vafler", "2 dl melkTil Vafler"]);
+      expect(items()).toEqual(["2 EggTil Vafler", "2 dl MelkTil Vafler"]);
     });
   });
 
@@ -438,7 +438,7 @@ describe("ShoppingList", () => {
       fireEvent.change(screen.getByLabelText("Antall porsjoner for Pannekaker"), {
         target: { value: "8" },
       });
-      await user.click(screen.getByRole("checkbox", { name: /egg/ }));
+      await user.click(screen.getByRole("checkbox", { name: /Egg/ }));
       await user.type(screen.getByRole("searchbox", { name: "Søk etter oppskrift" }), "pann");
       rerender(<Host mode="hidden" recipes={recipes} />);
       rerender(<Host mode="visible" recipes={recipes} />);
@@ -448,7 +448,7 @@ describe("ShoppingList", () => {
       expect(screen.getByText("Velg minst én oppskrift for å lage en liste.")).toBeInTheDocument();
       await user.click(pick("Pannekaker"));
       expect(screen.getByLabelText("Antall porsjoner for Pannekaker")).toHaveValue(4);
-      expect(screen.getByRole("checkbox", { name: /egg/ })).not.toBeChecked();
+      expect(screen.getByRole("checkbox", { name: /Egg/ })).not.toBeChecked();
     });
 
     it("beholder uka som kom fra ukemenyen, og lagrede avkrysninger", async () => {
@@ -555,13 +555,13 @@ describe("ShoppingList", () => {
       expect(stored()).toMatchObject({
         title: "Uke 46",
         items: [
-          { key: "egg|", text: "3 egg", from: "Pannekaker" },
-          { key: "mel|g", text: "400 g mel", from: "Pannekaker" },
-          { key: "melk|dl", text: "4 dl melk", from: "Pannekaker" },
+          { key: "egg|", text: "3 Egg", from: "Pannekaker" },
+          { key: "mel|g", text: "400 g Mel", from: "Pannekaker" },
+          { key: "melk|dl", text: "4 dl Melk", from: "Pannekaker" },
         ],
         checked: [],
       });
-      await user.click(screen.getByRole("checkbox", { name: /3 egg/ }));
+      await user.click(screen.getByRole("checkbox", { name: /3 Egg/ }));
       expect(stored()?.checked).toEqual(["egg|"]);
     });
 
@@ -579,7 +579,7 @@ describe("ShoppingList", () => {
       const user = userEvent.setup();
       render(<ShoppingList recipes={recipes} pantry={[{ id: 1, name: "egg" }]} />);
       await user.click(pick("Vafler"));
-      expect(stored()?.items.map((item) => item.text)).toEqual(["2 dl melk"]);
+      expect(stored()?.items.map((item) => item.text)).toEqual(["2 dl Melk"]);
     });
   });
 });

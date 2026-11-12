@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { messageFor } from "@/lib/messages";
 import { createTestDb, type Db, TEST_USER_ID } from "@/server/db/client";
-import { listFolders } from "@/server/services/folder-service";
+import { listFolders, moveRecipeToFolder } from "@/server/services/folder-service";
+import { createManualRecipe } from "@/server/services/recipe-service";
 
 const session = vi.hoisted(() => ({ userId: 1 as number | null }));
 vi.mock("@/server/session", () => ({
@@ -20,7 +21,7 @@ vi.mock("@/server/db/client", async (importOriginal) => {
 const revalidatePath = vi.hoisted(() => vi.fn());
 vi.mock("next/cache", () => ({ revalidatePath }));
 
-const { createFolder, deleteFolder, renameFolder } = await import("./actions");
+const { createFolder, deleteFolder, renameFolder, undoDeleteFolder } = await import("./actions");
 
 const failure = (kind: string | undefined) => {
   const message = messageFor(kind);
@@ -154,7 +155,10 @@ describe("deleteFolder", () => {
   it("sletter mappen og revaliderer", async () => {
     await createFolder("Hverdag");
     revalidatePath.mockClear();
-    expect(await deleteFolder(1)).toEqual({ ok: true });
+    expect(await deleteFolder(1)).toEqual({
+      ok: true,
+      restore: { name: "Hverdag", recipeIds: [] },
+    });
     expect(folders()).toEqual([]);
     expect(revalidatePath).toHaveBeenCalledExactlyOnceWith("/", "layout");
   });
@@ -172,5 +176,49 @@ describe("deleteFolder", () => {
     breakDatabase();
     expect(await deleteFolder(1)).toEqual(failure(undefined));
     expect(console.error).toHaveBeenCalled();
+  });
+});
+
+describe("undoDeleteFolder (Story 6.30b)", () => {
+  it("lager mappen på nytt, legger oppskriftene tilbake og revaliderer", async () => {
+    await createFolder("Hverdag");
+    const saved = createManualRecipe(
+      TEST_USER_ID,
+      { title: "Suppe", servings: 4, ingredients: ["2 egg"], steps: ["Stek."] },
+      state.db!,
+    );
+    if (!saved.ok) throw new Error("kunne ikke lagre");
+    moveRecipeToFolder(TEST_USER_ID, saved.value.id, 1, state.db!);
+    const deleted = await deleteFolder(1);
+    if (!deleted.ok || !("restore" in deleted)) throw new Error("kunne ikke slette");
+    revalidatePath.mockClear();
+    expect(await undoDeleteFolder(deleted.restore.name, deleted.restore.recipeIds)).toMatchObject({
+      ok: true,
+      name: "Hverdag",
+      restored: 1,
+    });
+    expect(folders()).toMatchObject([{ name: "Hverdag", recipeCount: 1 }]);
+    expect(revalidatePath).toHaveBeenCalledExactlyOnceWith("/", "layout");
+  });
+
+  it("tatt navn gir melding under feltet", async () => {
+    await createFolder("Hverdag");
+    expect(await undoDeleteFolder("Hverdag", [])).toEqual(
+      nameError("Du har allerede en mappe med dette navnet."),
+    );
+  });
+
+  it("ugyldig navn, id-er og uten innlogging avvises", async () => {
+    expect(await undoDeleteFolder("   ", [])).toMatchObject({ ok: false, field: "name" });
+    expect(await undoDeleteFolder("Ny", [0] as number[])).toEqual(failure("not_found"));
+    expect(await undoDeleteFolder("Ny", "x" as unknown as number[])).toEqual(failure("not_found"));
+    session.userId = null;
+    expect(await undoDeleteFolder("Ny", [])).toEqual(failure("login_required"));
+    session.userId = 1;
+  });
+
+  it("databasefeil: reservemelding", async () => {
+    breakDatabase();
+    expect(await undoDeleteFolder("Ny", [])).toEqual(failure(undefined));
   });
 });

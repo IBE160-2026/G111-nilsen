@@ -5,6 +5,7 @@ import {
   convertLine,
   findStepDurations,
   formatCountdown,
+  capitalizeName,
   formatLine,
   formatTimerLabel,
   ingredientsForStep,
@@ -36,6 +37,11 @@ type Props = {
  * valgt antall og skjermen holdt våken. Innholdet monteres bare mens den er åpen, så steget
  * starter på 1 hver gang. Ingenting lagres.
  */
+/** Ingredienslinjen med navnet med stor forbokstav, som i ingredienslisten (Story 6.29b). */
+function lineText(line: Parameters<typeof formatLine>[0]): string {
+  return capitalizeName(formatLine(line), line.name);
+}
+
 export default function CookingMode({
   title,
   steps,
@@ -301,7 +307,7 @@ function Session({
             </h3>
             <ul role="list" className={styles.stepLines}>
               {stepLines.map((line) => (
-                <li key={line.id}>{formatLine(convertLine(scaleLine(line, factor), units))}</li>
+                <li key={line.id}>{lineText(convertLine(scaleLine(line, factor), units))}</li>
               ))}
             </ul>
           </section>
@@ -315,7 +321,7 @@ function Session({
           </summary>
           <ul role="list" className={styles.lines}>
             {lines.map((line) => (
-              <li key={line.id}>{formatLine(convertLine(scaleLine(line, factor), units))}</li>
+              <li key={line.id}>{lineText(convertLine(scaleLine(line, factor), units))}</li>
             ))}
           </ul>
         </details>

@@ -108,6 +108,10 @@ export const homeMessages = {
    * Handlelisten er ikke med: den har sitt eget kort over, og står i toppmenyen.
    */
   shortcutsLabel: "Og dessuten",
+  customize: "Tilpass",
+  customizeDone: "Ferdig",
+  customizeLegend: "Velg hvilke snarveier som vises",
+  noShortcuts: "Ingen snarveier valgt. Trykk «Tilpass» for å velge.",
   shortcuts: [
     { href: "/hva-kan-jeg-lage", title: "Hva kan jeg lage?" },
     { href: "/middagsforslag", title: "Middagsforslag" },
@@ -698,6 +702,18 @@ export const folderMessages = {
   nameRequired: "Skriv et navn på mappen.",
   nameTooLong: "Navnet kan være maks 40 tegn. Gjør det kortere.",
   nameTaken: "Du har allerede en mappe med dette navnet.",
+  /** Etter sletting (Story 6.30b): «Mappen «Hverdag» er slettet.» med «Angre». */
+  deletedBanner: (name: string, count: number) =>
+    count === 0
+      ? `Mappen «${name}» er slettet.`
+      : `Mappen «${name}» er slettet. ${count === 1 ? "Oppskriften" : "Oppskriftene"} ligger fortsatt i Oppskrifter.`,
+  undo: "Angre",
+  undoFor: (name: string) => `Angre slettingen av ${name}`,
+  restoring: "Gjenoppretter …",
+  restored: (name: string, count: number) =>
+    count === 0
+      ? `Mappen «${name}» er gjenopprettet.`
+      : `Mappen «${name}» er gjenopprettet med ${count === 1 ? "1 oppskrift" : `${count} oppskrifter`}.`,
 } as const;
 
 /** Antall oppskrifter i en mappe: «Ingen oppskrifter», «1 oppskrift» eller «3 oppskrifter». */
@@ -711,7 +727,7 @@ export function recipeCountLabel(count: number): string {
 export const deleteFolderDialogMessages = {
   title: "Slette mappen?",
   descriptionAfterName:
-    "slettes. Oppskriftene i mappen blir liggende i Oppskrifter, uten mappe. Du kan ikke angre.",
+    "slettes. Oppskriftene i mappen blir liggende i Oppskrifter, uten mappe. Du kan angre rett etterpå.",
   confirm: "Slett",
   cancel: "Avbryt",
 } as const;

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { FolderActionResult } from "@/app/_shared/action-result";
+import type { FolderRestore } from "@/app/mapper/actions";
 import type { FolderSummary } from "@/domain";
 import {
   deleteFolderDialogMessages as dialog,
@@ -17,9 +18,12 @@ import styles from "./FolderRow.module.css";
 type Props = {
   folder: FolderSummary;
   onRename: (id: number, name: string) => Promise<FolderActionResult>;
-  onDelete: (id: number) => Promise<FolderActionResult>;
-  /** Kalles etter at mappen er slettet, så eieren kan flytte fokus til et sted som finnes. */
-  onDeleted?: () => void;
+  onDelete: (id: number) => Promise<FolderActionResult<{ restore?: FolderRestore }>>;
+  /**
+   * Kalles etter at mappen er slettet, så eieren kan flytte fokus til et sted som finnes, og få
+   * det som trengs for å angre (Story 6.30b).
+   */
+  onDeleted?: (restore?: FolderRestore) => void;
 };
 
 /**
@@ -63,7 +67,7 @@ export default function FolderRow({ folder, onRename, onDelete, onDeleted }: Pro
     try {
       const result = await onDelete(folder.id);
       setConfirmOpen(false);
-      if (result.ok) onDeleted?.();
+      if (result.ok) onDeleted?.(result.restore);
       else setDeleteError(result.message);
     } catch (error) {
       console.error("Kunne ikke slette mappen", error);

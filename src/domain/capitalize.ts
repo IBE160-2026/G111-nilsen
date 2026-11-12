@@ -11,6 +11,18 @@ export function capitalizeFirst(text: string): string {
   return first !== upper && upper.length === 1 ? upper + text.slice(1) : text;
 }
 
+/**
+ * Linjen («2 dl melk», «2 dl melk (ca.)») med navnet skrevet med stor forbokstav («2 dl Melk»). Står
+ * ikke navnet i teksten (eller er tomt), får første bokstav i teksten stor bokstav i stedet
+ * (Story 6.29b). Brukes på handlelisten og i kokemodus, så navnene ser like ut som i ingredienslisten.
+ */
+export function capitalizeName(text: string, name: string): string {
+  if (name === "") return capitalizeFirst(text);
+  const index = text.lastIndexOf(name);
+  if (index < 0) return capitalizeFirst(text);
+  return text.slice(0, index) + capitalizeFirst(name) + text.slice(index + name.length);
+}
+
 /** Forkortelser som avsluttes med punktum midt i en setning: ordet etter dem skal ikke få stor bokstav. */
 const ABBREVIATIONS = new Set([
   "ca",

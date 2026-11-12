@@ -1370,3 +1370,17 @@ slik at siden føles ferdig i hverdagen.
 
 **Gitt** at språkmodellen er opptatt
 **Så** får jeg enkle forslag og en forklaring i stedet for en feilmelding
+
+### Story 6.29b–6.31b: samme navn overalt, angre på mapper, egne snarveier
+
+Som bruker
+vil jeg at navnene ser like ut på alle sider, at jeg kan angre sletting av en mappe, og at jeg velger hvilke snarveier som vises på forsiden.
+
+**Gitt** at en ingrediens står som «melk»
+**Så** vises den som «Melk» i kokemodus, handleliste og «Har hjemme»
+
+**Gitt** at jeg har slettet en mappe
+**Så** står en «Angre»-knapp som lager mappen på nytt med oppskriftene i
+
+**Gitt** at jeg trykker «Tilpass» på forsiden
+**Så** kan jeg skjule og vise snarveier, og valget er der neste gang på samme enhet

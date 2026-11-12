@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, isNotNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, sql } from "drizzle-orm";
 import type { Folder, FolderSummary, RecipeSummary } from "@/domain";
 import type { Db } from "../client";
 import { folders, recipes } from "../schema";
@@ -131,4 +131,36 @@ export function assignRecipeToNewFolder(
     },
     { behavior: "immediate" },
   );
+}
+
+/**
+ * Gjenoppretter en slettet mappe (Story 6.30b): oppretter mappen på nytt og legger de oppgitte
+ * oppskriftene i den, men bare de som fortsatt er lagret, tilhører brukeren og ikke ligger i en
+ * annen mappe nå. Alt i én transaksjon. Returnerer ny mappe-id og antall oppskrifter som kom tilbake.
+ */
+export function restoreFolder(
+  db: Db,
+  folder: NewFolder,
+  recipeIds: readonly number[],
+): { id: number; restored: number } {
+  return db.transaction((tx) => {
+    const id = tx.insert(folders).values(folder).returning({ id: folders.id }).get().id;
+    let restored = 0;
+    // Litt og litt, så antallet variabler i spørringen holder seg lavt.
+    for (let start = 0; start < recipeIds.length; start += 200) {
+      restored += tx
+        .update(recipes)
+        .set({ folderId: id })
+        .where(
+          and(
+            inArray(recipes.id, recipeIds.slice(start, start + 200)),
+            isNotNull(recipes.savedAt),
+            eq(recipes.userId, folder.userId),
+            isNull(recipes.folderId),
+          ),
+        )
+        .run().changes;
+    }
+    return { id, restored };
+  });
 }

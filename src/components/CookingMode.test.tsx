@@ -127,8 +127,8 @@ describe("CookingMode", () => {
     await user.click(openButton());
     const d = within(dialog());
     expect(d.getByText("Ingredienser for 8 porsjoner")).toBeInTheDocument();
-    expect(d.getAllByText("800 g mel").length).toBeGreaterThan(0);
-    expect(d.getAllByText("4 egg").length).toBeGreaterThan(0);
+    expect(d.getAllByText("800 g Mel").length).toBeGreaterThan(0);
+    expect(d.getAllByText("4 Egg").length).toBeGreaterThan(0);
   });
 
   it("bruker antallet som er valgt på siden akkurat nå, også halve", async () => {
@@ -149,7 +149,7 @@ describe("CookingMode", () => {
     await user.click(openButton());
     const d = within(dialog());
     expect(d.getByText("Ingredienser for 4,5 porsjoner")).toBeInTheDocument();
-    expect(d.getAllByText("450 g mel").length).toBeGreaterThan(0);
+    expect(d.getAllByText("450 g Mel").length).toBeGreaterThan(0);
   });
 
   it("uten gyldig opprinnelig antall vises uskalerte mengder uten antall", async () => {
@@ -158,7 +158,7 @@ describe("CookingMode", () => {
     await user.click(openButton());
     const d = within(dialog());
     expect(d.getByText("Ingredienser")).toBeInTheDocument();
-    expect(d.getAllByText("400 g mel").length).toBeGreaterThan(0);
+    expect(d.getAllByText("400 g Mel").length).toBeGreaterThan(0);
   });
 
   it("virker uten Wake Lock, og når Wake Lock avvises", async () => {
@@ -206,19 +206,19 @@ describe("CookingMode", () => {
       </SelectedServingsProvider>,
     );
     await user.click(openButton());
-    expect(within(dialog()).getByText("2 cup flour")).toBeInTheDocument();
+    expect(within(dialog()).getByText("2 cup Flour")).toBeInTheDocument();
     await user.keyboard("{Escape}");
     dialog().dispatchEvent(new Event("cancel", { cancelable: true }));
     await user.click(screen.getByRole("radio", { name: "Volum (dl)" }));
     await user.click(openButton());
-    expect(within(dialog()).getByText("4,8 dl flour (ca.)")).toBeInTheDocument();
-    expect(within(dialog()).getByText("1 ss salt")).toBeInTheDocument();
+    expect(within(dialog()).getByText("4,8 dl Flour (ca.)")).toBeInTheDocument();
+    expect(within(dialog()).getByText("1 ss Salt")).toBeInTheDocument();
     await user.keyboard("{Escape}");
     dialog().dispatchEvent(new Event("cancel", { cancelable: true }));
     await user.click(screen.getByRole("radio", { name: "Vekt (gram)" }));
     await user.click(openButton());
-    expect(within(dialog()).getByText("290 g flour (ca.)")).toBeInTheDocument();
-    expect(within(dialog()).getByText("18 g salt (ca.)")).toBeInTheDocument();
+    expect(within(dialog()).getByText("290 g Flour (ca.)")).toBeInTheDocument();
+    expect(within(dialog()).getByText("18 g Salt (ca.)")).toBeInTheDocument();
   });
 
   it("viser ingrediensene som brukes i steget, med mengde i valgt antall", async () => {
@@ -233,8 +233,8 @@ describe("CookingMode", () => {
     await user.click(openButton());
     const d = within(dialog());
     const section = d.getByRole("region", { name: "I dette steget" });
-    expect(within(section).getByText("800 g mel")).toBeInTheDocument();
-    expect(within(section).getByText("4 egg")).toBeInTheDocument();
+    expect(within(section).getByText("800 g Mel")).toBeInTheDocument();
+    expect(within(section).getByText("4 Egg")).toBeInTheDocument();
     await user.click(d.getByRole("button", { name: "Neste" }));
     expect(d.queryByRole("region", { name: "I dette steget" })).not.toBeInTheDocument();
   });

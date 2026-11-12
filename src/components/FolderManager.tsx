@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { FolderActionResult } from "@/app/_shared/action-result";
+import type { FolderRestore } from "@/app/mapper/actions";
 import type { FolderSummary } from "@/domain";
 import { folderMessages as m } from "@/lib/messages";
 import EmptyState from "./EmptyState";
 import FolderNameForm from "./FolderNameForm";
 import FolderRow from "./FolderRow";
+import UndoFolderBanner from "./UndoFolderBanner";
 import styles from "./FolderManager.module.css";
 
 type Props = {
@@ -14,7 +16,12 @@ type Props = {
   /** Server Actions fra `src/app/mapper/actions.ts`. */
   onCreate: (name: string) => Promise<FolderActionResult>;
   onRename: (id: number, name: string) => Promise<FolderActionResult>;
-  onDelete: (id: number) => Promise<FolderActionResult>;
+  onDelete: (id: number) => Promise<FolderActionResult<{ restore?: FolderRestore }>>;
+  /** Angrer en sletting (Story 6.30b); uten den vises ingen «Angre». */
+  onUndoDelete?: (
+    name: string,
+    recipeIds: number[],
+  ) => Promise<FolderActionResult<{ name: string; restored: number }>>;
 };
 
 /**
@@ -22,9 +29,17 @@ type Props = {
  * tom-tilstanden under skjemaet når det ikke finnes mapper. Etter sletting flyttes fokus til
  * navnefeltet i «Ny mappe», siden knappen som åpnet dialogen er borte.
  */
-export default function FolderManager({ folders, onCreate, onRename, onDelete }: Props) {
+export default function FolderManager({
+  folders,
+  onCreate,
+  onRename,
+  onDelete,
+  onUndoDelete,
+}: Props) {
   const [focusCreate, setFocusCreate] = useState(0);
   const createSection = useRef<HTMLElement>(null);
+  // Mappen som ble slettet sist, så den kan gjenopprettes (Story 6.30b).
+  const [deleted, setDeleted] = useState<FolderRestore | null>(null);
 
   // Effekten ligger i forelderen, så den kjører etter at dialogen i raden har gitt fokus tilbake
   // til en knapp som snart er borte.
@@ -45,6 +60,10 @@ export default function FolderManager({ folders, onCreate, onRename, onDelete }:
         />
       </section>
 
+      {deleted !== null && onUndoDelete ? (
+        <UndoFolderBanner key={deleted.name} restore={deleted} onUndo={onUndoDelete} />
+      ) : null}
+
       {folders.length === 0 ? (
         <EmptyState
           title={m.emptyTitle}
@@ -59,7 +78,10 @@ export default function FolderManager({ folders, onCreate, onRename, onDelete }:
               folder={folder}
               onRename={onRename}
               onDelete={onDelete}
-              onDeleted={() => setFocusCreate((n) => n + 1)}
+              onDeleted={(restore) => {
+                setFocusCreate((n) => n + 1);
+                setDeleted(restore ?? null);
+              }}
             />
           ))}
         </ul>

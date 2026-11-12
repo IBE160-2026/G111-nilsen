@@ -7,7 +7,7 @@ import LoginRequired from "@/components/LoginRequired";
 import { listFolders } from "@/server/services/folder-service";
 import { currentUserId } from "@/server/session";
 import styles from "../list-page.module.css";
-import { createFolder, deleteFolder, renameFolder } from "./actions";
+import { createFolder, deleteFolder, renameFolder, undoDeleteFolder } from "./actions";
 
 export const metadata: Metadata = { title: folderMessages.heading };
 
@@ -41,6 +41,7 @@ async function FolderLoader() {
       onCreate={createFolder}
       onRename={renameFolder}
       onDelete={deleteFolder}
+      onUndoDelete={undoDeleteFolder}
     />
   );
 }

@@ -480,13 +480,15 @@ test("Versjon 2: handleliste fra lagret oppskrift", async ({ page }, testInfo) =
   const label = (await homeButton.getAttribute("aria-label")) ?? "";
   const name = label.replace("Har hjemme: ", "");
   await homeButton.click();
+  // Listen viser navnet med stor forbokstav (Story 6.29b).
+  const shown = name.charAt(0).toLocaleUpperCase("nb") + name.slice(1);
   const pantry = page
     .getByRole("heading", { level: 2, name: "Har hjemme" })
     .locator("xpath=ancestor::section");
-  await expect(pantry.getByText(name, { exact: true })).toBeVisible();
+  await expect(pantry.getByText(shown, { exact: true })).toBeVisible();
   await expect(list.getByRole("listitem")).toHaveCount(before - 1);
   await page.reload();
-  await expect(pantry.getByText(name, { exact: true })).toBeVisible();
+  await expect(pantry.getByText(shown, { exact: true })).toBeVisible();
   await page.getByRole("checkbox", { name: uj1.title }).check();
   await expect(page.getByText(/skjult fordi du har/)).toBeVisible();
 
@@ -972,6 +974,38 @@ test("Versjon 2: statistikk viser hva som er laget oftest", async ({ page }, tes
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
 });
 
+test("Versjon 2: å slette en mappe kan angres, og oppskriftene kommer tilbake i den", async ({
+  page,
+}, testInfo) => {
+  const title = `Angremappe-oppskrift ${testInfo.project.name}`;
+  const folder = `Angremappe ${testInfo.project.name}`;
+  await page.goto("/ny");
+  await page.waitForLoadState("networkidle");
+  await field(page, "Tittel").fill(title);
+  await field(page, "Antall porsjoner").fill("2");
+  await field(page, "Ingredienser").fill("2 egg");
+  await page.getByRole("button", { name: "Lagre oppskrift" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+  await page.getByRole("button", { name: "Lagre i mappe" }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Ny mappe").check();
+  await dialog.getByLabel("Navn på ny mappe").fill(folder);
+  await dialog.getByRole("button", { name: "Lagre", exact: true }).click();
+  await expect(dialog).toBeHidden();
+
+  await page.goto("/mapper");
+  await page.waitForLoadState("networkidle");
+  const row = page.getByRole("listitem").filter({ hasText: folder });
+  await expect(row).toContainText("1 oppskrift");
+  await page.getByRole("button", { name: `Slett ${folder}` }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Slett", exact: true }).click();
+  await expect(page.getByRole("button", { name: `Slett ${folder}` })).toHaveCount(0);
+
+  await page.getByRole("button", { name: `Angre slettingen av ${folder}` }).click();
+  await expect(page.getByText(`Mappen «${folder}» er gjenopprettet`)).toBeVisible();
+  await expect(row).toContainText("1 oppskrift");
+});
+
 test("Versjon 2: tilfeldig middagsforslag", async ({ page }, testInfo) => {
   const title = `Middag ${testInfo.project.name}`;
   await page.goto("/ny");
@@ -1054,7 +1088,7 @@ test("Versjon 2: Hva kan jeg lage? ut fra det du har hjemme", async ({ page }, t
   await page.getByRole("button", { name: "Legg til", exact: true }).click();
   const few = page.getByRole("region", { name: "Mangler 1–2 ting" });
   await expect(few.getByRole("heading", { level: 3, name: title })).toBeVisible();
-  await expect(few).toContainText("Mangler: kremfløte");
+  await expect(few).toContainText("Mangler: Kremfløte");
 
   // Begge hjemme: kan lages nå.
   await page.getByLabel("Legg til noe du har hjemme").fill("kremfløte");
@@ -1165,6 +1199,18 @@ test("Forsiden har snarveier, og «Hent en oppskrift» går til Importer", async
   // Seks kort pluss «Og dessuten»-raden med seks mindre sider (Story 6.18b, 6.20b).
   await expect(shortcuts.getByRole("link")).toHaveCount(12);
   await expect(page.getByRole("heading", { level: 3, name: "Og dessuten" })).toBeVisible();
+  // Story 6.31b: velg hvilke snarveier som vises; valget består etter ny innlasting.
+  await shortcuts.getByRole("button", { name: "Tilpass" }).click();
+  await shortcuts.getByRole("checkbox", { name: "Statistikk" }).uncheck();
+  await shortcuts.getByRole("button", { name: "Ferdig" }).click();
+  await expect(shortcuts.getByRole("link", { name: "Statistikk", exact: true })).toHaveCount(0);
+  await expect(shortcuts.getByRole("link")).toHaveCount(11);
+  await page.reload();
+  await expect(shortcuts.getByRole("link")).toHaveCount(11);
+  await shortcuts.getByRole("button", { name: "Tilpass" }).click();
+  await shortcuts.getByRole("checkbox", { name: "Statistikk" }).check();
+  await expect(shortcuts.getByRole("link")).toHaveCount(12);
+  await shortcuts.getByRole("button", { name: "Ferdig" }).click();
   await shortcuts.getByRole("link", { name: "Middagsforslag" }).click();
   await expect(
     page.getByRole("heading", { level: 1, name: "Hva skal vi ha til middag?" }),
