@@ -86,6 +86,13 @@ describe("saveRecipeEdits", () => {
     expect(stored()).toEqual(before);
   });
 
+  it("tomt antall porsjoner og utbytte lagres (Story 6.33b)", async () => {
+    const values = { ...valid, servings: "", yieldNote: "Ca 16 kanelboller" };
+    const error = await saveRecipeEdits(id, initialManualRecipeState, form(values)).catch((e) => e);
+    expect(error).toBeInstanceOf(RedirectError);
+    expect(stored()).toMatchObject({ originalServings: null, yieldNote: "Ca 16 kanelboller" });
+  });
+
   it("lagrer endringene og sender brukeren tilbake til /oppskrift/{id}", async () => {
     const error = await saveRecipeEdits(id, initialManualRecipeState, form(valid)).catch((e) => e);
     expect(error).toBeInstanceOf(RedirectError);
