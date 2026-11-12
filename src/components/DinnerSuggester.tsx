@@ -3,22 +3,36 @@
 import Link from "next/link";
 import { useId, useMemo, useState } from "react";
 import { dinnerCandidates, formatMinutes, pickDinner, type DinnerCandidate } from "@/domain";
-import { dinnerMessages as m } from "@/lib/messages";
+import { dinnerMessages as m, ratingMessages } from "@/lib/messages";
 import styles from "./DinnerSuggester.module.css";
 
-type Props = { recipes: readonly DinnerCandidate[] };
+/** En oppskrift i trekningen, med det kortet viser. */
+export type DinnerRecipe = DinnerCandidate & {
+  folderName?: string | null;
+  rating?: number | null;
+  labels?: readonly string[];
+};
 
-const TIMES = [30, 60] as const;
+type Props = { recipes: readonly DinnerRecipe[] };
+
+const TIMES = [
+  { value: null, label: m.timeAll },
+  { value: 30, label: m.timeShort },
+  { value: 60, label: m.timeMedium },
+] as const;
 
 /**
  * Tilfeldig middagsforslag (Story 6.13): trekker en oppskrift fra samlingen, eventuelt bare
- * favoritter og opptil en gitt tid. Trekningen skjer ved klikk, ikke ved visning.
+ * favoritter og opptil en gitt tid. Trekningen skjer ved klikk, ikke ved visning, så siden er
+ * ren å rendre. Forslaget vises i et stort kort som er sidens midtpunkt.
  */
 export default function DinnerSuggester({ recipes }: Props) {
   const id = useId();
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [maxMinutes, setMaxMinutes] = useState<number | null>(null);
-  const [picked, setPicked] = useState<DinnerCandidate | null>(null);
+  const [picked, setPicked] = useState<DinnerRecipe | null>(null);
+  // Teller opp for hver trekning, så kortet kan tones inn på nytt selv om samme rett kommer igjen.
+  const [draws, setDraws] = useState(0);
 
   const candidates = useMemo(
     () => dinnerCandidates(recipes, { onlyFavorites, maxMinutes }),
@@ -26,72 +40,119 @@ export default function DinnerSuggester({ recipes }: Props) {
   );
   // Forslaget gjelder bare så lenge det fortsatt passer filteret og finnes i samlingen.
   const shown = picked !== null && candidates.some((c) => c.id === picked.id) ? picked : null;
+  const empty = candidates.length === 0;
 
   function suggest() {
     setPicked(pickDinner(candidates, shown?.id ?? null));
+    setDraws((n) => n + 1);
   }
 
   return (
     <div className={styles.root}>
       <div className={styles.filters}>
-        <label className={styles.check}>
-          <input
-            type="checkbox"
-            checked={onlyFavorites}
-            onChange={(event) => setOnlyFavorites(event.target.checked)}
-          />
-          <span>{m.onlyFavorites}</span>
+        <input
+          id={`${id}-fav`}
+          type="checkbox"
+          className={styles.toggleInput}
+          checked={onlyFavorites}
+          onChange={(event) => setOnlyFavorites(event.target.checked)}
+        />
+        <label htmlFor={`${id}-fav`} className={styles.toggle}>
+          {m.onlyFavorites}
         </label>
-        <div className={styles.field}>
-          <label htmlFor={`${id}-tid`} className={styles.label}>
-            {m.timeLabel}
-          </label>
-          <select
-            id={`${id}-tid`}
-            className={styles.select}
-            value={maxMinutes === null ? "" : String(maxMinutes)}
-            onChange={(event) =>
-              setMaxMinutes(event.target.value === "" ? null : Number(event.target.value))
-            }
-          >
-            <option value="">{m.timeAny}</option>
-            {TIMES.map((minutes) => (
-              <option key={minutes} value={minutes}>
-                {m.timeUpTo(minutes)}
-              </option>
-            ))}
-          </select>
-        </div>
+
+        <fieldset className={styles.times}>
+          <legend className={styles.legend}>{m.timeLabel}</legend>
+          {TIMES.map((time) => {
+            const value = time.value === null ? "alle" : String(time.value);
+            return (
+              <div key={value} className={styles.timeChoice}>
+                <input
+                  id={`${id}-tid-${value}`}
+                  type="radio"
+                  name={`${id}-tid`}
+                  className={styles.toggleInput}
+                  checked={maxMinutes === time.value}
+                  onChange={() => setMaxMinutes(time.value)}
+                />
+                <label htmlFor={`${id}-tid-${value}`} className={styles.toggle}>
+                  {time.label}
+                </label>
+              </div>
+            );
+          })}
+        </fieldset>
       </div>
-      <p className={styles.meta} aria-live="polite">
-        {m.count(candidates.length)}
+
+      <p className={styles.count} aria-live="polite">
+        {empty ? m.noMatch : m.count(candidates.length)}
       </p>
 
-      {candidates.length === 0 ? (
-        <section className={styles.card}>
-          <h2 className={styles.heading}>{m.noMatch}</h2>
-          <p>{m.noMatchHint}</p>
-        </section>
-      ) : (
-        <button type="button" className={styles.suggest} onClick={suggest}>
-          {shown === null ? m.suggest : m.another}
-        </button>
-      )}
-
-      <div role="status" aria-live="polite">
-        {shown !== null ? (
-          <section aria-label={m.resultHeading} className={styles.card}>
-            <h2 className={styles.heading}>{shown.title}</h2>
-            {shown.totalMinutes !== null ? (
-              <p className={styles.meta}>{formatMinutes(shown.totalMinutes)}</p>
+      <div role="status" aria-live="polite" className={styles.stage}>
+        {empty ? (
+          <section className={styles.card}>
+            <p className={styles.kicker}>{m.resultHeading}</p>
+            <h2 className={styles.title}>{m.noMatch}</h2>
+            <p className={styles.lead}>{m.noMatchHint}</p>
+          </section>
+        ) : shown === null ? (
+          <section className={`${styles.card} ${styles.waiting}`}>
+            <span aria-hidden="true" className={styles.deck}>
+              <span />
+              <span />
+              <span />
+            </span>
+            <h2 className={styles.title}>{m.placeholderTitle}</h2>
+            <p className={styles.lead}>{m.placeholderBody}</p>
+          </section>
+        ) : (
+          <section
+            key={draws}
+            aria-label={m.resultHeading}
+            className={`${styles.card} ${styles.result}`}
+          >
+            <p className={styles.kicker}>{m.resultHeading}</p>
+            <h2 className={styles.title}>{shown.title}</h2>
+            <p className={styles.meta}>
+              {[
+                shown.totalMinutes !== null ? formatMinutes(shown.totalMinutes) : null,
+                shown.folderName ?? null,
+              ]
+                .filter((part) => part !== null)
+                .join(" · ")}
+              {shown.rating != null ? (
+                <span
+                  className={styles.rating}
+                  role="img"
+                  aria-label={ratingMessages.summary(shown.rating)}
+                >
+                  {"★".repeat(shown.rating)}
+                  {"☆".repeat(5 - shown.rating)}
+                </span>
+              ) : null}
+            </p>
+            {shown.labels !== undefined && shown.labels.length > 0 ? (
+              <ul className={styles.labels}>
+                {shown.labels.map((label) => (
+                  <li key={label} className={styles.label}>
+                    {label}
+                  </li>
+                ))}
+              </ul>
             ) : null}
-            {candidates.length === 1 ? <p className={styles.meta}>{m.onlyOne}</p> : null}
+            {candidates.length === 1 ? <p className={styles.lead}>{m.onlyOne}</p> : null}
             <Link href={`/oppskrift/${shown.id}`} className={styles.open}>
               {m.open}
             </Link>
           </section>
-        ) : null}
+        )}
       </div>
+
+      {empty ? null : (
+        <button type="button" className={styles.suggest} onClick={suggest}>
+          {shown === null ? m.suggest : m.another}
+        </button>
+      )}
     </div>
   );
 }

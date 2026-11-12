@@ -7,7 +7,8 @@ import LoginRequired from "@/components/LoginRequired";
 import { collectionMessages, dinnerMessages as m } from "@/lib/messages";
 import { listCollection } from "@/server/services/recipe-service";
 import { currentUserId } from "@/server/session";
-import styles from "../list-page.module.css";
+import listStyles from "../list-page.module.css";
+import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: m.heading };
 
@@ -17,9 +18,9 @@ export const metadata: Metadata = { title: m.heading };
  */
 export default function DinnerPage() {
   return (
-    <div className={styles.root}>
+    <div className={`${listStyles.root} ${styles.root}`}>
       <h1>{m.heading}</h1>
-      <Suspense fallback={<p className={styles.loading}>{m.loading}</p>}>
+      <Suspense fallback={<p className={listStyles.loading}>{m.loading}</p>}>
         <DinnerLoader />
       </Suspense>
     </div>
@@ -47,13 +48,16 @@ async function DinnerLoader() {
 
   return (
     <>
-      <p>{m.lead}</p>
+      <p className={styles.lead}>{m.lead}</p>
       <DinnerSuggester
         recipes={recipes.value.map((recipe) => ({
           id: recipe.id,
           title: recipe.title,
           totalMinutes: recipe.totalMinutes ?? null,
           isFavorite: recipe.isFavorite,
+          folderName: recipe.folderName,
+          rating: recipe.rating ?? null,
+          labels: recipe.labels ?? [],
         }))}
       />
     </>

@@ -1,0 +1,15 @@
+/* Siden er én sentrert komposisjon: overskrift, ingress og forslagskortet under hverandre. */
+.root {
+  align-items: center;
+  text-align: center;
+}
+
+.root > h1 {
+  margin: 0;
+}
+
+.lead {
+  max-width: 34rem;
+  margin: 0;
+  color: var(--color-ink-secondary);
+}

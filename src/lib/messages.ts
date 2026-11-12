@@ -759,6 +759,12 @@ export const dinnerMessages = {
   suggest: "Foreslå en middag",
   another: "Foreslå en annen",
   resultHeading: "Forslag",
+  /** Teksten i det tomme kortet før man har trykket. */
+  placeholderTitle: "Middagen venter",
+  placeholderBody: "Trykk på knappen, så trekker appen en av oppskriftene dine.",
+  timeAll: "Alle",
+  timeShort: "Opptil 30 min",
+  timeMedium: "Opptil 60 min",
   open: "Åpne oppskriften",
   count: (n: number) => (n === 1 ? "1 oppskrift å velge blant" : `${n} oppskrifter å velge blant`),
   suggested: (title: string) => `Forslag: ${title}`,

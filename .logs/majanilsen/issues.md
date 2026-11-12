@@ -124,3 +124,4 @@
 - 921 PRD revidert etter tilbakemelding fra faglærer: scope delt i bygget/kandidat/ikke nå, testbare konsekvenser, NFR-8/NFR-9. Åpent: rate-limit faller ikke tilbake til enkle forslag; opphavsrett ikke avklart.
 - 920 README ryddet: innholdsfortegnelse, to samleseksjoner, Epic 6 sortert, oppdaterte testtall og e2e-liste. Åpent: CI-status ikke verifisert.
 - 919 Nye skjermbilder i README, og rettet at «la røren hvile» ble foreslått selv om oppskriften sa «la røren svelle». Åpent: slett docs/skjermbilde-versjon-2.png.
+- 918 Designet middagsforslag-siden på nytt: sentrert kort, pillefiltre. Åpent: pille-mønsteret bør gjenbrukes i den samlede designrunden.

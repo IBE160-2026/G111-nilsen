@@ -1,83 +1,253 @@
 .root {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--space-4);
-  max-width: var(--content-max-width);
+  width: 100%;
+  max-width: 34rem;
+  margin: 0 auto;
+  text-align: center;
 }
 
+/* Filtre som trykkflater i stedet for et skjema: avkrysning og tid i samme rad. Større avstand
+   mellom favorittpillen og tidsvalgene, så de leses som to grupper også når raden brytes. */
 .filters {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-4);
+  justify-content: center;
+  gap: var(--space-2) var(--space-5);
 }
 
-.check {
+.times {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+/* Gruppenavnet leses opp, men tar ikke plass: valgene sier seg selv. */
+.legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.timeChoice {
+  display: contents;
+}
+
+/* Selve inndatafeltet er skjult, men fortsatt i tabrekkefølgen og for skjermlesere. */
+.toggleInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.toggle {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
   min-height: var(--tap-target-min);
-  font-weight: var(--type-label-weight);
+  padding: 0 var(--space-4);
+  border: var(--button-border-width) solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-raised);
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.label {
-  font-weight: var(--type-label-weight);
-}
-
-.select {
-  min-height: var(--tap-target-min);
-  padding: 0 var(--space-3);
-  border: 1px solid var(--color-border-strong, var(--color-border-hairline));
-  border-radius: var(--radius-sm, 8px);
-  background: var(--color-surface);
+.toggle:hover {
+  border-color: var(--color-accent);
   color: var(--color-ink-primary);
-  font: inherit;
 }
 
-.meta {
+/* Valgt: fylt pille, så tilstanden ikke bæres av farge alene (den har også aria-checked). */
+.toggleInput:checked + .toggle {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.toggleInput:focus-visible + .toggle {
+  outline: var(--focus-ring-width) solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.count {
   margin: 0;
   color: var(--color-ink-secondary);
   font-size: var(--type-meta-size);
 }
 
-.suggest {
-  align-self: flex-start;
-  min-height: var(--tap-target-min);
-  padding: 0 var(--space-5);
-  border: none;
-  border-radius: var(--radius-pill, 999px);
-  background: var(--color-accent);
-  color: var(--color-on-accent, #fff);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
+.stage {
+  width: 100%;
 }
 
 .card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  background: var(--color-surface-raised);
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 16rem;
+  justify-content: center;
+  padding: var(--space-6) var(--space-5);
   border: 1px solid var(--color-border-hairline);
   border-radius: var(--radius-md);
-  padding: var(--space-5) var(--space-4);
+  background: var(--color-surface-raised);
 }
 
-.heading {
+/* Før trekningen: tonet kort med stiplet kant, så det ser ut som en plass som venter. */
+.waiting {
+  border-style: dashed;
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-tint);
+}
+
+/* Tre kort i en stabel: «trekk en av oppskriftene dine». */
+.deck {
+  position: relative;
+  width: 84px;
+  height: 60px;
+  margin-bottom: var(--space-1);
+}
+
+.deck span {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+}
+
+.deck span:nth-child(1) {
+  transform: rotate(-11deg) translate(-9px, 3px);
+  opacity: 0.5;
+}
+
+.deck span:nth-child(2) {
+  transform: rotate(7deg) translate(9px, 1px);
+  opacity: 0.75;
+}
+
+.deck span:nth-child(3) {
+  border-color: var(--color-accent);
+}
+
+.result {
+  animation: appear 220ms ease-out;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result {
+    animation: none;
+  }
+}
+
+.kicker {
   margin: 0;
+  color: var(--color-ink-secondary);
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  letter-spacing: var(--type-label-letter-spacing);
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.75rem;
+  line-height: var(--type-display-line-height);
+  text-wrap: balance;
+}
+
+.meta,
+.lead {
+  margin: 0;
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
+}
+
+.rating {
+  margin-left: var(--space-2);
+  color: var(--color-accent);
+  letter-spacing: 0.1em;
+}
+
+.labels {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.label {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-full);
+  color: var(--color-ink-secondary);
+  font-size: var(--type-meta-size);
 }
 
 .open {
-  align-self: flex-start;
-  min-height: var(--tap-target-min);
   display: inline-flex;
   align-items: center;
+  min-height: var(--tap-target-min);
+  margin-top: var(--space-1);
+  padding: 0 var(--space-5);
+  border: var(--button-border-width) solid var(--color-accent);
+  border-radius: var(--radius-full);
   color: var(--color-accent);
-  font-weight: var(--type-label-weight);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.suggest {
+  min-height: 3.25rem;
+  padding: 0 var(--space-6);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font: inherit;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.suggest:hover {
+  filter: brightness(0.95);
+}
+
+@media (min-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
 }
