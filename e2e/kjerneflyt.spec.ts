@@ -974,6 +974,29 @@ test("Versjon 2: statistikk viser hva som er laget oftest", async ({ page }, tes
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
 });
 
+test("Versjon 2: ingredienser kan deles i lister som «Kanelboller» og «Fyll»", async ({
+  page,
+}, testInfo) => {
+  const title = `Delelister ${testInfo.project.name}`;
+  await page.goto("/ny");
+  await page.waitForLoadState("networkidle");
+  await field(page, "Tittel").fill(title);
+  await field(page, "Antall porsjoner").fill("4");
+  await field(page, "Ingredienser").fill("Kanelboller:\n5 dl mel\nFyll:\n100 g smør\n2 ss kanel");
+  await page.getByRole("button", { name: "Lagre oppskrift" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+  const card = page.getByRole("region", { name: "Ingredienser" });
+  await expect(card.getByRole("heading", { level: 3, name: "Kanelboller" })).toBeVisible();
+  await expect(card.getByRole("heading", { level: 3, name: "Fyll" })).toBeVisible();
+  await expect(card.getByRole("listitem")).toHaveCount(3);
+
+  // Redigering viser listene som overskrifter igjen.
+  await page.getByRole("link", { name: `Rediger ${title}` }).click();
+  await expect(field(page, "Ingredienser")).toHaveValue(
+    "Kanelboller:\n5 dl mel\nFyll:\n100 g smør\n2 ss kanel",
+  );
+});
+
 test("Versjon 2: å slette en mappe kan angres, og oppskriftene kommer tilbake i den", async ({
   page,
 }, testInfo) => {

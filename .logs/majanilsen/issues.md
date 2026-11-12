@@ -134,3 +134,4 @@
 - 911 «mel» passer til sammensatte ord (hvetemel) i «Hva kan jeg lage?». Åpent: kort liste, utvides ved behov.
 - 910 Stor forbokstav i ingredienser og steg (ved visning). Åpent: kokemodus, handleliste og «Har hjemme» ikke endret.
 - 909 Stor forbokstav overalt (6.29b), angre på mappesletting (6.30b), valgfrie snarveier (6.31b). Åpent: angre gjelder til siden lastes på nytt; snarveivalget er per enhet.
+- 908 Delelister i ingredienser («Fyll:» som overskrift). Åpent: steg har ikke delelister; ingen egen knapp for å legge til liste.

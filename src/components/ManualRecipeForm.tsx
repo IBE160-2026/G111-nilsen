@@ -134,7 +134,9 @@ export default function ManualRecipeForm({
           Ingredienser
         </label>
         <p id={`${idOf("ingredients")}-hint`} className={styles.hint}>
-          Én ingrediens per linje, for eksempel «400 g mel» eller «2 egg».
+          Én ingrediens per linje, for eksempel «400 g mel» eller «2 egg». Skal oppskriften ha flere
+          lister, for eksempel «Deig» og «Fyll», skriver du navnet på en egen linje med kolon:
+          «Fyll:».
         </p>
         <textarea
           rows={8}

@@ -85,3 +85,10 @@ export {
   MAX_TIMER_SECONDS,
   type StepDuration,
 } from "./step-durations";
+export {
+  MAX_SECTION_LENGTH,
+  joinSections,
+  sectionHeading,
+  splitSections,
+  type SectionedLine,
+} from "./ingredient-sections";

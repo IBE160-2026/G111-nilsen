@@ -131,6 +131,7 @@ Kravene står i PRD §4.7 (FR-28–FR-43), med status på hvert krav i PRD §4.0
 - **Rettinger (6.26b):** innloggingsskjemaet mister ikke lenger det du skriver rett etter at siden åpnes (sak 011), og «Hva kan jeg lage?» sier ikke at du mangler vann, salt eller pepper. «mel» passer også til «hvetemel» og «maismel».
 - **Stor forbokstav (6.28b):** ingrediensnavn og hver setning i stegene vises med stor forbokstav, også for oppskrifter som allerede er lagret.
 - **Samme navn overalt, angre på mapper, egne snarveier (6.29b–6.31b):** kokemodus, handleliste og «Har hjemme» bruker samme stor forbokstav; sletting av en mappe kan angres; og du velger selv hvilke snarveier som vises på forsiden («Tilpass»).
+- **Delelister (6.32b):** ingredienser kan deles i lister som «Kanelboller» og «Fyll» ved å skrive navnet med kolon på egen linje.
 
 Ikke bygget ennå: offentlig lenke til én oppskrift, glemt passord og delt handleliste (kandidater), og stemmestyring i kokemodus (utsatt). Designrunden tas samlet til slutt.
 

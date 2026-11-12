@@ -1,5 +1,5 @@
 import type { ManualRecipeValues } from "@/app/_shared/form-fields";
-import type { Recipe } from "@/domain";
+import { joinSections, type Recipe } from "@/domain";
 
 /** Skjemaverdiene slik oppskriften står nå: én ingrediens og ett steg per linje. */
 export function initialValuesOf(recipe: Recipe): ManualRecipeValues {
@@ -9,9 +9,12 @@ export function initialValuesOf(recipe: Recipe): ManualRecipeValues {
     title: recipe.title,
     servings: recipe.originalServings === null ? "" : String(recipe.originalServings),
     minutes: recipe.totalMinutes == null ? "" : String(recipe.totalMinutes),
-    ingredients: byPosition(recipe.ingredients)
-      .map((line) => line.original)
-      .join("\n"),
+    ingredients: joinSections(
+      byPosition(recipe.ingredients).map((line) => ({
+        text: line.original,
+        section: line.section,
+      })),
+    ).join("\n"),
     steps: byPosition(recipe.steps)
       .map((step) => step.text)
       .join("\n"),

@@ -1384,3 +1384,14 @@ vil jeg at navnene ser like ut på alle sider, at jeg kan angre sletting av en m
 
 **Gitt** at jeg trykker «Tilpass» på forsiden
 **Så** kan jeg skjule og vise snarveier, og valget er der neste gang på samme enhet
+
+### Story 6.32b: delelister i ingredienser
+
+Som bruker
+vil jeg dele ingrediensene i lister, for eksempel «Kanelboller» og «Fyll».
+
+**Gitt** at jeg skriver «Fyll:» på en egen linje i ingrediensfeltet
+**Så** blir linjene under en egen liste med overskriften «Fyll»
+
+**Gitt** at jeg redigerer en oppskrift med flere lister
+**Så** står listene som overskrifter med kolon i feltet

@@ -57,6 +57,23 @@ function saveAndRead(values: Partial<ManualRecipeInput>) {
 }
 
 describe("recipe-service", () => {
+  it("Delelister: «Fyll:» blir overskrift og ikke ingrediens (Story 6.32b)", () => {
+    const recipe = saveAndRead({
+      ingredients: ["Kanelboller:", "5 dl mel", "1 egg", "Fyll:", "100 g smør"],
+    });
+    expect(recipe.ingredients.map((l) => [l.position, l.section, l.original])).toEqual([
+      [0, "Kanelboller", "5 dl mel"],
+      [1, "Kanelboller", "1 egg"],
+      [2, "Fyll", "100 g smør"],
+    ]);
+  });
+
+  it("Delelister: bare overskrifter uten ingredienser avvises", () => {
+    expect(
+      createManualRecipe(TEST_USER_ID, { ...input, ingredients: ["Fyll:"] }, createTestDb()),
+    ).toEqual({ ok: false, error: { kind: "validation", detail: "ingredients" } });
+  });
+
   it("Gyldig: lagrer tittel, antall, tolkede linjer og steg", () => {
     const recipe = saveAndRead({});
     expect(recipe).toMatchObject({

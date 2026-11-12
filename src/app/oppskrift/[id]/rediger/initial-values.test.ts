@@ -51,6 +51,25 @@ describe("initialValuesOf", () => {
     });
   });
 
+  it("delelister skrives tilbake som overskrifter med kolon (Story 6.32b)", () => {
+    const line = (id: number, section: string | null, original: string) => ({
+      ...recipe.ingredients[1],
+      id,
+      position: id,
+      section,
+      original,
+    });
+    const values = initialValuesOf({
+      ...recipe,
+      ingredients: [
+        line(0, "Deig", "5 dl mel"),
+        line(1, "Fyll", "100 g smør"),
+        line(2, "Fyll", "sukker"),
+      ],
+    });
+    expect(values.ingredients).toBe("Deig:\n5 dl mel\nFyll:\n100 g smør\nsukker");
+  });
+
   it("porsjonsantall vises som tekst", () => {
     expect(initialValuesOf({ ...recipe, originalServings: 4 }).servings).toBe("4");
   });

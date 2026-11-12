@@ -9,6 +9,7 @@ import {
   type RecipeSummary,
   type ShoppingRecipe,
   withAppliedSuggestions,
+  splitSections,
 } from "@/domain";
 import { isSelectedServings, LIMITS, splitLines } from "@/lib/recipe-input";
 import { appError, err, ok, type Result } from "@/lib/result";
@@ -103,7 +104,9 @@ type RecipeContent = { title: string; ingredients: NewIngredientLine[]; steps: N
  */
 function buildContent(input: ManualRecipeInput): Result<RecipeContent> {
   const title = input.title.trim();
-  const ingredients = linesOf(input.ingredients);
+  // Linjer som slutter på «:» er overskrifter for delelister, ikke ingredienser (Story 6.32b).
+  const sectioned = splitSections(linesOf(input.ingredients));
+  const ingredients = sectioned.map((line) => line.text);
   const stepTexts = linesOf(input.steps);
 
   const invalid = invalidField(title, input.servings, ingredients, stepTexts);
@@ -114,10 +117,10 @@ function buildContent(input: ManualRecipeInput): Result<RecipeContent> {
 
   return ok({
     title,
-    ingredients: ingredients.map((text, position) => ({
+    ingredients: sectioned.map(({ text, section }, position) => ({
       ...parseLine(text),
       position,
-      section: null,
+      section,
     })),
     steps: stepTexts.map((text, position) => ({ text, position, section: null })),
   });
