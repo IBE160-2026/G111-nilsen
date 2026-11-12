@@ -935,13 +935,43 @@ test("Versjon 2: tilfeldig middagsforslag", async ({ page }, testInfo) => {
   await page.getByRole("button", { name: "Lagre oppskrift" }).click();
   await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
 
+  // Egen mappe, så mappefilteret har noe å trekke fra (Story 6.13b).
+  const folder = `Middagsmappe ${testInfo.project.name}`;
+  await page.getByRole("button", { name: "Lagre i mappe" }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Ny mappe").check();
+  await dialog.getByLabel("Navn på ny mappe").fill(folder);
+  await dialog.getByRole("button", { name: "Lagre", exact: true }).click();
+  await expect(dialog).toBeHidden();
+
   await page.goto("/oppskrifter");
   await page.getByRole("link", { name: "Middagsforslag" }).click();
   await expect(
     page.getByRole("heading", { level: 1, name: "Hva skal vi ha til middag?" }),
   ).toBeVisible();
+  await page.waitForLoadState("networkidle");
+
+  // Pillene er etiketter til skjulte avkrysningsbokser; et klikk på etiketten skal slå dem på.
+  await expect(page.getByRole("checkbox", { name: "Alle mapper" })).toBeChecked();
+  await page
+    .locator("label")
+    .filter({ hasText: new RegExp(`^${folder}$`) })
+    .click();
+  await expect(page.getByRole("checkbox", { name: folder })).toBeChecked();
+  await expect(page.getByRole("checkbox", { name: "Alle mapper" })).not.toBeChecked();
+  await expect(page.getByText("1 oppskrift å velge blant")).toBeVisible();
 
   await page.getByRole("button", { name: "Foreslå en middag" }).click();
+  await expect(page.getByRole("region", { name: "Forslag" })).toContainText(title);
+
+  // «Alle mapper» nullstiller valget.
+  await page
+    .locator("label")
+    .filter({ hasText: /^Alle mapper$/ })
+    .click();
+  await expect(page.getByRole("checkbox", { name: folder })).not.toBeChecked();
+
+  await page.getByRole("button", { name: /Foreslå en/ }).click();
   const result = page.getByRole("region", { name: "Forslag" });
   await expect(result).toBeVisible();
   await expect(page.getByRole("button", { name: "Foreslå en annen" })).toBeVisible();

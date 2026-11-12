@@ -763,6 +763,11 @@ export const dinnerMessages = {
   placeholderTitle: "Middagen venter",
   placeholderBody: "Trykk på knappen, så trekker appen en av oppskriftene dine.",
   timeAll: "Alle",
+  /** Mappefilter (Story 6.13b). */
+  foldersLabel: "Mapper",
+  allFolders: "Alle mapper",
+  noFolder: "Uten mappe",
+  folderFor: (name: string) => `Trekk fra mappen ${name}`,
   timeShort: "Opptil 30 min",
   timeMedium: "Opptil 60 min",
   open: "Åpne oppskriften",

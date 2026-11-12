@@ -36,6 +36,7 @@ export { convertLine, hasConvertibleUnit, type UnitSystem } from "./convert-unit
 export { parseRecipeText, type RecipeDraft } from "./parse-recipe-text";
 export {
   dinnerCandidates,
+  dinnerFolders,
   pickDinner,
   type DinnerCandidate,
   type DinnerFilter,

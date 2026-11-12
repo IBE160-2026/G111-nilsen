@@ -2,13 +2,18 @@
 
 import Link from "next/link";
 import { useId, useMemo, useState } from "react";
-import { dinnerCandidates, formatMinutes, pickDinner, type DinnerCandidate } from "@/domain";
+import {
+  dinnerCandidates,
+  dinnerFolders,
+  formatMinutes,
+  pickDinner,
+  type DinnerCandidate,
+} from "@/domain";
 import { dinnerMessages as m, ratingMessages } from "@/lib/messages";
 import styles from "./DinnerSuggester.module.css";
 
 /** En oppskrift i trekningen, med det kortet viser. */
 export type DinnerRecipe = DinnerCandidate & {
-  folderName?: string | null;
   rating?: number | null;
   labels?: readonly string[];
 };
@@ -30,17 +35,26 @@ export default function DinnerSuggester({ recipes }: Props) {
   const id = useId();
   const [onlyFavorites, setOnlyFavorites] = useState(false);
   const [maxMinutes, setMaxMinutes] = useState<number | null>(null);
+  // Mappene det trekkes fra (Story 6.13b). Tom = alle.
+  const [folders, setFolders] = useState<readonly (string | null)[]>([]);
   const [picked, setPicked] = useState<DinnerRecipe | null>(null);
   // Teller opp for hver trekning, så kortet kan tones inn på nytt selv om samme rett kommer igjen.
   const [draws, setDraws] = useState(0);
 
+  const folderOptions = useMemo(() => dinnerFolders(recipes), [recipes]);
   const candidates = useMemo(
-    () => dinnerCandidates(recipes, { onlyFavorites, maxMinutes }),
-    [recipes, onlyFavorites, maxMinutes],
+    () => dinnerCandidates(recipes, { onlyFavorites, maxMinutes, folders }),
+    [recipes, onlyFavorites, maxMinutes, folders],
   );
   // Forslaget gjelder bare så lenge det fortsatt passer filteret og finnes i samlingen.
   const shown = picked !== null && candidates.some((c) => c.id === picked.id) ? picked : null;
   const empty = candidates.length === 0;
+
+  function toggleFolder(name: string | null) {
+    setFolders((chosen) =>
+      chosen.includes(name) ? chosen.filter((other) => other !== name) : [...chosen, name],
+    );
+  }
 
   function suggest() {
     setPicked(pickDinner(candidates, shown?.id ?? null));
@@ -83,6 +97,41 @@ export default function DinnerSuggester({ recipes }: Props) {
           })}
         </fieldset>
       </div>
+
+      {folderOptions.length > 1 ? (
+        <fieldset className={styles.filters}>
+          <legend className={styles.legend}>{m.foldersLabel}</legend>
+          <div className={styles.timeChoice}>
+            <input
+              id={`${id}-mapper-alle`}
+              type="checkbox"
+              className={styles.toggleInput}
+              checked={folders.length === 0}
+              onChange={() => setFolders([])}
+            />
+            <label htmlFor={`${id}-mapper-alle`} className={styles.toggle}>
+              {m.allFolders}
+            </label>
+          </div>
+          {folderOptions.map((folder, index) => {
+            const name = folder ?? m.noFolder;
+            return (
+              <div key={folder ?? "\u0000"} className={styles.timeChoice}>
+                <input
+                  id={`${id}-mappe-${index}`}
+                  type="checkbox"
+                  className={styles.toggleInput}
+                  checked={folders.includes(folder)}
+                  onChange={() => toggleFolder(folder)}
+                />
+                <label htmlFor={`${id}-mappe-${index}`} className={styles.toggle}>
+                  {name}
+                </label>
+              </div>
+            );
+          })}
+        </fieldset>
+      ) : null}
 
       <p className={styles.count} aria-live="polite">
         {empty ? m.noMatch : m.count(candidates.length)}

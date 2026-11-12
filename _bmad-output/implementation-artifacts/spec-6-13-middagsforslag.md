@@ -12,6 +12,12 @@ Epic 6. Ida vil la appen velge en tilfeldig middag fra samlingen.
 ## Verifisering
 lint, typecheck, format:check og build grønne; 130 filer og 3018 tester; 38 e2e grønne. Skjermbilder ved 360 og 1280 px sett, uten vannrett rulling.
 
+## Tillegg 2026-11-12: mappefilter (Story 6.13b)
+- **Domene:** `DinnerCandidate` har `folderName: string | null`, og `DinnerFilter.folders` er mappene det trekkes fra (`null` i listen = «uten mappe»). **Tom liste betyr alle mapper**, så brukeren slipper å velge noe for å komme i gang. `dinnerFolders(recipes)` gir mappene som finnes i samlingen, sortert på norsk, med «uten mappe» sist.
+- **Visning:** en egen rad med piller under tidsvalgene: «Alle mapper» (valgt når ingen mappe er valgt; et klikk nullstiller), så én pille per mappe og «Uten mappe» når noen oppskrifter mangler mappe. Flere mapper kan velges samtidig (avkrysningsbokser i et `fieldset` med skjult `legend` «Mapper»).
+- Raden vises bare når det er mer enn ett valg; med alt i samme mappe er filteret meningsløst.
+- Et forslag som faller utenfor etter at mappene er endret, forsvinner (samme regel som for tid og favoritter).
+
 ## Designrunde 2026-11-12
 Siden var teknisk riktig, men kjedelig: innholdet lå som en tynn stripe øverst til venstre, og resten av skjermen var tom. Endret uten å endre oppførselen:
 - Sentrert komposisjon (overskrift, ingress, filtre, kort, knapp) i en kolonne på maks 34 rem.
@@ -24,4 +30,6 @@ Egen gjennomgang.
 - Funnet og rettet: e2e fant to avkrysningsfelt «Bare favoritter» (skjult Oppskrifter-side under Activity); testen bruker rolle-spørring som bare ser synlige elementer.
 - Valgt: ingen tilfeldighet under rendering (renhet), trekning ved klikk.
 - Utsatt: «ikke samme som sist uke», vekting etter vurdering, å kombinere med «Hva kan jeg lage?».
+- Funnet etter mappefilteret: `fieldset` tegnet nettleserens egen ramme rundt mappepillene; nullstilt i `.filters`.
+- Valgt: mappene identifiseres med navn, ikke id. Navnet er unikt per konto, og listen som siden allerede leser, har navnet.
 - Funnet i designrunden: kortet hadde ingen informasjon utover tittel og tid; det viser nå også mappe, vurdering og merkelapper, som allerede lå i dataene siden leste.

@@ -16,6 +16,10 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--space-2) var(--space-5);
+  /* Mapperaden er et fieldset; nullstill nettleserens ramme og marg. */
+  margin: 0;
+  padding: 0;
+  border: none;
 }
 
 .times {
