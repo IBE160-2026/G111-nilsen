@@ -12,7 +12,7 @@ Repoet inneholder applikasjonen og dokumentasjon av utvikling, testing og kvalit
 
 **RecipeMate** er en matlagingsassistent for oppskrifter fra nettet. Du limer inn en lenke (eller skriver inn oppskriften selv), og appen viser oppskriften i et fast og ryddig format der du kan velge antall porsjoner, slik at alle mengder regnes om med en gang. Oppskrifter kan lagres i Oppskrifter, i mapper og som favoritter.
 
-![RecipeMate: en oppskrift skalert til 5 porsjoner, med et valgt forslag](docs/skjermbilde-oppskrift.png)
+![Oppskriftssiden i RecipeMate: «Amerikanske pannekaker» skalert fra 4 til 6 porsjoner, med et valgt forslag merket inne i steget](docs/skjermbilde-oppskrift.png)
 
 **For hvem:** alle som lager mat fra oppskrifter på nettet og må regne om mengdene når det varierer hvor mange som skal spise.
 
@@ -74,7 +74,11 @@ Appen er bygget i seks epics, én story om gangen. Hver story har en spec i `_bm
 
 Versjon 2 (Epic 5) kom etter at v1 var levert. Endringene i planen står i [`sprint-change-proposal-2026-11-10.md`](_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-10.md), kravene i PRD §4.6 (FR-19–FR-27), og hver story har en spec i `_bmad-output/implementation-artifacts/spec-5-N-*.md`.
 
-![RecipeMate versjon 2: forslag flettet inn i stegene, valg av mål og et ingrediensforslag i listen](docs/skjermbilde-versjon-2.png)
+![Handlelisten: ingrediensene fra ukas oppskrifter slått sammen til én liste med «Har hjemme» på hver vare](docs/skjermbilde-handleliste.png)
+
+Handlelisten slår sammen like varer fra flere oppskrifter («5 gulrøtter» fra to retter) og viser hvilke oppskrifter hver vare hører til.
+
+![Kokemodus på mobil: ett steg om gangen i stor tekst, ingrediensene steget bruker, og «Start tidtaker: 5 min»](docs/skjermbilde-kokemodus-mobil.png)
 
 - **Halve porsjoner og glidebryter (5.1, 5.3):** 0,5–50 porsjoner i halve steg med «+ ½», feltet («4,5») eller glidebryteren.
 - **Søk og filtrering (5.2):** søk i tittel, kilde, mappe og ingredienser på Oppskrifter, med «Bare favoritter» og mappevalg.
@@ -88,6 +92,12 @@ Versjon 2 (Epic 5) kom etter at v1 var levert. Endringene i planen står i [`spr
 ### Epic 6: Videre utvikling
 
 Kravene står i PRD §4.7 (FR-28–FR-43), med status på hvert krav i PRD §4.0: bygget, kandidat eller ikke nå. Hver story har en spec i `_bmad-output/implementation-artifacts/spec-6-N-*.md`. Punktene under er de ferdige storyene, sortert etter story-nummer.
+
+![Oppskrifter: kort med kilde, mappe, stjerner, tid og merkelapper, med søk, filter og «Sorter etter»](docs/skjermbilde-oppskrifter.png)
+
+![Ukemeny: oppskrifter lagt på dagene i uke 46, med antall porsjoner per dag](docs/skjermbilde-ukemeny.png)
+
+![«Hva kan jeg lage?»: det du har hjemme øverst, og oppskriftene gruppert i «Kan lages nå» og «Mangler flere ting»](docs/skjermbilde-hva-kan-jeg-lage.png)
 
 - **Ingrediensforslag i listen (6.1):** et forslag som innfører en ingrediens, gir også en linje i ingredienslisten.
 - **Tid (6.2):** total tid hentes fra kilden eller skrives inn selv, og vises ved hjertet og på kortene. «Hent tid fra kilden» for eldre importer.
@@ -368,7 +378,7 @@ drizzle/        Databasemigrasjoner (genereres med npm run db:generate)
 public/         Filer som serveres som de er: appikoner og service worker (sw.js)
 test/fixtures/  Lagrede eksempelsider, eksempelforslag og eksempelsvar fra språkmodell brukt som testdata
 e2e/           Ende-til-ende-tester (Playwright); konfigurasjon i playwright.config.ts
-docs/          Skjermbilde brukt i denne fila
+docs/          Skjermbilder brukt i denne fila
 scripts/        Hjelpeskript; db-migrate.ts kjører migrasjonene, fetch-fixtures.sh henter testsidene
 issues/         Feil og problemer underveis, og hva som kan endres (én fil per sak)
 ```

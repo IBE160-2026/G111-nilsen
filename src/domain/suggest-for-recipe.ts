@@ -38,6 +38,23 @@ const any = (text: string, stems: readonly string[], compound = false) =>
 const hasStep = (c: Context, stems: readonly string[]) => any(c.steps, stems);
 
 /**
+ * Ord som betyr at noe allerede får stå og hvile. Oppskrifter bruker mange ord om det samme
+ * («la røren svelle», «la deigen stå», «sett den kaldt»), og uten disse ville appen foreslått
+ * noe oppskriften allerede sier.
+ */
+const RESTING_WORDS = [
+  "hvil",
+  "svell",
+  "stå",
+  "settes kaldt",
+  "sett den kaldt",
+  "sett deigen kaldt",
+  "la den stå",
+  "trekke",
+] as const;
+const restsAlready = (c: Context) => hasStep(c, RESTING_WORDS);
+
+/**
  * Enkle forslag uten språkmodell: grupper etter hva slags rett det er, med råd som passer det
  * oppskriften faktisk inneholder. Rekkefølgen er prioriteten. `skipWhen` hopper over et råd
  * oppskriften allerede følger. Hver gruppe har egne råd om ingredienser, steg og servering.
@@ -60,7 +77,7 @@ const GROUPS: readonly Group[] = [
         reason: "Deigen setter seg, og formene holder seg bedre i pannen.",
         appliesTo: "steps",
         before: ["form", "stek"],
-        skipWhen: (c) => hasStep(c, ["hvile", "hviler"]),
+        skipWhen: restsAlready,
       },
       {
         text: "Server med kokte poteter og en enkel råkost eller agurksalat.",
@@ -115,7 +132,7 @@ const GROUPS: readonly Group[] = [
         reason: "Melet sveller, så pannekakene blir mykere og holder seg bedre sammen.",
         appliesTo: "steps",
         before: ["stek"],
-        skipWhen: (c) => hasStep(c, ["hvile", "hviler"]),
+        skipWhen: restsAlready,
       },
       {
         text: "Ha en teskje vaniljesukker eller kardemomme i røren.",
@@ -246,7 +263,7 @@ const GROUPS: readonly Group[] = [
         text: "La kyllingen hvile 5–10 minutter før du skjærer i den, og sjekk at den er 75 °C inni.",
         reason: "Safta fordeler seg, så kjøttet blir saftigere, og kjernetemperaturen er trygg.",
         appliesTo: "steps",
-        skipWhen: (c) => hasStep(c, ["hvile"]),
+        skipWhen: restsAlready,
       },
       {
         text: "Mariner kyllingen i olje, sitron og hvitløk et par timer før steking.",

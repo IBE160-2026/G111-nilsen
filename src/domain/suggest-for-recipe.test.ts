@@ -71,6 +71,21 @@ describe("suggestForRecipe", () => {
     expect(list.length).toBeGreaterThan(0);
   });
 
+  it("hopper over hvileråd når oppskriften bruker et annet ord for det", () => {
+    // Funnet 2026-11-12: Godt.no sier «la pannekakerøren svelle», og appen foreslo likevel
+    // å la røren hvile. «svelle», «stå» og «trekke» teller nå som hvile.
+    for (const steg of [
+      "La pannekakerøren svelle i 10-15 minutter.",
+      "La røren stå i 20 minutter.",
+      "La røren trekke litt før steking.",
+    ]) {
+      const list = texts(
+        recipe("Pannekaker", ["3 egg", "3 dl melk", "2 dl hvetemel"], [steg, "Stek."]),
+      );
+      expect(list.join(" "), steg).not.toContain("hvile i 20");
+    }
+  });
+
   it("gir forslag med forklaring og gyldig del av oppskriften", () => {
     for (const r of [pannekaker, kjottboller, rundstykker]) {
       for (const s of suggestForRecipe(r)) {
