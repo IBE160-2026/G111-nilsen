@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { ActionResult } from "@/app/_shared/action-result";
 import {
+  capitalizeFirst,
   convertLine,
   formatQuantity,
   hasConvertibleUnit,
@@ -72,7 +73,7 @@ function Line({
     return (
       <CheckRow className={styles.row} checked={checked} onToggle={toggle}>
         <span className={styles.unparsed}>
-          {line.original}
+          {capitalizeFirst(line.original)}
           {badge}
         </span>
       </CheckRow>
@@ -88,7 +89,7 @@ function Line({
           <>
             {" "}
             <span className={styles.name}>
-              {line.name ? <span>{line.name}</span> : null}
+              {line.name ? <span>{capitalizeFirst(line.name)}</span> : null}
               {line.name && line.approximate ? " " : null}
               {line.approximate ? <span className={styles.approximate}>ca.</span> : null}
               {badge}

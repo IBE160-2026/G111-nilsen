@@ -129,6 +129,7 @@ Kravene står i PRD §4.7 (FR-28–FR-43), med status på hvert krav i PRD §4.0
 - **Angre «Laget i dag» (6.21b):** etter at du har trykket «Laget i dag», kommer det en «Angre»-knapp som setter antall og dato tilbake. Under «Sist laget» står også en lenke «Se statistikk».
 - **Små forbedringer (6.22b–6.25b):** middagsforslag husker filteret ditt; «Angre» finnes på merkelapper og i ukemenyen; statistikken kan vises for siste 30 dager, i år eller alt; og når språkmodellen er opptatt får du enkle forslag i stedet for en feil.
 - **Rettinger (6.26b):** innloggingsskjemaet mister ikke lenger det du skriver rett etter at siden åpnes (sak 011), og «Hva kan jeg lage?» sier ikke at du mangler vann, salt eller pepper. «mel» passer også til «hvetemel» og «maismel».
+- **Stor forbokstav (6.28b):** ingrediensnavn og hver setning i stegene vises med stor forbokstav, også for oppskrifter som allerede er lagret.
 
 Ikke bygget ennå: offentlig lenke til én oppskrift, glemt passord og delt handleliste (kandidater), og stemmestyring i kokemodus (utsatt). Designrunden tas samlet til slutt.
 

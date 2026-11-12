@@ -33,7 +33,7 @@ describe("IngredientList", () => {
   it("Åpne: viser opprinnelig antall og mengder som originalen, uten «Tilbakestill»", () => {
     render(<IngredientList ingredients={basic} originalServings={4} />);
     expect(field()).toHaveValue("4");
-    expect(shown()).toEqual(["400 g mel", "1 egg", "salt og pepper"]);
+    expect(shown()).toEqual(["400 g Mel", "1 Egg", "Salt og pepper"]);
     expect(screen.queryByRole("button", { name: /Tilbakestill/ })).not.toBeInTheDocument();
   });
 
@@ -44,7 +44,7 @@ describe("IngredientList", () => {
     await user.click(plus());
 
     expect(field()).toHaveValue("5");
-    expect(shown()).toEqual(["500 g mel", "1 egg ca.", "salt og pepper"]);
+    expect(shown()).toEqual(["500 g Mel", "1 Egg ca.", "Salt og pepper"]);
     expect(screen.getByText("ca.")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("5 porsjoner");
     expect(fetchSpy).not.toHaveBeenCalled();
@@ -53,12 +53,12 @@ describe("IngredientList", () => {
   it("utolkbare linjer vises i kursiv-stilen og er uendret ved alle antall", async () => {
     const user = userEvent.setup();
     render(<IngredientList ingredients={basic} originalServings={4} />);
-    const unparsed = () => screen.getByText("salt og pepper");
+    const unparsed = () => screen.getByText("Salt og pepper");
     expect(unparsed()).toHaveClass("unparsed");
     for (const value of ["1", "17", "50"]) {
       await user.clear(field());
       await user.type(field(), `${value}{Enter}`);
-      expect(unparsed()).toHaveTextContent(/^salt og pepper$/);
+      expect(unparsed()).toHaveTextContent(/^Salt og pepper$/);
     }
   });
 
@@ -67,11 +67,11 @@ describe("IngredientList", () => {
     render(<IngredientList ingredients={lines("400 g mel")} originalServings={2} />);
     await user.click(minus());
     expect(field()).toHaveValue("1");
-    expect(shown()).toEqual(["200 g mel"]);
+    expect(shown()).toEqual(["200 g Mel"]);
     await user.click(minus());
     expect(field()).toHaveValue("0,5");
     expect(minus()).toHaveAttribute("aria-disabled", "true");
-    expect(shown()).toEqual(["100 g mel"]);
+    expect(shown()).toEqual(["100 g Mel"]);
   });
 
   it("Skriv gyldig: 8 og forlat feltet gir mengder for 8 og «Tilbakestill til 4»", async () => {
@@ -80,7 +80,7 @@ describe("IngredientList", () => {
     await user.clear(field());
     await user.type(field(), "8");
     await user.tab();
-    expect(shown()).toEqual(["800 g mel", "2 egg", "salt og pepper"]);
+    expect(shown()).toEqual(["800 g Mel", "2 Egg", "Salt og pepper"]);
     expect(screen.getByRole("button", { name: "Tilbakestill til 4" })).toBeInTheDocument();
   });
 
@@ -96,7 +96,7 @@ describe("IngredientList", () => {
 
       expect(screen.getByText(servingStepperMessages.invalidHalf)).toBeInTheDocument();
       expect(field()).toHaveValue("5");
-      expect(shown()).toEqual(["500 g mel", "1 egg ca.", "salt og pepper"]);
+      expect(shown()).toEqual(["500 g Mel", "1 Egg ca.", "Salt og pepper"]);
     },
   );
 
@@ -108,14 +108,14 @@ describe("IngredientList", () => {
     await user.click(screen.getByRole("button", { name: "Tilbakestill til 4" }));
     expect(field()).toHaveValue("4");
     expect(screen.queryByRole("button", { name: /Tilbakestill/ })).not.toBeInTheDocument();
-    expect(shown()).toEqual(["400 g mel", "1 egg", "salt og pepper"]);
+    expect(shown()).toEqual(["400 g Mel", "1 Egg", "Salt og pepper"]);
   });
 
   it("Ingen porsjoner: uten opprinnelig antall vises ingen porsjonsvelger og mengdene uskalert", () => {
     render(<IngredientList ingredients={basic} originalServings={null} />);
     expect(screen.queryByLabelText("Antall porsjoner")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /porsjoner/ })).not.toBeInTheDocument();
-    expect(shown()).toEqual(["400 g mel", "1 egg", "salt og pepper"]);
+    expect(shown()).toEqual(["400 g Mel", "1 Egg", "Salt og pepper"]);
   });
 
   it("Seksjoner: linjer uten seksjon først, så hver seksjon med etikett, i lagret rekkefølge", () => {
@@ -144,9 +144,9 @@ describe("IngredientList", () => {
         .map((li) => li.textContent),
     );
     expect(texts).toEqual([
-      ["400 g pasta", "1 l vann"],
-      ["2 dl fløte", "1 ts salt"],
-      ["50 g parmesan"],
+      ["400 g Pasta", "1 l Vann"],
+      ["2 dl Fløte", "1 ts Salt"],
+      ["50 g Parmesan"],
     ]);
     expect(lists[1]).toHaveAccessibleName("Saus");
   });
@@ -159,17 +159,17 @@ describe("IngredientList", () => {
 
     await user.clear(field());
     await user.type(field(), "3{Enter}");
-    expect(shown()).toEqual(["560 g potet", "1 egg ca.", "0,4 ts salt"]);
+    expect(shown()).toEqual(["560 g Potet", "1 Egg ca.", "0,4 ts Salt"]);
 
     for (let i = 0; i < 7; i++) await user.click(minus()); // ned til 1
     await user.clear(field());
     await user.type(field(), "50{Enter}");
     await user.clear(field());
     await user.type(field(), "3{Enter}");
-    expect(shown()).toEqual(["560 g potet", "1 egg ca.", "0,4 ts salt"]);
+    expect(shown()).toEqual(["560 g Potet", "1 Egg ca.", "0,4 ts Salt"]);
 
     await user.click(screen.getByRole("button", { name: "Tilbakestill til 4" }));
-    expect(shown()).toEqual(["750 g potet", "1 egg", "½ ts salt"]);
+    expect(shown()).toEqual(["750 g Potet", "1 Egg", "½ ts Salt"]);
     expect(original).toEqual(snapshot);
   });
 
@@ -192,7 +192,7 @@ describe("IngredientList", () => {
     (original) => {
       render(<IngredientList ingredients={basic} originalServings={original} />);
       expect(screen.queryByLabelText("Antall porsjoner")).not.toBeInTheDocument();
-      expect(shown()).toEqual(["400 g mel", "1 egg", "salt og pepper"]);
+      expect(shown()).toEqual(["400 g Mel", "1 Egg", "Salt og pepper"]);
     },
   );
   describe("avkrysning (Story 1.6)", () => {
@@ -203,9 +203,9 @@ describe("IngredientList", () => {
       render(<IngredientList ingredients={basic} originalServings={4} />);
       expect(boxes()).toHaveLength(3);
       for (const checkbox of boxes()) expect(checkbox).not.toBeChecked();
-      expect(box("400 g mel")).toBeInTheDocument();
-      expect(box("1 egg")).toBeInTheDocument();
-      expect(box("salt og pepper")).toBeInTheDocument();
+      expect(box("400 g Mel")).toBeInTheDocument();
+      expect(box("1 Egg")).toBeInTheDocument();
+      expect(box("Salt og pepper")).toBeInTheDocument();
       // Hver boks ligger i en <label> som omslutter hele raden.
       for (const checkbox of boxes()) expect(checkbox.closest("label")).toBeInTheDocument();
     });
@@ -213,31 +213,31 @@ describe("IngredientList", () => {
     it("Trykk på tekst: «mel» i «400 g mel» krysser av raden, uten å berøre de andre", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={basic} originalServings={4} />);
-      await user.click(screen.getByText("mel"));
-      expect(box("400 g mel")).toBeChecked();
-      expect(box("1 egg")).not.toBeChecked();
-      expect(box("salt og pepper")).not.toBeChecked();
+      await user.click(screen.getByText("Mel"));
+      expect(box("400 g Mel")).toBeChecked();
+      expect(box("1 Egg")).not.toBeChecked();
+      expect(box("Salt og pepper")).not.toBeChecked();
     });
 
     it("Trykk igjen: avkrysningen fjernes", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={basic} originalServings={4} />);
-      await user.click(screen.getByText("mel"));
+      await user.click(screen.getByText("Mel"));
       await user.click(screen.getByText("400 g"));
-      expect(box("400 g mel")).not.toBeChecked();
+      expect(box("400 g Mel")).not.toBeChecked();
     });
 
     it("Utolkbar linje: kan krysses av og beholder kursiv-stilen og teksten ved alle antall", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={basic} originalServings={4} />);
-      await user.click(screen.getByText("salt og pepper"));
-      expect(box("salt og pepper")).toBeChecked();
+      await user.click(screen.getByText("Salt og pepper"));
+      expect(box("Salt og pepper")).toBeChecked();
       for (const value of ["1", "17", "50"]) {
         await user.clear(field());
         await user.type(field(), `${value}{Enter}`);
-        expect(screen.getByText("salt og pepper")).toHaveClass("unparsed");
-        expect(screen.getByText("salt og pepper")).toHaveTextContent(/^salt og pepper$/);
-        expect(box("salt og pepper")).toBeChecked();
+        expect(screen.getByText("Salt og pepper")).toHaveClass("unparsed");
+        expect(screen.getByText("Salt og pepper")).toHaveTextContent(/^Salt og pepper$/);
+        expect(box("Salt og pepper")).toBeChecked();
       }
     });
 
@@ -253,68 +253,68 @@ describe("IngredientList", () => {
       await user.tab();
       await user.tab();
       await user.tab();
-      expect(box("400 g mel")).toHaveFocus();
+      expect(box("400 g Mel")).toHaveFocus();
       await user.keyboard(" ");
-      expect(box("400 g mel")).toBeChecked();
-      expect(box("400 g mel")).toHaveFocus();
+      expect(box("400 g Mel")).toBeChecked();
+      expect(box("400 g Mel")).toHaveFocus();
       await user.keyboard(" ");
-      expect(box("400 g mel")).not.toBeChecked();
-      expect(box("400 g mel")).toHaveFocus();
+      expect(box("400 g Mel")).not.toBeChecked();
+      expect(box("400 g Mel")).toHaveFocus();
     });
 
     it("Skalering: «400 g mel» avkrysset beholder avkrysningen når antallet går fra 4 til 8", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={basic} originalServings={4} />);
-      await user.click(screen.getByText("mel"));
+      await user.click(screen.getByText("Mel"));
       await user.clear(field());
       await user.type(field(), "8{Enter}");
-      expect(shown()).toEqual(["800 g mel", "2 egg", "salt og pepper"]);
-      expect(box("800 g mel")).toBeChecked();
-      expect(box("2 egg")).not.toBeChecked();
+      expect(shown()).toEqual(["800 g Mel", "2 Egg", "Salt og pepper"]);
+      expect(box("800 g Mel")).toBeChecked();
+      expect(box("2 Egg")).not.toBeChecked();
     });
 
     it("Skalering med −/+ beholder avkrysningen for flere rader, også «ca.»-linjer", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={basic} originalServings={4} />);
-      await user.click(screen.getByText("egg"));
+      await user.click(screen.getByText("Egg"));
       await user.click(plus());
-      expect(box("1 egg ca.")).toBeChecked();
+      expect(box("1 Egg ca.")).toBeChecked();
       await user.click(minus());
-      expect(box("1 egg")).toBeChecked();
+      expect(box("1 Egg")).toBeChecked();
     });
 
     it("Tilbakestill: avkrysningen beholdes når antallet endres og settes tilbake til 4", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={basic} originalServings={4} />);
-      await user.click(screen.getByText("mel"));
+      await user.click(screen.getByText("Mel"));
       await user.click(plus());
       await user.click(screen.getByRole("button", { name: "Tilbakestill til 4" }));
-      expect(shown()).toEqual(["400 g mel", "1 egg", "salt og pepper"]);
-      expect(box("400 g mel")).toBeChecked();
+      expect(shown()).toEqual(["400 g Mel", "1 Egg", "Salt og pepper"]);
+      expect(box("400 g Mel")).toBeChecked();
     });
 
     it("ugyldig inntasting beholder avkrysningen og forrige verdi", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={basic} originalServings={4} />);
-      await user.click(screen.getByText("mel"));
+      await user.click(screen.getByText("Mel"));
       await user.clear(field());
       await user.type(field(), "abc");
       await user.tab();
       expect(screen.getByText(servingStepperMessages.invalidHalf)).toBeInTheDocument();
-      expect(box("400 g mel")).toBeChecked();
+      expect(box("400 g Mel")).toBeChecked();
     });
 
     it("Seksjoner: avkrysning per linje, uavhengig av seksjon", async () => {
       const user = userEvent.setup();
       const sectioned = lines(["2 dl fløte", "Saus"], "400 g pasta", ["1 ts salt", "Saus"]);
       render(<IngredientList ingredients={sectioned} originalServings={4} />);
-      await user.click(screen.getByText("fløte"));
-      expect(box("2 dl fløte")).toBeChecked();
-      expect(box("1 ts salt")).not.toBeChecked();
-      expect(box("400 g pasta")).not.toBeChecked();
-      await user.click(screen.getByText("pasta"));
-      expect(box("400 g pasta")).toBeChecked();
-      expect(box("1 ts salt")).not.toBeChecked();
+      await user.click(screen.getByText("Fløte"));
+      expect(box("2 dl Fløte")).toBeChecked();
+      expect(box("1 ts Salt")).not.toBeChecked();
+      expect(box("400 g Pasta")).not.toBeChecked();
+      await user.click(screen.getByText("Pasta"));
+      expect(box("400 g Pasta")).toBeChecked();
+      expect(box("1 ts Salt")).not.toBeChecked();
     });
 
     it("Lukke og åpne: ingen rader er avkrysset etter at Activity har skjult og vist siden", async () => {
@@ -325,9 +325,9 @@ describe("IngredientList", () => {
         </Activity>
       );
       const { rerender } = render(view("visible"));
-      await user.click(screen.getByText("mel"));
+      await user.click(screen.getByText("Mel"));
       await user.click(plus());
-      expect(box("500 g mel")).toBeChecked();
+      expect(box("500 g Mel")).toBeChecked();
 
       rerender(view("hidden"));
       rerender(view("visible"));
@@ -337,7 +337,7 @@ describe("IngredientList", () => {
     it("Avmontere: ny montering har ingen avkryssede rader", async () => {
       const user = userEvent.setup();
       const { unmount } = render(<IngredientList ingredients={basic} originalServings={4} />);
-      await user.click(screen.getByText("mel"));
+      await user.click(screen.getByText("Mel"));
       unmount();
       render(<IngredientList ingredients={basic} originalServings={4} />);
       for (const checkbox of boxes()) expect(checkbox).not.toBeChecked();
@@ -347,24 +347,24 @@ describe("IngredientList", () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={basic} originalServings={null} />);
       expect(screen.queryByLabelText("Antall porsjoner")).not.toBeInTheDocument();
-      await user.click(screen.getByText("mel"));
-      expect(box("400 g mel")).toBeChecked();
+      await user.click(screen.getByText("Mel"));
+      expect(box("400 g Mel")).toBeChecked();
     });
 
     it("Skjermleser: navnet er radens tekst og tilstanden annonseres av boksen (checked)", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={basic} originalServings={4} />);
-      expect(screen.getByRole("checkbox", { name: "400 g mel", checked: false })).toBeVisible();
-      await user.click(screen.getByText("mel"));
-      expect(screen.getByRole("checkbox", { name: "400 g mel", checked: true })).toBeVisible();
+      expect(screen.getByRole("checkbox", { name: "400 g Mel", checked: false })).toBeVisible();
+      await user.click(screen.getByText("Mel"));
+      expect(screen.getByRole("checkbox", { name: "400 g Mel", checked: true })).toBeVisible();
     });
 
     it("Avkrysning gir ingen serverkall", async () => {
       const fetchSpy = vi.spyOn(globalThis, "fetch");
       const user = userEvent.setup();
       render(<IngredientList ingredients={basic} originalServings={4} />);
-      await user.click(screen.getByText("mel"));
-      await user.click(screen.getByText("egg"));
+      await user.click(screen.getByText("Mel"));
+      await user.click(screen.getByText("Egg"));
       expect(fetchSpy).not.toHaveBeenCalled();
     });
   });
@@ -373,14 +373,14 @@ describe("IngredientList", () => {
     it("starter på lagret antall og skalerer fra originalen", () => {
       render(<IngredientList ingredients={basic} originalServings={4} selectedServings={6} />);
       expect(field()).toHaveValue("6");
-      expect(shown()).toEqual(["600 g mel", "2 egg ca.", "salt og pepper"]);
+      expect(shown()).toEqual(["600 g Mel", "2 Egg ca.", "Salt og pepper"]);
       expect(screen.getByRole("button", { name: "Tilbakestill til 4" })).toBeInTheDocument();
     });
 
     it.each([99, 0, 2.3, -1, null])("ugyldig lagret antall %s gir opprinnelig antall", (value) => {
       render(<IngredientList ingredients={basic} originalServings={4} selectedServings={value} />);
       expect(field()).toHaveValue("4");
-      expect(shown()[0]).toBe("400 g mel");
+      expect(shown()[0]).toBe("400 g Mel");
     });
 
     it("kaller onServingsChange ved hver endring, også «Tilbakestill», og skriving i feltet", async () => {
@@ -424,7 +424,7 @@ describe("IngredientList", () => {
       );
       await user.click(plus());
       expect(field()).toHaveValue("5");
-      expect(shown()[0]).toBe("500 g mel");
+      expect(shown()[0]).toBe("500 g Mel");
     });
 
     it.each([
@@ -453,9 +453,9 @@ describe("IngredientList", () => {
       render(
         <IngredientList ingredients={basic} originalServings={4} onServingsChange={() => {}} />,
       );
-      await user.click(screen.getByRole("checkbox", { name: "400 g mel" }));
+      await user.click(screen.getByRole("checkbox", { name: "400 g Mel" }));
       await user.click(plus());
-      expect(screen.getByRole("checkbox", { name: "500 g mel" })).toBeChecked();
+      expect(screen.getByRole("checkbox", { name: "500 g Mel" })).toBeChecked();
     });
   });
 
@@ -465,7 +465,7 @@ describe("IngredientList", () => {
       render(<IngredientList ingredients={lines("400 g mel", "2 egg")} originalServings={4} />);
       await user.click(screen.getByRole("button", { name: "Legg til en halv porsjon" }));
       expect(field()).toHaveValue("4,5");
-      expect(shown()).toEqual(["450 g mel", "2 egg ca."]);
+      expect(shown()).toEqual(["450 g Mel", "2 Egg ca."]);
     });
 
     it("lagret 6,5 brukes som startverdi og sendes til onServingsChange", async () => {
@@ -508,11 +508,11 @@ describe("IngredientList", () => {
       );
       fireEvent.change(slider(), { target: { value: "2.5" } });
       expect(field()).toHaveValue("2,5");
-      expect(shown()).toEqual(["250 g mel"]);
+      expect(shown()).toEqual(["250 g Mel"]);
       expect(onServingsChange).toHaveBeenLastCalledWith(2.5);
       fireEvent.change(slider(), { target: { value: "0.5" } });
       expect(field()).toHaveValue("0,5");
-      expect(shown()).toEqual(["50 g mel"]);
+      expect(shown()).toEqual(["50 g Mel"]);
     });
 
     it("«+ ½» ved 0,5 gir 1", async () => {
@@ -546,11 +546,11 @@ describe("IngredientList", () => {
     it("regner om til dl, og tilbake til originalen", async () => {
       const user = userEvent.setup();
       render(<IngredientList ingredients={us} originalServings={4} />);
-      expect(shown()).toEqual(["2 cup flour", "1 lb beef", "2 tbsp butter", "3 egg"]);
+      expect(shown()).toEqual(["2 cup Flour", "1 lb Beef", "2 tbsp Butter", "3 Egg"]);
       await user.click(choose("Volum (dl)"));
-      expect(shown()).toEqual(["4,8 dl flour ca.", "450 g beef ca.", "2 ss butter", "3 egg"]);
+      expect(shown()).toEqual(["4,8 dl Flour ca.", "450 g Beef ca.", "2 ss Butter", "3 Egg"]);
       await user.click(choose("Som i oppskriften"));
-      expect(shown()).toEqual(["2 cup flour", "1 lb beef", "2 tbsp butter", "3 egg"]);
+      expect(shown()).toEqual(["2 cup Flour", "1 lb Beef", "2 tbsp Butter", "3 Egg"]);
     });
 
     it("regner om til gram for kjente varer", async () => {
@@ -562,7 +562,7 @@ describe("IngredientList", () => {
         />,
       );
       await user.click(choose("Vekt (gram)"));
-      expect(shown()).toEqual(["400 g melk ca.", "27 g smør ca.", "3 dl buljong", "3 egg"]);
+      expect(shown()).toEqual(["400 g Melk ca.", "27 g Smør ca.", "3 dl Buljong", "3 Egg"]);
     });
 
     it("regner om etter skalering", async () => {
@@ -570,7 +570,7 @@ describe("IngredientList", () => {
       render(<IngredientList ingredients={lines("1 cup milk")} originalServings={4} />);
       await user.click(choose("Volum (dl)"));
       await user.click(plus());
-      expect(shown()).toEqual(["3 dl milk ca."]);
+      expect(shown()).toEqual(["3 dl Milk ca."]);
     });
   });
 });

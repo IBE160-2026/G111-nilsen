@@ -132,3 +132,4 @@
 - 913 Små forbedringer: middagsforslag husker filter, angre på merkelapper/ukemeny, statistikk for periode, enkle forslag når språkmodellen er opptatt. Åpent: eldre «laget» mangler enkeltdatoer; mappesletting kan ikke angres.
 - 912 Rettet sak 011 (konto-skjemaet står i ferdig side) og basisvarer i «Hva kan jeg lage?». Åpent: årsak til 011 ikke bevist; sammensatte ord matches ikke.
 - 911 «mel» passer til sammensatte ord (hvetemel) i «Hva kan jeg lage?». Åpent: kort liste, utvides ved behov.
+- 910 Stor forbokstav i ingredienser og steg (ved visning). Åpent: kokemodus, handleliste og «Har hjemme» ikke endret.

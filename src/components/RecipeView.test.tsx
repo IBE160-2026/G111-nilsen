@@ -136,7 +136,7 @@ describe("RecipeView", () => {
       within(ingredients)
         .getAllByRole("listitem")
         .map((item) => item.textContent),
-    ).toEqual(["1 ½ dl melk", "2 ss", "salt og pepper"]);
+    ).toEqual(["1 ½ dl Melk", "2 ss", "Salt og pepper"]);
 
     const list = within(steps).getByRole("list");
     expect(list.tagName).toBe("OL");
@@ -222,7 +222,7 @@ describe("RecipeView", () => {
       .closest("section")!;
     expect(
       within(ingredientCard).getByRole("checkbox", {
-        name: /vaniljesukker eller kardemomme Forslag/,
+        name: /Vaniljesukker eller kardemomme Forslag/,
       }),
     ).toBeInTheDocument();
     const stepCard = screen.getByRole("region", { name: "Slik gjør du" });
@@ -388,7 +388,7 @@ describe("RecipeView", () => {
     const { rerender } = render(<RecipeView recipe={recipe} folders={folders} />);
     await user.click(screen.getByRole("button", { name: "Flere porsjoner" }));
     await user.click(screen.getByText("Stek."));
-    await user.click(screen.getByText("melk"));
+    await user.click(screen.getByText("Melk"));
 
     rerender(
       <RecipeView
@@ -406,14 +406,14 @@ describe("RecipeView", () => {
     const ingredients = screen.getByRole("region", { name: "Ingredienser" });
     const steps = screen.getByRole("region", { name: "Slik gjør du" });
 
-    await user.click(within(ingredients).getByText("melk"));
-    expect(within(ingredients).getByRole("checkbox", { name: "1 ½ dl melk" })).toBeChecked();
+    await user.click(within(ingredients).getByText("Melk"));
+    expect(within(ingredients).getByRole("checkbox", { name: "1 ½ dl Melk" })).toBeChecked();
     expect(within(steps).getByRole("checkbox", { name: "Visp sammen." })).not.toBeChecked();
 
     await user.click(within(steps).getByText("Visp sammen."));
     expect(within(steps).getByRole("checkbox", { name: "Visp sammen." })).toBeChecked();
-    await user.click(within(ingredients).getByText("melk"));
-    expect(within(ingredients).getByRole("checkbox", { name: "1 ½ dl melk" })).not.toBeChecked();
+    await user.click(within(ingredients).getByText("Melk"));
+    expect(within(ingredients).getByRole("checkbox", { name: "1 ½ dl Melk" })).not.toBeChecked();
     expect(within(steps).getByRole("checkbox", { name: "Visp sammen." })).toBeChecked();
   });
 
@@ -426,7 +426,7 @@ describe("RecipeView", () => {
     );
     const { rerender } = render(view("visible"));
     await user.click(screen.getByText("Stek."));
-    await user.click(screen.getByText("melk"));
+    await user.click(screen.getByText("Melk"));
     rerender(view("hidden"));
     rerender(view("visible"));
     for (const checkbox of screen.getAllByRole("checkbox")) expect(checkbox).not.toBeChecked();
@@ -538,7 +538,7 @@ describe("RecipeView", () => {
       render(<RecipeView recipe={{ ...saved, selectedServings: 6 }} folders={folders} />);
       expect(screen.getByLabelText("Antall porsjoner")).toHaveValue("6");
       const ingredients = screen.getByRole("region", { name: "Ingredienser" });
-      expect(within(ingredients).getAllByRole("listitem")[0]).toHaveTextContent("2 ¼ dl melk");
+      expect(within(ingredients).getAllByRole("listitem")[0]).toHaveTextContent("2 ¼ dl Melk");
     });
   });
 });

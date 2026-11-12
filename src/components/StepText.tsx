@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import type { Step } from "@/domain";
+import { capitalizeSentences, type Step } from "@/domain";
 import { appliedSuggestionMessages as m } from "@/lib/messages";
 import SuggestedBadge from "./SuggestedBadge";
 import styles from "./StepText.module.css";
@@ -24,7 +24,7 @@ export default function StepText({ step }: { step: Step }) {
           <Added text={text} />{" "}
         </Fragment>
       ))}
-      {step.text}
+      {capitalizeSentences(step.text)}
       {(step.addedAfter ?? []).map((text) => (
         <Fragment key={`etter-${text}`}>
           {" "}
