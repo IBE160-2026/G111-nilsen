@@ -7,6 +7,7 @@ import CollectionBrowser from "@/components/CollectionBrowser";
 import {
   collectionMessages,
   dinnerMessages,
+  shareMessages,
   shoppingMessages,
   trashMessages,
   whatToCookMessages,
@@ -37,6 +38,9 @@ export default function SamlingenPage({
         <span className={styles.titleLinks}>
           <Link href="/hva-kan-jeg-lage" className={styles.titleLink}>
             {whatToCookMessages.link}
+          </Link>
+          <Link href="/delt" className={styles.titleLink}>
+            {shareMessages.link}
           </Link>
           <Link href="/middagsforslag" className={styles.titleLink}>
             {dinnerMessages.link}

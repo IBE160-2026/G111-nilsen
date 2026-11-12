@@ -120,3 +120,4 @@
 - 925 Eksport og import av oppskrifter som JSON-fil (/sikkerhetskopi). Åpent: ukemeny og handlelister ikke med, endret tittel regnes som ny.
 - 924 Installerbar app (PWA): manifest, ikoner, service worker, frakoblet-side. Åpent: test på ekte telefon.
 - 923 Handlelisten uten nett (utdrag i nettleseren, vist på frakoblet-siden). Åpent: ingen synk av avkrysninger tilbake; test 6.16 og 6.17 på telefon.
+- 922 Deling av samlingen med en annen konto (lesetilgang og kopiering). Åpent: ingen felles redigering eller varsling.

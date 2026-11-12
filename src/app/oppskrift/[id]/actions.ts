@@ -11,7 +11,14 @@ import {
   type SuggestionsActionResult,
 } from "@/app/_shared/action-result";
 import { folderFailure, folderIdSchema, parseFolderName } from "@/app/_shared/folder-action";
-import { labelMessages, notesMessages, recipeTimeMessages, variantMessages } from "@/lib/messages";
+import {
+  labelMessages,
+  messageFor,
+  notesMessages,
+  recipeTimeMessages,
+  shareMessages,
+  variantMessages,
+} from "@/lib/messages";
 import { parseRecipeId } from "@/lib/recipe-id";
 import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import { moveRecipeToFolder, moveRecipeToNewFolder } from "@/server/services/folder-service";
@@ -31,6 +38,7 @@ import {
   setFavorite as setFavoriteForRecipe,
   setOriginalServings,
   setSelectedServings,
+  copySharedRecipe,
 } from "@/server/services/recipe-service";
 import {
   applySuggestion as applySuggestionToRecipe,
@@ -451,5 +459,27 @@ export async function removeLabel(id: number, label: string): Promise<LabelActio
   } catch (error) {
     console.error("Kunne ikke fjerne merkelappen", error);
     return actionFailure("unknown");
+  }
+}
+
+/** Svaret fra «Kopier til min samling» (Story 6.19). */
+export type CopySharedResult = { ok: true; id: number } | { ok: false; message: string };
+
+/**
+ * Kopierer en oppskrift fra en delt samling til din egen (Story 6.19). Uten lesetilgang, eller på
+ * din egen oppskrift, svarer den som om den ikke finnes.
+ */
+export async function copySharedToMine(id: number): Promise<CopySharedResult> {
+  if (!idSchema.safeParse(id).success) return { ok: false, message: messageFor("not_found").title };
+  try {
+    const userId = await currentUserId();
+    if (userId === null) return { ok: false, message: actionFailure("login_required").message };
+    const result = copySharedRecipe(userId, id, shareMessages.copyPrefix);
+    if (!result.ok) return { ok: false, message: actionFailure(result.error.kind).message };
+    revalidatePath("/", "layout");
+    return { ok: true, id: result.value.id };
+  } catch (error) {
+    console.error("Kunne ikke kopiere oppskriften", error);
+    return { ok: false, message: actionFailure("unknown").message };
   }
 }

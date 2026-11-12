@@ -65,5 +65,12 @@ async function RecipeLoader({ params }: { params: Params }) {
   const folders = viewer === null ? { ok: true as const, value: [] } : listFolders(viewer);
   if (!folders.ok) throw new Error(`Kunne ikke hente mappene (${folders.error.kind})`);
 
-  return <RecipeView recipe={result.value} folders={folders.value} signedIn={viewer !== null} />;
+  return (
+    <RecipeView
+      recipe={result.value}
+      folders={folders.value}
+      signedIn={viewer !== null}
+      sharedBy={result.value.sharedBy}
+    />
+  );
 }

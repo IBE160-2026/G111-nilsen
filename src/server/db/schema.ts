@@ -269,3 +269,27 @@ export const recipeLabels = sqliteTable(
   },
   (table) => [uniqueIndex("recipe_labels_unique_idx").on(table.recipeId, table.labelKey)],
 );
+
+/**
+ * Deling av samlingen (Story 6.19): eieren inviterer en annen konto, som ser oppskriftene når
+ * invitasjonen er godtatt. `status` er «pending» til mottakeren svarer. Raden slettes når en av
+ * kontoene slettes, og samme par finnes bare én gang.
+ */
+export const shares = sqliteTable(
+  "shares",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    ownerId: integer("owner_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    memberId: integer("member_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    status: text("status").notNull().$type<"pending" | "accepted">(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [
+    uniqueIndex("shares_owner_member_unique").on(table.ownerId, table.memberId),
+    index("shares_member_idx").on(table.memberId, table.status),
+  ],
+);

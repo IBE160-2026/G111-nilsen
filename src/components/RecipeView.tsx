@@ -19,6 +19,7 @@ import {
   saveNotes,
   saveRecipe,
   setFavorite,
+  copySharedToMine,
 } from "@/app/oppskrift/[id]/actions";
 import { editRecipeMessages, sourceLinkMessages } from "@/lib/messages";
 import { sourceLabel } from "@/lib/source-label";
@@ -30,6 +31,7 @@ import CopyVariantButton from "./CopyVariantButton";
 import PrintButton from "./PrintButton";
 import RecipeLabels from "./RecipeLabels";
 import RecipeRating from "./RecipeRating";
+import SharedRecipeBanner from "./SharedRecipeBanner";
 import RecipeNotes from "./RecipeNotes";
 import RecipeTime from "./RecipeTime";
 import { loginHref } from "./LoginRequired";
@@ -55,17 +57,27 @@ export default function RecipeView({
   recipe,
   folders,
   signedIn = true,
+  sharedBy,
 }: {
   recipe: Recipe;
   folders: Folder[];
   /** `false` uten innlogging: lagre-linjen viser «Logg inn for å lagre» (Story 5.13). */
   signedIn?: boolean;
+  /**
+   * E-posten til eieren når oppskriften kommer fra en delt samling (Story 6.19). Da vises den
+   * uten endreknapper, bare med «Kopier til min samling».
+   */
+  sharedBy?: string;
 }) {
+  const readOnly = sharedBy !== undefined;
   // Forslag som er tatt i bruk vises i listene, merket «Forslag» (Story 5.11); originalen endres ikke.
   const shown = withAppliedSuggestions(recipe.ingredients, recipe.steps, recipe.suggestions);
   return (
     <SelectedServingsProvider>
       <article className={styles.root}>
+        {sharedBy !== undefined ? (
+          <SharedRecipeBanner email={sharedBy} onCopy={copySharedToMine.bind(null, recipe.id)} />
+        ) : null}
         <header className={styles.header}>
           <div className={styles.titleRow}>
             <h1>{recipe.title}</h1>
@@ -76,15 +88,17 @@ export default function RecipeView({
               originalServings={recipe.originalServings}
               selectedServings={recipe.selectedServings}
             />
-            <Link
-              href={`/oppskrift/${recipe.id}/rediger`}
-              className={styles.edit}
-              data-print="hide"
-              aria-label={`${editRecipeMessages.editLink} ${recipe.title}`}
-            >
-              {editRecipeMessages.editLink}
-            </Link>
-            {recipe.savedAt !== null ? (
+            {readOnly ? null : (
+              <Link
+                href={`/oppskrift/${recipe.id}/rediger`}
+                className={styles.edit}
+                data-print="hide"
+                aria-label={`${editRecipeMessages.editLink} ${recipe.title}`}
+              >
+                {editRecipeMessages.editLink}
+              </Link>
+            )}
+            {recipe.savedAt !== null && !readOnly ? (
               <span data-print="hide">
                 <CopyVariantButton
                   title={recipe.title}
@@ -150,8 +164,8 @@ export default function RecipeView({
             </div>
           ) : null}
 
-          {/* Notater og «sist laget» bare for lagrede oppskrifter (Story 6.3). */}
-          {recipe.savedAt !== null ? (
+          {/* Notater og «sist laget» bare for lagrede oppskrifter (Story 6.3), og ikke i en delt samling. */}
+          {recipe.savedAt !== null && !readOnly ? (
             <div className={styles.notes} data-print="hide">
               <RecipeRating
                 key={`vurdering-${recipe.id}`}
@@ -177,33 +191,37 @@ export default function RecipeView({
             </div>
           ) : null}
 
-          <div className={styles.suggestions} data-print="hide">
-            <SuggestionsSection
-              key={`forslag-${recipe.id}`}
-              onRequest={requestSuggestions.bind(null, recipe.id)}
-              applied={recipe.suggestions}
-              onApply={applySuggestion.bind(null, recipe.id)}
-              onRemove={removeSuggestion.bind(null, recipe.id)}
-            />
-          </div>
+          {readOnly ? null : (
+            <div className={styles.suggestions} data-print="hide">
+              <SuggestionsSection
+                key={`forslag-${recipe.id}`}
+                onRequest={requestSuggestions.bind(null, recipe.id)}
+                applied={recipe.suggestions}
+                onApply={applySuggestion.bind(null, recipe.id)}
+                onRemove={removeSuggestion.bind(null, recipe.id)}
+              />
+            </div>
+          )}
         </div>
 
-        <div data-print="hide">
-          <RecipeActions
-            title={recipe.title}
-            saved={recipe.savedAt !== null}
-            onSave={saveRecipe.bind(null, recipe.id)}
-            onDelete={removeRecipe.bind(null, recipe.id)}
-            folders={folders}
-            folderId={recipe.folderId}
-            onMoveToFolder={moveToFolder.bind(null, recipe.id)}
-            onMoveToNewFolder={moveToNewFolder.bind(null, recipe.id)}
-            isFavorite={recipe.isFavorite}
-            onSetFavorite={setFavorite.bind(null, recipe.id)}
-            loginHref={signedIn ? undefined : loginHref(`/oppskrift/${recipe.id}`)}
-            totalMinutes={recipe.totalMinutes ?? null}
-          />
-        </div>
+        {readOnly ? null : (
+          <div data-print="hide">
+            <RecipeActions
+              title={recipe.title}
+              saved={recipe.savedAt !== null}
+              onSave={saveRecipe.bind(null, recipe.id)}
+              onDelete={removeRecipe.bind(null, recipe.id)}
+              folders={folders}
+              folderId={recipe.folderId}
+              onMoveToFolder={moveToFolder.bind(null, recipe.id)}
+              onMoveToNewFolder={moveToNewFolder.bind(null, recipe.id)}
+              isFavorite={recipe.isFavorite}
+              onSetFavorite={setFavorite.bind(null, recipe.id)}
+              loginHref={signedIn ? undefined : loginHref(`/oppskrift/${recipe.id}`)}
+              totalMinutes={recipe.totalMinutes ?? null}
+            />
+          </div>
+        )}
       </article>
     </SelectedServingsProvider>
   );

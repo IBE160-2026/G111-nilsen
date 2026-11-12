@@ -13,8 +13,11 @@ import {
 import { isSelectedServings, LIMITS, splitLines } from "@/lib/recipe-input";
 import { appError, err, ok, type Result } from "@/lib/result";
 import { getDb, type Db } from "../db/client";
+import { findUserById } from "../db/repositories/user-repository";
+import { mayViewShared } from "./share-service";
 import {
   copyRecipe,
+  copyRecipeToUser,
   deleteRecipeById,
   deleteRecipeLabel,
   deleteStaleUnsavedRecipes,
@@ -441,10 +444,55 @@ export function canAccessRecipe(viewer: number | null, id: number, db: Db = getD
   return owner !== null && (owner.userId === null || owner.userId === viewer);
 }
 
-/** Henter oppskriften for `viewer`, eller `not_found` når den ikke finnes eller er en annens. */
-export function getRecipeFor(viewer: number | null, id: number, db: Db = getDb()): Result<Recipe> {
-  if (!canAccessRecipe(viewer, id, db)) return err(appError("not_found"));
-  return getRecipe(id, db);
+/**
+ * Om `viewer` kan se oppskriften: sin egen, en import uten eier, eller en oppskrift fra en
+ * samling noen deler med `viewer` (Story 6.19). Deling gir bare lesetilgang; `canAccessRecipe`
+ * styrer fortsatt hva som kan endres.
+ */
+export function canViewRecipe(viewer: number | null, id: number, db: Db = getDb()): boolean {
+  if (canAccessRecipe(viewer, id, db)) return true;
+  if (!isRecipeId(id)) return false;
+  const owner = findRecipeOwner(db, id);
+  return owner !== null && mayViewShared(viewer, owner.userId, db);
+}
+
+/**
+ * Henter oppskriften for `viewer`, eller `not_found` når den ikke finnes, er en annens og ikke
+ * delt. `sharedBy` er e-posten til eieren når oppskriften kommer fra en delt samling (Story 6.19).
+ */
+export function getRecipeFor(
+  viewer: number | null,
+  id: number,
+  db: Db = getDb(),
+): Result<Recipe & { sharedBy?: string }> {
+  if (!canViewRecipe(viewer, id, db)) return err(appError("not_found"));
+  const recipe = getRecipe(id, db);
+  if (!recipe.ok || canAccessRecipe(viewer, id, db)) return recipe;
+  const owner = findRecipeOwner(db, id);
+  const ownerUser = owner?.userId == null ? null : findUserById(db, owner.userId);
+  return ok({ ...recipe.value, sharedBy: ownerUser?.email ?? "" });
+}
+
+/**
+ * Kopierer en oppskrift fra en delt samling til `viewer` sin egen samling (Story 6.19). Tittelen
+ * får `titlePrefix` foran. Uten lesetilgang gir den `not_found`.
+ */
+export function copySharedRecipe(
+  viewer: number,
+  id: unknown,
+  titlePrefix: string,
+  db: Db = getDb(),
+  now: Date = new Date(),
+): Result<{ id: number }> {
+  if (typeof id !== "number" || !isRecipeId(id)) return err(appError("not_found"));
+  if (!canViewRecipe(viewer, id, db) || canAccessRecipe(viewer, id, db)) {
+    return err(appError("not_found"));
+  }
+  const original = findRecipeById(db, id);
+  if (original === null) return err(appError("not_found"));
+  const title = `${titlePrefix}${original.title}`.slice(0, LIMITS.titleLength).trim();
+  const newId = copyRecipeToUser(db, id, viewer, title, now.toISOString());
+  return newId === null ? err(appError("not_found")) : ok({ id: newId });
 }
 
 /** Hvor lange notatene kan være (Story 6.3). */

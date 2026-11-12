@@ -739,6 +739,74 @@ test("Versjon 2: appen kan installeres og viser en egen side uten nett", async (
   await context.setOffline(false);
 });
 
+test("Versjon 2: dele samlingen med en annen konto", async ({ page, browser }, testInfo) => {
+  const project = testInfo.project.name;
+  const title = `Delt ${project}`;
+  const friend = `venn-${project}@e2e.recipemate.no`;
+
+  // Ida lager en oppskrift og inviterer en annen konto, som ikke finnes ennå.
+  await page.goto("/ny");
+  await page.waitForLoadState("networkidle");
+  await field(page, "Tittel").fill(title);
+  await field(page, "Antall porsjoner").fill("2");
+  await field(page, "Ingredienser").fill("2 dl rømme");
+  await page.getByRole("button", { name: "Lagre oppskrift" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+
+  await page.goto("/oppskrifter");
+  await page.getByRole("link", { name: "Deling" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Deling" })).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  await page.getByLabel("E-posten til den du vil dele med").fill(friend);
+  await page.getByRole("button", { name: "Inviter" }).click();
+  await expect(page.getByText("Fant ingen konto med denne e-posten.")).toBeVisible();
+
+  // Vennen lager konto i sin egen nettleser.
+  const context = await browser.newContext();
+  const friendPage = await context.newPage();
+  await friendPage.goto(`${page.url().split("/delt")[0]}/ny-konto`);
+  await field(friendPage, "E-post").fill(friend);
+  await field(friendPage, "Passord").fill(PASSWORD);
+  await friendPage.getByRole("button", { name: "Lag konto" }).click();
+  await expect(friendPage.getByRole("button", { name: "Logg ut" })).toBeVisible();
+
+  // Nå virker invitasjonen, og vennen ser den under «Delt med deg».
+  await page.getByRole("button", { name: "Inviter" }).click();
+  await expect(page.getByText(`Invitasjonen er sendt til ${friend}.`)).toBeVisible();
+  await expect(page.getByText("Venter på svar")).toBeVisible();
+
+  await friendPage.goto("/delt");
+  await friendPage.waitForLoadState("networkidle");
+  const owner = accountFor(project);
+  // Før invitasjonen er godtatt, er oppskriften ikke synlig.
+  await expect(friendPage.getByRole("link", { name: `Se oppskriftene til ${owner}` })).toHaveCount(
+    0,
+  );
+  await friendPage.getByRole("button", { name: `Godta invitasjonen fra ${owner}` }).click();
+  await friendPage.getByRole("link", { name: `Se oppskriftene til ${owner}` }).click();
+  await expect(friendPage.getByRole("heading", { name: `Oppskrifter fra ${owner}` })).toBeVisible();
+
+  // Vennen kan se oppskriften, men ikke endre den, og kan kopiere den til sin egen samling.
+  await friendPage.getByRole("link", { name: new RegExp(title) }).click();
+  await expect(friendPage.getByRole("heading", { level: 1, name: title })).toBeVisible();
+  await expect(friendPage.getByText(`Delt av ${owner}`, { exact: false })).toBeVisible();
+  await expect(friendPage.getByRole("link", { name: `Rediger ${title}` })).toHaveCount(0);
+  await friendPage.getByRole("button", { name: "Kopier til min samling" }).click();
+  await expect(friendPage.getByText("Oppskriften er kopiert til samlingen din.")).toBeVisible();
+  await friendPage.goto("/oppskrifter");
+  await expect(
+    friendPage.getByRole("link", { name: new RegExp(`Kopi av ${title}`) }),
+  ).toBeVisible();
+
+  // Ida avslutter delingen: oppskriften er ikke lenger synlig for vennen.
+  await page.reload();
+  await page.getByRole("button", { name: `Avslutt delingen med ${friend}` }).click();
+  await expect(page.getByText(`Delingen med ${friend} er avsluttet.`)).toBeVisible();
+  await friendPage.goto("/delt");
+  await expect(friendPage.getByText("Ingen deler samlingen sin med deg ennå.")).toBeVisible();
+  await context.close();
+});
+
 test("Versjon 2: handlelisten kan brukes uten nett", async ({ page, context }, testInfo) => {
   const title = `Butikk ${testInfo.project.name}`;
   await page.goto("/ny");

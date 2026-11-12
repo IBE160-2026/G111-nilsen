@@ -674,3 +674,47 @@ export function markCooked(db: Db, id: number, at: string): number | null {
     .get();
   return row?.cookedCount ?? null;
 }
+
+/**
+ * Kopierer en lagret oppskrift til en annen konto (Story 6.19): innholdet og kilden følger med,
+ * men ikke mappe, notater, merkelapper, vurdering eller favoritt — de hører til eierens egen
+ * samling. Returnerer ny id, eller `null` når originalen ikke finnes eller ikke er lagret.
+ */
+export function copyRecipeToUser(
+  db: Db,
+  id: number,
+  userId: number,
+  title: string,
+  now: string,
+): number | null {
+  const original = findRecipeById(db, id);
+  if (original === null || original.savedAt === null) return null;
+  return db.transaction((tx) =>
+    insertRecipeRows(tx, {
+      title,
+      sourceUrl: original.sourceUrl,
+      sourceName: original.sourceName,
+      originalServings: original.originalServings,
+      selectedServings: null,
+      savedAt: now,
+      createdAt: now,
+      updatedAt: now,
+      userId,
+      totalMinutes: original.totalMinutes ?? null,
+      ingredients: original.ingredients.map((line) => ({
+        position: line.position,
+        section: line.section,
+        original: line.original,
+        quantity: line.quantity,
+        unit: line.unit,
+        name: line.name,
+        parseable: line.parseable,
+      })),
+      steps: original.steps.map((step) => ({
+        position: step.position,
+        section: step.section,
+        text: step.text,
+      })),
+    }),
+  );
+}

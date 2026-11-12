@@ -1267,3 +1267,29 @@ slik at jeg ikke står uten liste.
 
 **Gitt** at jeg ikke har sett noen handleliste
 **Så** står det på den frakoblede siden hvordan jeg får den
+
+### Story 6.19: Dele samlingen med en annen konto
+
+Som Ida,
+vil jeg dele oppskriftene mine med noen jeg lager mat sammen med,
+slik at vi slipper å legge inn de samme oppskriftene hver for oss.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg er på «Deling» og skriver e-posten til en annen RecipeMate-konto
+**Så** sendes en invitasjon, og den står som «Venter på svar» hos meg
+
+**Gitt** at e-posten ikke har en konto, er min egen, eller jeg har invitert den før
+**Så** får jeg en forklarende melding og ingenting deles
+
+**Gitt** at jeg har fått en invitasjon
+**Så** kan jeg godta eller avslå den, og etter at jeg har godtatt ser jeg oppskriftene til den andre under «Delt med deg»
+
+**Gitt** at jeg åpner en oppskrift fra en delt samling
+**Så** ser jeg den uten knapper for å endre, slette eller lagre, med «Delt av <e-post>» og «Kopier til min samling»
+
+**Gitt** at jeg kopierer en delt oppskrift
+**Så** får jeg min egen kopi (uten mappe, notater, vurdering og favoritt) som jeg kan endre fritt, uten at originalen endres
+
+**Gitt** at en av oss avslutter delingen
+**Så** forsvinner tilgangen begge veier, og oppskriftene er ikke synlige lenger

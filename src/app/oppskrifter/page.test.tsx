@@ -131,9 +131,13 @@ describe("/oppskrifter", () => {
       .getAllByRole("link")
       .filter(
         (a) =>
-          !["/handleliste", "/nylig-slettet", "/hva-kan-jeg-lage", "/middagsforslag"].includes(
-            a.getAttribute("href") ?? "",
-          ),
+          ![
+            "/handleliste",
+            "/nylig-slettet",
+            "/hva-kan-jeg-lage",
+            "/middagsforslag",
+            "/delt",
+          ].includes(a.getAttribute("href") ?? ""),
       );
     expect(links.map((a) => [a.textContent, a.getAttribute("href")])).toEqual([
       ["Legg inn selv", "/ny"],
@@ -184,9 +188,13 @@ describe("/oppskrifter", () => {
       .getAllByRole("link")
       .filter(
         (a) =>
-          !["/handleliste", "/nylig-slettet", "/hva-kan-jeg-lage", "/middagsforslag"].includes(
-            a.getAttribute("href") ?? "",
-          ),
+          ![
+            "/handleliste",
+            "/nylig-slettet",
+            "/hva-kan-jeg-lage",
+            "/middagsforslag",
+            "/delt",
+          ].includes(a.getAttribute("href") ?? ""),
       );
     expect(links.map((a) => a.textContent)).toEqual([
       "I mappeMatprat · Hverdag",

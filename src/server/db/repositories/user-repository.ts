@@ -73,3 +73,11 @@ export function deleteSession(db: Db, tokenHash: string): void {
 export function deleteExpiredSessions(db: Db, now: string): number {
   return db.delete(sessions).where(lt(sessions.expiresAt, now)).run().changes;
 }
+
+/** Brukeren med denne id-en, eller `null` (Story 6.19). */
+export function findUserById(db: Db, id: number): User | null {
+  return (
+    db.select({ id: users.id, email: users.email }).from(users).where(eq(users.id, id)).get() ??
+    null
+  );
+}
