@@ -1023,6 +1023,11 @@ test("Versjon 2: kake uten porsjoner, med utbytte og delt «Slik gjør du»", as
     "Kake:\nBland mel.\nStek.\nGlasur:\nPisk melis.",
   );
   await expect(field(page, "Antall porsjoner")).toHaveValue("");
+  // Lagring med tomt antall virker også ved redigering.
+  await field(page, "Utbytte").fill("ca. 16 boller");
+  await page.getByRole("button", { name: "Lagre endringer" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+  await expect(page.getByText("Gir: ca. 16 boller")).toBeVisible();
 });
 
 test("Versjon 2: å slette en mappe kan angres, og oppskriftene kommer tilbake i den", async ({
