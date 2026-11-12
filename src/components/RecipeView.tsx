@@ -22,7 +22,7 @@ import {
   setFavorite,
   copySharedToMine,
 } from "@/app/oppskrift/[id]/actions";
-import { editRecipeMessages, sourceLinkMessages } from "@/lib/messages";
+import { editRecipeMessages, recipeYieldMessages, sourceLinkMessages } from "@/lib/messages";
 import { sourceLabel } from "@/lib/source-label";
 import { isHttpUrl } from "@/lib/source-url";
 import CookingMode from "./CookingMode";
@@ -125,6 +125,12 @@ export default function RecipeView({
             ) : (
               sourceLabel(recipe)
             )}
+            {recipe.yieldNote ? (
+              <>
+                <span aria-hidden="true">{" · "}</span>
+                {recipeYieldMessages.shown(recipe.yieldNote)}
+              </>
+            ) : null}
             {recipe.totalMinutes != null ? (
               <>
                 <span aria-hidden="true">{" · "}</span>
@@ -147,6 +153,8 @@ export default function RecipeView({
               originalServings={recipe.originalServings}
               selectedServings={recipe.selectedServings}
               onOriginalServingsChange={changeOriginalServings.bind(null, recipe.id)}
+              // Egne oppskrifter uten antall (en kake, «ca. 12 boller») spørres det ikke om.
+              askOriginalServings={recipe.sourceUrl !== null}
               // Valgt antall huskes bare for oppskrifter i samlingen.
               onServingsChange={
                 recipe.savedAt !== null ? rememberServings.bind(null, recipe.id) : undefined

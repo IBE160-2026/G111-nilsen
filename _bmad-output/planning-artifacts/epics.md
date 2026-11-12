@@ -1395,3 +1395,14 @@ vil jeg dele ingrediensene i lister, for eksempel «Kanelboller» og «Fyll».
 
 **Gitt** at jeg redigerer en oppskrift med flere lister
 **Så** står listene som overskrifter med kolon i feltet
+
+### Story 6.33b–6.34b: utbytte uten porsjoner og delt fremgangsmåte
+
+Som bruker
+vil jeg la antall porsjoner stå tomt og skrive hva oppskriften gir, og dele «Slik gjør du» i deler.
+
+**Gitt** at jeg lager en kake uten antall porsjoner og skriver «ca. 12 boller» under Utbytte
+**Så** lagres oppskriften, den viser «Gir: ca. 12 boller», og jeg blir ikke spurt om antall
+
+**Gitt** at jeg skriver «Glasur:» på en egen linje i stegene
+**Så** vises stegene etter den som egen del med overskrift, nummerert fra 1

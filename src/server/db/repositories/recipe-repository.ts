@@ -40,6 +40,8 @@ export type NewRecipe = {
   userId?: number | null;
   /** Tid i minutter (Story 6.2); `null` eller utelatt = ikke oppgitt. */
   totalMinutes?: number | null;
+  /** Utbytte i tekst (Story 6.33b); `null` eller utelatt = ikke oppgitt. */
+  yieldNote?: string | null;
 };
 
 export type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
@@ -59,6 +61,7 @@ export function insertRecipeRows(tx: Tx, recipe: NewRecipe): number {
       updatedAt: recipe.updatedAt,
       userId: recipe.userId ?? null,
       totalMinutes: recipe.totalMinutes ?? null,
+      yieldNote: recipe.yieldNote ?? null,
     })
     .returning({ id: recipes.id })
     .get();
@@ -135,6 +138,7 @@ export function copyRecipe(db: Db, id: number, title: string, now: string): numb
         db.select({ userId: recipes.userId }).from(recipes).where(eq(recipes.id, id)).get()
           ?.userId ?? null,
       totalMinutes: original.totalMinutes ?? null,
+      yieldNote: original.yieldNote ?? null,
     });
     tx.update(recipes)
       .set({
@@ -234,6 +238,8 @@ export type RecipeUpdate = {
   steps: NewStep[];
   /** Ny tid i minutter (Story 6.2); utelatt = uendret, `null` = fjernet. */
   totalMinutes?: number | null;
+  /** Nytt utbytte (Story 6.33b); utelatt = uendret, `null` = fjernet. */
+  yieldNote?: string | null;
 };
 
 /**
@@ -258,6 +264,7 @@ export function updateRecipe(db: Db, id: number, data: RecipeUpdate): boolean {
           originalServings: data.originalServings,
           updatedAt: data.updatedAt,
           ...(data.totalMinutes !== undefined ? { totalMinutes: data.totalMinutes } : {}),
+          ...(data.yieldNote !== undefined ? { yieldNote: data.yieldNote } : {}),
           ...(current.originalServings !== data.originalServings ? { selectedServings: null } : {}),
         })
         .where(eq(recipes.id, id))
@@ -349,6 +356,7 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
     sourceName: row.sourceName,
     originalServings: row.originalServings,
     totalMinutes: row.totalMinutes,
+    yieldNote: row.yieldNote,
     notes: row.notes,
     fitsFor: row.fitsFor,
     labels: labelRows.map((entry) => entry.label),
@@ -772,6 +780,7 @@ export function copyRecipeToUser(
       updatedAt: now,
       userId,
       totalMinutes: original.totalMinutes ?? null,
+      yieldNote: original.yieldNote ?? null,
       ingredients: original.ingredients.map((line) => ({
         position: line.position,
         section: line.section,

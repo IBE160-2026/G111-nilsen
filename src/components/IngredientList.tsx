@@ -119,6 +119,11 @@ type Props = {
    * «Hvor mange er oppskriften laget for?» eller «endre».
    */
   onOriginalServingsChange?: (servings: number) => Promise<ActionResult>;
+  /**
+   * Om dialogen åpnes av seg selv når antallet mangler (standard). Settes til `false` for
+   * oppskrifter brukeren har skrevet selv uten antall; «Hvor mange?» finnes fortsatt som knapp.
+   */
+  askOriginalServings?: boolean;
 };
 
 /**
@@ -151,6 +156,7 @@ export default function IngredientList({
   selectedServings = null,
   onServingsChange,
   onOriginalServingsChange,
+  askOriginalServings = true,
 }: Props) {
   // Ugyldig opprinnelig antall (0, negativt, desimal, over 50) behandles som manglende.
   // Etter lagring i dialogen er det lokale antallet fasit (siden revalideres i bakgrunnen).
@@ -166,7 +172,7 @@ export default function IngredientList({
   );
   // Mangler antallet, spørres det før skalering er mulig (FR-3); «Avbryt» lar oppskriften stå uskalert.
   const [dialogOpen, setDialogOpen] = useState(
-    originalServings === null && onOriginalServingsChange !== undefined,
+    originalServings === null && onOriginalServingsChange !== undefined && askOriginalServings,
   );
 
   const [unitSystem, setUnitSystem] = useState<UnitSystem>("original");

@@ -90,6 +90,8 @@ export type Recipe = {
   steps: Step[];
   /** Hvor lang tid oppskriften tar, i minutter (Story 6.2); `null` eller utelatt = ikke oppgitt. */
   totalMinutes?: number | null;
+  /** Utbytte i tekst, for eksempel «ca. 12 boller» (Story 6.33b); `null` eller utelatt = ikke oppgitt. */
+  yieldNote?: string | null;
   /** Egne notater (Story 6.3); `null` eller utelatt = ingen. */
   notes?: string | null;
   /** Hvem oppskriften passer til etter brukerens egen vurdering; `null` eller utelatt = ikke oppgitt. */

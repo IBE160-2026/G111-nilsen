@@ -57,14 +57,17 @@ import {
 /** Ferdig validert input fra skjemaet «Legg inn selv». */
 export type ManualRecipeInput = {
   title: string;
-  servings: number;
+  /** Antall porsjoner, 1–50; `null` = ikke oppgitt (Story 6.33b). */
+  servings: number | null;
   ingredients: string[];
   steps: string[];
   /** Tid i minutter, 1–1440 (Story 6.2); `null` = ingen tid, utelatt = ikke en del av skjemaet. */
   minutes?: number | null;
+  /** Utbytte i tekst (Story 6.33b); `null` = ingen, utelatt = ikke en del av skjemaet. */
+  yieldNote?: string | null;
 };
 
-type ManualRecipeField = "title" | "servings" | "minutes" | "ingredients" | "steps";
+type ManualRecipeField = "title" | "servings" | "yieldNote" | "minutes" | "ingredients" | "steps";
 
 function linesOf(texts: string[]): string[] {
   return texts.flatMap(splitLines);
@@ -77,15 +80,14 @@ function tooLong(lines: string[], max: number): boolean {
 /** Finner første felt som bryter grensene i `LIMITS`, eller `null`. */
 function invalidField(
   title: string,
-  servings: number,
+  servings: number | null,
   ingredients: string[],
   steps: string[],
 ): ManualRecipeField | null {
   if (title === "" || title.length > LIMITS.titleLength) return "title";
   if (
-    !Number.isInteger(servings) ||
-    servings < LIMITS.servingsMin ||
-    servings > LIMITS.servingsMax
+    servings !== null &&
+    (!Number.isInteger(servings) || servings < LIMITS.servingsMin || servings > LIMITS.servingsMax)
   ) {
     return "servings";
   }
@@ -107,12 +109,16 @@ function buildContent(input: ManualRecipeInput): Result<RecipeContent> {
   // Linjer som slutter på «:» er overskrifter for delelister, ikke ingredienser (Story 6.32b).
   const sectioned = splitSections(linesOf(input.ingredients));
   const ingredients = sectioned.map((line) => line.text);
-  const stepTexts = linesOf(input.steps);
+  const sectionedSteps = splitSections(linesOf(input.steps));
+  const stepTexts = sectionedSteps.map((step) => step.text);
 
   const invalid = invalidField(title, input.servings, ingredients, stepTexts);
   if (invalid) return err(appError("validation", invalid));
   if (input.minutes != null && !isRecipeMinutes(input.minutes)) {
     return err(appError("validation", "minutes"));
+  }
+  if (input.yieldNote != null && input.yieldNote.trim().length > LIMITS.yieldNoteLength) {
+    return err(appError("validation", "yieldNote"));
   }
 
   return ok({
@@ -122,7 +128,7 @@ function buildContent(input: ManualRecipeInput): Result<RecipeContent> {
       position,
       section,
     })),
-    steps: stepTexts.map((text, position) => ({ text, position, section: null })),
+    steps: sectionedSteps.map(({ text, section }, position) => ({ text, position, section })),
   });
 }
 
@@ -153,6 +159,7 @@ export function createManualRecipe(
     steps: content.value.steps,
     userId,
     totalMinutes: input.minutes ?? null,
+    yieldNote: input.yieldNote?.trim() || null,
   });
   return ok({ id });
 }
@@ -179,6 +186,7 @@ export function updateManualRecipe(
     ingredients: content.value.ingredients,
     steps: content.value.steps,
     ...(input.minutes !== undefined ? { totalMinutes: input.minutes } : {}),
+    ...(input.yieldNote !== undefined ? { yieldNote: input.yieldNote?.trim() || null } : {}),
   });
   return updated ? ok({ id }) : err(appError("not_found"));
 }

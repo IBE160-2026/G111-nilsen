@@ -6,6 +6,7 @@ import type { ManualRecipeValues } from "./form-fields";
 const valid: ManualRecipeValues = {
   title: "Pannekaker",
   servings: "4",
+  yieldNote: "",
   minutes: "",
   ingredients: "3 dl hvetemel\n6 dl melk\n3 egg",
   steps: "Visp sammen.\nStek tynne pannekaker.",
@@ -34,6 +35,7 @@ describe("validateManualRecipe (matrisen i spec 1.4)", () => {
       data: {
         title: "Pannekaker",
         servings: 4,
+        yieldNote: null,
         minutes: null,
         ingredients: ["3 dl hvetemel", "6 dl melk", "3 egg"],
         steps: ["Visp sammen.", "Stek tynne pannekaker."],
@@ -65,12 +67,25 @@ describe("validateManualRecipe (matrisen i spec 1.4)", () => {
     expect(errorsOf({ title })).toEqual({ title: m.titleRequired });
   });
 
-  it.each(["0", "51", "2,5", "2.5", "abc", "", "-1", "1e1"])(
+  it.each(["0", "51", "2,5", "2.5", "abc", "-1", "1e1"])(
     "Ugyldig antall: %j gir melding under Antall porsjoner",
     (servings) => {
       expect(errorsOf({ servings })).toEqual({ servings: m.servingsInvalid });
     },
   );
+
+  it("Antall porsjoner er valgfritt (Story 6.33b): tomt gir null", () => {
+    const result = check({ servings: "  " });
+    expect(result.ok && result.data.servings).toBeNull();
+  });
+
+  it("Utbytte (Story 6.33b): trimmes, tomt gir null, og over 100 tegn avvises", () => {
+    const ok = check({ yieldNote: "  ca. 12 boller " });
+    expect(ok.ok && ok.data.yieldNote).toBe("ca. 12 boller");
+    const empty = check({ yieldNote: " " });
+    expect(empty.ok && empty.data.yieldNote).toBeNull();
+    expect(errorsOf({ yieldNote: "x".repeat(101) })).toEqual({ yieldNote: m.yieldNoteTooLong });
+  });
 
   it.each(["", "\n   \n\n"])("Ingen ingredienser: %j gir melding under Ingredienser", (text) => {
     expect(errorsOf({ ingredients: text })).toEqual({ ingredients: m.ingredientsRequired });

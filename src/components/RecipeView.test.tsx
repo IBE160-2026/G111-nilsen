@@ -288,12 +288,31 @@ describe("RecipeView", () => {
 
   it("mangler opprinnelig antall: dialogen spør, og valget lagres med oppskriftens id (Story 2.4)", async () => {
     const user = userEvent.setup();
-    render(<RecipeView recipe={{ ...recipe, originalServings: null }} folders={folders} />);
+    render(
+      <RecipeView
+        recipe={{ ...recipe, originalServings: null, sourceUrl: "https://a.no/x" }}
+        folders={folders}
+      />,
+    );
     const dialog = screen.getByRole("dialog", { name: "Hvor mange er oppskriften laget for?" });
     await user.click(within(dialog).getByRole("button", { name: "Lagre" }));
     expect(actions.changeOriginalServings).toHaveBeenCalledWith(1, 4);
     expect(await screen.findByText(/oppr\. 4/)).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Ingredienser" })).toBeInTheDocument();
+  });
+
+  it("egen oppskrift uten antall spør ikke, og viser utbyttet (Story 6.33b)", () => {
+    render(
+      <RecipeView
+        recipe={{ ...recipe, originalServings: null, yieldNote: "ca. 12 boller" }}
+        folders={folders}
+      />,
+    );
+    expect(
+      screen.queryByRole("dialog", { name: "Hvor mange er oppskriften laget for?" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/Gir: ca\. 12 boller/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Oppgi antall porsjoner" })).toBeInTheDocument();
   });
 
   it("viser kilden når oppskriften har sourceUrl eller sourceName", () => {

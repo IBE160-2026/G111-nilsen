@@ -997,6 +997,34 @@ test("Versjon 2: ingredienser kan deles i lister som «Kanelboller» og «Fyll»
   );
 });
 
+test("Versjon 2: kake uten porsjoner, med utbytte og delt «Slik gjør du»", async ({
+  page,
+}, testInfo) => {
+  const title = `Kakedeler ${testInfo.project.name}`;
+  await page.goto("/ny");
+  await page.waitForLoadState("networkidle");
+  await field(page, "Tittel").fill(title);
+  // Antall porsjoner står tomt (Story 6.33b); utbyttet står i stedet.
+  await field(page, "Utbytte").fill("ca. 12 boller");
+  await field(page, "Ingredienser").fill("Kake:\n5 dl mel\nGlasur:\n2 dl melis");
+  await field(page, "Steg (valgfritt)").fill("Kake:\nBland mel.\nStek.\nGlasur:\nPisk melis.");
+  await page.getByRole("button", { name: "Lagre oppskrift" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+  await expect(page.getByText("Gir: ca. 12 boller")).toBeVisible();
+  // Ingen dialog som maser om antall.
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  const steps = page.getByRole("region", { name: "Slik gjør du" });
+  await expect(steps.getByRole("heading", { level: 3, name: "Kake" })).toBeVisible();
+  await expect(steps.getByRole("heading", { level: 3, name: "Glasur" })).toBeVisible();
+  await expect(steps.getByRole("checkbox")).toHaveCount(3);
+
+  await page.getByRole("link", { name: `Rediger ${title}` }).click();
+  await expect(field(page, "Steg (valgfritt)")).toHaveValue(
+    "Kake:\nBland mel.\nStek.\nGlasur:\nPisk melis.",
+  );
+  await expect(field(page, "Antall porsjoner")).toHaveValue("");
+});
+
 test("Versjon 2: å slette en mappe kan angres, og oppskriftene kommer tilbake i den", async ({
   page,
 }, testInfo) => {

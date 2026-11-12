@@ -22,18 +22,22 @@ export const manualRecipeSchema = z.object({
     .trim()
     .min(1, { error: m.titleRequired })
     .max(LIMITS.titleLength, { error: m.titleTooLong }),
+  // Valgfritt (Story 6.33b): tomt = ingen porsjonsantall, ellers et helt tall 1–50.
   servings: z
     .string()
     .trim()
-    .regex(/^\d{1,3}$/, { error: m.servingsInvalid })
-    .transform(Number)
-    .pipe(
-      z
-        .number()
-        .int()
-        .min(LIMITS.servingsMin, { error: m.servingsInvalid })
-        .max(LIMITS.servingsMax, { error: m.servingsInvalid }),
+    .regex(/^(\d{1,3})?$/, { error: m.servingsInvalid })
+    .transform((text) => (text === "" ? null : Number(text)))
+    .refine(
+      (value) => value === null || (value >= LIMITS.servingsMin && value <= LIMITS.servingsMax),
+      { error: m.servingsInvalid },
     ),
+  // Valgfritt (Story 6.33b): for eksempel «ca. 12 boller»; tomt = ingen.
+  yieldNote: z
+    .string()
+    .trim()
+    .max(LIMITS.yieldNoteLength, { error: m.yieldNoteTooLong })
+    .transform((text) => (text === "" ? null : text)),
   // Valgfritt (Story 6.2): tomt = ingen tid, ellers hele minutter 1–1440.
   minutes: z
     .string()
@@ -63,6 +67,7 @@ export function valuesFromFormData(formData: FormData): ManualRecipeValues {
   return {
     title: get("title"),
     servings: get("servings"),
+    yieldNote: get("yieldNote"),
     minutes: get("minutes"),
     ingredients: get("ingredients"),
     steps: get("steps"),

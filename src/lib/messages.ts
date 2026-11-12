@@ -182,7 +182,8 @@ export const sourceLinkMessages = {
 export const manualRecipeFieldMessages = {
   titleRequired: "Skriv en tittel.",
   titleTooLong: "Tittelen kan være maks 200 tegn. Gjør den kortere.",
-  servingsInvalid: "Skriv et helt tall fra 1 til 50.",
+  servingsInvalid: "Skriv et helt tall fra 1 til 50, eller la feltet stå tomt.",
+  yieldNoteTooLong: "Utbyttet kan være maks 100 tegn. Gjør det kortere.",
   ingredientsRequired: "Skriv minst én ingrediens, én per linje.",
   ingredientsTooMany: "Du kan ha maks 100 ingredienslinjer.",
   ingredientLineTooLong:
@@ -190,6 +191,13 @@ export const manualRecipeFieldMessages = {
   stepsTooMany: "Du kan ha maks 100 steg.",
   stepTooLong: "Et steg kan være maks 2000 tegn. Del det opp i flere steg.",
   minutesInvalid: "Skriv tiden i hele minutter, fra 1 til 1440, eller la feltet stå tomt.",
+} as const;
+
+/** Utbytte i tekst (Story 6.33b): for oppskrifter der antall porsjoner ikke passer. */
+export const recipeYieldMessages = {
+  label: "Utbytte",
+  hint: "Valgfritt. For eksempel «ca. 12 boller» eller «1 langpanne». Bruk dette i stedet for antall porsjoner når det passer bedre.",
+  shown: (note: string) => `Gir: ${note}`,
 } as const;
 
 /** Tid for oppskriften (Story 6.2). */

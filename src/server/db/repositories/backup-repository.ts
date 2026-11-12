@@ -16,6 +16,7 @@ export type ExportedRecipe = {
   sourceName: string | null;
   originalServings: number | null;
   totalMinutes: number | null;
+  yieldNote: string | null;
   isFavorite: boolean;
   notes: string | null;
   fitsFor: string | null;
@@ -43,6 +44,7 @@ export function readRecipesForExport(db: Db, userId: number): ExportedRecipe[] {
     sourceName: recipe.sourceName,
     originalServings: recipe.originalServings,
     totalMinutes: recipe.totalMinutes,
+    yieldNote: recipe.yieldNote ?? null,
     isFavorite: recipe.isFavorite,
     notes: recipe.notes,
     fitsFor: recipe.fitsFor,

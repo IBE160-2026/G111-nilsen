@@ -2,6 +2,7 @@
 export const MANUAL_RECIPE_FIELDS = [
   "title",
   "servings",
+  "yieldNote",
   "minutes",
   "ingredients",
   "steps",

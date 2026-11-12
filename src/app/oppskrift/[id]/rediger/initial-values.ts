@@ -8,6 +8,7 @@ export function initialValuesOf(recipe: Recipe): ManualRecipeValues {
   return {
     title: recipe.title,
     servings: recipe.originalServings === null ? "" : String(recipe.originalServings),
+    yieldNote: recipe.yieldNote ?? "",
     minutes: recipe.totalMinutes == null ? "" : String(recipe.totalMinutes),
     ingredients: joinSections(
       byPosition(recipe.ingredients).map((line) => ({
@@ -15,8 +16,8 @@ export function initialValuesOf(recipe: Recipe): ManualRecipeValues {
         section: line.section,
       })),
     ).join("\n"),
-    steps: byPosition(recipe.steps)
-      .map((step) => step.text)
-      .join("\n"),
+    steps: joinSections(
+      byPosition(recipe.steps).map((step) => ({ text: step.text, section: step.section })),
+    ).join("\n"),
   };
 }

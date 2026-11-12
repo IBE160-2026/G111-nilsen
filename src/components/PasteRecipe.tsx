@@ -76,7 +76,7 @@ export default function PasteRecipe({ action }: { action: FormAction }) {
           <ManualRecipeForm
             key={draft.n}
             action={action}
-            initialValues={draft.values}
+            initialValues={{ ...draft.values, yieldNote: "" }}
             submitLabel={m.saveLabel}
           />
         </section>

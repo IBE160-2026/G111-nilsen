@@ -77,6 +77,7 @@ describe("getDb", () => {
     db.$client.exec("alter table recipes drop column cooked_count");
     db.$client.exec("alter table recipes drop column last_cooked_at");
     db.$client.exec("alter table recipes drop column notes");
+    db.$client.exec("alter table recipes drop column yield_note");
     db.$client.exec("alter table recipes drop column total_minutes");
     db.$client.exec("alter table recipes drop column user_id");
     db.$client.exec("drop table users");

@@ -46,6 +46,7 @@ const snapshotSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   totalMinutes: z.number().nullable(),
+  yieldNote: z.string().nullish(),
   notes: z.string().nullable(),
   fitsFor: z.string().nullable(),
   rating: z.number().nullable(),
@@ -95,6 +96,7 @@ export function trashRecipe(db: Db, id: number, now: string): number | null {
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       totalMinutes: row.totalMinutes,
+      yieldNote: row.yieldNote,
       notes: row.notes,
       fitsFor: row.fitsFor,
       rating: row.rating,
@@ -257,6 +259,7 @@ export function restoreRecipe(
       updatedAt: data.updatedAt,
       userId,
       totalMinutes: data.totalMinutes,
+      yieldNote: data.yieldNote ?? null,
       ingredients: data.ingredients.map((line) => ({
         position: line.position,
         section: line.section,

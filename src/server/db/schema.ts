@@ -76,6 +76,8 @@ export const recipes = sqliteTable("recipes", {
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }),
   /** Hvor lang tid oppskriften tar, i minutter (Story 6.2); `null` = ikke oppgitt. */
   totalMinutes: integer("total_minutes"),
+  /** Hva oppskriften gir når antall porsjoner ikke passer, for eksempel «ca. 12 boller» (Story 6.33b); `null` = ikke oppgitt. */
+  yieldNote: text("yield_note"),
   /** Brukerens egne notater (Story 6.3); `null` = ingen. */
   notes: text("notes"),
   /** Brukerens egen vurdering av hvem oppskriften passer til, for eksempel «2 sultne» (Story 6.6b); `null` = ingen. */

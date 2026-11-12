@@ -14,6 +14,7 @@ function failingAction(fieldErrors: ManualRecipeFormState["fieldErrors"]) {
     values: {
       title: String(formData.get("title") ?? ""),
       servings: String(formData.get("servings") ?? ""),
+      yieldNote: String(formData.get("yieldNote") ?? ""),
       minutes: String(formData.get("minutes") ?? ""),
       ingredients: String(formData.get("ingredients") ?? ""),
       steps: String(formData.get("steps") ?? ""),
@@ -37,7 +38,7 @@ describe("ManualRecipeForm", () => {
   it("viser feil under feltet, kobler dem med aria-describedby, beholder verdier og flytter fokus", async () => {
     const user = userEvent.setup();
     const action = failingAction({
-      servings: "Skriv et helt tall fra 1 til 50.",
+      servings: "Skriv et helt tall fra 1 til 50, eller la feltet stå tomt.",
       ingredients: "Skriv minst én ingrediens, én per linje.",
     });
     render(<ManualRecipeForm action={action} />);
@@ -52,10 +53,12 @@ describe("ManualRecipeForm", () => {
     expect(action).toHaveBeenCalledTimes(1);
 
     expect(servings).toHaveAttribute("aria-invalid", "true");
-    expect(servings).toHaveAccessibleDescription(/Skriv et helt tall fra 1 til 50\./);
+    expect(servings).toHaveAccessibleDescription(/Skriv et helt tall fra 1 til 50, eller/);
     expect(servings.getAttribute("aria-describedby")).toContain("servings-error");
     const errorId = servings.getAttribute("aria-describedby")!.split(" ").at(-1)!;
-    expect(document.getElementById(errorId)).toHaveTextContent("Skriv et helt tall fra 1 til 50.");
+    expect(document.getElementById(errorId)).toHaveTextContent(
+      "Skriv et helt tall fra 1 til 50, eller la feltet stå tomt.",
+    );
     expect(screen.getByLabelText("Ingredienser")).toHaveAccessibleDescription(
       /Skriv minst én ingrediens/,
     );
@@ -77,7 +80,7 @@ describe("ManualRecipeForm", () => {
     await waitFor(() => expect(button).toBeDisabled());
     finish({
       fieldErrors: { title: "Skriv en tittel." },
-      values: { title: "", servings: "", minutes: "", ingredients: "", steps: "" },
+      values: { title: "", servings: "", yieldNote: "", minutes: "", ingredients: "", steps: "" },
     });
     await waitFor(() => expect(button).toBeEnabled());
     // Fokus flyttes i en effekt etter at knappen er aktiv igjen, så det må ventes på.
@@ -95,7 +98,14 @@ describe("ManualRecipeForm", () => {
     const user = userEvent.setup();
     const action = vi.fn(async () => ({
       fieldErrors: {},
-      values: { title: "A", servings: "4", minutes: "", ingredients: "2 egg", steps: "" },
+      values: {
+        title: "A",
+        servings: "4",
+        yieldNote: "",
+        minutes: "",
+        ingredients: "2 egg",
+        steps: "",
+      },
       formError: "Noe gikk galt. Prøv igjen.",
     }));
     render(<ManualRecipeForm action={action} />);
@@ -120,6 +130,7 @@ describe("ManualRecipeForm", () => {
         initialValues={{
           title: "Vafler",
           servings: "6",
+          yieldNote: "",
           minutes: "",
           ingredients: "1 egg\n2 dl melk",
           steps: "Rør.",
@@ -145,6 +156,7 @@ describe("ManualRecipeForm", () => {
         initialValues={{
           title: "Vafler",
           servings: "6",
+          yieldNote: "",
           minutes: "",
           ingredients: "1 egg",
           steps: "",
@@ -178,7 +190,7 @@ describe("ManualRecipeForm", () => {
     expect(click.defaultPrevented).toBe(true);
     finish({
       fieldErrors: { title: "Skriv en tittel." },
-      values: { title: "", servings: "", minutes: "", ingredients: "", steps: "" },
+      values: { title: "", servings: "", yieldNote: "", minutes: "", ingredients: "", steps: "" },
     });
     await waitFor(() => expect(cancel).not.toHaveAttribute("aria-disabled"));
     const after = new MouseEvent("click", { bubbles: true, cancelable: true });
@@ -190,6 +202,7 @@ describe("ManualRecipeForm", () => {
     const values = (title: string) => ({
       title,
       servings: "4",
+      yieldNote: "",
       minutes: "",
       ingredients: "1 egg",
       steps: "",

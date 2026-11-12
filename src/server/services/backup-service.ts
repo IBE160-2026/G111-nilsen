@@ -44,6 +44,7 @@ const recipeSchema = z.object({
   sourceName: text(200).nullable(),
   originalServings: z.number().int().min(LIMITS.servingsMin).max(LIMITS.servingsMax).nullable(),
   totalMinutes: z.number().int().min(1).max(MAX_RECIPE_MINUTES).nullable(),
+  yieldNote: text(LIMITS.yieldNoteLength).nullish(),
   isFavorite: z.boolean(),
   notes: text(NOTES_MAX_LENGTH).nullable(),
   fitsFor: text(FITS_FOR_MAX_LENGTH).nullable(),
@@ -125,6 +126,7 @@ export function importBackup(
         createdAt: stamp,
         updatedAt: stamp,
         totalMinutes: recipe.totalMinutes,
+        yieldNote: recipe.yieldNote ?? null,
         ingredients: recipe.ingredients.map((line, position) => {
           const parsedLine = parseLine(line.text);
           return {

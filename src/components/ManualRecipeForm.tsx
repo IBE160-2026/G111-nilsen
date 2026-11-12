@@ -1,6 +1,6 @@
 "use client";
 
-import { recipeTimeMessages } from "@/lib/messages";
+import { recipeTimeMessages, recipeYieldMessages } from "@/lib/messages";
 import Link from "next/link";
 import { useActionState, useEffect, useId, useRef } from "react";
 import {
@@ -19,7 +19,7 @@ type FormAction = (
 
 export const initialManualRecipeState: ManualRecipeFormState = {
   fieldErrors: {},
-  values: { title: "", servings: "", minutes: "", ingredients: "", steps: "" },
+  values: { title: "", servings: "", yieldNote: "", minutes: "", ingredients: "", steps: "" },
 };
 
 /**
@@ -99,17 +99,33 @@ export default function ManualRecipeForm({
           Antall porsjoner
         </label>
         <p id={`${idOf("servings")}-hint`} className={styles.hint}>
-          Hvor mange oppskriften er til, et helt tall fra 1 til 50.
+          Valgfritt. Hvor mange oppskriften er til, et helt tall fra 1 til 50. Er det en kake eller
+          noe annet som ikke deles i porsjoner, kan du la feltet stå tomt.
         </p>
         <input
           type="text"
           inputMode="numeric"
           autoComplete="off"
           className={`${styles.input} ${styles.servings}`}
-          aria-required="true"
           {...fieldProps("servings", true)}
         />
         {error("servings")}
+      </div>
+
+      <div className={styles.field}>
+        <label htmlFor={idOf("yieldNote")} className={styles.label}>
+          {recipeYieldMessages.label}
+        </label>
+        <p id={`${idOf("yieldNote")}-hint`} className={styles.hint}>
+          {recipeYieldMessages.hint}
+        </p>
+        <input
+          type="text"
+          autoComplete="off"
+          className={styles.input}
+          {...fieldProps("yieldNote", true)}
+        />
+        {error("yieldNote")}
       </div>
 
       <div className={styles.field}>

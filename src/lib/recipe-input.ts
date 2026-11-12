@@ -11,6 +11,8 @@ export const LIMITS = {
   linesPerField: 100,
   ingredientLineLength: 300,
   stepLength: 2000,
+  /** Utbytte i tekst, for eksempel «ca. 12 boller» (Story 6.33b). */
+  yieldNoteLength: 100,
 } as const;
 
 /**

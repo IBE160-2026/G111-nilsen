@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { Activity } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Step } from "@/domain";
-import StepList from "./StepList";
+import StepList, { groupSteps } from "./StepList";
 
 afterEach(() => {
   cleanup();
@@ -145,5 +145,52 @@ describe("StepList", () => {
   it("viser kortet med bare forslag til retten, uten steg", () => {
     render(<StepList steps={[]} tips={["Server med bær."]} />);
     expect(screen.getByRole("region", { name: "Slik gjør du" })).toBeInTheDocument();
+  });
+});
+
+const step = (id: number, section: string | null, text: string): Step => ({
+  id,
+  position: id,
+  section,
+  text,
+});
+
+describe("groupSteps (Story 6.34b)", () => {
+  it("uten deler er alt én gruppe, sortert på posisjon", () => {
+    const groups = groupSteps([step(2, null, "b"), step(1, null, "a")]);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].steps.map((s) => s.text)).toEqual(["a", "b"]);
+  });
+
+  it("deler stegene der delen skifter", () => {
+    const groups = groupSteps([step(1, "Kake", "a"), step(2, "Kake", "b"), step(3, "Glasur", "c")]);
+    expect(groups.map((g) => [g.section, g.steps.length])).toEqual([
+      ["Kake", 2],
+      ["Glasur", 1],
+    ]);
+  });
+});
+
+describe("StepList med deler", () => {
+  it("viser en overskrift per del og starter nummereringen på 1 i hver", () => {
+    render(
+      <StepList
+        steps={[
+          step(1, "Kake", "Bland tørt."),
+          step(2, "Kake", "Stek."),
+          step(3, "Glasur", "Pisk smør."),
+        ]}
+      />,
+    );
+    expect(screen.getByRole("heading", { level: 3, name: "Kake" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3, name: "Glasur" })).toBeInTheDocument();
+    const glasur = screen.getByRole("list", { name: "Glasur" });
+    expect(within(glasur).getByText("1.")).toBeInTheDocument();
+    expect(within(glasur).getByText("Pisk smør.")).toBeInTheDocument();
+  });
+
+  it("uten deler vises ingen mellomoverskrifter", () => {
+    render(<StepList steps={[step(1, null, "Rør.")]} />);
+    expect(screen.queryByRole("heading", { level: 3 })).not.toBeInTheDocument();
   });
 });

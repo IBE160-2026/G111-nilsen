@@ -45,6 +45,7 @@ describe("initialValuesOf", () => {
     expect(initialValuesOf(recipe)).toEqual({
       title: "Importert",
       servings: "",
+      yieldNote: "",
       minutes: "",
       ingredients: "2 egg\nsalt",
       steps: "Stek.",

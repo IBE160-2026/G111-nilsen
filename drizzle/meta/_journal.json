@@ -127,6 +127,13 @@
       "when": 1794495842469,
       "tag": "0017_cooked_log",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1794504925250,
+      "tag": "0018_yield_note",
+      "breakpoints": true
     }
   ]
 }
