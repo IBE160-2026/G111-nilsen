@@ -739,6 +739,51 @@ test("Versjon 2: appen kan installeres og viser en egen side uten nett", async (
   await context.setOffline(false);
 });
 
+test("Versjon 2: handlelisten kan brukes uten nett", async ({ page, context }, testInfo) => {
+  const title = `Butikk ${testInfo.project.name}`;
+  await page.goto("/ny");
+  await page.waitForLoadState("networkidle");
+  await field(page, "Tittel").fill(title);
+  await field(page, "Antall porsjoner").fill("2");
+  await field(page, "Ingredienser").fill("2 dl fløte\n3 egg\n1 ss smør");
+  await page.getByRole("button", { name: "Lagre oppskrift" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+
+  await page.goto("/handleliste");
+  await page.waitForLoadState("networkidle");
+  await page.getByRole("checkbox", { name: title }).check();
+  const list = page
+    .getByRole("heading", { name: "Du må kjøpe" })
+    .locator("xpath=ancestor::section");
+  await expect(list.getByRole("listitem").first()).toBeVisible();
+  const total = await list.getByRole("listitem").count();
+  const firstItem = (await list.getByRole("listitem").first().locator("label").innerText())
+    .split("\n")[0]!
+    .trim();
+
+  // Service workeren må være klar, og «Du er frakoblet»-siden lagret, før nettet går.
+  await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined));
+  await page.goto("/");
+  await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined));
+  await expect.poll(() => page.evaluate(() => caches.has("recipemate-offline-v2"))).toBe(true);
+
+  await context.setOffline(true);
+  await page.goto("/handleliste");
+  await expect(page.getByRole("heading", { level: 1, name: "Du er frakoblet" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: /^Handlelisten din/ })).toBeVisible();
+  const offlineList = page.getByRole("region", { name: /^Handlelisten din/ });
+  const offlineItems = offlineList.getByRole("listitem");
+  await expect(offlineItems).toHaveCount(total);
+  await expect(offlineList.getByRole("status")).toContainText(`${total} av ${total} igjen`);
+
+  // Avkrysningen huskes, også etter at siden er lastet på nytt uten nett.
+  await page.getByRole("checkbox", { name: new RegExp(`^${firstItem}`) }).check();
+  await expect(offlineList.getByRole("status")).toContainText(`${total - 1} av ${total} igjen`);
+  await page.reload();
+  await expect(page.getByRole("checkbox", { name: new RegExp(`^${firstItem}`) })).toBeChecked();
+  await context.setOffline(false);
+});
+
 test("Versjon 2: eksport og import av oppskrifter som fil", async ({ page }, testInfo) => {
   const title = `Kopi ${testInfo.project.name}`;
   await page.goto("/ny");

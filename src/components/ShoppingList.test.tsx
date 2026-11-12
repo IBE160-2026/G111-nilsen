@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { Activity } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { parseLine, type ShoppingRecipe } from "@/domain";
+import { OFFLINE_LIST_KEY, parseOfflineList } from "@/lib/offline-list";
 import ShoppingList from "./ShoppingList";
 
 beforeEach(() => {
@@ -536,6 +537,49 @@ describe("ShoppingList", () => {
       );
       expect(screen.getByLabelText("Antall porsjoner for Vafler")).toHaveValue(9);
       expect(screen.queryByLabelText("Antall porsjoner for Uten antall")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("handlelisten uten nett (Story 6.17)", () => {
+    beforeEach(() => window.localStorage.clear());
+
+    function stored() {
+      return parseOfflineList(window.localStorage.getItem(OFFLINE_LIST_KEY));
+    }
+
+    it("lagrer varene som skal kjøpes, og avkrysningene, i nettleseren", async () => {
+      const user = userEvent.setup();
+      render(<ShoppingList recipes={recipes} listName="Uke 46" />);
+      expect(stored()).toBeNull(); // ingenting valgt ennå
+      await user.click(pick("Pannekaker"));
+      expect(stored()).toMatchObject({
+        title: "Uke 46",
+        items: [
+          { key: "egg|", text: "3 egg", from: "Pannekaker" },
+          { key: "mel|g", text: "400 g mel", from: "Pannekaker" },
+          { key: "melk|dl", text: "4 dl melk", from: "Pannekaker" },
+        ],
+        checked: [],
+      });
+      await user.click(screen.getByRole("checkbox", { name: /3 egg/ }));
+      expect(stored()?.checked).toEqual(["egg|"]);
+    });
+
+    it("en tom liste overskriver ikke det som er lagret", async () => {
+      const user = userEvent.setup();
+      const { unmount } = render(<ShoppingList recipes={recipes} />);
+      await user.click(pick("Vafler"));
+      expect(stored()?.items).toHaveLength(2);
+      unmount();
+      render(<ShoppingList recipes={recipes} />);
+      expect(stored()?.items).toHaveLength(2);
+    });
+
+    it("varer hjemme kommer ikke med", async () => {
+      const user = userEvent.setup();
+      render(<ShoppingList recipes={recipes} pantry={[{ id: 1, name: "egg" }]} />);
+      await user.click(pick("Vafler"));
+      expect(stored()?.items.map((item) => item.text)).toEqual(["2 dl melk"]);
     });
   });
 });

@@ -2,15 +2,17 @@
  * Service worker for RecipeMate (Story 6.16). Bevisst smal:
  *  - statiske filer under /_next/static/ (hash i filnavnet, endres aldri) hentes først fra
  *    mellomlageret, så appen starter raskt;
- *  - får en sidenavigasjon ikke svar fra nettet, vises den ferdig lagrede siden /frakoblet;
+ *  - får en sidenavigasjon ikke svar fra nettet, vises den ferdig lagrede siden /frakoblet, som
+ *    kan vise handlelisten brukeren sist så (lagret i nettleseren, ikke her; Story 6.17);
  *  - ingen sider, API-svar eller brukerdata lagres. Innloggede sider går alltid til nettet, så
  *    ingen andres data blir liggende igjen på en delt telefon.
  * Endre VERSION når denne filen endres, så gamle mellomlagre ryddes bort.
  */
-const VERSION = "v1";
+const VERSION = "v2";
 const STATIC_CACHE = `recipemate-static-${VERSION}`;
 const OFFLINE_CACHE = `recipemate-offline-${VERSION}`;
 const OFFLINE_URL = "/frakoblet";
+let offlineRefreshed = false;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(precacheOfflinePage().then(() => self.skipWaiting()));
@@ -67,10 +69,20 @@ self.addEventListener("fetch", (event) => {
 
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request).catch(async () => {
-        const cache = await caches.open(OFFLINE_CACHE);
-        return (await cache.match(OFFLINE_URL)) ?? Response.error();
-      }),
+      fetch(request).then(
+        (response) => {
+          // Ny versjon av appen kan ha ny frakoblet-side: hent den på nytt én gang per økt.
+          if (!offlineRefreshed && url.pathname !== OFFLINE_URL) {
+            offlineRefreshed = true;
+            event.waitUntil(precacheOfflinePage().catch(() => {}));
+          }
+          return response;
+        },
+        async () => {
+          const cache = await caches.open(OFFLINE_CACHE);
+          return (await cache.match(OFFLINE_URL)) ?? Response.error();
+        },
+      ),
     );
   }
 });

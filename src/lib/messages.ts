@@ -831,3 +831,14 @@ export const pwaMessages = {
   offlineDescription: "Siden du ba om trenger nett. Sjekk at du er på nett, og prøv igjen.",
   offlineAction: "Prøv igjen",
 } as const;
+
+/** Handlelisten uten nett (Story 6.17). */
+export const offlineListMessages = {
+  heading: "Handlelisten din",
+  lead: (updated: string) => `Sist oppdatert ${updated}. Du kan krysse av her uten nett.`,
+  checkHint: "Avkrysningene gjelder bare her. Åpne handlelisten når du er på nett igjen.",
+  empty: "Åpne handlelisten mens du har nett, så er den her neste gang.",
+  from: "Til",
+  remaining: (left: number, total: number) =>
+    left === 0 ? "Du har alt." : `${left} av ${total} igjen`,
+} as const;

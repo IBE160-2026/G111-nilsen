@@ -11,6 +11,7 @@ import {
 import type { ActionResult, PantryActionResult } from "@/app/_shared/action-result";
 import type { SaveListResult } from "@/app/handleliste/actions";
 import { fallbackMessage, pantryMessages as p, shoppingMessages as m } from "@/lib/messages";
+import { writeOfflineList } from "@/lib/offline-list";
 import { isSelectedServings, LIMITS } from "@/lib/recipe-input";
 import UnitChoice from "./UnitChoice";
 import CheckRow from "./CheckRow";
@@ -171,6 +172,24 @@ export default function ShoppingList({
     () => splitByPantry(allItems, pantry),
     [allItems, pantry],
   );
+
+  // Handlelisten uten nett (Story 6.17): et utdrag av det som skal kjøpes og avkrysningene lagres i
+  // nettleseren, så «Du er frakoblet»-siden kan vise listen i butikken.
+  useEffect(() => {
+    // En tom liste (ingenting valgt ennå) overskriver ikke den lagrede; den slettes ved utlogging.
+    if (items.length === 0) return;
+    writeOfflineList({
+      version: 1,
+      title: name,
+      savedAt: new Date().toISOString(),
+      items: items.map((item) => ({
+        key: item.key,
+        text: item.text,
+        from: item.recipes.join(", "),
+      })),
+      checked: items.filter((item) => checked.has(item.key)).map((item) => item.key),
+    });
+  }, [items, checked, name]);
 
   async function addPantry(name: string): Promise<boolean> {
     if (!onAddPantry || pantryPending) return false;

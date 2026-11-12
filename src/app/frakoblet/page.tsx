@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import OfflineShoppingList from "@/components/OfflineShoppingList";
 import RetryButton from "@/components/RetryButton";
 import { pwaMessages as m } from "@/lib/messages";
 import styles from "../list-page.module.css";
@@ -16,6 +17,7 @@ export default function OfflinePage() {
       <p>{m.offlineTitle}</p>
       <p>{m.offlineDescription}</p>
       <RetryButton label={m.offlineAction} />
+      <OfflineShoppingList />
     </div>
   );
 }

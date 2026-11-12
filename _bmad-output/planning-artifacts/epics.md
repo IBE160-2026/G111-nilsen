@@ -1247,3 +1247,23 @@ slik at den er like rask å finne som andre apper, også når nettet er dårlig.
 
 **Gitt** at jeg er innlogget
 **Så** lagres ingen av sidene mine, oppskrifter eller svar fra serveren på telefonen
+
+### Story 6.17: Handlelisten uten nett
+
+Som Ida,
+vil jeg kunne se og krysse av i handlelisten i butikken selv om nettet faller ut,
+slik at jeg ikke står uten liste.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg har sett handlelisten mens jeg var på nett
+**Så** vises den sist sette listen (varer og hvem de er til) på siden «Du er frakoblet» når jeg åpner appen uten nett, med tidspunkt for når den sist ble oppdatert
+
+**Gitt** at jeg er uten nett og krysser av en vare
+**Så** huskes avkrysningen, også etter at siden er lastet på nytt, og jeg ser hvor mange som er igjen
+
+**Gitt** at jeg logger ut
+**Så** slettes den lagrede listen fra nettleseren
+
+**Gitt** at jeg ikke har sett noen handleliste
+**Så** står det på den frakoblede siden hvordan jeg får den

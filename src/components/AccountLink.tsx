@@ -2,6 +2,7 @@ import Link from "next/link";
 import { logOutAccount } from "@/app/account-actions";
 import { accountMessages as m } from "@/lib/messages";
 import { currentUser } from "@/server/session";
+import ClearOfflineListOnLogout from "./ClearOfflineListOnLogout";
 import styles from "./AccountLink.module.css";
 
 /**
@@ -12,9 +13,12 @@ export default async function AccountLink() {
   const user = await currentUser();
   if (user === null) {
     return (
-      <Link href="/logg-inn" className={styles.link}>
-        {m.login}
-      </Link>
+      <>
+        <Link href="/logg-inn" className={styles.link}>
+          {m.login}
+        </Link>
+        <ClearOfflineListOnLogout />
+      </>
     );
   }
   return (
