@@ -49,10 +49,11 @@ const BASIC_WORDS = new Set([
 
 /**
  * Ord som også passer som siste del av et sammensatt ord (Story 6.27b): «mel» passer til
- * «hvetemel» og «maismel», «olje» til «olivenolje», «sukker» til «rørsukker». Listen er kort med
- * vilje: «melk» skal ikke passe til «kokosmelk», og «mel» ikke til «melis» (ordet slutter ikke på mel).
+ * «hvetemel» og «maismel». Listen er kort med vilje: «melk» skal ikke passe til «kokosmelk»,
+ * «olje» ikke til «olivenolje» og «sukker» ikke til «rørsukker» (det er andre varer), og «mel»
+ * ikke til «melis» (ordet slutter ikke på mel).
  */
-const COMPOUND_ENDINGS = new Set(["mel", "olje", "sukker"]);
+const COMPOUND_ENDINGS = new Set(["mel"]);
 
 /** Om `word` er et sammensatt ord som slutter på et av ordene i `COMPOUND_ENDINGS` som `ending`. */
 function endsWithCompound(word: string, ending: string): boolean {
@@ -66,8 +67,8 @@ function isBasic(labelWords: ReadonlySet<string>): boolean {
 /**
  * Finner hvilke oppskrifter som kan lages av det brukeren har hjemme (Story 6.12). En ingrediens
  * er hjemme når alle ordene i noe brukeren har hjemme står i ingrediensen («smør» passer til
- * «usaltet smør», men «mel» passer ikke til «melis», og «melk» ikke til «kokosmelk»). Unntak: «mel», «olje» og «sukker» passer også til sammensatte ord
- * som slutter på dem («hvetemel», «olivenolje»). Hver
+ * «usaltet smør», men «mel» passer ikke til «melis», og «melk» ikke til «kokosmelk»). Unntak: «mel» passer også til sammensatte ord som slutter på det
+ * («hvetemel», «maismel»). Hver
  * ingrediens teller én gang per oppskrift (uavhengig av store og små bokstaver). Vann, salt og
  * pepper regnes som at man alltid har dem og mangler aldri. Oppskrifter
  * uten ingredienser eller uten noen ingrediens hjemme tas ikke med. Sortert på færrest som
