@@ -941,8 +941,14 @@ test("Versjon 2: statistikk viser hva som er laget oftest", async ({ page }, tes
     await expect(page.getByText(/laget \d+ gang/)).toBeVisible();
   }
 
-  await page.goto("/oppskrifter");
-  await page.getByRole("link", { name: "Statistikk", exact: true }).click();
+  // «Angre» tar bort den siste, og «Laget i dag» teller opp igjen (Story 6.21).
+  await page.getByRole("button", { name: "Angre" }).click();
+  await expect(page.getByText(/laget 2 ganger/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Angre" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Laget i dag" }).click();
+  await expect(page.getByText(/laget 3 ganger/)).toBeVisible();
+
+  await page.getByRole("link", { name: "Se statistikk" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Statistikk" })).toBeVisible();
   await page.waitForLoadState("networkidle");
 

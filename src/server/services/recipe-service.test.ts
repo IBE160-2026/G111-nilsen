@@ -6,6 +6,7 @@ import {
   canAccessRecipe,
   createManualRecipe,
   markRecipeCooked,
+  undoRecipeCooked,
   setRecipeFitsFor,
   addRecipeLabel,
   deleteDeletedRecipeForGood,
@@ -880,6 +881,41 @@ describe("notater og sist laget (Story 6.3)", () => {
       2,
     ]);
     expect(markRecipeCooked(999, db)).toMatchObject({ ok: false, error: { kind: "not_found" } });
+  });
+
+  it("«Angre» teller ned og setter datoen tilbake (Story 6.21)", () => {
+    const db = createTestDb();
+    const id = saved(db);
+    const day1 = () => new Date("2026-11-09T18:00:00.000Z");
+    const day2 = () => new Date("2026-11-10T18:00:00.000Z");
+    markRecipeCooked(id, db, day1);
+    markRecipeCooked(id, db, day2);
+    expect(undoRecipeCooked(id, "2026-11-09T18:00:00.000Z", db)).toEqual({
+      ok: true,
+      value: { lastCookedAt: "2026-11-09T18:00:00.000Z", cookedCount: 1 },
+    });
+    // Siste angring: aldri laget igjen, og datoen forsvinner uansett hva som sendes inn.
+    expect(undoRecipeCooked(id, "2026-11-09T18:00:00.000Z", db)).toEqual({
+      ok: true,
+      value: { lastCookedAt: null, cookedCount: 0 },
+    });
+    const recipe = getRecipe(id, db);
+    expect(recipe.ok && [recipe.value.lastCookedAt, recipe.value.cookedCount]).toEqual([null, 0]);
+  });
+
+  it("«Angre» går ikke under null og avviser ukjent oppskrift og ugyldig dato", () => {
+    const db = createTestDb();
+    const id = saved(db);
+    expect(undoRecipeCooked(id, null, db)).toMatchObject({
+      ok: false,
+      error: { kind: "not_found" },
+    });
+    expect(undoRecipeCooked(999, null, db)).toMatchObject({ ok: false });
+    markRecipeCooked(id, db);
+    expect(undoRecipeCooked(id, "ikke en dato", db)).toMatchObject({
+      ok: false,
+      error: { kind: "validation" },
+    });
   });
 });
 

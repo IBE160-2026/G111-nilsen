@@ -676,6 +676,26 @@ export function markCooked(db: Db, id: number, at: string): number | null {
 }
 
 /**
+ * Angrer «Laget i dag» (Story 6.21): teller ned med én og setter «sist laget» tilbake til
+ * `previousAt` (eller `null` når oppskriften da aldri var laget). Returnerer det nye antallet, eller
+ * `null` når oppskriften ikke finnes, ikke er lagret eller ikke er laget.
+ */
+export function undoCooked(db: Db, id: number, previousAt: string | null): number | null {
+  const row = db
+    .select({ cookedCount: recipes.cookedCount })
+    .from(recipes)
+    .where(and(eq(recipes.id, id), isNotNull(recipes.savedAt)))
+    .get();
+  if (!row || row.cookedCount < 1) return null;
+  const count = row.cookedCount - 1;
+  db.update(recipes)
+    .set({ cookedCount: count, lastCookedAt: count === 0 ? null : previousAt })
+    .where(eq(recipes.id, id))
+    .run();
+  return count;
+}
+
+/**
  * Kopierer en lagret oppskrift til en annen konto (Story 6.19): innholdet og kilden følger med,
  * men ikke mappe, notater, merkelapper, vurdering eller favoritt — de hører til eierens egen
  * samling. Returnerer ny id, eller `null` når originalen ikke finnes eller ikke er lagret.

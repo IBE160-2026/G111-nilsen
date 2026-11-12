@@ -52,6 +52,7 @@ const {
   removeLabel,
   saveNotes,
   markCookedToday,
+  undoCookedToday,
 } = await import("./actions");
 
 const failure = (kind: string | undefined) => {
@@ -661,6 +662,27 @@ describe("saveNotes og markCookedToday (Story 6.3)", () => {
     session.userId = TEST_USER_ID;
     expect(await saveNotes(id, 5 as unknown as string)).toMatchObject({ ok: false });
     expect(await markCookedToday(0)).toMatchObject({ ok: false });
+  });
+
+  it("«Angre» tilbakestiller for eieren, men ikke for andre eller med ugyldig input", async () => {
+    expect(await markCookedToday(id)).toMatchObject({ ok: true, cookedCount: 1 });
+    expect(await undoCookedToday(id, 5 as unknown as string)).toMatchObject({ ok: false });
+    expect(await undoCookedToday(0, null)).toMatchObject({ ok: false });
+    session.userId = Number(
+      state
+        .db!.$client.prepare(
+          "insert into users (email, password_hash, created_at) values ('d@d.no', 'x', 'x')",
+        )
+        .run().lastInsertRowid,
+    );
+    expect(await undoCookedToday(id, null)).toMatchObject({ ok: false });
+    session.userId = TEST_USER_ID;
+    expect(await undoCookedToday(id, null)).toEqual({
+      ok: true,
+      lastCookedAt: null,
+      cookedCount: 0,
+    });
+    expect(await undoCookedToday(id, null)).toMatchObject({ ok: false });
   });
 });
 

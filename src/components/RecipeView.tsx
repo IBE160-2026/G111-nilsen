@@ -5,6 +5,7 @@ import {
   changeOriginalServings,
   fetchTimeFromSource,
   markCookedToday,
+  undoCookedToday,
   addLabel,
   moveToFolder,
   moveToNewFolder,
@@ -187,6 +188,7 @@ export default function RecipeView({
                 onSaveNotes={saveNotes.bind(null, recipe.id)}
                 onSaveFitsFor={saveFitsFor.bind(null, recipe.id)}
                 onCooked={markCookedToday.bind(null, recipe.id)}
+                onUndoCooked={undoCookedToday.bind(null, recipe.id)}
               />
             </div>
           ) : null}

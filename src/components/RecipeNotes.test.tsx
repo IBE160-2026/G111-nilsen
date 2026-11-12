@@ -19,6 +19,11 @@ function setup(overrides: Partial<React.ComponentProps<typeof RecipeNotes>> = {}
       lastCookedAt: "2026-11-10T18:00:00.000Z",
       cookedCount: 1,
     })),
+    onUndoCooked: vi.fn(async () => ({
+      ok: true as const,
+      lastCookedAt: null as string | null,
+      cookedCount: 0,
+    })),
     ...overrides,
   };
   render(<RecipeNotes {...props} />);
@@ -107,6 +112,37 @@ describe("RecipeNotes", () => {
       await screen.findByText("Sist laget 10. november 2026 · laget 1 gang"),
     ).toBeInTheDocument();
     expect(screen.getByText("Merket som laget i dag.")).toBeInTheDocument();
+  });
+
+  it("«Angre» vises først etter «Laget i dag» og sender tilbake forrige dato", async () => {
+    const user = userEvent.setup();
+    const props = setup({ lastCookedAt: "2026-11-03T10:00:00.000Z", cookedCount: 4 });
+    expect(screen.queryByRole("button", { name: "Angre" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Laget i dag" }));
+    await user.click(await screen.findByRole("button", { name: "Angre" }));
+    expect(props.onUndoCooked).toHaveBeenCalledWith("2026-11-03T10:00:00.000Z");
+    expect(await screen.findByText("Ikke laget ennå.")).toBeInTheDocument();
+    expect(screen.getByText(/Angret\./)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Angre" })).not.toBeInTheDocument();
+  });
+
+  it("feil ved angring vises, og man kan prøve igjen", async () => {
+    const user = userEvent.setup();
+    setup({
+      onUndoCooked: vi.fn(async () => ({ ok: false as const, message: "Fant ikke oppskriften." })),
+    });
+    await user.click(screen.getByRole("button", { name: "Laget i dag" }));
+    await user.click(await screen.findByRole("button", { name: "Angre" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Fant ikke oppskriften.");
+    expect(screen.getByRole("button", { name: "Angre" })).toBeInTheDocument();
+  });
+
+  it("har en lenke til statistikken", () => {
+    setup();
+    expect(screen.getByRole("link", { name: "Se statistikk" })).toHaveAttribute(
+      "href",
+      "/statistikk",
+    );
   });
 
   it("feil fra serveren eller nettet vises og logges", async () => {

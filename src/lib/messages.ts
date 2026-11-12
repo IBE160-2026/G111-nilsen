@@ -517,6 +517,9 @@ export const notesMessages = {
   cooked: "Laget i dag",
   cookedSaving: "Lagrer …",
   cookedDone: "Merket som laget i dag.",
+  undo: "Angre",
+  undoDone: "Angret. Oppskriften er ikke lenger merket som laget i dag.",
+  seeStats: "Se statistikk",
   never: "Ikke laget ennå.",
   lastCooked: (date: string, count: number) =>
     `Sist laget ${date} · ${count === 1 ? "laget 1 gang" : `laget ${count} ganger`}`,

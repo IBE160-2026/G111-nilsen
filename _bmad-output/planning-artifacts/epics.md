@@ -1333,3 +1333,20 @@ slik at jeg får brukt hele samlingen og ikke lager det samme hver uke.
 
 **Gitt** at jeg ikke har lagret noen oppskrifter, eller ikke er innlogget
 **Så** får jeg en forklarende tekst eller blir bedt om å logge inn
+
+### Story 6.21b: Angre «Laget i dag» og snarvei til statistikk
+
+Som Ida,
+vil jeg kunne angre at jeg trykket «Laget i dag», og komme til statistikken fra oppskriften,
+slik at en feil ikke ødelegger tallene og jeg raskt ser hva jeg har laget.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg nettopp har trykket «Laget i dag»
+**Så** står det en «Angre»-knapp ved siden av, og når jeg trykker den, går antall og «sist laget» tilbake til det de var
+
+**Gitt** at jeg angrer den eneste gangen oppskriften er laget
+**Så** står det «Ikke laget ennå.» igjen
+
+**Gitt** at jeg ser «Sist laget …» på oppskriften
+**Så** står det en lenke «Se statistikk» under, som åpner statistikksiden

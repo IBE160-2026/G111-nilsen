@@ -39,6 +39,7 @@ import {
   setOriginalServings,
   setSelectedServings,
   copySharedRecipe,
+  undoRecipeCooked,
 } from "@/server/services/recipe-service";
 import {
   applySuggestion as applySuggestionToRecipe,
@@ -412,9 +413,38 @@ export async function markCookedToday(
     const result = markRecipeCooked(id);
     if (!result.ok) return actionFailure(result.error.kind);
     revalidatePath("/oppskrifter");
+    revalidatePath("/statistikk");
     return { ok: true, ...result.value };
   } catch (error) {
     console.error("Kunne ikke merke oppskriften som laget", error);
+    return actionFailure("unknown");
+  }
+}
+
+/** Svaret fra «Angre» etter «Laget i dag» (Story 6.21). */
+export type UndoCookedResult =
+  { ok: true; lastCookedAt: string | null; cookedCount: number } | { ok: false; message: string };
+
+/**
+ * Angrer «Laget i dag» (Story 6.21). `previousAt` er datoen oppskriften hadde før (eller `null`);
+ * verdien valideres på nytt her, siden Server Actions er offentlige endepunkter.
+ */
+export async function undoCookedToday(
+  id: number,
+  previousAt: string | null,
+): Promise<UndoCookedResult> {
+  if (!idSchema.safeParse(id).success) return actionFailure("not_found");
+  if (!z.string().max(40).nullable().safeParse(previousAt).success)
+    return actionFailure("validation");
+  try {
+    if (!(await mayChange(id))) return actionFailure("not_found");
+    const result = undoRecipeCooked(id, previousAt);
+    if (!result.ok) return actionFailure(result.error.kind);
+    revalidatePath("/oppskrifter");
+    revalidatePath("/statistikk");
+    return { ok: true, ...result.value };
+  } catch (error) {
+    console.error("Kunne ikke angre «Laget i dag»", error);
     return actionFailure("unknown");
   }
 }

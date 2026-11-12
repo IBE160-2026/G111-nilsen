@@ -24,6 +24,7 @@ const actions = vi.hoisted(() => ({
   copyRecipeToVariant: vi.fn(),
   removeLabel: vi.fn(),
   markCookedToday: vi.fn(),
+  undoCookedToday: vi.fn(),
 }));
 vi.mock("@/app/oppskrift/[id]/actions", () => actions);
 

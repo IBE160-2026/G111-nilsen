@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useId, useState } from "react";
 import type { ActionResult } from "@/app/_shared/action-result";
 import { fallbackMessage, notesMessages as m } from "@/lib/messages";
@@ -7,6 +8,9 @@ import styles from "./RecipeNotes.module.css";
 
 type CookedResult =
   { ok: true; lastCookedAt: string; cookedCount: number } | { ok: false; message: string };
+
+type UndoResult =
+  { ok: true; lastCookedAt: string | null; cookedCount: number } | { ok: false; message: string };
 
 type Props = {
   notes: string | null;
@@ -16,6 +20,8 @@ type Props = {
   onSaveNotes: (notes: string) => Promise<ActionResult>;
   onSaveFitsFor: (fitsFor: string) => Promise<ActionResult>;
   onCooked: () => Promise<CookedResult>;
+  /** Angrer «Laget i dag»; får datoen oppskriften hadde før (Story 6.21). */
+  onUndoCooked: (previousAt: string | null) => Promise<UndoResult>;
 };
 
 /** Dato som «10. november 2026», alltid i norsk tid, så server og nettleser gir samme tekst. */
@@ -42,6 +48,7 @@ export default function RecipeNotes({
   onSaveNotes,
   onSaveFitsFor,
   onCooked,
+  onUndoCooked,
 }: Props) {
   const id = useId();
   const [notes, setNotes] = useState(initialNotes ?? "");
@@ -49,7 +56,9 @@ export default function RecipeNotes({
   const [fitsFor, setFitsFor] = useState(initialFitsFor ?? "");
   const [savedFitsFor, setSavedFitsFor] = useState(initialFitsFor ?? "");
   const [cooked, setCooked] = useState({ at: initialCooked, count: initialCount });
-  const [pending, setPending] = useState<"notes" | "cooked" | null>(null);
+  // Datoen før siste «Laget i dag» i denne økten; finnes bare så lenge man kan angre.
+  const [undoTo, setUndoTo] = useState<{ at: string | null } | null>(null);
+  const [pending, setPending] = useState<"notes" | "cooked" | "undo" | null>(null);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
 
@@ -89,11 +98,32 @@ export default function RecipeNotes({
     try {
       const result = await onCooked();
       if (result.ok) {
+        setUndoTo({ at: cooked.at });
         setCooked({ at: result.lastCookedAt, count: result.cookedCount });
         setStatus(m.cookedDone);
       } else setError(result.message);
     } catch (cause) {
       console.error("Kunne ikke merke oppskriften som laget", cause);
+      setError(fail);
+    } finally {
+      setPending(null);
+    }
+  }
+
+  async function undoCooked() {
+    if (pending || !undoTo) return;
+    setPending("undo");
+    setStatus("");
+    setError("");
+    try {
+      const result = await onUndoCooked(undoTo.at);
+      if (result.ok) {
+        setCooked({ at: result.lastCookedAt, count: result.cookedCount });
+        setUndoTo(null);
+        setStatus(m.undoDone);
+      } else setError(result.message);
+    } catch (cause) {
+      console.error("Kunne ikke angre «Laget i dag»", cause);
       setError(fail);
     } finally {
       setPending(null);
@@ -107,17 +137,34 @@ export default function RecipeNotes({
       <h2 id={`${id}-overskrift`}>{m.heading}</h2>
 
       <div className={styles.cooked}>
-        <p className={styles.cookedText}>
-          {cooked.at === null ? m.never : m.lastCooked(formatCookedDate(cooked.at), cooked.count)}
-        </p>
-        <button
-          type="button"
-          className={styles.secondary}
-          aria-disabled={pending ? true : undefined}
-          onClick={() => void markCooked()}
-        >
-          {pending === "cooked" ? m.cookedSaving : m.cooked}
-        </button>
+        <div className={styles.cookedInfo}>
+          <p className={styles.cookedText}>
+            {cooked.at === null ? m.never : m.lastCooked(formatCookedDate(cooked.at), cooked.count)}
+          </p>
+          <Link href="/statistikk" className={styles.statsLink}>
+            {m.seeStats}
+          </Link>
+        </div>
+        <div className={styles.cookedActions}>
+          {undoTo ? (
+            <button
+              type="button"
+              className={styles.secondary}
+              aria-disabled={pending ? true : undefined}
+              onClick={() => void undoCooked()}
+            >
+              {pending === "undo" ? m.cookedSaving : m.undo}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className={styles.secondary}
+            aria-disabled={pending ? true : undefined}
+            onClick={() => void markCooked()}
+          >
+            {pending === "cooked" ? m.cookedSaving : m.cooked}
+          </button>
+        </div>
       </div>
 
       <div className={styles.field}>

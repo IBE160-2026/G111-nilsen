@@ -30,6 +30,7 @@ import {
   listSavedIngredientNames,
   listSavedRecipes,
   markCooked,
+  undoCooked,
   markRecipeSaved,
   setRecipeFavorite,
   updateRecipe,
@@ -569,6 +570,27 @@ export function markRecipeCooked(
   const at = now().toISOString();
   const count = markCooked(db, id, at);
   return count === null ? err(appError("not_found")) : ok({ lastCookedAt: at, cookedCount: count });
+}
+
+/**
+ * Angrer «Laget i dag» (Story 6.21): teller ned med én og setter «sist laget» tilbake til
+ * `previousAt` (en gyldig dato, eller `null`). Ikke laget fra før, ukjent eller ulagret oppskrift
+ * gir `not_found`; en ugyldig dato gir `validation`.
+ */
+export function undoRecipeCooked(
+  id: number,
+  previousAt: string | null,
+  db: Db = getDb(),
+): Result<{ lastCookedAt: string | null; cookedCount: number }> {
+  if (!isRecipeId(id)) return err(appError("not_found"));
+  if (
+    previousAt !== null &&
+    (typeof previousAt !== "string" || Number.isNaN(Date.parse(previousAt)))
+  )
+    return err(appError("validation", "date"));
+  const count = undoCooked(db, id, previousAt);
+  if (count === null) return err(appError("not_found"));
+  return ok({ lastCookedAt: count === 0 ? null : previousAt, cookedCount: count });
 }
 
 /** Lengste merkelapp og flest merkelapper på én oppskrift (Story 6.7). */
