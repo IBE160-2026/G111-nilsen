@@ -110,6 +110,27 @@ describe("gramsPerDl", () => {
   });
 });
 
+// Konsekvensene som står i PRD FR-22 (lagt til ved revisjonen 2026-11-12).
+describe("FR-22 – fasit fra PRD", () => {
+  it.each([
+    ["1 dl mel", "60 g mel (ca.)"],
+    ["1 dl melk", "100 g melk (ca.)"],
+    ["1 dl hvetemel", "60 g hvetemel (ca.)"],
+    ["1 dl olivenolje", "90 g olivenolje (ca.)"],
+  ])("gram: %s → %s", (input, expected) => {
+    expect(grams(input)).toBe(expected);
+  });
+
+  it("en vare som ikke står på listen, vises uendret", () => {
+    expect(grams("1 dl ukjent vare")).toBe("1 dl ukjent vare");
+  });
+
+  it("amerikanske mål: 1 cup mel blir 2,4 dl, og tbsp blir ss uten «ca.»", () => {
+    expect(metric("1 cup mel")).toBe("2,4 dl mel (ca.)");
+    expect(metric("1 tbsp sukker")).toBe("1 ss sukker");
+  });
+});
+
 describe("dl ↔ gram for kjente ingredienser", () => {
   it.each([
     ["400 g mel", "6 ⅔ dl mel (ca.)"],

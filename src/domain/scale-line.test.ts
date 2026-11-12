@@ -48,6 +48,27 @@ describe("scaleLine – fasit fra PRD FR-8 (opprinnelig 4)", () => {
   it("FR-8 #10: 750 g potet → 3 gir 560 g potet", () => {
     expect(show("750 g potet", 3)).toBe("560 g potet");
   });
+
+  // Rad 11–15 kom med revisjonen av PRD-en 2026-11-12: halve porsjoner og udelelige enheter.
+  it("FR-8 #11: 1 egg → 0,5 gir 1 egg (ca.)", () => {
+    expect(show("1 egg", 0.5)).toBe("1 egg (ca.)");
+  });
+
+  it("FR-8 #12: 400 g mel → 2,5 gir 250 g mel", () => {
+    expect(show("400 g mel", 2.5)).toBe("250 g mel");
+  });
+
+  it("FR-8 #13: 2 løk → 6 gir 3 løk", () => {
+    expect(show("2 løk", 6)).toBe("3 løk");
+  });
+
+  it("FR-8 #14: 1 boks tomater → 6 gir 2 boks tomater (ca.)", () => {
+    expect(show("1 boks tomater", 6)).toBe("2 boks tomater (ca.)");
+  });
+
+  it("FR-8 #15: 3 stk gulrot → 2 gir 2 stk gulrot (ca.)", () => {
+    expect(show("3 stk gulrot", 2)).toBe("2 stk gulrot (ca.)");
+  });
 });
 
 describe("scaleLine – øvrige rader i matrisen", () => {

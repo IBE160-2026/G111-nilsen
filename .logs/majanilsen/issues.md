@@ -121,3 +121,4 @@
 - 924 Installerbar app (PWA): manifest, ikoner, service worker, frakoblet-side. Åpent: test på ekte telefon.
 - 923 Handlelisten uten nett (utdrag i nettleseren, vist på frakoblet-siden). Åpent: ingen synk av avkrysninger tilbake; test 6.16 og 6.17 på telefon.
 - 922 Deling av samlingen med en annen konto (lesetilgang og kopiering). Åpent: ingen felles redigering eller varsling.
+- 921 PRD revidert etter tilbakemelding fra faglærer: scope delt i bygget/kandidat/ikke nå, testbare konsekvenser, NFR-8/NFR-9. Åpent: rate-limit faller ikke tilbake til enkle forslag; opphavsrett ikke avklart.
