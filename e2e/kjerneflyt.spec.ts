@@ -925,6 +925,38 @@ test("Versjon 2: lim inn tekst blir et utkast som kan lagres", async ({ page }, 
   await expect(page.getByText("3 dl hvetemel")).toBeVisible();
 });
 
+test("Versjon 2: statistikk viser hva som er laget oftest", async ({ page }, testInfo) => {
+  const title = `Gryte ${testInfo.project.name}`;
+  await page.goto("/ny");
+  await page.waitForLoadState("networkidle");
+  await field(page, "Tittel").fill(title);
+  await field(page, "Antall porsjoner").fill("2");
+  await field(page, "Ingredienser").fill("2 egg");
+  await page.getByRole("button", { name: "Lagre oppskrift" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+
+  // «Laget i dag» tre ganger, så oppskriften havner øverst i «Laget oftest».
+  for (let i = 0; i < 3; i++) {
+    await page.getByRole("button", { name: "Laget i dag" }).click();
+    await expect(page.getByText(/laget \d+ gang/)).toBeVisible();
+  }
+
+  await page.goto("/oppskrifter");
+  await page.getByRole("link", { name: "Statistikk", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Statistikk" })).toBeVisible();
+  await page.waitForLoadState("networkidle");
+
+  const mest = page.getByRole("region", { name: "Laget oftest" });
+  await expect(mest.getByRole("link", { name: title })).toBeVisible();
+  await expect(mest).toContainText("3 ganger");
+  await expect(
+    page.getByRole("region", { name: "Sist laget" }).getByRole("link", { name: title }),
+  ).toBeVisible();
+
+  await mest.getByRole("link", { name: title }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+});
+
 test("Versjon 2: tilfeldig middagsforslag", async ({ page }, testInfo) => {
   const title = `Middag ${testInfo.project.name}`;
   await page.goto("/ny");
@@ -1109,8 +1141,8 @@ test("Forsiden har snarveier, og «Hent en oppskrift» går til Importer", async
   await expect(page.getByRole("link", { name: "Logg inn", exact: true }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: "Lag konto" }).first()).toBeVisible();
   const shortcuts = page.getByRole("region", { name: "Gå rett til" });
-  // Seks kort pluss «Og dessuten»-raden med de mindre sidene (Story 6.18b).
-  await expect(shortcuts.getByRole("link")).toHaveCount(11);
+  // Seks kort pluss «Og dessuten»-raden med seks mindre sider (Story 6.18b, 6.20b).
+  await expect(shortcuts.getByRole("link")).toHaveCount(12);
   await expect(page.getByRole("heading", { level: 3, name: "Og dessuten" })).toBeVisible();
   await shortcuts.getByRole("link", { name: "Middagsforslag" }).click();
   await expect(

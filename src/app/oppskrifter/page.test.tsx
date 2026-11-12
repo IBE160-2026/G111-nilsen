@@ -137,6 +137,7 @@ describe("/oppskrifter", () => {
             "/hva-kan-jeg-lage",
             "/middagsforslag",
             "/delt",
+            "/statistikk",
           ].includes(a.getAttribute("href") ?? ""),
       );
     expect(links.map((a) => [a.textContent, a.getAttribute("href")])).toEqual([
@@ -194,6 +195,7 @@ describe("/oppskrifter", () => {
             "/hva-kan-jeg-lage",
             "/middagsforslag",
             "/delt",
+            "/statistikk",
           ].includes(a.getAttribute("href") ?? ""),
       );
     expect(links.map((a) => a.textContent)).toEqual([
@@ -250,6 +252,11 @@ describe("/oppskrifter etter en sletting (Story 6.11)", () => {
       "href",
       "/hva-kan-jeg-lage",
     );
+  });
+
+  it("har en lenke til «Statistikk» ved overskriften (Story 6.20b)", async () => {
+    render((await renderPage()).heading);
+    expect(screen.getByRole("link", { name: "Statistikk" })).toHaveAttribute("href", "/statistikk");
   });
 
   it("har en lenke til «Nylig slettet» ved overskriften", async () => {

@@ -33,6 +33,14 @@ export {
   type CollectionSort,
 } from "./filter-collection";
 export { convertLine, hasConvertibleUnit, type UnitSystem } from "./convert-units";
+export {
+  collectionStats,
+  TOP_LIST_SIZE,
+  type CollectionStats,
+  type NameCount,
+  type RankedRecipe,
+  type StatsRecipe,
+} from "./collection-stats";
 export { parseRecipeText, type RecipeDraft } from "./parse-recipe-text";
 export {
   dinnerCandidates,

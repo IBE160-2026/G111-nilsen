@@ -125,6 +125,7 @@ Kravene står i PRD §4.7 (FR-28–FR-43), med status på hvert krav i PRD §4.0
 - **Handlelisten uten nett (6.17):** mens du ser handlelisten lagres varene og avkrysningene i nettleseren (ikke oppskriftene), og «Du er frakoblet»-siden viser dem med avkrysning når nettet er borte. Listen slettes når du logger ut.
 - **Deling (6.19):** på `/delt` kan du invitere en annen RecipeMate-konto til å se samlingen din. Mottakeren godtar, ser oppskriftene under «Delt med deg» og kan kopiere dem til sin egen samling, men ikke endre dine. Begge kan avslutte delingen.
 - **Snarveier på forsiden (6.18b):** «Og dessuten»-raden under «Gå rett til» på forsiden lenker til «Hva kan jeg lage?», Middagsforslag, Deling, Eksport og import og Nylig slettet, som ellers bare nås fra overskriften i Oppskrifter.
+- **Statistikk (6.20b):** `/statistikk` viser nøkkeltall (oppskrifter, ganger laget, favoritter, planlagte middager), «Laget oftest», «Sist laget», «Best vurdert», hvor mange du aldri har laget, og fordelingen på mapper, merkelapper og kilder. Alt regnes ut av data som allerede finnes.
 
 Ikke bygget ennå: offentlig lenke til én oppskrift, glemt passord og delt handleliste (kandidater), og stemmestyring i kokemodus (utsatt). Designrunden tas samlet til slutt.
 

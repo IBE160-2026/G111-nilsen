@@ -1310,3 +1310,26 @@ slik at jeg ikke må huske hvor de ligger.
 
 **Gitt** at jeg er på Oppskrifter
 **Så** står lenkene fortsatt ved overskriften, som før
+
+### Story 6.20b: Statistikk over samlingen
+
+Som Ida,
+vil jeg se hvilke retter jeg lager oftest og hva jeg aldri har laget,
+slik at jeg får brukt hele samlingen og ikke lager det samme hver uke.
+
+**Akseptansekriterier:**
+
+**Gitt** at jeg har lagrede oppskrifter
+**Så** viser siden «Statistikk» antall oppskrifter, hvor mange ganger jeg har krysset av «Laget i dag», antall favoritter og antall planlagte middager
+
+**Gitt** at jeg har krysset av «Laget i dag» på noen oppskrifter
+**Så** står de i «Laget oftest» med antall ganger, og i «Sist laget» med dato, nyeste først, og jeg kan trykke på en av dem for å åpne oppskriften
+
+**Gitt** at jeg ikke har laget alle oppskriftene
+**Så** står det hvor mange jeg ikke har laget ennå
+
+**Gitt** at jeg har vurdert, sortert i mapper og satt merkelapper
+**Så** ser jeg de best vurderte, snittvurdering og snittid, og hvordan oppskriftene fordeler seg på mapper, merkelapper og kilder
+
+**Gitt** at jeg ikke har lagret noen oppskrifter, eller ikke er innlogget
+**Så** får jeg en forklarende tekst eller blir bedt om å logge inn

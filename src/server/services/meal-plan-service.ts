@@ -125,6 +125,11 @@ export type PlannedWeek = { monday: string; meals: number; titles: string[] };
 export const PLANNED_WEEKS_LIMIT = 52;
 
 /** Ukene brukeren har planlagt noe i (Story 6.4b), nyeste først, høyst ett år. */
+/** Titlene på alle planlagte måltider, én per oppføring (Story 6.20b). */
+export function listPlannedTitles(userId: number, db: Db = getDb()): Result<string[]> {
+  return ok(listPlannedMeals(db, userId).map((meal) => meal.title));
+}
+
 export function listPlannedWeeks(userId: number, db: Db = getDb()): Result<PlannedWeek[]> {
   const weeks = new Map<string, { day: string; title: string }[]>();
   for (const meal of listPlannedMeals(db, userId)) {

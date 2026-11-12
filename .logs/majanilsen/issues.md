@@ -127,3 +127,4 @@
 - 918 Designet middagsforslag-siden på nytt: sentrert kort, pillefiltre. Åpent: pille-mønsteret bør gjenbrukes i den samlede designrunden.
 - 917 Mappefilter på middagsforslag (flere mapper samtidig, «Uten mappe»). Åpent: valget huskes ikke mellom besøk.
 - 916 Snarveier («Og dessuten») til de mindre sidene på forsiden. Åpent: ikke mulig å velge hvilke som vises.
+- 915 Statistikkside over samlingen (laget oftest, sist laget, best vurdert, fordelinger). Åpent: ingen grafer eller tidsrom.

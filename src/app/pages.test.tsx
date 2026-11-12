@@ -77,6 +77,7 @@ describe("forsiden og 404-siden", () => {
       // «Og dessuten»: sidene som ellers bare nås fra overskriften i Oppskrifter (Story 6.18b).
       "/hva-kan-jeg-lage",
       "/middagsforslag",
+      "/statistikk",
       "/delt",
       "/sikkerhetskopi",
       "/nylig-slettet",
@@ -90,6 +91,7 @@ describe("forsiden og 404-siden", () => {
     for (const [navn, href] of [
       ["Hva kan jeg lage?", "/hva-kan-jeg-lage"],
       ["Middagsforslag", "/middagsforslag"],
+      ["Statistikk", "/statistikk"],
       ["Deling", "/delt"],
       ["Eksport og import", "/sikkerhetskopi"],
       ["Nylig slettet", "/nylig-slettet"],

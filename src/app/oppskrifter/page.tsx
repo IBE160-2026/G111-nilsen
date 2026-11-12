@@ -8,6 +8,7 @@ import {
   collectionMessages,
   dinnerMessages,
   shareMessages,
+  statsMessages,
   shoppingMessages,
   trashMessages,
   whatToCookMessages,
@@ -38,6 +39,9 @@ export default function SamlingenPage({
         <span className={styles.titleLinks}>
           <Link href="/hva-kan-jeg-lage" className={styles.titleLink}>
             {whatToCookMessages.link}
+          </Link>
+          <Link href="/statistikk" className={styles.titleLink}>
+            {statsMessages.link}
           </Link>
           <Link href="/delt" className={styles.titleLink}>
             {shareMessages.link}
