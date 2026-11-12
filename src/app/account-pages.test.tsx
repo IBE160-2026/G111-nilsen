@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react";
-import type { ReactElement } from "react";
+import { Suspense, type ReactElement } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const session = vi.hoisted(() => ({ userId: 1 as number | null }));
@@ -32,9 +32,24 @@ async function renderWithLoader(page: ReactElement<{ children: ReactElement[] }>
   );
 }
 
+/** Rendrer konto-siden: skjemaet står i siden, og «neste»-delen leses i Suspense. */
+async function renderAccountPage(page: ReactElement<{ children: ReactElement[] }>) {
+  const [header, form] = page.props.children as [
+    ReactElement,
+    ReactElement<{ extras: ReactElement<{ children: ReactElement }> }>,
+  ];
+  const loader = form.props.extras.props.children;
+  render(
+    <>
+      {header}
+      <form.type {...form.props} extras={await (loader.type as AsyncComponent)(loader.props)} />
+    </>,
+  );
+}
+
 describe("/logg-inn og /ny-konto (Story 5.13)", () => {
   it("innloggingssiden har overskrift og skjema som sender til «neste»", async () => {
-    await renderWithLoader(
+    await renderAccountPage(
       LoginPage({ searchParams: Promise.resolve({ neste: "/handleliste" }) }) as ReactElement<{
         children: ReactElement[];
       }>,
@@ -43,8 +58,21 @@ describe("/logg-inn og /ny-konto (Story 5.13)", () => {
     expect(document.querySelector('input[name="neste"]')).toHaveValue("/handleliste");
   });
 
+  it("skjemaet står i den ferdige siden; bare «neste» og bytte-lenken strømmes inn (sak 011)", () => {
+    const page = LoginPage({ searchParams: new Promise(() => {}) }) as ReactElement<{
+      children: ReactElement[];
+    }>;
+    const [, form] = page.props.children as [ReactElement, ReactElement<{ extras: ReactElement }>];
+    // Foreldreelementet til skjemaet er ikke en Suspense, så feltene kan ikke bli byttet ut.
+    expect(form.type).not.toBe(Suspense);
+    expect(form.props.extras.type).toBe(Suspense);
+    // Reservelenken i fallback gjør at siden ikke hopper når resten kommer.
+    render(<form>{(form.props.extras.props as { fallback: ReactElement }).fallback}</form>);
+    expect(screen.getByRole("link", { name: "Lag konto" })).toHaveAttribute("href", "/ny-konto");
+  });
+
   it("«neste» til en annen side blir forsiden", async () => {
-    await renderWithLoader(
+    await renderAccountPage(
       RegisterPage({
         searchParams: Promise.resolve({ neste: "https://evil.no" }),
       }) as ReactElement<{

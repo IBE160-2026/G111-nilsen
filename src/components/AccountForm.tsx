@@ -1,24 +1,25 @@
 "use client";
 
-import Link from "next/link";
-import { useActionState, useEffect, useId, useRef } from "react";
+import { useActionState, useEffect, useId, useRef, type ReactNode } from "react";
 import { EMPTY_ACCOUNT_FORM, type AccountFormState } from "@/app/_shared/account-form";
 import { accountMessages as m } from "@/lib/messages";
 import styles from "./ManualRecipeForm.module.css";
-import own from "./AccountForm.module.css";
 
 type Props = {
   mode: "login" | "register";
   action: (state: AccountFormState, formData: FormData) => Promise<AccountFormState>;
-  /** Hvor brukeren sendes etterpå (allerede kontrollert at det er en sti i appen). */
-  next: string;
+  /**
+   * Det som avhenger av adressen (skjult «neste»-felt og lenken til den andre siden), se
+   * `AccountFormExtras`. Kan strømmes inn, så skjemaet selv står i den ferdige siden.
+   */
+  extras: ReactNode;
 };
 
 /**
  * Skjemaene «Logg inn» og «Lag konto» (Story 5.13). E-posten beholdes ved feil, passordet ikke.
  * Feil står under feltet (eller over knappen for «feil e-post eller passord»), og fokus flyttes dit.
  */
-export default function AccountForm({ mode, action, next }: Props) {
+export default function AccountForm({ mode, action, extras }: Props) {
   const [state, formAction, pending] = useActionState(action, EMPTY_ACCOUNT_FORM);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -40,13 +41,8 @@ export default function AccountForm({ mode, action, next }: Props) {
     else if (state.formError) formErrorRef.current?.focus();
   }, [state]);
 
-  const otherHref = `${register ? "/logg-inn" : "/ny-konto"}${
-    next === "/" ? "" : `?neste=${encodeURIComponent(next)}`
-  }`;
-
   return (
     <form action={formAction} className={styles.form} noValidate>
-      <input type="hidden" name="neste" value={next} />
       <div className={styles.field}>
         <label htmlFor={ids.email} className={styles.label}>
           {m.email}
@@ -116,10 +112,7 @@ export default function AccountForm({ mode, action, next }: Props) {
             : m.login}
       </button>
 
-      <p className={own.switch}>
-        {register ? m.haveAccount : m.noAccount}{" "}
-        <Link href={otherHref}>{register ? m.login : m.register}</Link>
-      </p>
+      {extras}
     </form>
   );
 }

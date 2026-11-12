@@ -24,4 +24,4 @@ Her dokumenterer vi feil og problemer som oppstår underveis i prosjektet, og hv
 | 008 | [Dev-serveren manglet nye migrasjoner](008-dev-server-mangler-nye-migrasjoner.md) | Løst | 2026-11-09 | 2026-11-09 |
 | 009 | [Valgt antall glemmes når oppskriften lagres etterpå](009-valgt-antall-glemmes-ved-lagring.md) | Løst | 2026-11-10 | 2026-11-10 |
 | 010 | [Skjult forrige side ga to felt med samme id](010-skjult-side-med-like-id-er.md) | Løst | 2026-11-10 | 2026-11-10 |
-| 011 | [E-postfeltet var tomt rett etter navigering](011-e-post-tom-rett-etter-navigering.md) | Åpen | 2026-11-10 | – |
+| 011 | [E-postfeltet var tomt rett etter navigering](011-e-post-tom-rett-etter-navigering.md) | Løst | 2026-11-10 | 2026-11-12 |

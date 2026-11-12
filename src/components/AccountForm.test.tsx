@@ -4,12 +4,19 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AccountFormState } from "@/app/_shared/account-form";
 import AccountForm from "./AccountForm";
+import AccountFormExtras from "./AccountFormExtras";
 
 afterEach(cleanup);
 
 describe("AccountForm", () => {
   it("innlogging: e-post, passord, knapp og lenke til ny konto med «neste»", () => {
-    render(<AccountForm mode="login" action={vi.fn()} next="/oppskrifter" />);
+    render(
+      <AccountForm
+        mode="login"
+        action={vi.fn()}
+        extras={<AccountFormExtras mode="login" next="/oppskrifter" />}
+      />,
+    );
     expect(screen.getByLabelText("E-post")).toHaveAttribute("autocomplete", "email");
     expect(screen.getByLabelText("Passord")).toHaveAttribute("type", "password");
     expect(screen.getByLabelText("Passord")).toHaveAttribute("autocomplete", "current-password");
@@ -21,7 +28,13 @@ describe("AccountForm", () => {
   });
 
   it("ny konto: passordhint og lenke til innlogging", () => {
-    render(<AccountForm mode="register" action={vi.fn()} next="/" />);
+    render(
+      <AccountForm
+        mode="register"
+        action={vi.fn()}
+        extras={<AccountFormExtras mode="register" next="/" />}
+      />,
+    );
     expect(screen.getByLabelText("Passord")).toHaveAttribute("autocomplete", "new-password");
     expect(screen.getByLabelText("Passord")).toHaveAccessibleDescription("Minst 8 tegn.");
     expect(screen.getByRole("link", { name: "Logg inn" })).toHaveAttribute("href", "/logg-inn");
@@ -35,7 +48,13 @@ describe("AccountForm", () => {
         passwordError: "Passordet må ha minst 8 tegn.",
       }),
     );
-    render(<AccountForm mode="register" action={action} next="/handleliste" />);
+    render(
+      <AccountForm
+        mode="register"
+        action={action}
+        extras={<AccountFormExtras mode="register" next="/handleliste" />}
+      />,
+    );
     await user.type(screen.getByLabelText("E-post"), "maja@eksempel.no");
     await user.type(screen.getByLabelText("Passord"), "kort");
     await user.click(screen.getByRole("button", { name: "Lag konto" }));
@@ -53,7 +72,13 @@ describe("AccountForm", () => {
       email: "a@b.no",
       formError: "Feil e-post eller passord.",
     }));
-    render(<AccountForm mode="login" action={action} next="/" />);
+    render(
+      <AccountForm
+        mode="login"
+        action={action}
+        extras={<AccountFormExtras mode="login" next="/" />}
+      />,
+    );
     await user.click(screen.getByRole("button", { name: "Logg inn" }));
     expect(await screen.findByText("Feil e-post eller passord.")).toBeInTheDocument();
   });

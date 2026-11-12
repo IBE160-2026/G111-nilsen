@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Status** | Åpen (testen venter; årsaken er ikke bekreftet) |
+| **Status** | Løst |
 | **Funnet** | 2026-11-10, av Claude (ende-til-ende-test for innlogging, Story 6.4) |
-| **Løst** | – |
+| **Løst** | 2026-11-12 |
 | **Område** | annet (innlogging) |
 | **Alvorlighet** | lav |
 
@@ -21,6 +21,9 @@ Ikke bekreftet. Sannsynligvis ble feltet fylt ut før siden var ferdig lastet (s
 
 ## Løsning / hva kan endres
 Testen venter nå på overskriften «Lag en konto» og at nettverket er stille før den fyller ut; 2 × 20 e2e grønne etterpå. For brukere er risikoen liten (man rekker sjelden å skrive før siden er klar), men hvis det dukker opp: vis skjemaet uten Suspense (bare `neste` trenger søkeparametrene), eller ta vare på det som er skrevet.
+
+## Oppfølging (2026-11-12)
+Skjemaet stod inne i en `<Suspense>` fordi `?neste=` måtte leses fra adressen. Nå står selve skjemaet i den ferdige siden, og bare det skjulte «neste»-feltet og lenken til den andre siden strømmes inn (`AccountFormExtras`), med en reservelenke i fallback. Ventetrikset (`networkidle`) er fjernet fra e2e-testen, og testen gikk 20 av 20 ganger på begge skjermbredder (`--repeat-each=10`). Årsaken er fortsatt ikke bevist, men feltene byttes ikke lenger ut. Test: `account-pages.test.tsx` sjekker at skjemaet ikke ligger i en Suspense.
 
 ## Lærdom / prompt
 «E2e: vent til siden er ferdig lastet før du fyller ut skjemaer som strømmes inn.»

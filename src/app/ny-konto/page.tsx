@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import AccountForm from "@/components/AccountForm";
+import AccountFormExtras from "@/components/AccountFormExtras";
 import { safeNextPath } from "@/lib/account-input";
 import { accountMessages as m } from "@/lib/messages";
 import { registerAccount } from "../account-actions";
@@ -18,14 +19,21 @@ export default function RegisterPage({ searchParams }: { searchParams: SearchPar
         <h1>{m.registerHeading}</h1>
         <p className={styles.lead}>{m.registerLead}</p>
       </header>
-      <Suspense>
-        <RegisterForm searchParams={searchParams} />
-      </Suspense>
+      <AccountForm
+        mode="register"
+        action={registerAccount}
+        extras={
+          <Suspense fallback={<AccountFormExtras mode="register" next="/" />}>
+            <RegisterExtras searchParams={searchParams} />
+          </Suspense>
+        }
+      />
     </div>
   );
 }
 
-async function RegisterForm({ searchParams }: { searchParams: SearchParams }) {
+/** Skjult «neste» og bytte-lenken, lest fra adressen (se `AccountFormExtras`). */
+async function RegisterExtras({ searchParams }: { searchParams: SearchParams }) {
   const { neste } = await searchParams;
-  return <AccountForm mode="register" action={registerAccount} next={safeNextPath(neste)} />;
+  return <AccountFormExtras mode="register" next={safeNextPath(neste)} />;
 }

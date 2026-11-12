@@ -350,7 +350,8 @@ export const whatToCookMessages = {
   removeFor: (name: string) => `Fjern ${name}`,
   added: (name: string) => `${name} er lagt til.`,
   removed: (name: string) => `${name} er fjernet.`,
-  sameList: "Dette er den samme listen som «Har hjemme» på handlelisten.",
+  sameList:
+    "Dette er den samme listen som «Har hjemme» på handlelisten. Vann, salt og pepper regnes som at du alltid har.",
   startHint: "Legg til noe du har hjemme, så dukker oppskriftene opp her.",
   noMatch: "Ingen av oppskriftene dine bruker det du har hjemme ennå.",
   noMatchHint: "Prøv å legge til flere ting, for eksempel det du bruker ofte.",

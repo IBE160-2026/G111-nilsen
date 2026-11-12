@@ -138,11 +138,11 @@ test("Versjon 2: innlogging – hent uten konto, logg inn for å lagre, andre se
   await expect(page.getByRole("heading", { level: 1, name: "Logg inn" })).toBeVisible();
 
   // Ny konto for testen; etterpå tilbake til oppskriften, og nå kan den lagres.
-  const email = `innlogging-${testInfo.project.name}@e2e.recipemate.no`;
+  const email = `innlogging-${testInfo.project.name}-${testInfo.repeatEachIndex}@e2e.recipemate.no`;
   await page.getByRole("link", { name: "Lag konto" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Lag en konto" })).toBeVisible();
-  // Vent til skjemaet er klart, ellers kan det som fylles ut før hydrering bli nullstilt.
-  await page.waitForLoadState("networkidle");
+  // Ingen venting her (sak 011): skjemaet står i den ferdige siden, så det som fylles ut med en
+  // gang skal bli stående.
   await field(page, "E-post").fill(email);
   await field(page, "Passord").fill("kort");
   await page.getByRole("button", { name: "Lag konto" }).click();

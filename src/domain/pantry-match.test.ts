@@ -93,4 +93,29 @@ describe("matchPantry", () => {
     matchPantry(recipes, home);
     expect(JSON.stringify([recipes, home])).toBe(before);
   });
+
+  it("vann, salt og pepper regnes som at man alltid har dem (Story 6.26b)", () => {
+    const [match] = matchPantry(
+      [
+        recipe(1, "Suppe", [
+          "egg",
+          "salt",
+          "salt og pepper",
+          "kokende vann",
+          "svart pepper",
+          "smør",
+        ]),
+      ],
+      pantry("egg"),
+    );
+    expect(match?.have).toEqual(["egg"]);
+    expect(match?.missing).toEqual(["smør"]);
+  });
+
+  it("salt i en lengre ingrediens er fortsatt en egen ingrediens, og eget «salt» teller som hjemme", () => {
+    const [a] = matchPantry([recipe(1, "R", ["egg", "saltet smør", "pepperrot"])], pantry("egg"));
+    expect(a?.missing).toEqual(["saltet smør", "pepperrot"]);
+    const [b] = matchPantry([recipe(1, "R", ["salt", "egg"])], pantry("salt"));
+    expect(b?.have).toEqual(["salt"]);
+  });
 });

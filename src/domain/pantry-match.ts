@@ -31,10 +31,32 @@ function words(text: string): string[] {
 }
 
 /**
+ * Ord i ingredienser som regnes som at man alltid har dem: vann, salt og pepper (Story 6.26b).
+ * En ingrediens der alle ordene er slike («salt», «salt og pepper», «kokende vann») verken teller
+ * som hjemme eller som mangler, med mindre brukeren selv har skrevet den inn.
+ */
+const BASIC_WORDS = new Set([
+  "vann",
+  "salt",
+  "pepper",
+  "og",
+  "svart",
+  "malt",
+  "kokende",
+  "kaldt",
+  "lunkent",
+]);
+
+function isBasic(labelWords: ReadonlySet<string>): boolean {
+  return labelWords.size > 0 && [...labelWords].every((word) => BASIC_WORDS.has(word));
+}
+
+/**
  * Finner hvilke oppskrifter som kan lages av det brukeren har hjemme (Story 6.12). En ingrediens
  * er hjemme når alle ordene i noe brukeren har hjemme står i ingrediensen («smør» passer til
  * «usaltet smør», men «mel» passer ikke til «melis», og «melk» ikke til «kokosmelk»). Hver
- * ingrediens teller én gang per oppskrift (uavhengig av store og små bokstaver). Oppskrifter
+ * ingrediens teller én gang per oppskrift (uavhengig av store og små bokstaver). Vann, salt og
+ * pepper regnes som at man alltid har dem og mangler aldri. Oppskrifter
  * uten ingredienser eller uten noen ingrediens hjemme tas ikke med. Sortert på færrest som
  * mangler, så flest hjemme, så tittel (norsk rekkefølge). Ren funksjon.
  */
@@ -56,7 +78,8 @@ export function matchPantry(
       seen.add(key);
       const labelWords = new Set(words(label));
       const atHome = owned.some((entry) => entry.every((word) => labelWords.has(word)));
-      (atHome ? have : missing).push(label);
+      if (atHome) have.push(label);
+      else if (!isBasic(labelWords)) missing.push(label);
     }
     if (have.length > 0) matches.push({ id: recipe.id, title: recipe.title, have, missing });
   }

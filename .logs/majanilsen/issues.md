@@ -130,3 +130,4 @@
 - 915 Statistikkside over samlingen (laget oftest, sist laget, best vurdert, fordelinger). Åpent: ingen grafer eller tidsrom.
 - 914 Angre «Laget i dag» og lenke «Se statistikk» på oppskriften. Åpent: angre finnes bare til siden lastes på nytt.
 - 913 Små forbedringer: middagsforslag husker filter, angre på merkelapper/ukemeny, statistikk for periode, enkle forslag når språkmodellen er opptatt. Åpent: eldre «laget» mangler enkeltdatoer; mappesletting kan ikke angres.
+- 912 Rettet sak 011 (konto-skjemaet står i ferdig side) og basisvarer i «Hva kan jeg lage?». Åpent: årsak til 011 ikke bevist; sammensatte ord matches ikke.
