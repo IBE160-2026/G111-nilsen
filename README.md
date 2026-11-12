@@ -23,11 +23,21 @@ Repoet inneholder applikasjonen og dokumentasjon av utvikling, testing og kvalit
 - Lagrer oppskriftene på kontoen din (e-post og passord), i mapper og som favoritter, og du kan krysse av under matlaging.
 - Gir 1–3 forslag til hvordan retten kan bli bedre. Uten nøkkel er det enkle forslag laget av regler ut fra ingrediensene og stegene (merket «Enkle forslag»); med nøkkel lager en språkmodell forslag til akkurat denne oppskriften. Forslag du tar i bruk lagres med oppskriften og vises i ingredienslisten eller ved riktig steg, merket «Forslag» (også i kokemodus og handlelisten); originalen endres ikke, og «Fjern» tar dem bort igjen.
 
-Å hente, vise og skalere oppskrifter virker uten konto; å lagre, mapper, favoritter og handleliste krever innlogging (se «Kontoer»). Ingenting krever nøkkel eller nett unntatt språkmodellen (importen kan kjøres mot lagrede sider, se «Importere fra lenke»). Status: versjon 1 (Epic 1–4, Story 1.1–4.4) og versjon 2 (Epic 5, Story 5.1–5.13) er bygget, se «Hva appen inneholder». Åpne saker står i [`issues/`](issues/README.md) og i `_bmad-output/implementation-artifacts/deferred-work.md`.
+Å hente, vise og skalere oppskrifter virker uten konto; å lagre, mapper, favoritter og handleliste krever innlogging (se «Kontoer»). Ingenting krever nøkkel eller nett unntatt språkmodellen (importen kan kjøres mot lagrede sider, se «Importere fra lenke»).
+
+**Status:** versjon 1 (Epic 1–4), versjon 2 (Epic 5) og det meste av Epic 6 er bygget, se «Hva appen inneholder». Hva som er forpliktet, hva som er kandidat og hva som er utsatt, står i PRD §4.0. Åpne saker står i [`issues/`](issues/README.md) og i `_bmad-output/implementation-artifacts/deferred-work.md`.
+
+## Innhold
+
+- [Om appen](#om-appen) og [hva appen inneholder](#hva-appen-inneholder) — hva RecipeMate gjør, og hvilke epics og stories den er bygget av.
+- [Komme i gang](#komme-i-gang) — krav, installasjon, kjøring og database.
+- [Slik virker delene](#slik-virker-delene) — kontoer, samlingen, mapper, favoritter, import og forslag, i detalj.
+- [Testing og kodekvalitet](#testing-og-kodekvalitet) — kommandoer, CI, ende-til-ende-tester og hva testene dekker.
+- [Mappestruktur](#mappestruktur) og [planleggingsdokumenter](#planleggingsdokumenter) — hvor koden og BMAD-dokumentene ligger.
 
 ## Hva appen inneholder
 
-Appen er bygget i fem epics, én story om gangen. Hver story har en spec i `_bmad-output/implementation-artifacts/` og står i [`epics.md`](_bmad-output/planning-artifacts/epics.md).
+Appen er bygget i seks epics, én story om gangen. Hver story har en spec i `_bmad-output/implementation-artifacts/` og står i [`epics.md`](_bmad-output/planning-artifacts/epics.md).
 
 ### Epic 1: Les og skaler en oppskrift
 
@@ -77,20 +87,25 @@ Versjon 2 (Epic 5) kom etter at v1 var levert. Endringene i planen står i [`spr
 
 ### Epic 6: Videre utvikling
 
-Kravene står i PRD §4.7 (FR-28–FR-39), og hver story har en spec i `_bmad-output/implementation-artifacts/spec-6-N-*.md`. Epic 6 bygges videre; listen under viser det som er ferdig.
+Kravene står i PRD §4.7 (FR-28–FR-43), med status på hvert krav i PRD §4.0: bygget, kandidat eller ikke nå. Hver story har en spec i `_bmad-output/implementation-artifacts/spec-6-N-*.md`. Punktene under er de ferdige storyene, sortert etter story-nummer.
 
 - **Ingrediensforslag i listen (6.1):** et forslag som innfører en ingrediens, gir også en linje i ingredienslisten.
 - **Tid (6.2):** total tid hentes fra kilden eller skrives inn selv, og vises ved hjertet og på kortene. «Hent tid fra kilden» for eldre importer.
 - **Notater og sist laget (6.3):** egne notater på oppskriften, «Laget i dag» og «Sist laget … · laget N ganger».
+- **Ukemeny (6.4):** eget punkt i toppmenyen. Søk etter en lagret oppskrift og velg den, så legges den på dagen med en gang (antall porsjoner skrives først hvis det skal være annerledes), bla mellom uker og lag én handleliste for hele uka.
 - **Tøm «Har hjemme» (6.4b):** «Tøm listen» (med bekreftelse) fjerner alt i «Har hjemme» etter en handletur.
 - **Alle uker (6.4c):** «Alle uker» på Ukemeny viser hver planlagte uke (Uke 38, Uke 39 …), nyeste først, med rettene. Hver uke åpnes på en egen side (6.4d) med menyen i korte trekk, «Se handlelisten for uka» og «Endre uka». Avkrysninger i handlelisten for en uke lagres per uke.
-- **Lagre handlelisten (6.4g):** Handleliste er for denne uka og bygges av ukemenyen (med «Forrige uke»/«Neste uke» og lenke til menyen). «Lagre handlelisten» lagrer valgte oppskrifter og porsjoner under et navn; lagrede lister åpnes og slettes under «Lagrede handlelister». Migrasjon `0012_shopping_lists`.
-- **Handleliste: søk og nullstilling (6.4f):** du kan søke etter oppskrift i «Velg oppskrifter». Valg, porsjoner og avkrysninger som ikke er lagret er borte når du forlater siden og kommer tilbake; lagrede uker og «Har hjemme» beholdes.
-- **Forside (6.4e):** `/` er en forside med salgstekst (hva appen gjør, tre steg og hva mer den kan), en stor «Hent en oppskrift»-knapp og snarveier til Hent en oppskrift, Oppskrifter, Ukemeny, Handleliste, Mapper og Favoritter. Importskjemaet er flyttet til `/importer`; logoen i menyen går til forsiden. Menylenkene viser en pulserende strek fra klikket til siden er åpnet. Uten innlogging står det øverst at man må lage konto eller logge inn.
 - **Lagre uka (6.4d):** endringene i ukemenyen samles til du trykker «Lagre uka» (da erstattes hele uka). Ulagrede endringer vises, og handlelisten for uka venter til uka er lagret. «Se alle uker» er en stor knapp under menyen.
-- **Passer til (6.6b):** feltet «Passer til» i notatkortet, for din egen vurdering («2 sultne»). Endrer ikke mengdene.
-- **Utskrift (6.6):** «Skriv ut» ved tittelen åpner utskriftsdialogen. Utskriften har tittel, kilde (med adresse), antall porsjoner, ingredienser med avkrysningsbokser og steg i én kolonne, uten meny, knapper, forslag og notater.
+- **Forside (6.4e):** `/` er en forside med salgstekst (hva appen gjør, tre steg og hva mer den kan), en stor «Hent en oppskrift»-knapp og snarveier til Hent en oppskrift, Oppskrifter, Ukemeny, Handleliste, Mapper og Favoritter. Importskjemaet er flyttet til `/importer`; logoen i menyen går til forsiden. Menylenkene viser en pulserende strek fra klikket til siden er åpnet. Uten innlogging står det øverst at man må lage konto eller logge inn.
+- **Handleliste: søk og nullstilling (6.4f):** du kan søke etter oppskrift i «Velg oppskrifter». Valg, porsjoner og avkrysninger som ikke er lagret er borte når du forlater siden og kommer tilbake; lagrede uker og «Har hjemme» beholdes.
+- **Lagre handlelisten (6.4g):** Handleliste er for denne uka og bygges av ukemenyen (med «Forrige uke»/«Neste uke» og lenke til menyen). «Lagre handlelisten» lagrer valgte oppskrifter og porsjoner under et navn; lagrede lister åpnes og slettes under «Lagrede handlelister». Migrasjon `0012_shopping_lists`.
 - **Tidtaker i kokemodus (6.5):** tider i stegteksten («10–15 minutter», «1 time og 30 minutter», «en halv time») blir knapper som starter en nedtelling. Store knapper og tall, flere tidtakere samtidig, «−1/+1/+5 min» for å justere, og når tiden er ute: beskjed, gjentatte pip, vibrasjon, varsel fra systemet (hvis tillatt) og blinkende fanetittel.
+- **Utskrift (6.6):** «Skriv ut» ved tittelen åpner utskriftsdialogen. Utskriften har tittel, kilde (med adresse), antall porsjoner, ingredienser med avkrysningsbokser og steg i én kolonne, uten meny, knapper, forslag og notater.
+- **Passer til (6.6b):** feltet «Passer til» i notatkortet, for din egen vurdering («2 sultne»). Endrer ikke mengdene.
+- **Merkelapper (6.7):** i oppskriften kan du skrive egne merkelapper (høyst 10, 30 tegn hver). De vises på kortene i Oppskrifter, søket finner dem, og «Merkelapp» filtrerer.
+- **Vurdering (6.8):** «Din vurdering» i oppskriften: trykk en stjerne fra 1 til 5, og «Fjern vurdering» tar den bort. Stjernene vises på kortet i Oppskrifter.
+- **Sortering (6.9):** «Sorter etter» i Oppskrifter: sist lagret (standard), sist laget, mest laget, høyest vurdering og alfabetisk. Like oppskrifter står sist lagret først.
+- **Egen variant (6.10):** «Lag egen variant» ved tittelen kopierer en lagret oppskrift til «Kopi av …» og åpner redigeringen, så originalen blir uendret.
 - **Angre sletting (6.11):** en slettet oppskrift ligger i «Nylig slettet» i 7 dager. «Angre» rett etter slettingen eller «Hent tilbake» der gir den tilbake med alt innhold, og «Slett for godt» fjerner den med en gang.
 - **Hva kan jeg lage? (6.12):** skriv hva du har hjemme (samme liste som på handlelisten), så grupperes oppskriftene som «Kan lages nå», «Mangler 1–2 ting» og «Mangler flere ting», med hva som mangler. Lenke fra Oppskrifter.
 - **Middagsforslag (6.13):** «Foreslå en middag» trekker en tilfeldig oppskrift fra samlingen, eventuelt bare favoritter og opptil 30 eller 60 minutter; «Foreslå en annen» gir alltid en annen. Lenke fra Oppskrifter.
@@ -99,30 +114,20 @@ Kravene står i PRD §4.7 (FR-28–FR-39), og hver story har en spec i `_bmad-ou
 - **Installerbar app (6.16):** appen har manifest og ikoner, så den kan legges på hjemskjermen. En liten service worker (`public/sw.js`, bare i produksjonsbygg) lagrer statiske filer og viser «Du er frakoblet» når en side ikke får svar fra nettet. Ingen sider eller brukerdata lagres på telefonen.
 - **Handlelisten uten nett (6.17):** mens du ser handlelisten lagres varene og avkrysningene i nettleseren (ikke oppskriftene), og «Du er frakoblet»-siden viser dem med avkrysning når nettet er borte. Listen slettes når du logger ut.
 - **Deling (6.19):** på `/delt` kan du invitere en annen RecipeMate-konto til å se samlingen din. Mottakeren godtar, ser oppskriftene under «Delt med deg» og kan kopiere dem til sin egen samling, men ikke endre dine. Begge kan avslutte delingen.
-- **Egen variant (6.10):** «Lag egen variant» ved tittelen kopierer en lagret oppskrift til «Kopi av …» og åpner redigeringen, så originalen blir uendret.
-- **Sortering (6.9):** «Sorter etter» i Oppskrifter: sist lagret (standard), sist laget, mest laget, høyest vurdering og alfabetisk. Like oppskrifter står sist lagret først.
-- **Vurdering (6.8):** «Din vurdering» i oppskriften: trykk en stjerne fra 1 til 5, og «Fjern vurdering» tar den bort. Stjernene vises på kortet i Oppskrifter.
-- **Merkelapper (6.7):** i oppskriften kan du skrive egne merkelapper (høyst 10, 30 tegn hver). De vises på kortene i Oppskrifter, søket finner dem, og «Merkelapp» filtrerer.
-- **Ukemeny (6.4):** eget punkt i toppmenyen. Søk etter en lagret oppskrift og velg den, så legges den på dagen med en gang (antall porsjoner skrives først hvis det skal være annerledes), bla mellom uker og lag én handleliste for hele uka.
 
-## Kryss av under matlaging
+Ikke bygget ennå: offentlig lenke til én oppskrift, glemt passord og delt handleliste (kandidater), og stemmestyring i kokemodus (utsatt). Designrunden tas samlet til slutt.
 
-På oppskriftssiden er hver ingredienslinje og hvert steg en avkrysningsboks. Trykk hvor som helst på raden, eller sett fokus på boksen med Tab og trykk mellomrom. Avkrysset rad har fylt boks med hake, gjennomstreket og dempet tekst, og nummeret på steget står igjen. Det gjelder også linjer som appen ikke kan tolke, som «salt og pepper».
+## Komme i gang
 
-- Avkrysningen er bare tilstand i nettleseren. Den lagres ikke (ikke i databasen, `localStorage`, adressen eller en cookie), og det sendes ingen forespørsel til serveren.
-- Avkrysningen påvirker ikke skaleringen og består når du endrer antall porsjoner eller trykker «Tilbakestill til N».
-- Når du forlater oppskriften eller åpner «Rediger» og går tilbake, er alt tomt igjen. Next.js med Cache Components skjuler en side i stedet for å fjerne den, så `useCheckedSet` (`src/components/use-checked-set.ts`) tømmer avkrysningene i en `useLayoutEffect`-opprydding.
-- Ingredienser og steg har hvert sitt sett av id-er, så en ingrediens og et steg med samme id aldri påvirker hverandre.
-- Ved 1 og 50 porsjoner er −/+ merket med `aria-disabled` i stedet for `disabled`. Knappen beholder tastaturfokus, og et trykk gjør ingenting.
-- Koden ligger i `CheckRow.tsx` (rad, boks og hake med CSS), `IngredientList.tsx` og `StepList.tsx`. Fargene og størrelsene kommer fra `src/styles/tokens.css`.
+Appen kjører lokalt uten database-server, konto eller API-nøkkel.
 
-## Krav
+### Krav
 
 - [Node.js](https://nodejs.org/) 22 eller nyere (npm følger med). Testet med Node.js 22.23 og npm 10.9.
 - Ingen database-server, konto eller API-nøkkel trengs (nøkkel til språkmodell er valgfri, se «Forslag»)
 - Bare for ende-til-ende-testene: en nettleser for Playwright (`npx playwright install chromium`, én gang, ca. 150 MB nedlasting)
 
-## Installasjon
+### Installasjon
 
 ```bash
 git clone https://github.com/IBE160-2026/G111-nilsen.git
@@ -132,7 +137,7 @@ npm install
 
 Appen starter uten `.env`. Valgfrie miljøvariabler står i [`.env.example`](.env.example); kopier fila til `.env.local` hvis du vil sette dem.
 
-## Kjøring
+### Kjøring
 
 ```bash
 npm run dev      # utviklingsserver på http://localhost:3000
@@ -140,7 +145,34 @@ npm run build    # produksjonsbygg
 npm start        # kjør produksjonsbygget
 ```
 
-## Kontoer
+### Database
+
+Appen bruker én SQLite-fil, som standard `data/recipemate.db` i prosjektmappen (mappen `data/` er ikke med i git). Du trenger ikke gjøre noe for å komme i gang: mappen, fila og tabellene opprettes automatisk første gang appen trenger databasen, for eksempel når du lagrer en oppskrift. `npm run build` lager ingen database.
+
+```bash
+npm run db:migrate   # opprett databasen og kjør migrasjonene manuelt (valgfritt)
+npm run db:generate  # lag en ny migrasjon etter endring i src/server/db/schema.ts
+```
+
+- Vil du ha fila et annet sted, sett `DATABASE_PATH` i `.env.local` (se `.env.example`). Både appen og `npm run db:migrate` leser `.env` og `.env.local` på samme måte (skriptet bruker `@next/env`).
+- Nye migrasjoner (for eksempel etter en ny story) kjøres automatisk også mens `npm run dev` går. Får du likevel «no such table», stopp dev-serveren og start den på nytt (se [issue 008](issues/008-dev-server-mangler-nye-migrasjoner.md)).
+- Vil du starte med tom database, stopp appen og slett mappen `data/`.
+- Skjemaet ligger i `src/server/db/schema.ts`, og migrasjonene i `drizzle/` (de er med i git).
+
+#### Hvis better-sqlite3 ikke installerer
+
+`better-sqlite3` er en native modul. Pakken har med ferdigbygde versjoner for macOS, Linux og Windows (x64 og arm64), så `npm install` trenger normalt verken kompilator eller nett utover npm. `package-lock.json` har `"gypfile": false` for pakken, slik at npm ikke prøver å bygge den selv (se [issue 004](issues/004-better-sqlite3-bygges-fra-kildekode.md)). Hvis installasjonen feiler (ofte med feil fra `node-gyp` eller `prebuild-install`):
+
+1. Sjekk at du bruker Node.js 22 eller nyere (`node -v`), helst en LTS-versjon.
+2. Slett `node_modules/` og kjør `npm install` på nytt.
+3. Mangler det ferdigbygd versjon, må modulen bygges lokalt. Det krever byggverktøy: på macOS `xcode-select --install`, på Windows «Desktop development with C++» fra Visual Studio Build Tools, på Linux `build-essential` og `python3`. Kjør deretter `npm rebuild better-sqlite3`.
+4. Har du byttet Node-versjon etter installasjonen, kjør `npm rebuild better-sqlite3`.
+
+## Slik virker delene
+
+Denne delen beskriver hver del av appen i detalj: hva brukeren ser, hvilke regler som gjelder, hvor koden ligger og hva som er testet.
+
+### Kontoer
 
 Man lager en konto med e-post og passord (`/ny-konto`) og logger inn på `/logg-inn`; «Logg inn» og «Logg ut» står øverst til høyre. Hver konto har sine egne oppskrifter, mapper, favoritter og «Har hjemme».
 
@@ -150,7 +182,7 @@ Man lager en konto med e-post og passord (`/ny-konto`) og logger inn på `/logg-
 - **Sikkerhet:** passord lagres som scrypt-hash med eget salt, aldri i klartekst. Innloggingen er en tilfeldig nøkkel i en `httpOnly`-cookie (SameSite=Lax, Secure over https) som varer i 30 dager; databasen har bare en hash av nøkkelen. Feil e-post og feil passord gir samme melding. Det finnes ikke «glemt passord» (det krever e-postutsending).
 - Koden ligger i `src/server/services/auth-service.ts`, `src/server/session.ts`, `src/app/account-actions.ts`, `src/app/logg-inn/`, `src/app/ny-konto/`, `AccountForm.tsx`, `AccountLink.tsx` og `LoginRequired.tsx`. Tabellene `users` og `sessions` og eierkolonnene kommer fra migrasjonen `drizzle/0006_accounts.sql`, som kjøres automatisk.
 
-## Oppskrifter (samlingen)
+### Oppskrifter (samlingen)
 
 Menypunktet og overskriften heter «Oppskrifter». Adressen er fortsatt `/oppskrifter`, og koden og dokumentene kaller lagrede oppskrifter «samlingen».
 
@@ -161,7 +193,18 @@ Menypunktet og overskriften heter «Oppskrifter». Adressen er fortsatt `/oppskr
 - Siden leser databasen inne i `Suspense` etter `connection()`, og en databasefeil vises av `error.tsx` i stedet for en tom samling.
 - Koden ligger i `src/app/oppskrifter/`, `RecipeCard.tsx`, `listCollection` i `src/server/services/recipe-service.ts` og `listSavedRecipes` i `src/server/db/repositories/recipe-repository.ts`.
 
-## Lagre, slette og rydde
+### Kryss av under matlaging
+
+På oppskriftssiden er hver ingredienslinje og hvert steg en avkrysningsboks. Trykk hvor som helst på raden, eller sett fokus på boksen med Tab og trykk mellomrom. Avkrysset rad har fylt boks med hake, gjennomstreket og dempet tekst, og nummeret på steget står igjen. Det gjelder også linjer som appen ikke kan tolke, som «salt og pepper».
+
+- Avkrysningen er bare tilstand i nettleseren. Den lagres ikke (ikke i databasen, `localStorage`, adressen eller en cookie), og det sendes ingen forespørsel til serveren.
+- Avkrysningen påvirker ikke skaleringen og består når du endrer antall porsjoner eller trykker «Tilbakestill til N».
+- Når du forlater oppskriften eller åpner «Rediger» og går tilbake, er alt tomt igjen. Next.js med Cache Components skjuler en side i stedet for å fjerne den, så `useCheckedSet` (`src/components/use-checked-set.ts`) tømmer avkrysningene i en `useLayoutEffect`-opprydding.
+- Ingredienser og steg har hvert sitt sett av id-er, så en ingrediens og et steg med samme id aldri påvirker hverandre.
+- Ved 1 og 50 porsjoner er −/+ merket med `aria-disabled` i stedet for `disabled`. Knappen beholder tastaturfokus, og et trykk gjør ingenting.
+- Koden ligger i `CheckRow.tsx` (rad, boks og hake med CSS), `IngredientList.tsx` og `StepList.tsx`. Fargene og størrelsene kommer fra `src/styles/tokens.css`.
+
+### Lagre, slette og rydde
 
 Nederst på oppskriftssiden står en lagre-linje som følger med når du ruller. Er oppskriften ikke i samlingen (`savedAt` er `null`), står det «Lagre». Etter lagring sier «Lagret.» fra i tre sekunder (skjermleseren leser det opp), og linjen viser «Slett». «Slett» åpner dialogen «Slette oppskriften?» med «Avbryt» som startfokus; bekrefter du, slettes oppskriften med ingredienser og steg, og du sendes til Samlingen. «Avbryt» eller Escape lukker dialogen uten å endre noe, og fokus går tilbake til «Slett».
 
@@ -170,7 +213,7 @@ Nederst på oppskriftssiden står en lagre-linje som følger med når du ruller.
 - Koden ligger i `src/app/oppskrift/[id]/actions.ts` (Server Actions), `RecipeActions.tsx` og `ConfirmDialog.tsx`, tjenestene `saveRecipeToCollection`, `deleteRecipe`, `setSelectedServings` og `purgeStaleUnsavedRecipes` i `src/server/services/recipe-service.ts` og tilsvarende funksjoner i `recipe-repository.ts`.
 - Testes med `npm test`: repository og tjenester mot en ekte SQLite-database i minnet (blant annet at sletting kaskaderer og at `updatedAt` er uendret), handlinger, dialog og lagre-linje (falske tidtakere for tresekundersregelen) og opprydding med falske tidtakere.
 
-## Mapper
+### Mapper
 
 På Mapper-siden (`/mapper`) kan du opprette, gi nytt navn til og slette mapper. Hver mappe vises med antall oppskrifter («3 oppskrifter», «1 oppskrift», «Ingen oppskrifter») og lenker til mappesiden (`/mapper/{id}`), som viser oppskriftene i mappen som kort, sist lagret først, eller «Mappen er tom.». En oppskrift ligger i maks én mappe, og bare oppskrifter i samlingen kan legges i en mappe. Oppskriftskortene under Oppskrifter viser mappenavnet etter kilden («Matprat · Hverdag»).
 
@@ -182,7 +225,7 @@ På Mapper-siden (`/mapper`) kan du opprette, gi nytt navn til og slette mapper.
 - Koden ligger i `src/app/mapper/` (sider og Server Actions), `moveToFolder` og `moveToNewFolder` i `src/app/oppskrift/[id]/actions.ts`, `FolderManager`, `FolderRow`, `FolderNameForm`, `FolderDialog` og den felles `Dialog` i `src/components/`, `folder-service.ts`, `folder-repository.ts` og `src/lib/folder-name.ts`.
 - Testes med `npm test`: migrasjonen fra 0000 og 0001 med data, fremmednøkkelen (`SET NULL`), unik `name_key`, tilbakerulling når «Ny mappe» feiler midt i transaksjonen, navneregler, handlinger, dialoger, mapperaden og sidene.
 
-## Favoritter
+### Favoritter
 
 Hver oppskrift i samlingen har et hjerte. Trykk på hjertet for å markere eller avmarkere oppskriften som favoritt; oppskriften åpnes ikke. Hjertet står øverst til høyre på kortene under Oppskrifter, i mapper og i Favoritter, og først i lagre-linjen nederst på oppskriftssiden (ved siden av mappeknappen og «Slett»). Lagre-linjen sier «Lagt til i favoritter.» eller «Fjernet fra favoritter.» i tre sekunder. En oppskrift som ikke er lagret i samlingen har ikke hjerte; den må lagres først.
 
@@ -193,7 +236,7 @@ Hver oppskrift i samlingen har et hjerte. Trykk på hjertet for å markere eller
 - Koden ligger i `setFavorite` i `src/app/oppskrift/[id]/actions.ts`, `FavoriteButton`, `FavoriteFeedback`, `RecipeCard` og `RecipeActions` i `src/components/`, `src/app/favoritter/page.tsx`, `setFavorite` og `listFavorites` i `src/server/services/recipe-service.ts` og `setRecipeFavorite` og `listFavoriteRecipes` i `recipe-repository.ts`. Tekstene står i `favoriteMessages` i `src/lib/messages.ts`.
 - Testes med `npm test`: repository og tjeneste mot en ekte SQLite-database i minnet (idempotens, ulagret oppskrift, `updatedAt` uendret, mappe og redigering beholder favoritten), migrasjonen fra 0002 med data, handlingen, hjerteknappen (optimistisk visning, tilbakerulling, raske trykk i kø, `<Activity>`), kort, lagre-linje og Favoritter-siden (fokus og kunngjøring).
 
-## Redigere en oppskrift
+### Redigere en oppskrift
 
 På oppskriftssiden (`/oppskrift/{id}`) står «Rediger» ved tittelen. Den åpner `/oppskrift/{id}/rediger` med samme skjema som «Legg inn selv», forhåndsutfylt med tittel, antall porsjoner, ingredienser (én per linje, slik de ble skrevet) og steg. «Lagre endringer» bruker samme validering og tolking som ny oppskrift, erstatter ingredienser og steg i én databasetransaksjon og sender deg tilbake til oppskriften. «Avbryt» går tilbake uten å endre noe.
 
@@ -202,7 +245,7 @@ På oppskriftssiden (`/oppskrift/{id}`) står «Rediger» ved tittelen. Den åpn
 - Koden ligger i `src/app/oppskrift/[id]/rediger/` (side og Server Action), `updateManualRecipe` i `src/server/services/recipe-service.ts` og `updateRecipe` i `src/server/db/repositories/recipe-repository.ts`.
 - Testes med `npm test`: repository og tjeneste mot en ekte SQLite-database i minnet (blant annet tilbakerulling ved feil midt i oppdateringen), og skjema, side og handling med Testing Library.
 
-## Lese oppskriftsdata (import, del 1)
+### Lese oppskriftsdata (import, del 1)
 
 Story 2.1 legger grunnen for import fra lenke: to rene funksjoner i `src/domain/` som leser oppskriftsdata (schema.org `Recipe` i JSON-LD) fra HTML. Henting, lagring og skjermbilde kom i Story 2.2, se «Importere fra lenke».
 
@@ -212,7 +255,7 @@ Story 2.1 legger grunnen for import fra lenke: to rene funksjoner i `src/domain/
 - **Testdata:** testene leser de lagrede sidene i `test/fixtures/html/` (kilder i `test/fixtures/sources.md`) og små, egenskrevne JSON-LD-eksempler. Nettsider endrer seg, så testene bruker aldri nettet. Vil du fornye sidene, kjør `bash scripts/fetch-fixtures.sh` fra prosjektroten og oppdater de forventede verdiene i `src/domain/recipe-import.test.ts` etter å ha lest de nye filene.
 - Testes med `npm test`: I/O-matrisen fra spesifikasjonen, kantfall for alle regler (porsjonsantall, nummerering, seksjoner, feil felttyper, skadelig tekst), de ti lagrede sidene (fem med oppskrift, fem uten), at 2 MB HTML tas på under ett sekund, og at ingen av funksjonene kaster for tilfeldig eller ugyldig input.
 
-## Importere fra lenke
+### Importere fra lenke
 
 Story 2.2 binder import sammen. På Importer-siden (`/importer`) limer du inn en lenke og trykker «Hent oppskrift». Appen går gjennom disse stegene (AD-4): `validateUrl` → duplikatsjekk → henting → `extractRecipeJsonLd` → `normalizeRecipe` → `parseLine` → lagring som «ikke i samlingen». Du havner på `/oppskrift/{id}`, der kilden vises som lenke (åpnes i ny fane), og kan lagre oppskriften i Oppskrifter derfra. Uten JavaScript virker skjemaet også, så langt som mulig.
 
@@ -231,7 +274,7 @@ Story 2.2 binder import sammen. På Importer-siden (`/importer`) limer du inn en
 - **Testdata:** `scripts/fetch-fixtures.sh` henter sidene i `test/fixtures/sources.md` på nytt. Fixture-adapteren leser samme tabell; legg til en rad der når du lagrer en ny side.
 - Testes med `npm test`: adresseregler (tabeller for alle områdene, IPv6, IPv4-mappet og vertsnavn), HTTP-adapteren mot lokale 127.0.0.1-tjenere og falske oppslag (omdirigeringer, tidsfrist med falske timere, 2 MB-grense, tegnsett, statuskoder, ikke-HTML, selvsignert HTTPS-sertifikat avvises, ingen hengende sockets eller timere), fixture-adapteren, `importRecipe` mot en database i minnet (Tine, Matprat og Godt, duplikat uten henting, gjenbruk, avkorting, tilbakerulling), Server Action, skjema og side.
 
-## Forslag (valgfritt)
+### Forslag (valgfritt)
 
 «Få forslag» på en oppskrift gir 1–3 forslag med begrunnelse. Forslag du tar i bruk lagres med oppskriften; resten forsvinner.
 
@@ -240,29 +283,6 @@ Story 2.2 binder import sammen. På Importer-siden (`/importer`) limer du inn en
 - Skriv aldri nøkkelen i koden eller i `.env.example`. `.env.local` ligger utenfor git.
 - Svaret kontrolleres mot samme skjema som eksempelforslagene. Feil, tidsavbrudd (20 s) eller ugyldig svar gir «Fikk ikke laget forslag akkurat nå. Prøv igjen senere.», og resten av siden virker. Appen stopper etter 10 kall i minuttet for å holde kostnaden nede.
 - Testene bruker lagrede svar fra `test/fixtures/llm/`, ingen ekte nøkkel og ingen nettverkskall.
-
-## Database
-
-Appen bruker én SQLite-fil, som standard `data/recipemate.db` i prosjektmappen (mappen `data/` er ikke med i git). Du trenger ikke gjøre noe for å komme i gang: mappen, fila og tabellene opprettes automatisk første gang appen trenger databasen, for eksempel når du lagrer en oppskrift. `npm run build` lager ingen database.
-
-```bash
-npm run db:migrate   # opprett databasen og kjør migrasjonene manuelt (valgfritt)
-npm run db:generate  # lag en ny migrasjon etter endring i src/server/db/schema.ts
-```
-
-- Vil du ha fila et annet sted, sett `DATABASE_PATH` i `.env.local` (se `.env.example`). Både appen og `npm run db:migrate` leser `.env` og `.env.local` på samme måte (skriptet bruker `@next/env`).
-- Nye migrasjoner (for eksempel etter en ny story) kjøres automatisk også mens `npm run dev` går. Får du likevel «no such table», stopp dev-serveren og start den på nytt (se [issue 008](issues/008-dev-server-mangler-nye-migrasjoner.md)).
-- Vil du starte med tom database, stopp appen og slett mappen `data/`.
-- Skjemaet ligger i `src/server/db/schema.ts`, og migrasjonene i `drizzle/` (de er med i git).
-
-### Hvis better-sqlite3 ikke installerer
-
-`better-sqlite3` er en native modul. Pakken har med ferdigbygde versjoner for macOS, Linux og Windows (x64 og arm64), så `npm install` trenger normalt verken kompilator eller nett utover npm. `package-lock.json` har `"gypfile": false` for pakken, slik at npm ikke prøver å bygge den selv (se [issue 004](issues/004-better-sqlite3-bygges-fra-kildekode.md)). Hvis installasjonen feiler (ofte med feil fra `node-gyp` eller `prebuild-install`):
-
-1. Sjekk at du bruker Node.js 22 eller nyere (`node -v`), helst en LTS-versjon.
-2. Slett `node_modules/` og kjør `npm install` på nytt.
-3. Mangler det ferdigbygd versjon, må modulen bygges lokalt. Det krever byggverktøy: på macOS `xcode-select --install`, på Windows «Desktop development with C++» fra Visual Studio Build Tools, på Linux `build-essential` og `python3`. Kjør deretter `npm rebuild better-sqlite3`.
-4. Har du byttet Node-versjon etter installasjonen, kjør `npm rebuild better-sqlite3`.
 
 ## Testing og kodekvalitet
 
@@ -280,7 +300,7 @@ npm run test:e2e     # ende-til-ende-tester (Playwright), se under
 
 ### CI (GitHub Actions)
 
-`.github/workflows/ci.yml` kjører lint, typekontroll, formatsjekk, `npm test`, bygg og `npm run test:e2e` på hver push og pull request til `main` (Node 22, ingen hemmeligheter). Arbeidsflyten er ikke prøvd på GitHub ennå; første kjøring viser om den trenger justering.
+`.github/workflows/ci.yml` kjører lint, typekontroll, formatsjekk, `npm test`, bygg og `npm run test:e2e` på hver push og pull request til `main` (Node 22, ingen hemmeligheter). Resultatet av hver kjøring står under «Actions» i GitHub.
 
 ### Kjente funn i `npm audit`
 
@@ -295,14 +315,24 @@ npm run test:e2e
 
 `npm run test:e2e` bygger appen og starter den på port 3100 med en midlertidig database (`.e2e/`, slettes ved hver kjøring), lagrede oppskriftssider i stedet for nettet (`IMPORT_SOURCE=fixtures`) og uten språkmodellnøkkel (eksempelforslag). Ingen test bruker nettverket. Stopp `npm run dev` først, siden bygget bruker samme `.next`-mappe.
 
-`e2e/kjerneflyt.spec.ts` kjører hver gang ved 360 px og 1280 px (22 tester). Hver test logger inn med en egen testkonto per skjermbredde (kontoen lages første gang):
+`e2e/kjerneflyt.spec.ts` kjører hver gang ved 360 px og 1280 px (24 tester per bredde, 48 til sammen). Hver test logger inn med en egen testkonto per skjermbredde (kontoen lages første gang):
 
 - **Innlogging:** hent en oppskrift uten konto, «Logg inn for å lagre», lag konto (med feil passord først), lagre, se at en annen nettleser ikke finner oppskriften, og logg ut.
 - **UJ-1:** importer en oppskrift, velg ett flere porsjoner, lagre i en ny mappe og gjør den til favoritt.
 - **UJ-2:** velg 5 porsjoner, få forslag, ta i bruk ett og hopp over resten, lagre i mappe og se at forslaget huskes etter at siden lastes på nytt. Kanttilfelle: en oversiktsside gir «Fant ingen oppskrift på siden».
 - **UJ-3:** finn oppskriften igjen under Favoritter, se at antallet huskes, og endre det.
-- **Tidtaker:** legg inn en oppskrift med et steg som «La hvile i 2 sekunder», åpne kokemodus, start tidtakeren, la nettleseren vise varsler, og hør at det piper og at «Tiden er ute» kommer. Legg til tid med «+1 min».
-- **Ukemeny:** åpne Ukemeny fra toppmenyen, søk etter en oppskrift og velg den med tastaturet, legg den på mandag med 3 porsjoner, se at den står der etter ny innlasting, lag handleliste for uka (oppskriften er valgt med 3 porsjoner) og fjern den igjen.
+- **Søk, halv porsjon og kokemodus:** søk i Oppskrifter, sett 2,5 porsjoner og gå gjennom stegene i kokemodus.
+- **Merkelapper og vurdering:** sett merkelapper og stjerner, og finn oppskriften igjen med søk og filter.
+- **Tidtaker:** et steg som «La hvile i 2 sekunder» gir en knapp som starter nedtelling; det piper, «Tiden er ute» kommer, og «+1 min» legger til tid.
+- **Handleliste:** velg oppskrifter, se den sammenslåtte listen, merk noe som «Har hjemme», tøm listen igjen, og lagre og åpne en handleliste med navn.
+- **Ukemeny:** legg en oppskrift på mandag med 3 porsjoner, se at den står der etter ny innlasting, og lag handlelisten for uka.
+- **Egen variant og sletting:** kopier en oppskrift til «Kopi av …», og slett en oppskrift, angre, hent den tilbake fra «Nylig slettet» og slett den for godt.
+- **Hva kan jeg lage? og middagsforslag:** legg inn noe du har hjemme og se grupperingen, og få et tilfeldig middagsforslag med «Foreslå en annen».
+- **Lim inn tekst:** lim inn en oppskrift som tekst, kontroller utkastet og lagre det.
+- **Eksport og import:** last ned samlingen som fil, importer den samme filen igjen (ingen dubletter), importer en endret fil, og se meldingen for en ugyldig fil.
+- **Installerbar app og uten nett:** manifest og ikoner finnes, nettet slås av, «Du er frakoblet» vises, og handlelisten kan krysses av uten nett også etter ny innlasting.
+- **Deling:** inviter en konto som ikke finnes ennå, lag den i en annen nettleser, godta invitasjonen, les den delte oppskriften uten å kunne endre den, kopier den til egen samling, og avslutt delingen.
+- **Sortering og forside:** sorter Oppskrifter alfabetisk og tilbake, og se at forsiden har snarveiene og «Hent en oppskrift».
 - **Gammel adresse:** `/samlingen` sendes videre til `/oppskrifter`.
 - **Tastatur:** Tab når «Færre porsjoner», «Flere porsjoner» og «Få forslag», og fokus er synlig overalt, i lys og mørk modus.
 
@@ -310,7 +340,7 @@ Playwright-versjonen er låst i `package-lock.json`. Ligger nettleseren et annet
 
 ### Hva testene dekker
 
-`npm test` kjører Vitest én gang og gir i dag 112 testfiler og 2811 tester (ende-til-ende-testene kommer i tillegg, se over). Ingen test bruker nettverket (bare lokale 127.0.0.1-tjenere) eller en ekte API-nøkkel.
+`npm test` kjører Vitest én gang og gir i dag 150 testfiler og 3124 tester (ende-til-ende-testene kommer i tillegg, se over). Ingen test bruker nettverket (bare lokale 127.0.0.1-tjenere) eller en ekte API-nøkkel.
 
 - **Domenet** (`src/domain/`): tolking av mengder og ingredienslinjer og skalering og formatering, med fasittabellen fra Epic 1 (400 g mel for 6 gir 600 g, «1 egg (ca.)», og så videre) som egne tester, og lesing av oppskriftsdata fra lagrede HTML-sider (JSON-LD, normalisering, tekstrensing, ytelse for 2 MB og aldri-kaster-egenskap).
 - **Server** (`src/server/`): repositorier og tjenester mot en ekte SQLite-database i minnet, blant annet tilbakerulling ved feil, redigering, samlingen, lagring, sletting og opprydding, og datamigrasjonen (en database med bare den første migrasjonen oppgraderes).
@@ -335,6 +365,7 @@ src/
     db/         Databaseskjema, tilkobling, migrering og repositorier
   styles/       Designtokens (farger, typografi, avstander)
 drizzle/        Databasemigrasjoner (genereres med npm run db:generate)
+public/         Filer som serveres som de er: appikoner og service worker (sw.js)
 test/fixtures/  Lagrede eksempelsider, eksempelforslag og eksempelsvar fra språkmodell brukt som testdata
 e2e/           Ende-til-ende-tester (Playwright); konfigurasjon i playwright.config.ts
 docs/          Skjermbilde brukt i denne fila
@@ -350,3 +381,4 @@ issues/         Feil og problemer underveis, og hva som kan endres (én fil per 
 - [UX: design](_bmad-output/planning-artifacts/ux-designs/ux-RecipeMate-2026-11-04/DESIGN.md) og [opplevelse](_bmad-output/planning-artifacts/ux-designs/ux-RecipeMate-2026-11-04/EXPERIENCE.md)
 - [Epics og stories](_bmad-output/planning-artifacts/epics.md)
 - [Issues (feil underveis)](issues/README.md)
+
