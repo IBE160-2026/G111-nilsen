@@ -1239,7 +1239,7 @@ for (const scheme of ["light", "dark"] as const) {
 test("Forsiden har snarveier, og «Hent en oppskrift» går til Importer", async ({ page }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { level: 1, name: "Fra oppskrift på nettet til middag på bordet" }),
+    page.getByRole("heading", { level: 1, name: "Fra oppskrift på nettet til mat på bordet" }),
   ).toBeVisible();
   await expect(page.getByRole("textbox")).toHaveCount(0);
   // Innlogget: ingen innloggingsmelding. Uten konto står det øverst at man må lage konto eller logge inn.

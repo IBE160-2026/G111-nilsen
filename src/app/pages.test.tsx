@@ -33,7 +33,7 @@ describe("forsiden og 404-siden", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "Fra oppskrift på nettet til middag på bordet",
+        name: "Fra oppskrift på nettet til mat på bordet",
       }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Slutt med lange tekster/)).toBeInTheDocument();

@@ -64,7 +64,7 @@ export function messageFor(kind: ErrorKind | string | null | undefined): ErrorMe
 /** Forsiden (`/`): velkomst og snarveier til delene av appen. */
 export const homeMessages = {
   tabTitle: "Forside",
-  heading: "Fra oppskrift på nettet til middag på bordet",
+  heading: "Fra oppskrift på nettet til mat på bordet",
   lead: "Slutt med lange tekster, reklame og rulling med fete fingre. Lim inn en lenke, så får du oppskriften ryddig og klar til å lage, regnet om til akkurat så mange porsjoner du trenger.",
   cta: "Hent en oppskrift",
   ctaHint: "Du trenger ikke konto for å prøve.",
