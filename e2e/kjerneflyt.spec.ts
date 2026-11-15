@@ -1030,6 +1030,26 @@ test("Versjon 2: kake uten porsjoner, med utbytte og delt «Slik gjør du»", as
   await expect(page.getByText("Gir: ca. 16 boller")).toBeVisible();
 });
 
+test("Versjon 2: engelsk oppskrift får «Oversett til norsk», som forklarer at nøkkel mangler", async ({
+  page,
+}, testInfo) => {
+  const title = `English rolls ${testInfo.project.name}`;
+  await page.goto("/ny");
+  await page.waitForLoadState("networkidle");
+  await field(page, "Tittel").fill(title);
+  await field(page, "Ingredienser").fill("2 cups flour\n1 cup sugar\n1 tablespoon butter");
+  await field(page, "Steg (valgfritt)").fill(
+    "Mix the flour and the sugar in a bowl.\nBake for 20 minutes, then cool and serve.",
+  );
+  await page.getByRole("button", { name: "Lagre oppskrift" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+  // E2E kjører uten nøkkel til språkmodellen, så oversettelse er ikke slått på.
+  await page.getByRole("button", { name: "Oversett til norsk" }).click();
+  await expect(page.getByText("Oversettelse er ikke slått på.")).toBeVisible();
+  // Originalen står uendret.
+  await expect(page.getByRole("heading", { level: 1, name: title })).toBeVisible();
+});
+
 test("Versjon 2: å slette en mappe kan angres, og oppskriftene kommer tilbake i den", async ({
   page,
 }, testInfo) => {

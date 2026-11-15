@@ -137,3 +137,4 @@
 - 908 Delelister i ingredienser («Fyll:» som overskrift). Åpent: steg har ikke delelister; ingen egen knapp for å legge til liste.
 - 907 Valgfritt antall porsjoner, utbytte («ca. 12 boller») og delt «Slik gjør du». Åpent: kokemodus viser ikke del-navn; handleliste uskalert uten porsjoner.
 - 906 «Hentet fra» i kildelinjen på oppskriftssiden. Ingen åpne punkter.
+- 905 Oversett engelske oppskrifter til norsk (6.36b). Åpent: ikke prøvd mot ekte språkmodell; handleliste/ukemeny bruker originalen; engelsk-gjetningen er enkel.

@@ -12,6 +12,10 @@ export const ERROR_KINDS = [
   "validation",
   "not_found",
   "suggestion_failed",
+  /** Oversettelsen feilet (Story 6.36b). */
+  "translation_failed",
+  /** Oversettelse er ikke slått på: ingen nøkkel til språkmodellen (Story 6.36b). */
+  "translation_unavailable",
   /** Handlingen krever innlogging (Story 5.13). */
   "login_required",
   /** Uventet feil (for eksempel databasen). Brukeren får reservemeldingen. */

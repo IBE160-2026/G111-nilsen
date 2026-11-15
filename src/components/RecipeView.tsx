@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { withAppliedSuggestions, type Folder, type Recipe } from "@/domain";
+import {
+  applyTranslation,
+  looksEnglish,
+  translationFits,
+  withAppliedSuggestions,
+  type Folder,
+  type Recipe,
+} from "@/domain";
 import {
   applySuggestion,
   changeOriginalServings,
@@ -21,6 +28,8 @@ import {
   saveRecipe,
   setFavorite,
   copySharedToMine,
+  showTranslation,
+  translateToNorwegian,
 } from "@/app/oppskrift/[id]/actions";
 import { editRecipeMessages, recipeYieldMessages, sourceLinkMessages } from "@/lib/messages";
 import { sourceLabel } from "@/lib/source-label";
@@ -36,6 +45,7 @@ import RecipeRating from "./RecipeRating";
 import SharedRecipeBanner from "./SharedRecipeBanner";
 import RecipeNotes from "./RecipeNotes";
 import RecipeTime from "./RecipeTime";
+import TranslationBar from "./TranslationBar";
 import { loginHref } from "./LoginRequired";
 import RecipeActions from "./RecipeActions";
 import { SelectedServingsProvider } from "./SelectedServings";
@@ -72,11 +82,18 @@ export default function RecipeView({
   sharedBy?: string;
 }) {
   const readOnly = sharedBy !== undefined;
+  // Norsk oversettelse (Story 6.36b): tittel, ingredienser og steg byttes ut ved visning; originalen
+  // og redigeringen er uendret. Passer ikke oversettelsen lenger, vises originalen.
+  const translation = recipe.translation ?? null;
+  const translationUsable = translation !== null && translationFits(recipe, translation);
+  const norwegian = translation !== null && translationUsable && translation.active;
+  const view = norwegian ? applyTranslation(recipe, translation) : recipe;
+  const showTranslationBar = !readOnly && (translationUsable || looksEnglish(recipe));
   // «Hentet fra Tine» når kilden er kjent; «Lagt inn selv» står som den er (Story 6.35b).
   const source = sourceLabel(recipe);
   const sourceText = source === sourceMessages.manual ? source : sourceMessages.fetchedFrom(source);
   // Forslag som er tatt i bruk vises i listene, merket «Forslag» (Story 5.11); originalen endres ikke.
-  const shown = withAppliedSuggestions(recipe.ingredients, recipe.steps, recipe.suggestions);
+  const shown = withAppliedSuggestions(view.ingredients, view.steps, recipe.suggestions);
   return (
     <SelectedServingsProvider>
       <article className={styles.root}>
@@ -85,9 +102,9 @@ export default function RecipeView({
         ) : null}
         <header className={styles.header}>
           <div className={styles.titleRow}>
-            <h1>{recipe.title}</h1>
+            <h1>{view.title}</h1>
             <CookingMode
-              title={recipe.title}
+              title={view.title}
               steps={shown.steps}
               ingredients={shown.ingredients}
               originalServings={recipe.originalServings}
@@ -112,7 +129,7 @@ export default function RecipeView({
               </span>
             ) : null}
             <span data-print="hide">
-              <PrintButton title={recipe.title} />
+              <PrintButton title={view.title} />
             </span>
           </div>
           <p className={styles.meta}>
@@ -147,6 +164,14 @@ export default function RecipeView({
               </span>
             ) : null}
           </p>
+          {showTranslationBar ? (
+            <TranslationBar
+              hasTranslation={translationUsable}
+              norwegian={norwegian}
+              onTranslate={translateToNorwegian.bind(null, recipe.id)}
+              onShow={showTranslation.bind(null, recipe.id)}
+            />
+          ) : null}
         </header>
 
         <div className={styles.columns}>

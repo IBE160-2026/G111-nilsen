@@ -46,6 +46,7 @@ import {
   getSuggestions,
   removeAppliedSuggestion,
 } from "@/server/services/suggestion-service";
+import { setTranslationView, translateRecipe } from "@/server/services/translation-service";
 
 // Id og antall er bundet fra siden, men Server Actions er offentlige endepunkter og
 // valideres på nytt (samme regler som `parseRecipeId` og porsjonsvelgeren).
@@ -511,5 +512,41 @@ export async function copySharedToMine(id: number): Promise<CopySharedResult> {
   } catch (error) {
     console.error("Kunne ikke kopiere oppskriften", error);
     return { ok: false, message: actionFailure("unknown").message };
+  }
+}
+
+/**
+ * Lager en norsk versjon av oppskriften og lagrer den (Story 6.36b). Originalen endres ikke; siden
+ * revalideres og viser den norske versjonen. Uten nøkkel til språkmodellen, og ved feil, gir det en
+ * norsk melding og ingenting lagres.
+ */
+export async function translateToNorwegian(id: number): Promise<ActionResult> {
+  if (!idSchema.safeParse(id).success) return actionFailure("not_found");
+  try {
+    if (!(await mayChange(id))) return actionFailure("not_found");
+    const result = await translateRecipe(id);
+    if (!result.ok) return actionFailure(result.error.kind);
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (error) {
+    console.error("Kunne ikke oversette oppskriften", error);
+    return actionFailure(undefined);
+  }
+}
+
+/** Bytter mellom den norske versjonen (`true`) og originalen (`false`) (Story 6.36b). */
+export async function showTranslation(id: number, norwegian: boolean): Promise<ActionResult> {
+  if (!idSchema.safeParse(id).success || typeof norwegian !== "boolean") {
+    return actionFailure("not_found");
+  }
+  try {
+    if (!(await mayChange(id))) return actionFailure("not_found");
+    const result = setTranslationView(id, norwegian);
+    if (!result.ok) return actionFailure(result.error.kind);
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (error) {
+    console.error("Kunne ikke bytte språk", error);
+    return actionFailure(undefined);
   }
 }

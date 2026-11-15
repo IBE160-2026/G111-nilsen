@@ -45,6 +45,14 @@ export const errorMessages: Record<ErrorKind, ErrorMessage> = {
     title: "Fikk ikke laget forslag akkurat nå.",
     body: "Prøv igjen senere.",
   },
+  translation_failed: {
+    title: "Fikk ikke oversatt akkurat nå.",
+    body: "Prøv igjen senere.",
+  },
+  translation_unavailable: {
+    title: "Oversettelse er ikke slått på.",
+    body: "Den trenger en nøkkel til språkmodellen, som forslagene også bruker. Se README.",
+  },
   login_required: {
     title: "Du må logge inn.",
     body: "Logg inn eller lag en konto for å lagre oppskrifter.",
@@ -191,6 +199,18 @@ export const manualRecipeFieldMessages = {
   stepsTooMany: "Du kan ha maks 100 steg.",
   stepTooLong: "Et steg kan være maks 2000 tegn. Del det opp i flere steg.",
   minutesInvalid: "Skriv tiden i hele minutter, fra 1 til 1440, eller la feltet stå tomt.",
+} as const;
+
+/** Oversettelse til norsk (Story 6.36b). */
+export const translationMessages = {
+  translate: "Oversett til norsk",
+  retranslate: "Oversett på nytt",
+  pending: "Oversetter …",
+  groupLabel: "Språk",
+  original: "Original",
+  norwegian: "Norsk",
+  showingNorwegian: "Viser den norske oversettelsen.",
+  showingOriginal: "Viser originalen.",
 } as const;
 
 /** Utbytte i tekst (Story 6.33b): for oppskrifter der antall porsjoner ikke passer. */

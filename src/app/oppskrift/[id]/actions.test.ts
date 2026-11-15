@@ -53,6 +53,8 @@ const {
   saveNotes,
   markCookedToday,
   undoCookedToday,
+  showTranslation,
+  translateToNorwegian,
 } = await import("./actions");
 
 const failure = (kind: string | undefined) => {
@@ -775,5 +777,36 @@ describe("copyRecipeToVariant (Story 6.10)", () => {
     breakDatabase();
     expect(await copyRecipeToVariant(id)).toEqual(failure(undefined));
     expect(console.error).toHaveBeenCalled();
+  });
+});
+
+describe("oversettelse til norsk (Story 6.36b)", () => {
+  it("uten nøkkel til språkmodellen: melding om at oversettelse ikke er slått på, ingenting lagres", async () => {
+    expect(await translateToNorwegian(id)).toEqual(failure("translation_unavailable"));
+    const recipe = getRecipe(id, state.db!);
+    expect(recipe.ok && recipe.value.translation).toBeNull();
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
+  it.each([0, -1, 1.5, NaN, "1" as unknown as number])(
+    "ugyldig id %s: ikke funnet",
+    async (bad) => {
+      expect(await translateToNorwegian(bad)).toEqual(failure("not_found"));
+      expect(await showTranslation(bad, true)).toEqual(failure("not_found"));
+    },
+  );
+
+  it("uten oversettelse finnes det ikke noe å bytte til", async () => {
+    expect(await showTranslation(id, true)).toEqual(failure("not_found"));
+  });
+
+  it("en annens oppskrift behandles som ukjent", async () => {
+    session.userId = 999;
+    expect(await translateToNorwegian(id)).toEqual(failure("not_found"));
+    expect(await showTranslation(id, false)).toEqual(failure("not_found"));
+  });
+
+  it("ugyldig verdi for språk avvises", async () => {
+    expect(await showTranslation(id, "ja" as unknown as boolean)).toEqual(failure("not_found"));
   });
 });

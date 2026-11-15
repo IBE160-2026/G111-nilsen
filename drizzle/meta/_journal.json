@@ -134,6 +134,13 @@
       "when": 1794504925250,
       "tag": "0018_yield_note",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1794748104786,
+      "tag": "0019_recipe_translations",
+      "breakpoints": true
     }
   ]
 }

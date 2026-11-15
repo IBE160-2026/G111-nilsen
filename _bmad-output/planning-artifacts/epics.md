@@ -1406,3 +1406,17 @@ vil jeg la antall porsjoner stå tomt og skrive hva oppskriften gir, og dele «S
 
 **Gitt** at jeg skriver «Glasur:» på en egen linje i stegene
 **Så** vises stegene etter den som egen del med overskrift, nummerert fra 1
+
+### Story 6.36b: oversette engelske oppskrifter til norsk
+
+Som bruker
+vil jeg beholde en engelsk oppskrift på engelsk, men kunne vise den på norsk.
+
+**Gitt** at en oppskrift er på engelsk
+**Så** finnes knappen «Oversett til norsk», og den norske versjonen lagres
+
+**Gitt** at en oppskrift har en norsk versjon
+**Så** kan jeg bytte mellom «Original» og «Norsk», og originalen er uendret
+
+**Gitt** at språkmodellen ikke er slått på
+**Så** får jeg en forklaring i stedet for en falsk oversettelse

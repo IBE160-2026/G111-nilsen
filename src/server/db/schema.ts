@@ -315,3 +315,19 @@ export const cookedLog = sqliteTable(
     index("cooked_log_at_idx").on(table.cookedAt),
   ],
 );
+
+/**
+ * Norsk oversettelse av en oppskrift (Story 6.36b), én per oppskrift. Originalen endres aldri.
+ * Lister og delnavn lagres som JSON-tekst. `active` sier om den norske versjonen vises.
+ */
+export const recipeTranslations = sqliteTable("recipe_translations", {
+  recipeId: integer("recipe_id")
+    .primaryKey()
+    .references(() => recipes.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  ingredients: text("ingredients").notNull(),
+  steps: text("steps").notNull(),
+  sections: text("sections").notNull(),
+  active: integer("active", { mode: "boolean" }).notNull().default(true),
+  createdAt: text("created_at").notNull(),
+});

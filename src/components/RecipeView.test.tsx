@@ -25,6 +25,9 @@ const actions = vi.hoisted(() => ({
   removeLabel: vi.fn(),
   markCookedToday: vi.fn(),
   undoCookedToday: vi.fn(),
+  translateToNorwegian: vi.fn(),
+  copySharedToMine: vi.fn(),
+  showTranslation: vi.fn(),
 }));
 vi.mock("@/app/oppskrift/[id]/actions", () => actions);
 
@@ -113,6 +116,86 @@ const recipe: Recipe = {
   ],
   suggestions: [],
 };
+
+describe("RecipeView: oversettelse (Story 6.36b)", () => {
+  const english: Recipe = {
+    ...recipe,
+    title: "Cinnamon rolls",
+    ingredients: [
+      {
+        ...recipe.ingredients[0],
+        original: "2 cups flour",
+        name: "flour",
+        unit: "cup",
+        quantity: { min: 2 },
+      },
+      {
+        ...recipe.ingredients[1],
+        original: "1 cup sugar",
+        name: "sugar",
+        unit: "cup",
+        quantity: { min: 1 },
+      },
+    ],
+    steps: [
+      { id: 1, position: 0, section: null, text: "Mix the flour and the sugar in a bowl." },
+      { id: 2, position: 1, section: null, text: "Bake for 20 minutes, then cool and serve." },
+    ],
+  };
+  const translation = {
+    title: "Kanelboller",
+    ingredients: ["4,7 dl mel", "2,4 dl sukker"],
+    steps: ["Bland mel og sukker i en bolle.", "Stek i 20 minutter."],
+    sections: {},
+    active: true,
+  };
+
+  it("engelsk oppskrift uten oversettelse: «Oversett til norsk» vises, og originalen står", () => {
+    render(<RecipeView recipe={english} folders={folders} />);
+    expect(screen.getByRole("button", { name: "Oversett til norsk" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Cinnamon rolls" })).toBeInTheDocument();
+  });
+
+  it("norsk oppskrift får ikke knappen", () => {
+    render(<RecipeView recipe={recipe} folders={folders} />);
+    expect(screen.queryByRole("button", { name: "Oversett til norsk" })).not.toBeInTheDocument();
+  });
+
+  it("aktiv oversettelse: norsk tittel, ingredienser og steg, og «Original» finnes", () => {
+    render(<RecipeView recipe={{ ...english, translation }} folders={folders} />);
+    expect(screen.getByRole("heading", { level: 1, name: "Kanelboller" })).toBeInTheDocument();
+    expect(screen.getByText("Bland mel og sukker i en bolle.")).toBeInTheDocument();
+    expect(screen.getByText("Mel")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Norsk" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByText("Mix the flour and the sugar in a bowl.")).not.toBeInTheDocument();
+  });
+
+  it("inaktiv oversettelse viser originalen, men kan byttes til norsk", async () => {
+    const user = userEvent.setup();
+    actions.showTranslation.mockResolvedValue({ ok: true });
+    render(
+      <RecipeView
+        recipe={{ ...english, translation: { ...translation, active: false } }}
+        folders={folders}
+      />,
+    );
+    expect(screen.getByRole("heading", { level: 1, name: "Cinnamon rolls" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Norsk" }));
+    expect(actions.showTranslation).toHaveBeenCalledWith(1, true);
+  });
+
+  it("oversettelse som ikke passer lenger (endret oppskrift) vises ikke", () => {
+    const stale = { ...translation, steps: ["Bare ett."] };
+    render(<RecipeView recipe={{ ...english, translation: stale }} folders={folders} />);
+    expect(screen.getByRole("heading", { level: 1, name: "Cinnamon rolls" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Oversett til norsk" })).toBeInTheDocument();
+  });
+
+  it("delt samling (skrivebeskyttet): ingen språkvelger", () => {
+    render(<RecipeView recipe={english} folders={folders} sharedBy="a@b.no" />);
+    expect(screen.queryByRole("button", { name: "Oversett til norsk" })).not.toBeInTheDocument();
+  });
+});
 
 describe("RecipeView", () => {
   it("viser fast format: tittel, kilde, porsjonsvelger, ingredienser og nummererte steg", () => {

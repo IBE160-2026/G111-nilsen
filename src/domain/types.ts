@@ -106,6 +106,21 @@ export type Recipe = {
   cookedCount?: number;
   /** Forslag brukeren har tatt i bruk (Story 4.2), eldste først. Endrer aldri ingredienser eller steg. */
   suggestions: AppliedSuggestion[];
+  /** Norsk oversettelse (Story 6.36b); `null` eller utelatt = ingen. Endrer aldri originalen. */
+  translation?: RecipeTranslation | null;
+};
+
+/**
+ * En lagret norsk oversettelse av en oppskrift (Story 6.36b). `ingredients` og `steps` har samme
+ * rekkefølge og antall som originalen (sortert på posisjon, så id). `sections` gir oversatte
+ * delnavn per originalnavn. `active` sier om den norske versjonen vises.
+ */
+export type RecipeTranslation = {
+  title: string;
+  ingredients: string[];
+  steps: string[];
+  sections: Record<string, string>;
+  active: boolean;
 };
 
 /**

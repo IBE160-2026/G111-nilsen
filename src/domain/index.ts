@@ -1,5 +1,6 @@
 export type {
   AppliedSuggestion,
+  RecipeTranslation,
   Folder,
   FolderSummary,
   ParsedLine,
@@ -92,3 +93,4 @@ export {
   splitSections,
   type SectionedLine,
 } from "./ingredient-sections";
+export { applyTranslation, byPositionThenId, looksEnglish, translationFits } from "./translation";

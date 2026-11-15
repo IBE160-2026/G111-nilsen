@@ -5,6 +5,7 @@ import type {
   Recipe,
   RecipeLine,
   RecipeSummary,
+  RecipeTranslation,
   Step,
   SuggestionTarget,
   UnitKey,
@@ -16,6 +17,7 @@ import {
   folders,
   ingredientLines,
   recipeLabels,
+  recipeTranslations,
   recipes,
   steps,
   suggestions,
@@ -349,6 +351,12 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
     .orderBy(asc(recipeLabels.id))
     .all();
 
+  const translationRow = db
+    .select()
+    .from(recipeTranslations)
+    .where(eq(recipeTranslations.recipeId, id))
+    .get();
+
   return {
     id: row.id,
     title: row.title,
@@ -369,6 +377,7 @@ export function findRecipeById(db: Db, id: number): Recipe | null {
     isFavorite: row.isFavorite,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    translation: translationRow ? translationFromRow(translationRow) : null,
     ingredients: lines.map((line) => ({
       id: line.id,
       position: line.position,
@@ -796,5 +805,66 @@ export function copyRecipeToUser(
         text: step.text,
       })),
     }),
+  );
+}
+
+function parseJson<T>(text: string, fallback: T): T {
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function translationFromRow(row: typeof recipeTranslations.$inferSelect): RecipeTranslation {
+  return {
+    title: row.title,
+    ingredients: parseJson<string[]>(row.ingredients, []),
+    steps: parseJson<string[]>(row.steps, []),
+    sections: parseJson<Record<string, string>>(row.sections, {}),
+    active: row.active,
+  };
+}
+
+/** Lagrer (erstatter) den norske oversettelsen av en oppskrift (Story 6.36b). */
+export function saveTranslation(
+  db: Db,
+  recipeId: number,
+  translation: RecipeTranslation,
+  createdAt: string,
+): boolean {
+  if (!db.select({ id: recipes.id }).from(recipes).where(eq(recipes.id, recipeId)).get()) {
+    return false;
+  }
+  const values = {
+    title: translation.title,
+    ingredients: JSON.stringify(translation.ingredients),
+    steps: JSON.stringify(translation.steps),
+    sections: JSON.stringify(translation.sections),
+    active: translation.active,
+    createdAt,
+  };
+  db.insert(recipeTranslations)
+    .values({ recipeId, ...values })
+    .onConflictDoUpdate({ target: recipeTranslations.recipeId, set: values })
+    .run();
+  return true;
+}
+
+/** Slår visning av den norske versjonen av eller på. `false` når det ikke finnes en oversettelse. */
+export function setTranslationActive(db: Db, recipeId: number, active: boolean): boolean {
+  return (
+    db
+      .update(recipeTranslations)
+      .set({ active })
+      .where(eq(recipeTranslations.recipeId, recipeId))
+      .run().changes > 0
+  );
+}
+
+/** Sletter den norske oversettelsen (Story 6.36b). */
+export function deleteTranslation(db: Db, recipeId: number): boolean {
+  return (
+    db.delete(recipeTranslations).where(eq(recipeTranslations.recipeId, recipeId)).run().changes > 0
   );
 }
