@@ -304,6 +304,8 @@ export const editRecipeMessages = {
 /** Kilden som vises på oppskrifter uten navn og lenke (oppskriftssiden og kort). */
 export const sourceMessages = {
   manual: "Lagt inn selv",
+  /** Øverst på oppskriften: «Hentet fra Tine» (Story 6.35b). */
+  fetchedFrom: (source: string) => `Hentet fra ${source}`,
 } as const;
 
 /** Tekster for Samlingen (Story 3.1). */

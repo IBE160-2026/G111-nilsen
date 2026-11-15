@@ -133,6 +133,7 @@ Kravene står i PRD §4.7 (FR-28–FR-43), med status på hvert krav i PRD §4.0
 - **Samme navn overalt, angre på mapper, egne snarveier (6.29b–6.31b):** kokemodus, handleliste og «Har hjemme» bruker samme stor forbokstav; sletting av en mappe kan angres; og du velger selv hvilke snarveier som vises på forsiden («Tilpass»).
 - **Delelister (6.32b):** ingredienser kan deles i lister som «Kanelboller» og «Fyll» ved å skrive navnet med kolon på egen linje.
 - **Utbytte og delt fremgangsmåte (6.33b–6.34b):** antall porsjoner kan stå tomt, med et eget felt for utbytte som «ca. 12 boller», og «Slik gjør du» kan deles i deler som «Kake» og «Glasur» (samme skrivemåte med kolon).
+- **Hentet fra (6.35b):** kildelinjen øverst på oppskriften står som «Hentet fra Tine».
 
 Ikke bygget ennå: offentlig lenke til én oppskrift, glemt passord og delt handleliste (kandidater), og stemmestyring i kokemodus (utsatt). Designrunden tas samlet til slutt.
 

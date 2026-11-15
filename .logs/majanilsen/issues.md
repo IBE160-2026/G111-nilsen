@@ -136,3 +136,4 @@
 - 909 Stor forbokstav overalt (6.29b), angre på mappesletting (6.30b), valgfrie snarveier (6.31b). Åpent: angre gjelder til siden lastes på nytt; snarveivalget er per enhet.
 - 908 Delelister i ingredienser («Fyll:» som overskrift). Åpent: steg har ikke delelister; ingen egen knapp for å legge til liste.
 - 907 Valgfritt antall porsjoner, utbytte («ca. 12 boller») og delt «Slik gjør du». Åpent: kokemodus viser ikke del-navn; handleliste uskalert uten porsjoner.
+- 906 «Hentet fra» i kildelinjen på oppskriftssiden. Ingen åpne punkter.

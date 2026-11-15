@@ -322,7 +322,7 @@ describe("RecipeView", () => {
         folders={folders}
       />,
     );
-    expect(screen.getByText("matprat.no")).toBeInTheDocument();
+    expect(screen.getByText("Hentet fra matprat.no")).toBeInTheDocument();
     expect(screen.queryByText(/Lagt inn selv/)).not.toBeInTheDocument();
   });
 
@@ -333,18 +333,18 @@ describe("RecipeView", () => {
 
     it("viser kilden som lenke til sourceUrl som åpner i ny fane", () => {
       render(withUrl("https://www.matprat.no/oppskrifter/x/"));
-      const link = screen.getByRole("link", { name: "Matprat, åpner kilden i ny fane" });
+      const link = screen.getByRole("link", { name: "Hentet fra Matprat, åpner kilden i ny fane" });
       expect(link).toHaveAttribute("href", "https://www.matprat.no/oppskrifter/x/");
       expect(link).toHaveAttribute("target", "_blank");
       expect(link).toHaveAttribute("rel", "noopener noreferrer");
-      expect(link).toHaveTextContent("Matprat");
+      expect(link).toHaveTextContent("Hentet fra Matprat");
     });
 
     it("bruker vertsnavnet som tekst når kilden mangler navn", () => {
       render(withUrl("https://www.godt.no/x", null));
       expect(
-        screen.getByRole("link", { name: "godt.no, åpner kilden i ny fane" }),
-      ).toHaveTextContent("godt.no");
+        screen.getByRole("link", { name: "Hentet fra godt.no, åpner kilden i ny fane" }),
+      ).toHaveTextContent("Hentet fra godt.no");
     });
 
     it("http er også en lenke", () => {
@@ -361,7 +361,7 @@ describe("RecipeView", () => {
         render(withUrl(sourceUrl));
         expect(screen.queryByRole("link", { name: /åpner kilden/ })).not.toBeInTheDocument();
         expect(document.querySelector(`a[href="${sourceUrl}"]`)).toBeNull();
-        expect(screen.getByText("Matprat")).toBeInTheDocument();
+        expect(screen.getByText("Hentet fra Matprat")).toBeInTheDocument();
       },
     );
 

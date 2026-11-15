@@ -24,6 +24,7 @@ import {
 } from "@/app/oppskrift/[id]/actions";
 import { editRecipeMessages, recipeYieldMessages, sourceLinkMessages } from "@/lib/messages";
 import { sourceLabel } from "@/lib/source-label";
+import { sourceMessages } from "@/lib/messages";
 import { isHttpUrl } from "@/lib/source-url";
 import CookingMode from "./CookingMode";
 import FetchTimeButton from "./FetchTimeButton";
@@ -71,6 +72,9 @@ export default function RecipeView({
   sharedBy?: string;
 }) {
   const readOnly = sharedBy !== undefined;
+  // «Hentet fra Tine» når kilden er kjent; «Lagt inn selv» står som den er (Story 6.35b).
+  const source = sourceLabel(recipe);
+  const sourceText = source === sourceMessages.manual ? source : sourceMessages.fetchedFrom(source);
   // Forslag som er tatt i bruk vises i listene, merket «Forslag» (Story 5.11); originalen endres ikke.
   const shown = withAppliedSuggestions(recipe.ingredients, recipe.steps, recipe.suggestions);
   return (
@@ -118,12 +122,12 @@ export default function RecipeView({
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.source}
-                aria-label={`${sourceLabel(recipe)}, ${sourceLinkMessages.opensSuffix}`}
+                aria-label={`${sourceText}, ${sourceLinkMessages.opensSuffix}`}
               >
-                {sourceLabel(recipe)}
+                {sourceText}
               </a>
             ) : (
-              sourceLabel(recipe)
+              sourceText
             )}
             {recipe.yieldNote ? (
               <>
